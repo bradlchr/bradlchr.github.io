@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1b5e20" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121815" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Deep Roots Nature Advisors - Kansas City Native Plant Database</title>
   
   <!-- Fonts & Icons -->
@@ -604,8 +609,8 @@
     /* Plant Grid */
     .plants-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      gap: clamp(14px, 2vw, 20px);
     }
 
     .color-chip {
@@ -632,6 +637,7 @@
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
       transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
       position: relative;
+      min-width: 0;
     }
     .plant-card:hover {
       transform: translateY(-4px);
@@ -1162,18 +1168,295 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Responsive */
+    /* Sidebar Overlay (Mobile Drawer) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Mobile Sidebar Header & Footer */
+    .sidebar-mobile-header,
+    .sidebar-mobile-footer {
+      display: none;
+    }
+
+    .mobile-search-bar {
+      display: none;
+    }
+
+    .btn-filter-toggle {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-strong);
+      padding: 7px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-filter-toggle:hover {
+      background: var(--bg-surface-elevated);
+      border-color: var(--primary);
+    }
+    .filter-count-badge {
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      line-height: 1.2;
+    }
+    .results-and-mobile-filter {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .sidebar-scroll-area {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .btn-text-short {
+      display: none !important;
+    }
+
+    /* Responsive Breakpoints */
     @media (max-width: 1024px) {
       .app-layout {
         flex-direction: column;
-      }
-      .filter-sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
+        padding: 14px 16px;
+        gap: 14px;
       }
       .header-stats {
         display: none;
+      }
+      .sidebar-overlay {
+        display: block;
+      }
+      .mobile-search-bar {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .btn-filter-toggle {
+        display: inline-flex;
+      }
+
+      /* Off-canvas mobile filter drawer */
+      .filter-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(88vw, 360px);
+        max-width: 100%;
+        height: 100%;
+        height: 100dvh;
+        z-index: 1000;
+        background: var(--bg-surface);
+        box-shadow: 4px 0 28px rgba(0, 0, 0, 0.3);
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border-right: 1px solid var(--border-subtle);
+      }
+      .filter-sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        background: var(--bg-frosted);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-subtle);
+        flex-shrink: 0;
+      }
+      .sidebar-mobile-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+
+      .sidebar-scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 16px;
+        gap: 14px;
+      }
+
+      .sidebar-mobile-footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border-subtle);
+        flex-shrink: 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        height: 60px;
+        padding: 0 14px;
+        gap: 10px;
+      }
+      .brand-logo {
+        width: 34px;
+        height: 34px;
+        font-size: 18px;
+      }
+      .brand-text h1 {
+        font-size: 15px;
+      }
+      .brand-text p {
+        font-size: 10px;
+      }
+      .header-actions {
+        gap: 6px;
+      }
+
+      .btn-text-long {
+        display: none !important;
+      }
+      .btn-text-short {
+        display: inline !important;
+      }
+
+      /* Prevent mobile Safari auto-zoom on input focus */
+      input, textarea, select {
+        font-size: 16px !important;
+      }
+
+      .controls-bar {
+        padding: 10px 14px;
+        gap: 10px;
+      }
+      .controls-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .sort-control {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        font-size: 11px;
+      }
+      .sort-control select {
+        width: 100%;
+      }
+
+      /* Staging drawer full-width on mobile with dvh and safe-area */
+      .staging-drawer {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        height: 100dvh;
+      }
+      .drawer-footer {
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+      }
+
+      /* Dialogs fit viewport with safe area */
+      dialog {
+        width: calc(100% - 20px);
+        max-width: 100%;
+        max-height: 92dvh;
+        margin: auto;
+      }
+      .specs-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .toast-container {
+        left: 14px;
+        right: 14px;
+        bottom: max(14px, env(safe-area-inset-bottom, 14px));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app-layout {
+        padding: 10px 10px;
+        gap: 12px;
+      }
+      .brand-text p {
+        display: none;
+      }
+      .brand-text h1 {
+        font-size: 14px;
+      }
+      .btn-text-short {
+        display: none !important;
+      }
+      .user-profile-name {
+        display: none !important;
+      }
+      .btn-report {
+        padding: 7px 10px;
+      }
+      .btn-google {
+        padding: 7px 10px;
+      }
+
+      .controls-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .results-count {
+        font-size: 13px;
+      }
+
+      .card-media {
+        height: 190px;
+      }
+
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .brand-text h1 {
+        font-size: 13px;
+      }
+      .btn {
+        padding: 6px 8px;
       }
     }
   </style>
@@ -1214,7 +1497,8 @@
       <div id="authContainer">
         <button id="headerSignInBtn" class="btn btn-google">
           <svg style="width:16px;height:16px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-          <span>Sign In with Google</span>
+          <span class="btn-text-long">Sign In with Google</span>
+          <span class="btn-text-short">Sign In</span>
         </button>
       </div>
 
@@ -1226,7 +1510,8 @@
       <!-- Consultation Report Drawer Toggle -->
       <button id="reportDrawerBtn" class="btn btn-report">
         <i data-lucide="clipboard-list"></i>
-        <span>Report Staging</span>
+        <span class="btn-text-long">Report Staging</span>
+        <span class="btn-text-short">Report</span>
         <span id="stagedBadge" class="badge-count" style="display:none;">0</span>
       </button>
     </div>
@@ -1235,11 +1520,26 @@
   <!-- App Layout -->
   <div class="app-layout">
     
+    <!-- Filter Sidebar Overlay (for mobile drawer) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Filter Sidebar -->
-    <aside class="filter-sidebar">
+    <aside class="filter-sidebar" id="filterSidebar">
       
-      <!-- Search Card -->
-      <div class="filter-card">
+      <!-- Mobile Drawer Header -->
+      <div class="sidebar-mobile-header">
+        <div class="sidebar-mobile-title">
+          <i data-lucide="sliders-horizontal" style="width:16px;height:16px;"></i>
+          <span>Filter &amp; Sort</span>
+        </div>
+        <button id="closeSidebarBtn" class="btn-icon" aria-label="Close filters">
+          <i data-lucide="x" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-scroll-area">
+        <!-- Search Card -->
+        <div class="filter-card">
         <div class="search-box">
           <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
           <input type="text" id="searchInput" class="search-input" placeholder="Search Kansas City natives...">
@@ -1439,15 +1739,41 @@
 
       </div>
 
+      <!-- Mobile Drawer Footer -->
+      <div class="sidebar-mobile-footer">
+        <button id="resetAllFiltersMobileBtn" class="btn btn-secondary">Reset</button>
+        <button id="applyFiltersMobileBtn" class="btn btn-primary" style="flex:1;">
+          View <span id="mobileFilteredCount">184</span> Plants
+        </button>
+      </div>
+
     </aside>
 
     <!-- Main Content Grid -->
     <main class="main-content">
       
+      <!-- Mobile Search Bar (prominent on mobile / <= 1024px) -->
+      <div class="mobile-search-bar">
+        <div class="search-box">
+          <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
+          <input type="text" id="mobileSearchInput" class="search-input" placeholder="Search Kansas City natives...">
+          <button id="mobileSearchClearBtn" class="search-clear">
+            <i data-lucide="x" style="width:14px;height:14px;"></i>
+          </button>
+        </div>
+      </div>
+
       <!-- Controls Bar -->
       <div class="controls-bar">
-        <div class="results-count" id="resultsCount">
-          Showing <strong>184</strong> Kansas City Native Plants
+        <div class="results-and-mobile-filter">
+          <button id="openSidebarBtn" class="btn btn-filter-toggle">
+            <i data-lucide="sliders-horizontal" style="width:15px;height:15px;"></i>
+            <span>Filters</span>
+            <span id="mobileFilterBadge" class="filter-count-badge" style="display:none;">0</span>
+          </button>
+          <div class="results-count" id="resultsCount">
+            Showing <strong>184</strong> Kansas City Native Plants
+          </div>
         </div>
 
         <div class="controls-actions" style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;">
@@ -2599,7 +2925,7 @@
                 ${u.name.substring(0,2).toUpperCase()}
               </div>
             `}
-            <span style="font-size:12px;font-weight:700;">${firstName}</span>
+            <span class="user-profile-name" style="font-size:12px;font-weight:700;">${firstName}</span>
           </button>
         `;
         document.getElementById('userProfileBtn').addEventListener('click', openUserProfileModal);
@@ -2615,7 +2941,8 @@
         container.innerHTML = `
           <button id="headerSignInBtn" class="btn btn-google">
             <svg style="width:16px;height:16px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            <span>Sign In with Google</span>
+            <span class="btn-text-long">Sign In with Google</span>
+            <span class="btn-text-short">Sign In</span>
           </button>
         `;
         document.getElementById('headerSignInBtn').addEventListener('click', () => {
@@ -2839,12 +3166,31 @@
       } else {
         bar.style.display = 'none';
       }
+
+      // Sync mobile filter badge count
+      const mobileBadge = document.getElementById('mobileFilterBadge');
+      if (mobileBadge) {
+        if (count > 0) {
+          mobileBadge.textContent = count;
+          mobileBadge.style.display = 'inline-block';
+        } else {
+          mobileBadge.style.display = 'none';
+        }
+      }
     }
 
     function resetAllFilters() {
       state.filters.search = '';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchClearBtn').style.display = 'none';
+      const sInput = document.getElementById('searchInput');
+      if (sInput) sInput.value = '';
+      const sClear = document.getElementById('searchClearBtn');
+      if (sClear) sClear.style.display = 'none';
+
+      const msInput = document.getElementById('mobileSearchInput');
+      if (msInput) msInput.value = '';
+      const msClear = document.getElementById('mobileSearchClearBtn');
+      if (msClear) msClear.style.display = 'none';
+
       state.filters.sweet16 = false;
       document.getElementById('toggleSweet16Btn').classList.remove('active');
       state.filters.keystone = false;
@@ -2864,6 +3210,8 @@
       const countEl = document.getElementById('resultsCount');
 
       countEl.innerHTML = `Showing <strong>${state.filteredPlants.length}</strong> of ${state.allPlants.length} Kansas City Native Plants`;
+      const mobileFilteredCount = document.getElementById('mobileFilteredCount');
+      if (mobileFilteredCount) mobileFilteredCount.textContent = state.filteredPlants.length;
 
       if (state.filteredPlants.length === 0) {
         grid.style.display = 'none';
@@ -3553,27 +3901,86 @@
       document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
       overlay.addEventListener('click', closeDrawer);
 
-      // Search input
+      // Mobile Filter Sidebar Drawer
+      const filterSidebar = document.getElementById('filterSidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const openSidebarBtn = document.getElementById('openSidebarBtn');
+      const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+      const applyFiltersMobileBtn = document.getElementById('applyFiltersMobileBtn');
+      const resetAllFiltersMobileBtn = document.getElementById('resetAllFiltersMobileBtn');
+
+      const toggleSidebarDrawer = (open) => {
+        if (!filterSidebar || !sidebarOverlay) return;
+        if (open) {
+          filterSidebar.classList.add('open');
+          sidebarOverlay.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        } else {
+          filterSidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+      };
+
+      if (openSidebarBtn) openSidebarBtn.addEventListener('click', () => toggleSidebarDrawer(true));
+      if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => toggleSidebarDrawer(false));
+      if (sidebarOverlay) sidebarOverlay.addEventListener('click', () => toggleSidebarDrawer(false));
+      if (applyFiltersMobileBtn) applyFiltersMobileBtn.addEventListener('click', () => toggleSidebarDrawer(false));
+      if (resetAllFiltersMobileBtn) resetAllFiltersMobileBtn.addEventListener('click', resetAllFilters);
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          toggleSidebarDrawer(false);
+          closeDrawer();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+          if (filterSidebar && filterSidebar.classList.contains('open')) {
+            toggleSidebarDrawer(false);
+          }
+        }
+      });
+
+      // Search inputs (Dual desktop sidebar & mobile main content sync)
       const searchInput = document.getElementById('searchInput');
       const searchClear = document.getElementById('searchClearBtn');
+      const mobileSearchInput = document.getElementById('mobileSearchInput');
+      const mobileSearchClear = document.getElementById('mobileSearchClearBtn');
       let searchTimeout = null;
 
-      searchInput.addEventListener('input', (e) => {
+      const handleSearchInput = (val, sourceInput) => {
         clearTimeout(searchTimeout);
-        const val = e.target.value;
-        searchClear.style.display = val ? 'block' : 'none';
+        if (searchInput && sourceInput !== searchInput) searchInput.value = val;
+        if (mobileSearchInput && sourceInput !== mobileSearchInput) mobileSearchInput.value = val;
+        if (searchClear) searchClear.style.display = val ? 'block' : 'none';
+        if (mobileSearchClear) mobileSearchClear.style.display = val ? 'block' : 'none';
+
         searchTimeout = setTimeout(() => {
           state.filters.search = val;
           applyFilters();
         }, 180);
-      });
+      };
 
-      searchClear.addEventListener('click', () => {
-        searchInput.value = '';
-        searchClear.style.display = 'none';
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => handleSearchInput(e.target.value, searchInput));
+      }
+      if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', (e) => handleSearchInput(e.target.value, mobileSearchInput));
+      }
+
+      const handleSearchClear = () => {
+        if (searchInput) searchInput.value = '';
+        if (mobileSearchInput) mobileSearchInput.value = '';
+        if (searchClear) searchClear.style.display = 'none';
+        if (mobileSearchClear) mobileSearchClear.style.display = 'none';
         state.filters.search = '';
         applyFilters();
-      });
+      };
+
+      if (searchClear) searchClear.addEventListener('click', handleSearchClear);
+      if (mobileSearchClear) mobileSearchClear.addEventListener('click', handleSearchClear);
 
       // Quick toggles
       const sweet16Btn = document.getElementById('toggleSweet16Btn');
