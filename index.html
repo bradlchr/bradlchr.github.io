@@ -1751,6 +1751,42 @@
     </div>
   </dialog>
 
+  <!-- Firestore API Disabled Notice Dialog -->
+  <dialog id="firestoreApiModal">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="alert-triangle" style="color:var(--accent-orange);width:24px;height:24px;"></i>
+        <h3 style="font-size:16px;font-weight:800;color:var(--text-main);">Cloud Firestore API Needs to be Enabled</h3>
+      </div>
+      <button onclick="document.getElementById('firestoreApiModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+      <div style="background:#FFF3CD;color:#856404;border:1px solid #FFEEBA;padding:12px;border-radius:var(--radius-md);margin-bottom:14px;font-size:12px;">
+        <strong>Notice from Google Cloud:</strong><br>
+        Cloud Firestore API is not yet enabled for project <code>deep-roots-nature-advisors</code>. Google blocks database requests until the API is enabled in the Google Cloud Console.
+      </div>
+      <p style="margin-bottom:12px;">
+        To pull the live 185 records and authentic image URLs from your Firestore database:
+      </p>
+      <ol style="margin-left:20px;margin-bottom:16px;display:flex;flex-direction:column;gap:6px;">
+        <li>Click the button below to open Google Cloud Console.</li>
+        <li>Click the blue <strong>ENABLE</strong> button for Cloud Firestore API.</li>
+        <li>Return here and tap <strong>Pull Fresh Data from Master Database</strong>.</li>
+      </ol>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('firestoreApiModal').close()" class="btn btn-secondary">
+          Close
+        </button>
+        <a href="https://console.cloud.google.com/apis/library/firestore.googleapis.com?project=deep-roots-nature-advisors" target="_blank" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+          <i data-lucide="external-link"></i>
+          <span>Enable Firestore API in Google Cloud</span>
+        </a>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Google Docs Export Success Dialog -->
   <dialog id="exportSuccessModal">
     <div class="dialog-header">
@@ -1853,7 +1889,7 @@
         try {
           tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
+            scope: 'https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
             callback: handleGoogleTokenResponse
           });
         } catch (e) {
@@ -2049,19 +2085,32 @@
 
     // Load and Synchronize Plants
     async function loadMasterPlants() {
-      // 1. Initial load from embedded master catalog
-      const raw = document.getElementById('embeddedMasterPlants').textContent;
-      try {
-        state.allPlants = JSON.parse(raw);
-      } catch (err) {
-        console.error("Error loading embedded plants:", err);
+      // 1. Initial load from local Firestore cache or embedded master catalog
+      const cached = localStorage.getItem('dr_firestore_cache_plants');
+      if (cached) {
+        try {
+          const parsedCache = JSON.parse(cached);
+          if (Array.isArray(parsedCache) && parsedCache.length > 50) {
+            state.allPlants = parsedCache;
+            document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore (Cached)';
+          }
+        } catch (e) {}
+      }
+
+      if (!state.allPlants || state.allPlants.length === 0) {
+        const raw = document.getElementById('embeddedMasterPlants').textContent;
+        try {
+          state.allPlants = JSON.parse(raw);
+        } catch (err) {
+          console.error("Error loading embedded plants:", err);
+        }
       }
 
       // 2. Apply any custom local advisor edits
       applyCustomEditsToPlants();
 
       // 3. Attempt live sync from database endpoints
-      await tryLiveSyncFromDatabase();
+      await tryLiveSyncFromDatabase(false);
 
       applyFilters();
       updateHeaderInfo();
@@ -2080,45 +2129,96 @@
       });
     }
 
-    async function tryLiveSyncFromDatabase() {
-      // Try local REST API endpoint first if running via server.py
+    async function tryLiveSyncFromDatabase(showNotification = false) {
+      // 1. Try local REST API endpoint first if running via server.py
       try {
         const res = await fetch('/api/plants?limit=300', { signal: AbortSignal.timeout(2000) });
         if (res.ok) {
           const data = await res.json();
           const remoteList = data.plants || data;
           if (Array.isArray(remoteList) && remoteList.length > 50) {
-            mergeRemotePlants(remoteList);
+            replaceWithRemotePlants(remoteList);
             state.lastSyncTime = new Date().toLocaleTimeString();
             document.getElementById('dbEngineTxt').textContent = 'Live SQLite & Shared API';
+            if (showNotification) showToast(`Synchronized ${remoteList.length} plants from local server.`);
             return;
           }
         }
       } catch (e) {}
 
-      // Try Cloud Firestore REST endpoint
+      // 2. Try Cloud Firestore REST endpoint with pagination
+      const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      const token = state.gdriveToken || (state.currentUser && state.currentUser.accessToken);
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      let allDocs = [];
+      let pageToken = '';
+      let pageCount = 0;
+      let syncError = null;
+
       try {
-        const firestoreUrl = "https://firestore.googleapis.com/v1/projects/deep-roots-nature-advisors/databases/(default)/documents/plants?pageSize=300";
-        const headers = {};
-        if (state.gdriveToken) {
-          headers['Authorization'] = `Bearer ${state.gdriveToken}`;
-        }
-        const res = await fetch(firestoreUrl, { headers, signal: AbortSignal.timeout(3500) });
-        if (res.ok) {
+        do {
+          pageCount++;
+          let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/plants?pageSize=100`;
+          if (pageToken) {
+            url += `&pageToken=${encodeURIComponent(pageToken)}`;
+          }
+          const res = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            syncError = { status: res.status, data: errData };
+            console.error("Firestore sync error:", res.status, errData);
+            break;
+          }
           const data = await res.json();
           if (data.documents && data.documents.length > 0) {
-            const parsed = data.documents.map(doc => parseFirestoreDoc(doc)).filter(Boolean);
-            if (parsed.length > 0) {
-              mergeRemotePlants(parsed);
-              renderGrid();
-            }
+            allDocs.push(...data.documents);
+          }
+          pageToken = data.nextPageToken || '';
+        } while (pageToken && pageCount < 10);
+
+        if (allDocs.length > 0) {
+          const parsed = allDocs.map(doc => parseFirestoreDoc(doc)).filter(Boolean);
+          if (parsed.length > 0) {
+            replaceWithRemotePlants(parsed);
             state.lastSyncTime = new Date().toLocaleTimeString();
             document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore Master DB';
+            updateHeaderInfo();
+            try {
+              localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(parsed));
+            } catch (e) {}
+            showToast(`Synchronized ${parsed.length} plants directly from Cloud Firestore!`, 'success');
+            return;
+          }
+        } else if (syncError) {
+          const msg = syncError.data?.error?.message || `HTTP ${syncError.status}`;
+          if (syncError.status === 403 && msg.includes('disabled')) {
+            showToast("Cloud Firestore API is disabled in project deep-roots-nature-advisors. Please enable it in Google Cloud Console.", "warning", 9000);
+            const apiModal = document.getElementById('firestoreApiModal');
+            if (apiModal) apiModal.showModal();
+          } else if (syncError.status === 401 || syncError.status === 403) {
+            if (showNotification) showToast("Firestore access denied. Sign in with Google to authenticate.", "warning");
+          } else {
+            console.warn("Firestore sync warning:", msg);
+            if (showNotification) showToast("Firestore sync notice: " + msg, "warning");
           }
         }
-      } catch (e) {
-        console.warn("Firestore live sync notice:", e);
+      } catch (err) {
+        console.warn("Firestore live sync exception:", err);
+        if (showNotification) showToast("Could not reach Firestore: " + err.message, "warning");
       }
+    }
+
+    function replaceWithRemotePlants(remoteList) {
+      if (!Array.isArray(remoteList) || remoteList.length === 0) return;
+      state.allPlants = remoteList;
+      applyCustomEditsToPlants();
+      applyFilters();
+      updateHeaderInfo();
+      renderGrid();
     }
 
     function parseFirestoreValue(val) {
@@ -2150,22 +2250,33 @@
       if (!res.id && doc.name) {
         res.id = doc.name.split('/').pop();
       }
-      return res;
-    }
 
-    function mergeRemotePlants(remoteList) {
-      const map = new Map(state.allPlants.map(p => [p.scientific_name.toLowerCase().trim(), p]));
-      remoteList.forEach(rp => {
-        const key = (rp.scientific_name || '').toLowerCase().trim();
-        if (map.has(key)) {
-          const existing = map.get(key);
-          map.set(key, { ...existing, ...rp });
-        } else {
-          map.set(key, rp);
+      // Format mature height display
+      if (res.mature_height && typeof res.mature_height === 'object') {
+        res.height_display = res.mature_height.display || `${res.mature_height.min_ft || ''}–${res.mature_height.max_ft || ''} ft`;
+        if (res.mature_height.min_ft !== undefined) res.mature_height_min = res.mature_height.min_ft;
+        if (res.mature_height.max_ft !== undefined) res.mature_height_max = res.mature_height.max_ft;
+      }
+
+      // Ensure plant_url from sources if missing
+      if (!res.plant_url && Array.isArray(res.sources)) {
+        for (const s of res.sources) {
+          if (s && s.source_url && s.source_url.startsWith('http')) {
+            res.plant_url = s.source_url;
+            break;
+          }
         }
-      });
-      state.allPlants = Array.from(map.values());
-      applyCustomEditsToPlants();
+      }
+      res.plant_url = res.plant_url || '';
+
+      // Normalize tags & sweet 16 / keystone flags
+      const sci = (res.scientific_name || '').toLowerCase().trim();
+      const genus = sci.split(' ')[0] || '';
+      const tags = (res.special_tags || []).map(t => String(t).toLowerCase());
+      res.is_sweet_16 = res.is_sweet_16 || tags.some(t => t.includes('sweet 16'));
+      res.is_kc_keystone = res.is_kc_keystone || tags.some(t => t.includes('keystone'));
+
+      return res;
     }
 
     function updateHeaderInfo() {
@@ -3120,11 +3231,10 @@
       });
 
       document.getElementById('refreshFromDbBtn').addEventListener('click', async () => {
-        showToast("Synchronizing with shared database...");
-        await tryLiveSyncFromDatabase();
+        showToast("Synchronizing with shared Cloud Firestore master database...");
+        await tryLiveSyncFromDatabase(true);
         applyFilters();
         updateHeaderInfo();
-        showToast("Master database synchronization complete!");
       });
 
       document.getElementById('resetCustomEditsBtn').addEventListener('click', () => {
