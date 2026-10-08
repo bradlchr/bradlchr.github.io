@@ -1738,15 +1738,79 @@
         </div>
       </div>
 
+      <!-- Cloud Project & Database Configuration -->
+      <div style="background:var(--bg-base);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px;font-size:12px;">
+        <div style="font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:6px;">
+          <i data-lucide="database" style="width:14px;height:14px;color:var(--primary);"></i>
+          <span>Cloud Firestore Target</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:2px;">Project ID</label>
+            <input type="text" id="cfgFirestoreProjectId" value="deep-roots-nature-advisors" style="width:100%;padding:6px 8px;font-size:12px;border-radius:4px;border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-main);">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:2px;">Database ID</label>
+            <input type="text" id="cfgFirestoreDatabaseId" value="deep-roots-nature-advisors" placeholder="deep-roots-nature-advisors" style="width:100%;padding:6px 8px;font-size:12px;border-radius:4px;border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-main);">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:var(--text-muted);">Database: deep-roots-nature-advisors</span>
+          <button id="saveCloudConfigBtn" class="btn btn-secondary" style="padding:4px 10px;font-size:11px;">Save Settings</button>
+        </div>
+      </div>
+
       <div style="display:flex;flex-direction:column;gap:10px;">
         <button id="refreshFromDbBtn" class="btn btn-primary" style="width:100%;font-size:13px;">
           <i data-lucide="refresh-cw"></i>
           <span>Pull Fresh Data from Master Database</span>
         </button>
+        <button id="seedFirestoreBtn" class="btn btn-secondary" style="width:100%;font-size:12px;color:var(--primary);">
+          <i data-lucide="upload-cloud"></i>
+          <span>Upload Master Plant Catalog to Firestore</span>
+        </button>
         <button id="resetCustomEditsBtn" class="btn btn-secondary" style="width:100%;font-size:12px;color:var(--danger);">
           <i data-lucide="rotate-ccw"></i>
           <span>Reset Local Edits to Clean Master Catalog</span>
         </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Database Not Found / Setup Notice Dialog -->
+  <dialog id="firestoreDbNoticeModal">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="alert-circle" style="color:var(--accent-orange);width:24px;height:24px;"></i>
+        <h3 style="font-size:16px;font-weight:800;color:var(--text-main);">Firestore Database Needs to be Created</h3>
+      </div>
+      <button onclick="document.getElementById('firestoreDbNoticeModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+      <div style="background:#FFF3CD;color:#856404;border:1px solid #FFEEBA;padding:12px;border-radius:var(--radius-md);margin-bottom:14px;font-size:12px;">
+        <strong>Database Not Found in Project:</strong><br>
+        Google Cloud reports: <em>"The database (default) does not exist for project deep-roots-nature-advisors"</em>.
+      </div>
+      <p style="margin-bottom:10px;">
+        To create or link your database in Google Cloud:
+      </p>
+      <ol style="margin-left:20px;margin-bottom:14px;display:flex;flex-direction:column;gap:6px;">
+        <li>Open the Firestore Setup Console via the button below.</li>
+        <li>Select <strong>Firestore in Native mode</strong> (recommended).</li>
+        <li>Select a location (e.g. <code>nam5 (us-central)</code>).</li>
+        <li>Ensure Database ID is set to <strong>(default)</strong> (or note your custom database ID and enter it in Database Status settings).</li>
+        <li>Click <strong>Create Database</strong>.</li>
+      </ol>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('firestoreDbNoticeModal').close()" class="btn btn-secondary">
+          Close
+        </button>
+        <a href="https://console.cloud.google.com/datastore/setup?project=deep-roots-nature-advisors" target="_blank" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+          <i data-lucide="external-link"></i>
+          <span>Create Database in Google Cloud</span>
+        </a>
       </div>
     </div>
   </dialog>
@@ -2012,7 +2076,10 @@
       if (!token) return;
 
       try {
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/deep-roots-nature-advisors/databases/(default)/documents/users/${user.uid}`;
+        const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+        let dbId = localStorage.getItem('dr_firestore_database_id');
+        if (!dbId || dbId === '(default)') dbId = 'deep-roots-nature-advisors';
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${dbId}/documents/users/${user.uid}`;
         await fetch(firestoreUrl, {
           method: 'PATCH',
           headers: {
@@ -2146,46 +2213,66 @@
         }
       } catch (e) {}
 
-      // 2. Try Cloud Firestore REST endpoint with pagination
+      // 2. Try Cloud Firestore REST endpoint with pagination & multi-database fallback
       const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      let dbId = localStorage.getItem('dr_firestore_database_id');
+      if (!dbId || dbId === '(default)') {
+        dbId = 'deep-roots-nature-advisors';
+        localStorage.setItem('dr_firestore_database_id', dbId);
+      }
       const token = state.gdriveToken || (state.currentUser && state.currentUser.accessToken);
       const headers = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      let allDocs = [];
-      let pageToken = '';
-      let pageCount = 0;
-      let syncError = null;
-
-      try {
+      async function queryFirestoreDb(targetDb) {
+        let docs = [];
+        let pToken = '';
+        let count = 0;
+        let err = null;
         do {
-          pageCount++;
-          let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/plants?pageSize=100`;
-          if (pageToken) {
-            url += `&pageToken=${encodeURIComponent(pageToken)}`;
-          }
+          count++;
+          let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${targetDb}/documents/plants?pageSize=100`;
+          if (pToken) url += `&pageToken=${encodeURIComponent(pToken)}`;
           const res = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
           if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
-            syncError = { status: res.status, data: errData };
-            console.error("Firestore sync error:", res.status, errData);
+            err = { status: res.status, data: errData };
             break;
           }
           const data = await res.json();
           if (data.documents && data.documents.length > 0) {
-            allDocs.push(...data.documents);
+            docs.push(...data.documents);
           }
-          pageToken = data.nextPageToken || '';
-        } while (pageToken && pageCount < 10);
+          pToken = data.nextPageToken || '';
+        } while (pToken && count < 10);
+        return { docs, err };
+      }
+
+      try {
+        let { docs: allDocs, err: syncError } = await queryFirestoreDb(dbId);
+
+        // If (default) does not exist, attempt fallback to projectId
+        if (syncError && syncError.data?.error?.message?.includes('database (default) does not exist') && dbId === '(default)') {
+          console.info(`Database '(default)' not found. Checking database '${projectId}'...`);
+          const fallback = await queryFirestoreDb(projectId);
+          if (fallback.docs.length > 0 || !fallback.err) {
+            allDocs = fallback.docs;
+            syncError = fallback.err;
+            dbId = projectId;
+            localStorage.setItem('dr_firestore_database_id', projectId);
+            const dbInput = document.getElementById('cfgFirestoreDatabaseId');
+            if (dbInput) dbInput.value = projectId;
+          }
+        }
 
         if (allDocs.length > 0) {
           const parsed = allDocs.map(doc => parseFirestoreDoc(doc)).filter(Boolean);
           if (parsed.length > 0) {
             replaceWithRemotePlants(parsed);
             state.lastSyncTime = new Date().toLocaleTimeString();
-            document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore Master DB';
+            document.getElementById('dbEngineTxt').textContent = `Cloud Firestore (${dbId})`;
             updateHeaderInfo();
             try {
               localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(parsed));
@@ -2199,6 +2286,10 @@
             showToast("Cloud Firestore API is disabled in project deep-roots-nature-advisors. Please enable it in Google Cloud Console.", "warning", 9000);
             const apiModal = document.getElementById('firestoreApiModal');
             if (apiModal) apiModal.showModal();
+          } else if (msg.includes('does not exist')) {
+            showToast(`Database '${dbId}' does not exist in project '${projectId}'. Click 'Database Status' to configure.`, "warning", 9000);
+            const dbNotice = document.getElementById('firestoreDbNoticeModal');
+            if (dbNotice) dbNotice.showModal();
           } else if (syncError.status === 401 || syncError.status === 403) {
             if (showNotification) showToast("Firestore access denied. Sign in with Google to authenticate.", "warning");
           } else {
@@ -2556,7 +2647,7 @@
 
       card.innerHTML = `
         <div class="card-media">
-          ${imgUrl ? `<img src="${imgUrl}" alt="${commonName}" loading="lazy">` : `
+          ${imgUrl ? `<img src="${imgUrl}" alt="${commonName}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1598880940371-c756e015fea1?auto=format&fit=crop&w=600&q=80';">` : `
             <div class="card-placeholder">
               <i data-lucide="sprout" style="width:36px;height:36px;"></i>
               <span style="font-size:11px;">Botanical Record</span>
@@ -2750,6 +2841,10 @@
       const imgAttr = document.getElementById('modalImgAttr');
       if (plant.images && plant.images[0] && plant.images[0].url) {
         img.src = plant.images[0].url;
+        img.onerror = function() {
+          this.onerror = null;
+          this.src = 'https://images.unsplash.com/photo-1598880940371-c756e015fea1?auto=format&fit=crop&w=800&q=80';
+        };
         img.style.display = 'block';
         imgAttr.textContent = `Photo: ${plant.images[0].attribution_name || plant.images[0].source || 'Missouri Botanical Garden / Grow Native!'} ${plant.images[0].license ? '· ' + plant.images[0].license : ''}`;
       } else {
@@ -2841,7 +2936,10 @@
         // Save to Firestore if token available
         if (state.gdriveToken) {
           try {
-            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/deep-roots-nature-advisors/databases/(default)/documents/plants/${encodeURIComponent(plant.id || plant.scientific_name)}`;
+            const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+            let dId = localStorage.getItem('dr_firestore_database_id');
+            if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${encodeURIComponent(plant.id || plant.scientific_name)}`;
             fetch(firestoreUrl, {
               method: 'PATCH',
               headers: {
@@ -3235,6 +3333,97 @@
         await tryLiveSyncFromDatabase(true);
         applyFilters();
         updateHeaderInfo();
+      });
+
+      // Save Cloud Target Settings
+      const cfgProj = document.getElementById('cfgFirestoreProjectId');
+      const cfgDb = document.getElementById('cfgFirestoreDatabaseId');
+      if (cfgProj) cfgProj.value = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      if (cfgDb) cfgDb.value = localStorage.getItem('dr_firestore_database_id') || 'deep-roots-nature-advisors';
+
+      document.getElementById('saveCloudConfigBtn')?.addEventListener('click', () => {
+        const pId = cfgProj.value.trim() || 'deep-roots-nature-advisors';
+        const dId = cfgDb.value.trim() || 'deep-roots-nature-advisors';
+        localStorage.setItem('dr_firestore_project_id', pId);
+        localStorage.setItem('dr_firestore_database_id', dId);
+        showToast(`Saved target: ${pId} / ${dId}`);
+        tryLiveSyncFromDatabase(true);
+      });
+
+      // Upload / Seed Master Plants to Firestore
+      document.getElementById('seedFirestoreBtn')?.addEventListener('click', async () => {
+        const token = state.gdriveToken || (state.currentUser && state.currentUser.accessToken);
+        if (!token) {
+          showToast("Please sign in with Google first to authorize writing to Cloud Firestore.", "warning");
+          triggerGoogleSignIn();
+          return;
+        }
+        if (!confirm(`Upload all ${state.allPlants.length} species directly to Cloud Firestore collection 'plants'?`)) return;
+
+        showToast("Starting Cloud Firestore batch upload...", "info");
+        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+        let dId = localStorage.getItem('dr_firestore_database_id') || 'deep-roots-nature-advisors';
+        if (dId === '(default)') dId = 'deep-roots-nature-advisors';
+        
+        let uploaded = 0;
+        for (const p of state.allPlants) {
+          const docId = encodeURIComponent(p.id || p.scientific_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+          const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${docId}`;
+          
+          const body = {
+            fields: {
+              scientific_name: { stringValue: p.scientific_name || '' },
+              common_names: { arrayValue: { values: (p.common_names || []).map(n => ({ stringValue: String(n) })) } },
+              native_environment: { stringValue: p.native_environment || 'Forest' },
+              plant_type: { arrayValue: { values: (Array.isArray(p.plant_type) ? p.plant_type : [p.plant_type || 'Wildflower']).map(t => ({ stringValue: String(t) })) } },
+              mature_height: {
+                mapValue: {
+                  fields: {
+                    min_ft: { doubleValue: Number(p.mature_height_min || 1) },
+                    max_ft: { doubleValue: Number(p.mature_height_max || 3) },
+                    display: { stringValue: p.height_display || '1–3 ft' }
+                  }
+                }
+              },
+              plant_url: { stringValue: getPlantUrl(p) },
+              advisor_description: { stringValue: getPlantDesc(p) },
+              sociability: { stringValue: getPlantSociability(p) },
+              soil_requirements: { arrayValue: { values: (p.soil_requirements || []).map(s => ({ stringValue: String(s) })) } },
+              moisture_requirements: { arrayValue: { values: (p.moisture_requirements || []).map(m => ({ stringValue: String(m) })) } },
+              light_requirements: { arrayValue: { values: (p.light_requirements || []).map(l => ({ stringValue: String(l) })) } },
+              wildlife_ecosystem_benefits: { arrayValue: { values: (p.wildlife_ecosystem_benefits || []).map(w => ({ stringValue: String(w) })) } },
+              images: {
+                arrayValue: {
+                  values: (p.images || []).map(img => ({
+                    mapValue: {
+                      fields: {
+                        url: { stringValue: img.url || '' },
+                        caption: { stringValue: img.caption || '' },
+                        attribution_name: { stringValue: img.attribution_name || 'Grow Native!' }
+                      }
+                    }
+                  }))
+                }
+              }
+            }
+          };
+
+          try {
+            await fetch(url, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+            });
+            uploaded++;
+          } catch (e) {
+            console.error("Upload error for plant:", p.scientific_name, e);
+          }
+        }
+        showToast(`Uploaded ${uploaded} plants to Cloud Firestore!`, 'success');
+        tryLiveSyncFromDatabase(true);
       });
 
       document.getElementById('resetCustomEditsBtn').addEventListener('click', () => {
