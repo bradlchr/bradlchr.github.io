@@ -751,22 +751,32 @@
       cursor: pointer;
     }
 
-    .card-common-name {
+    .card-primary-name, .card-common-name {
       font-size: 16px;
       font-weight: 700;
       color: var(--text-main);
       line-height: 1.3;
     }
-    .card-common-name:hover {
+    .card-primary-name.is-scientific {
+      font-family: var(--font-serif);
+      font-style: italic;
+    }
+    .card-primary-name:hover, .card-common-name:hover {
       color: var(--primary);
     }
 
-    .card-sci-name {
-      font-family: var(--font-serif);
+    .card-secondary-name, .card-sci-name {
       font-size: 13px;
-      font-style: italic;
       color: var(--text-muted);
       margin-top: 1px;
+    }
+    .card-secondary-name.is-scientific, .card-sci-name.is-scientific {
+      font-family: var(--font-serif);
+      font-style: italic;
+    }
+    .card-secondary-name:not(.is-scientific) {
+      font-family: var(--font-sans);
+      font-style: normal;
     }
 
     .card-chips {
@@ -1258,6 +1268,35 @@
           <button id="resetAllFiltersBtn" class="clear-all-btn" style="margin-left:auto;">Reset All</button>
         </div>
 
+        <!-- Card Display & Sort Settings -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="sortDisplayFilterContent">
+            <span>Card Display &amp; Sort</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="sortDisplayFilterContent" style="display:flex;flex-direction:column;gap:10px;padding-top:6px;">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Default Name Display:</label>
+              <select id="sidebarNameDisplaySelect" class="sort-select" style="width:100%;">
+                <option value="common_first">Common Name First</option>
+                <option value="scientific_first">Scientific Name First</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Sort By:</label>
+              <select id="sidebarSortOrderSelect" class="sort-select" style="width:100%;">
+                <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
+                <option value="common_asc">Common Name (A to Z)</option>
+                <option value="common_desc">Common Name (Z to A)</option>
+                <option value="sci_asc">Scientific Name (A to Z)</option>
+                <option value="sci_desc">Scientific Name (Z to A)</option>
+                <option value="height_asc">Mature Height (Low to High)</option>
+                <option value="height_desc">Mature Height (High to Low)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <!-- Habitat / Environment -->
         <div class="accordion">
           <button class="accordion-header" data-target="habitatFilterContent">
@@ -1411,16 +1450,27 @@
           Showing <strong>184</strong> Kansas City Native Plants
         </div>
 
-        <div class="sort-control">
-          <label for="sortOrderSelect">Sort by:</label>
-          <select id="sortOrderSelect" class="sort-select">
-            <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
-            <option value="common_asc">Common Name (A to Z)</option>
-            <option value="common_desc">Common Name (Z to A)</option>
-            <option value="sci_asc">Scientific Name (A to Z)</option>
-            <option value="height_asc">Mature Height (Low to High)</option>
-            <option value="height_desc">Mature Height (High to Low)</option>
-          </select>
+        <div class="controls-actions" style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div class="sort-control">
+            <label for="defaultNameDisplaySelect">Default Title:</label>
+            <select id="defaultNameDisplaySelect" class="sort-select" title="Default name shown first when sorting by criteria other than name">
+              <option value="common_first">Common Name First</option>
+              <option value="scientific_first">Scientific Name First</option>
+            </select>
+          </div>
+
+          <div class="sort-control">
+            <label for="sortOrderSelect">Sort by:</label>
+            <select id="sortOrderSelect" class="sort-select">
+              <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
+              <option value="common_asc">Common Name (A to Z)</option>
+              <option value="common_desc">Common Name (Z to A)</option>
+              <option value="sci_asc">Scientific Name (A to Z)</option>
+              <option value="sci_desc">Scientific Name (Z to A)</option>
+              <option value="height_asc">Mature Height (Low to High)</option>
+              <option value="height_desc">Mature Height (High to Low)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -1935,11 +1985,22 @@
         sociability: new Set(),
       },
       sortOrder: localStorage.getItem('dr_sort_order') || 'common_asc',
+      defaultNameDisplay: localStorage.getItem('dr_default_name_display') || 'common_first',
       currentUser: JSON.parse(localStorage.getItem('dr_current_user') || 'null'),
       gdriveToken: localStorage.getItem('dr_gdrive_token') || null,
       activeModalPlant: null,
       lastSyncTime: new Date().toLocaleTimeString()
     };
+
+    function shouldShowScientificFirst() {
+      if (state.sortOrder === 'sci_asc' || state.sortOrder === 'sci_desc') {
+        return true;
+      }
+      if (state.sortOrder === 'common_asc' || state.sortOrder === 'common_desc') {
+        return false;
+      }
+      return state.defaultNameDisplay === 'scientific_first';
+    }
 
     // Google Web Application Client ID (from client_secret_636374214354-idc96pfjogkq13cqochh48it37h7jele...)
         // Authoritative Deep Roots Sweet 16 & Keystone definitions
@@ -2690,9 +2751,14 @@
 
     function sortPlants() {
       const order = state.sortOrder;
+      const showSciFirst = shouldShowScientificFirst();
       state.filteredPlants.sort((a, b) => {
-        const nameA = (a.common_names && a.common_names[0]) || a.scientific_name || '';
-        const nameB = (b.common_names && b.common_names[0]) || b.scientific_name || '';
+        const sciA = a.scientific_name || '';
+        const sciB = b.scientific_name || '';
+        const commA = (a.common_names && a.common_names[0]) || sciA;
+        const commB = (b.common_names && b.common_names[0]) || sciB;
+        const nameA = showSciFirst ? sciA : commA;
+        const nameB = showSciFirst ? sciB : commB;
         const hA = a.mature_height_max || 0;
         const hB = b.mature_height_max || 0;
 
@@ -2704,15 +2770,17 @@
             return nameA.localeCompare(nameB);
           }
           case 'common_asc':
-            return nameA.localeCompare(nameB);
+            return commA.localeCompare(commB);
           case 'common_desc':
-            return nameB.localeCompare(nameA);
+            return commB.localeCompare(commA);
           case 'sci_asc':
-            return (a.scientific_name || '').localeCompare(b.scientific_name || '');
+            return sciA.localeCompare(sciB);
+          case 'sci_desc':
+            return sciB.localeCompare(sciA);
           case 'height_asc':
-            return hA - hB;
+            return (hA - hB) || nameA.localeCompare(nameB);
           case 'height_desc':
-            return hB - hA;
+            return (hB - hA) || nameA.localeCompare(nameB);
           default:
             return 0;
         }
@@ -2917,7 +2985,10 @@
       const bloomColors = plant.bloom_color || plant.bloomColor || [];
       card.style.background = getBloomCardGradient(bloomColors, isDark);
 
+      const showSciFirst = shouldShowScientificFirst();
       const commonName = (plant.common_names && plant.common_names[0]) || plant.scientific_name;
+      const primaryName = showSciFirst ? (plant.scientific_name || commonName) : commonName;
+      const secondaryName = showSciFirst ? commonName : (plant.scientific_name || '');
       const isStaged = state.stagedPlants.some(p => p.id === plant.id || p.scientific_name === plant.scientific_name);
       const imgUrl = (plant.images && plant.images[0] && plant.images[0].url) || '';
 
@@ -2953,8 +3024,8 @@
           </div>
           <div class="card-body">
             <div class="card-title-group">
-              <h3 class="card-common-name">${commonName}</h3>
-              <p class="card-sci-name">${plant.scientific_name || ''}</p>
+              <h3 class="card-common-name card-primary-name ${showSciFirst ? 'is-scientific' : ''}">${primaryName}</h3>
+              <p class="card-sci-name card-secondary-name ${!showSciFirst ? 'is-scientific' : ''}">${secondaryName}</p>
             </div>
             <div class="card-chips">
               <span class="meta-chip"><i data-lucide="sun" style="width:12px;height:12px;"></i> ${sunStr}</span>
@@ -3557,15 +3628,49 @@
       document.getElementById('resetAllFiltersBtn').addEventListener('click', resetAllFilters);
       document.getElementById('resetFiltersEmptyBtn').addEventListener('click', resetAllFilters);
 
-      // Sort select
+      // Sort select & Sidebar sort select
       const sortSelect = document.getElementById('sortOrderSelect');
-      sortSelect.value = state.sortOrder;
-      sortSelect.addEventListener('change', (e) => {
-        state.sortOrder = e.target.value;
+      const sidebarSortSelect = document.getElementById('sidebarSortOrderSelect');
+      if (sortSelect) sortSelect.value = state.sortOrder;
+      if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+
+      const handleSortChange = (newOrder) => {
+        state.sortOrder = newOrder;
         localStorage.setItem('dr_sort_order', state.sortOrder);
+        if (sortSelect) sortSelect.value = state.sortOrder;
+        if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
         sortPlants();
         renderGrid();
-      });
+      };
+
+      if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => handleSortChange(e.target.value));
+      }
+      if (sidebarSortSelect) {
+        sidebarSortSelect.addEventListener('change', (e) => handleSortChange(e.target.value));
+      }
+
+      // Default Name Display select & Sidebar select
+      const nameDisplaySelect = document.getElementById('defaultNameDisplaySelect');
+      const sidebarNameDisplaySelect = document.getElementById('sidebarNameDisplaySelect');
+      if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+      if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+
+      const handleNameDisplayChange = (newDisplay) => {
+        state.defaultNameDisplay = newDisplay;
+        localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
+        if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+        if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+        sortPlants();
+        renderGrid();
+      };
+
+      if (nameDisplaySelect) {
+        nameDisplaySelect.addEventListener('change', (e) => handleNameDisplayChange(e.target.value));
+      }
+      if (sidebarNameDisplaySelect) {
+        sidebarNameDisplaySelect.addEventListener('change', (e) => handleNameDisplayChange(e.target.value));
+      }
 
       // Client Meta Inputs
       const clientInputs = {
