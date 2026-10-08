@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400;1,600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="window.__gsiLoaded = true; if (typeof window.initGoogleAuth === 'function') window.initGoogleAuth();"></script>
 
   <style>
     :root {
@@ -1589,6 +1589,44 @@
     </div>
   </dialog>
 
+  <!-- Safari / Pop-up Blocked Dialog -->
+  <dialog id="popupBlockedModal">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="alert-circle" style="color:var(--accent-orange);width:24px;height:24px;"></i>
+        <h3 style="font-size:16px;font-weight:800;color:var(--text-main);">Safari Blocked the Sign-In Window</h3>
+      </div>
+      <button onclick="document.getElementById('popupBlockedModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+      <p style="margin-bottom:12px;">
+        iPhone Safari has <strong>Block Pop-ups</strong> enabled by default, which blocks the Google sign-in window from opening.
+      </p>
+      <div style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);margin-bottom:16px;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-weight:700;color:var(--text-main);">To allow sign-in on iPhone:</div>
+        <div>1. Open iPhone <strong>Settings</strong></div>
+        <div>2. Scroll down and tap <strong>Safari</strong></div>
+        <div>3. Turn OFF <strong>Block Pop-ups</strong></div>
+        <div>4. Return to Safari and tap <strong>Sign In with Google</strong> again</div>
+      </div>
+      <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;">
+        <strong style="color:var(--text-main);">In-App Browser Note:</strong><br>
+        If you opened this link from a text message or chat app, tap the <strong>Safari compass icon</strong> (bottom right) to open in real Safari.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('popupBlockedModal').close()" class="btn btn-secondary">
+          Close
+        </button>
+        <button onclick="document.getElementById('popupBlockedModal').close(); triggerGoogleSignIn();" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
+          <i data-lucide="refresh-cw"></i>
+          <span>Try Again</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- User Profile & Sign Out Modal -->
   <dialog id="userProfileModal">
     <div class="dialog-header">
@@ -1914,6 +1952,26 @@
              window.location.origin.startsWith('content:');
     }
 
+    // Helper: Detect in-app webview on iOS (e.g. Messages, WhatsApp, Slack, Instagram)
+    function isIosInAppBrowser() {
+      const ua = navigator.userAgent || '';
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+      if (!isIOS) return false;
+      return (ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram') ||
+              ua.includes('Line') || ua.includes('Twitter') || ua.includes('MicroMessenger') ||
+              ua.includes('Snapchat') || (!ua.includes('Safari') && ua.includes('Mobile')));
+    }
+
+    function showPopupBlockedNotice() {
+      const modal = document.getElementById('popupBlockedModal');
+      if (modal) {
+        modal.showModal();
+        if (window.lucide) lucide.createIcons();
+      } else {
+        alert("Safari blocked the Google Sign-In window. On iPhone, open Settings > Safari and turn off Block Pop-ups, then tap Sign In again.");
+      }
+    }
+
     // Initialize Google Identity Services
     function initGoogleAuth() {
       if (isNonHttpOrigin()) {
@@ -1922,7 +1980,7 @@
       }
 
       if (window.google && window.google.accounts) {
-        // Initialize ID token client (for One-Tap & standard button)
+        // Initialize ID token client (for standard button in modal)
         try {
           google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
@@ -1947,15 +2005,24 @@
           tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
             scope: 'https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
-            callback: handleGoogleTokenResponse
+            callback: handleGoogleTokenResponse,
+            error_callback: (err) => {
+              console.warn("Google Token Client Error:", err);
+              if (err && (err.type === 'popup_blocked' || err.type === 'popup_closed')) {
+                showPopupBlockedNotice();
+              } else if (err && err.message) {
+                showToast("Google Sign-In: " + err.message, "warning", 6000);
+              }
+            }
           });
         } catch (e) {
           console.warn("GSI OAuth Token Client notice:", e);
         }
       }
     }
+    window.initGoogleAuth = initGoogleAuth;
 
-    // Trigger Google Sign-In
+    // Trigger Google Sign-In with iOS & Pop-up Handling
     function triggerGoogleSignIn() {
       if (isNonHttpOrigin()) {
         const authModal = document.getElementById('googleAuthModal');
@@ -1970,12 +2037,54 @@
         return;
       }
 
+      // Check if user is in an embedded webview on iOS (e.g. iMessage, SMS link, WhatsApp, Slack)
+      if (isIosInAppBrowser()) {
+        showPopupBlockedNotice();
+        showToast("Tap the Safari compass icon (bottom right) to open in real Safari for Google Sign-In.", "warning", 9000);
+        return;
+      }
+
+      // Lazy initialization if Google script loaded after initial DOM ready
+      if (!tokenClient && window.google && window.google.accounts) {
+        initGoogleAuth();
+      }
+
       if (tokenClient) {
-        tokenClient.requestAccessToken({ prompt: 'select_account' });
+        try {
+          tokenClient.requestAccessToken({ prompt: 'select_account' });
+        } catch (err) {
+          console.warn("requestAccessToken exception:", err);
+          showPopupBlockedNotice();
+        }
       } else if (window.google && window.google.accounts && window.google.accounts.id) {
-        google.accounts.id.prompt();
+        // Fallback for ID token prompt
+        try {
+          google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              console.warn("One Tap suppressed:", notification.getNotDisplayedReason());
+              showPopupBlockedNotice();
+            }
+          });
+        } catch (e) {
+          showPopupBlockedNotice();
+        }
       } else {
-        showToast("Google Identity Services initializing...", "warning");
+        // Library still downloading over cellular/slow network
+        showToast("Connecting to Google Identity Services...", "info", 3000);
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (window.google && window.google.accounts) {
+            clearInterval(interval);
+            initGoogleAuth();
+            if (tokenClient) {
+              tokenClient.requestAccessToken({ prompt: 'select_account' });
+            }
+          } else if (attempts > 12) {
+            clearInterval(interval);
+            showToast("Could not load Google Sign-In library. Check your network or disable content blockers.", "danger", 6000);
+          }
+        }, 250);
       }
     }
 
@@ -3585,6 +3694,13 @@
       loadMasterPlants();
       renderStaging();
       setupEventListeners();
+      // Check iOS In-App Browser (e.g. link opened from iMessage or WhatsApp)
+      if (isIosInAppBrowser()) {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:#1a4d2e;color:#fff;padding:8px 14px;font-size:12px;text-align:center;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;position:sticky;top:0;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.15);';
+        banner.innerHTML = '<span>Viewing in message app? Tap the <strong>Safari compass icon</strong> (bottom right) to open in Safari for Google Sign-In.</span>';
+        document.body.prepend(banner);
+      }
       initGoogleAuth();
       if (window.lucide) lucide.createIcons();
     });
