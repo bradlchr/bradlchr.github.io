@@ -6,6 +6,7 @@ Global web portal and distribution site for the **Deep Roots Nature Advisors - K
 - 🌐 **Live Web Application**: [**https://bradlchr.github.io/**](https://bradlchr.github.io/)
 - 📱 **Download Android App (APK)**: [**Download DeepRootsAdvisor-debug.apk**](https://bradlchr.github.io/DeepRootsAdvisor-debug.apk) (20 MB)
 - 📄 **Source Repository**: [github.com/bradlchr/deep-roots-nature-advisors](https://github.com/bradlchr/deep-roots-nature-advisors)
+- 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Quick start walkthrough for field advisors.
 
 ---
 
@@ -25,13 +26,14 @@ Global web portal and distribution site for the **Deep Roots Nature Advisors - K
   - `user` (Nature Advisor): Stage species, switch between consultations, create reports, edit botanical entries.
   - `admin` (Program Administrator): Provision new advisors, assign roles, reset passwords.
 - **Advisor Types**: `Advisor in Training`, `Advisor`, `Senior Advisor`, `Program Manager`.
-- **Pre-Seeded Default Administrator**:
+- **Default Administrator Setup**:
   - **Username**: `chris.bradley`
-  - **Password**: `deeproots_admin`
   - **Email**: `ctbbradley@gmail.com`
   - **Role**: `admin`
+  - *Note: Initial administrative credentials are provisioned securely out-of-band by the Program Manager.*
 
 ### 3. Consultation Reports & Official Word (.docx) Generation
+- **Garden Areas & Planting Zones**: Configure custom client property zones (e.g., *Area 1: Front Porch*, *Area 2: Front Sidewalk/Mailbox*, *Area 3: Backyard Shade Garden*) that propagate into the final generated `.docx` report.
 - **Multi-Consultation Switcher**: Manage drafts and switch between multiple client consultations.
 - **Cloud Firestore Storage**: Reports save directly to `/users/{username}/reports/{id}`.
 - **Real Word Document (.docx)**: Uses the official Deep Roots template (`report_template.docx`) via JSZip to output genuine Office Open XML `.docx` files formatted with client info, visit date, custom site analysis, grouped recommendation blocks, botanical bullets, and external Grow Native! hyperlinks.
