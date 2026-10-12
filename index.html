@@ -17,11 +17,25 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="report_template_base64.js"></script>
+  <script>
+    (function() {
+      try {
+        const loggedIn = localStorage.getItem('dr_logged_in_username');
+        const scale = (loggedIn && localStorage.getItem('dr_text_scale_' + loggedIn)) || localStorage.getItem('dr_text_scale') || 'standard';
+        document.documentElement.setAttribute('data-text-scale', scale);
+      } catch (e) {}
+    })();
+  </script>
 
   <style>
     :root {
       --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       --font-serif: 'Lora', Georgia, serif;
+      
+      /* Dynamic Text & UI Scaling (Per-user preference) */
+      --text-scale: 1;
+      --ui-scale: 1;
+      --base-font-size: 16px;
       
       /* Light Palette - Botanical Nature */
       --bg-base: #f4f7f4;
@@ -102,6 +116,33 @@
       --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
+    /* Dynamic User Text Size Scaling */
+    html {
+      font-size: 16px;
+      --text-scale: 1;
+      --ui-scale: 1;
+    }
+    html[data-text-scale="standard"] {
+      font-size: 16px;
+      --text-scale: 1;
+      --ui-scale: 1;
+    }
+    html[data-text-scale="comfortable"] {
+      font-size: 17.5px;
+      --text-scale: 1.1;
+      --ui-scale: 1.05;
+    }
+    html[data-text-scale="large"] {
+      font-size: 19.5px;
+      --text-scale: 1.25;
+      --ui-scale: 1.12;
+    }
+    html[data-text-scale="extra-large"] {
+      font-size: 22px;
+      --text-scale: 1.4;
+      --ui-scale: 1.2;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -113,11 +154,12 @@
       background-color: var(--bg-base);
       color: var(--text-main);
       line-height: 1.5;
+      font-size: calc(14px * var(--text-scale));
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      transition: background-color 0.25s ease, color 0.25s ease;
+      transition: background-color 0.25s ease, color 0.25s ease, font-size 0.15s ease;
     }
 
     /* Scrollbar */
@@ -145,60 +187,78 @@
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border-subtle);
-      height: 68px;
+      min-height: calc(68px * var(--ui-scale));
+      height: auto;
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      padding: 0 24px;
-      gap: 16px;
+      padding: max(10px, env(safe-area-inset-top, 10px)) max(20px, env(safe-area-inset-right, 20px)) 10px max(20px, env(safe-area-inset-left, 20px));
+      gap: calc(14px * var(--ui-scale));
     }
 
     .header-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: calc(12px * var(--ui-scale));
       text-decoration: none;
       color: inherit;
+      min-width: 0;
+      flex-shrink: 0;
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
+      width: calc(40px * var(--ui-scale));
+      height: calc(40px * var(--ui-scale));
       border-radius: var(--radius-md);
       background: linear-gradient(135deg, var(--primary) 0%, #153b23 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      font-size: 20px;
+      font-size: calc(20px * var(--ui-scale));
       box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+      padding-top: 1px;
     }
 
     .brand-text h1 {
-      font-size: 17px;
+      font-size: calc(17px * var(--text-scale));
       font-weight: 800;
       letter-spacing: -0.02em;
-      line-height: 1.2;
+      line-height: 1.25;
+      margin: 0;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
 
     .brand-text p {
-      font-size: 11px;
+      font-size: calc(11px * var(--text-scale));
       font-weight: 500;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      margin: 0;
+      line-height: 1.3;
     }
 
     .header-stats {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: calc(8px * var(--ui-scale));
       margin-left: 20px;
     }
 
     .stat-pill {
-      font-size: 12px;
+      font-size: calc(12px * var(--text-scale));
       font-weight: 600;
-      padding: 4px 10px;
+      padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
       border-radius: var(--radius-full);
       display: flex;
       align-items: center;
@@ -244,17 +304,19 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: calc(8px * var(--ui-scale));
       font-family: var(--font-sans);
-      font-size: 13px;
+      font-size: calc(13px * var(--text-scale));
       font-weight: 600;
-      padding: 8px 14px;
+      padding: calc(8px * var(--ui-scale)) calc(14px * var(--ui-scale));
+      min-height: calc(36px * var(--ui-scale));
       border-radius: var(--radius-md);
       border: 1px solid transparent;
       cursor: pointer;
       transition: all 0.15s ease;
       text-decoration: none;
       white-space: nowrap;
+      box-sizing: border-box;
     }
 
     .btn-primary {
@@ -299,11 +361,17 @@
     }
 
     .btn-icon {
-      padding: 8px;
+      padding: calc(8px * var(--ui-scale));
       border-radius: var(--radius-md);
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
+      min-width: calc(36px * var(--ui-scale));
+      min-height: calc(36px * var(--ui-scale));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
     }
     .btn-icon:hover {
       color: var(--text-main);
@@ -324,9 +392,9 @@
     .badge-count {
       background: var(--accent-gold);
       color: #fff;
-      font-size: 11px;
+      font-size: calc(11px * var(--text-scale));
       font-weight: 800;
-      padding: 2px 7px;
+      padding: calc(2px * var(--ui-scale)) calc(7px * var(--ui-scale));
       border-radius: var(--radius-full);
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
@@ -372,15 +440,16 @@
 
     .search-input {
       width: 100%;
-      padding: 10px 36px 10px 36px;
+      padding: calc(10px * var(--ui-scale)) 36px calc(10px * var(--ui-scale)) 36px;
       font-family: var(--font-sans);
-      font-size: 13px;
+      font-size: calc(13px * var(--text-scale));
       background: var(--bg-base);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       color: var(--text-main);
       outline: none;
       transition: border-color 0.2s;
+      box-sizing: border-box;
     }
     .search-input:focus {
       border-color: var(--primary);
@@ -421,9 +490,9 @@
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      padding: 9px 12px;
+      padding: calc(9px * var(--ui-scale)) calc(12px * var(--ui-scale));
       border-radius: var(--radius-md);
-      font-size: 13px;
+      font-size: calc(13px * var(--text-scale));
       font-weight: 600;
       border: 1px solid var(--border-subtle);
       background: var(--bg-base);
@@ -431,6 +500,7 @@
       cursor: pointer;
       transition: all 0.15s ease;
       text-align: left;
+      box-sizing: border-box;
     }
     .quick-toggle-btn:hover {
       border-color: var(--border-strong);
@@ -467,7 +537,7 @@
       padding: 6px 0;
       background: none;
       border: none;
-      font-size: 12px;
+      font-size: calc(12px * var(--text-scale));
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -486,9 +556,9 @@
     }
 
     .chip-filter {
-      font-size: 12px;
+      font-size: calc(12px * var(--text-scale));
       font-weight: 500;
-      padding: 4px 10px;
+      padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
       border-radius: var(--radius-full);
       background: var(--bg-base);
       border: 1px solid var(--border-subtle);
@@ -759,7 +829,7 @@
     }
 
     .card-primary-name, .card-common-name {
-      font-size: 16px;
+      font-size: calc(16px * var(--text-scale));
       font-weight: 700;
       color: var(--text-main);
       line-height: 1.3;
@@ -773,7 +843,7 @@
     }
 
     .card-secondary-name, .card-sci-name {
-      font-size: 13px;
+      font-size: calc(13px * var(--text-scale));
       color: var(--text-muted);
       margin-top: 1px;
     }
@@ -794,12 +864,12 @@
     }
 
     .meta-chip {
-      font-size: 11px;
+      font-size: calc(11px * var(--text-scale));
       font-weight: 600;
       background: var(--bg-base);
       color: var(--text-secondary);
       border: 1px solid var(--border-subtle);
-      padding: 2px 8px;
+      padding: calc(2px * var(--ui-scale)) calc(8px * var(--ui-scale));
       border-radius: var(--radius-sm);
       display: inline-flex;
       align-items: center;
@@ -807,9 +877,9 @@
     }
 
     .card-desc {
-      font-size: 12px;
+      font-size: calc(12.5px * var(--text-scale));
       color: var(--text-secondary);
-      line-height: 1.45;
+      line-height: 1.5;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -828,8 +898,8 @@
     }
 
     .btn-copy-desc {
-      font-size: 12px;
-      padding: 6px 10px;
+      font-size: calc(12px * var(--text-scale));
+      padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
       background: transparent;
       border: 1px solid var(--border-strong);
       color: var(--text-secondary);
@@ -845,9 +915,9 @@
     }
 
     .btn-add-report {
-      font-size: 12px;
+      font-size: calc(12px * var(--text-scale));
       font-weight: 700;
-      padding: 6px 12px;
+      padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
       background: var(--primary);
       color: #fff;
       border: none;
@@ -1459,6 +1529,7 @@
       max-height: calc(100vh - 64px);
       overflow-y: auto;
       padding: 0;
+      font-size: calc(13.5px * var(--text-scale));
     }
     dialog::backdrop {
       background: rgba(0, 0, 0, 0.55);
@@ -1475,6 +1546,9 @@
       top: 0;
       background: var(--bg-surface);
       z-index: 10;
+    }
+    .dialog-header h3 {
+      font-size: calc(16px * var(--text-scale));
     }
 
     .dialog-body {
@@ -1497,14 +1571,14 @@
       flex-direction: column;
     }
     .spec-label {
-      font-size: 10px;
+      font-size: calc(10.5px * var(--text-scale));
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
     }
     .spec-value {
-      font-size: 13px;
+      font-size: calc(13px * var(--text-scale));
       font-weight: 600;
       color: var(--text-main);
     }
@@ -1514,9 +1588,9 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 9px;
+      padding: calc(3px * var(--ui-scale)) calc(9px * var(--ui-scale));
       border-radius: var(--radius-full);
-      font-size: 11px;
+      font-size: calc(11px * var(--text-scale));
       font-weight: 700;
       text-transform: capitalize;
     }
@@ -1529,6 +1603,126 @@
       background: var(--primary-light);
       color: var(--primary);
       border: 1px solid var(--primary-border);
+    }
+
+    /* Text Size Controls & Modal */
+    .text-size-segmented-control {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .text-size-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      gap: 4px;
+      user-select: none;
+    }
+    .text-size-btn:hover {
+      border-color: var(--primary-border);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .text-size-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+    .text-size-btn.active .text-size-preview,
+    .text-size-btn.active .text-size-name {
+      color: #ffffff !important;
+    }
+    .text-size-preview {
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text-main);
+    }
+    .text-size-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .text-size-option-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s ease;
+      width: 100%;
+      box-sizing: border-box;
+      gap: 12px;
+    }
+    .text-size-option-card:hover {
+      border-color: var(--primary-border);
+      background: var(--primary-light);
+    }
+    .text-size-option-card.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .text-size-option-card .opt-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .text-size-option-card .opt-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      background: var(--bg-surface);
+    }
+    .text-size-option-card.active .opt-indicator {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+    .text-size-option-card.active .opt-indicator::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #ffffff;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .text-size-option-card .opt-title {
+      font-size: calc(13.5px * var(--text-scale));
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .text-size-option-card .opt-desc {
+      font-size: calc(11px * var(--text-scale));
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .text-size-option-card .opt-sample {
+      font-weight: 800;
+      color: var(--primary);
+      padding: 3px 9px;
+      border-radius: var(--radius-sm);
+      background: rgba(35, 92, 54, 0.08);
+      flex-shrink: 0;
     }
     .dialog-tabs {
       display: flex;
@@ -1790,23 +1984,27 @@
         display: flex !important;
       }
       header {
-        height: 60px;
-        padding: 0 14px;
-        gap: 10px;
+        min-height: calc(62px * var(--ui-scale));
+        height: auto;
+        padding: max(10px, env(safe-area-inset-top, 10px)) max(14px, env(safe-area-inset-right, 14px)) 10px max(14px, env(safe-area-inset-left, 14px));
+        gap: calc(8px * var(--ui-scale));
+        box-sizing: border-box;
       }
       .brand-logo {
-        width: 34px;
-        height: 34px;
-        font-size: 18px;
+        width: calc(34px * var(--ui-scale));
+        height: calc(34px * var(--ui-scale));
+        font-size: calc(18px * var(--ui-scale));
       }
       .brand-text h1 {
-        font-size: 15px;
+        font-size: calc(15px * var(--text-scale));
+        line-height: 1.25;
       }
       .brand-text p {
-        font-size: 10px;
+        font-size: calc(10px * var(--text-scale));
+        line-height: 1.3;
       }
       .header-actions {
-        gap: 6px;
+        gap: calc(6px * var(--ui-scale));
       }
 
       .btn-text-long {
@@ -1816,9 +2014,9 @@
         display: inline !important;
       }
 
-      /* Prevent mobile Safari auto-zoom on input focus */
+      /* Prevent mobile Safari auto-zoom on input focus while respecting text-scale */
       input, textarea, select {
-        font-size: 16px !important;
+        font-size: max(16px, calc(14px * var(--text-scale))) !important;
       }
 
       .controls-bar {
@@ -1837,7 +2035,7 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 3px;
-        font-size: 11px;
+        font-size: calc(11px * var(--text-scale));
       }
       .sort-control select {
         width: 100%;
@@ -1880,7 +2078,8 @@
         display: none;
       }
       .brand-text h1 {
-        font-size: 14px;
+        font-size: calc(14px * var(--text-scale));
+        line-height: 1.25;
       }
       .btn-text-short {
         display: none !important;
@@ -1889,10 +2088,10 @@
         display: none !important;
       }
       .btn-report {
-        padding: 7px 10px;
+        padding: calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale));
       }
       .btn-google {
-        padding: 7px 10px;
+        padding: calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale));
       }
 
       .controls-actions {
@@ -1900,7 +2099,7 @@
       }
 
       .results-count {
-        font-size: 13px;
+        font-size: calc(13px * var(--text-scale));
       }
 
       .card-media {
@@ -1914,10 +2113,11 @@
 
     @media (max-width: 360px) {
       .brand-text h1 {
-        font-size: 13px;
+        font-size: calc(13px * var(--text-scale));
+        line-height: 1.25;
       }
       .btn {
-        padding: 6px 8px;
+        padding: calc(6px * var(--ui-scale)) calc(8px * var(--ui-scale));
       }
     }
   </style>
@@ -1952,6 +2152,11 @@
       <!-- Theme Toggle -->
       <button id="themeToggleBtn" class="btn btn-icon" title="Toggle Dark/Light Mode">
         <i data-lucide="moon" id="themeIcon"></i>
+      </button>
+
+      <!-- Text Size Quick Toggle -->
+      <button id="textSizeToggleBtn" class="btn btn-icon" title="Adjust Text &amp; Display Size" onclick="openTextSizeModal()">
+        <span style="font-size:13px;font-weight:800;letter-spacing:-0.5px;line-height:1;">Aa</span>
       </button>
 
       <!-- Advisor Auth Container -->
@@ -2560,6 +2765,77 @@
     </form>
   </dialog>
 
+  <!-- Display & Text Size Quick Dialog -->
+  <dialog id="textSizeModal" style="max-width:480px;width:95%;">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i data-lucide="type" style="color:var(--primary);width:20px;height:20px;"></i>
+        <h3 style="font-size:16px;font-weight:800;margin:0;">Display &amp; Text Size</h3>
+      </div>
+      <button onclick="document.getElementById('textSizeModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <p style="font-size:12px;color:var(--text-secondary);margin:0 0 14px 0;line-height:1.5;">
+        Select your preferred font and display size. Cards, buttons, forms, and plant descriptions dynamically adapt to ensure optimal readability.
+      </p>
+
+      <div class="text-size-options-list" style="display:flex;flex-direction:column;gap:8px;">
+        <button type="button" class="text-size-option-card" data-scale="standard" onclick="setUserTextScale('standard'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Standard (100%)</div>
+              <div class="opt-desc">Default font size and compact layout</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:13px;font-weight:800;">Aa</span>
+        </button>
+
+        <button type="button" class="text-size-option-card" data-scale="comfortable" onclick="setUserTextScale('comfortable'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Comfortable (110%)</div>
+              <div class="opt-desc">Enhanced readability for laptops and tablets</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:14.5px;font-weight:800;">Aa</span>
+        </button>
+
+        <button type="button" class="text-size-option-card" data-scale="large" onclick="setUserTextScale('large'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Large (125%)</div>
+              <div class="opt-desc">High visibility for outdoor field consultations</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:16.5px;font-weight:800;">Aa</span>
+        </button>
+
+        <button type="button" class="text-size-option-card" data-scale="extra-large" onclick="setUserTextScale('extra-large'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Extra Large (140%)</div>
+              <div class="opt-desc">Maximum legibility and larger tap targets</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:19px;font-weight:800;">Aa</span>
+        </button>
+      </div>
+
+      <div style="margin-top:14px;padding:10px 12px;background:var(--primary-light);border:1px solid var(--primary-border);border-radius:var(--radius-md);display:flex;align-items:center;gap:8px;">
+        <i data-lucide="info" style="color:var(--primary);width:16px;height:16px;flex-shrink:0;"></i>
+        <span style="font-size:11.5px;color:var(--primary);line-height:1.4;">
+          Your text size preference is saved automatically to your profile and remembered across devices.
+        </span>
+      </div>
+    </div>
+  </dialog>
+
   <!-- User Profile & Administration Modal -->
   <dialog id="userProfileModal">
     <div class="dialog-header">
@@ -2595,6 +2871,39 @@
         <div style="display:flex;justify-content:space-between;">
           <span>Phone:</span>
           <strong id="profilePhoneTxt" style="color:var(--text-main);">913-424-2205</strong>
+        </div>
+      </div>
+
+      <!-- Display & Text Size Preferences -->
+      <div style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-main);">
+            <i data-lucide="type" style="width:14px;height:14px;color:var(--primary);"></i>
+            <span>Display &amp; Text Size</span>
+          </div>
+          <span id="profileTextSizeActiveLabel" style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 8px;border-radius:var(--radius-full);border:1px solid var(--primary-border);">Standard (100%)</span>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 0;line-height:1.4;">
+          Personalize the interface and font scaling for your comfort across all devices.
+        </p>
+        
+        <div class="text-size-segmented-control" id="profileTextSizeControls" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;">
+          <button type="button" class="text-size-btn" data-scale="standard" onclick="setUserTextScale('standard')" title="Standard (100%)">
+            <span class="text-size-preview" style="font-size:12px;font-weight:800;">Aa</span>
+            <span class="text-size-name">100%</span>
+          </button>
+          <button type="button" class="text-size-btn" data-scale="comfortable" onclick="setUserTextScale('comfortable')" title="Comfortable (110%)">
+            <span class="text-size-preview" style="font-size:14px;font-weight:800;">Aa</span>
+            <span class="text-size-name">110%</span>
+          </button>
+          <button type="button" class="text-size-btn" data-scale="large" onclick="setUserTextScale('large')" title="Large (125%)">
+            <span class="text-size-preview" style="font-size:16px;font-weight:800;">Aa</span>
+            <span class="text-size-name">125%</span>
+          </button>
+          <button type="button" class="text-size-btn" data-scale="extra-large" onclick="setUserTextScale('extra-large')" title="Extra Large (140%)">
+            <span class="text-size-preview" style="font-size:18px;font-weight:800;">Aa</span>
+            <span class="text-size-name">140%</span>
+          </button>
         </div>
       </div>
 
@@ -2856,6 +3165,16 @@
             <option value="admin">Admin (Full Administrative Privileges)</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label for="editUserTextSize">Display &amp; Text Size Preference</label>
+        <select id="editUserTextSize">
+          <option value="standard">Standard (100%)</option>
+          <option value="comfortable">Comfortable (110%)</option>
+          <option value="large">Large (125%)</option>
+          <option value="extra-large">Extra Large (140%)</option>
+        </select>
       </div>
 
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
@@ -3923,6 +4242,7 @@
           salt: { stringValue: u.salt || '' },
           is_temporary_password: { booleanValue: !!(u.isTemporaryPassword || u.is_temporary_password) },
           avatar_url: { stringValue: u.avatarUrl || u.avatar_url || '' },
+          text_size: { stringValue: u.textSize || u.text_size || 'standard' },
           created_at: { integerValue: String(u.createdAt || u.created_at || Date.now()) },
           updated_at: { integerValue: String(u.updatedAt || u.updated_at || Date.now()) }
         }
@@ -3955,6 +4275,7 @@
         salt: getStr('salt'),
         isTemporaryPassword: getBool('is_temporary_password'),
         avatarUrl: getStr('avatar_url'),
+        textSize: getStr('text_size') || 'standard',
         createdAt: getNum('created_at') || Date.now(),
         updatedAt: getNum('updated_at') || Date.now()
       };
@@ -4046,6 +4367,7 @@
           salt: salt,
           isTemporaryPassword: false,
           avatarUrl: '',
+          textSize: 'standard',
           createdAt: Date.now(),
           updatedAt: Date.now()
         };
@@ -4060,10 +4382,17 @@
         const current = users.find(u => u.username === loggedInUsername);
         if (current) {
           state.currentUser = userRecordToProfile(current);
+          const userScale = current.textSize || localStorage.getItem(`dr_text_scale_${current.username}`) || localStorage.getItem('dr_text_scale') || 'standard';
+          setUserTextScale(userScale, false);
         } else {
           localStorage.removeItem('dr_logged_in_username');
           state.currentUser = null;
+          const defaultScale = localStorage.getItem('dr_text_scale') || 'standard';
+          setUserTextScale(defaultScale, false);
         }
+      } else {
+        const defaultScale = localStorage.getItem('dr_text_scale') || 'standard';
+        setUserTextScale(defaultScale, false);
       }
 
       renderAuthUser();
@@ -4081,6 +4410,10 @@
           if (state.currentUser) {
             const updated = merged.find(u => u.username === state.currentUser.username);
             if (updated) {
+              if (updated.textSize && !state.currentUser.textSize) {
+                state.currentUser.textSize = updated.textSize;
+                setUserTextScale(updated.textSize, false);
+              }
               state.currentUser = userRecordToProfile(updated);
               renderAuthUser();
             }
@@ -4134,9 +4467,93 @@
         role: u.role || 'user',
         isAdmin: (u.role || '').toLowerCase() === 'admin',
         isTemporaryPassword: !!(u.isTemporaryPassword || u.is_temporary_password),
-        photoURL: u.avatarUrl || u.avatar_url || ''
+        photoURL: u.avatarUrl || u.avatar_url || '',
+        textSize: u.textSize || u.text_size || 'standard'
       };
     }
+
+    // ==================== Text Size & Dynamic Scaling Management ====================
+    function getUserTextScale() {
+      if (state.currentUser && state.currentUser.textSize) {
+        return state.currentUser.textSize;
+      }
+      if (state.currentUser && state.currentUser.username) {
+        const userSaved = localStorage.getItem(`dr_text_scale_${state.currentUser.username}`);
+        if (userSaved) return userSaved;
+      }
+      return localStorage.getItem('dr_text_scale') || 'standard';
+    }
+
+    function setUserTextScale(scaleKey, persistUser = true) {
+      const validScales = ['standard', 'comfortable', 'large', 'extra-large'];
+      if (!validScales.includes(scaleKey)) scaleKey = 'standard';
+
+      document.documentElement.setAttribute('data-text-scale', scaleKey);
+      localStorage.setItem('dr_text_scale', scaleKey);
+
+      if (state.currentUser) {
+        state.currentUser.textSize = scaleKey;
+        localStorage.setItem(`dr_text_scale_${state.currentUser.username}`, scaleKey);
+        localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
+
+        if (persistUser) {
+          const users = loadUsersCache();
+          const idx = users.findIndex(u => u.username === state.currentUser.username);
+          if (idx >= 0) {
+            users[idx].textSize = scaleKey;
+            users[idx].updatedAt = Date.now();
+            saveUsersCache(users);
+            syncUserToFirestore(users[idx]);
+          }
+        }
+      }
+
+      updateTextScaleUI(scaleKey);
+    }
+
+    function updateTextScaleUI(scaleKey) {
+      const validScales = ['standard', 'comfortable', 'large', 'extra-large'];
+      if (!validScales.includes(scaleKey)) scaleKey = 'standard';
+
+      const labels = {
+        'standard': 'Standard (100%)',
+        'comfortable': 'Comfortable (110%)',
+        'large': 'Large (125%)',
+        'extra-large': 'Extra Large (140%)'
+      };
+
+      // Update segmented controls in Profile modal
+      document.querySelectorAll('#profileTextSizeControls .text-size-btn').forEach(btn => {
+        const isMatch = btn.getAttribute('data-scale') === scaleKey;
+        btn.classList.toggle('active', isMatch);
+      });
+
+      const labelEl = document.getElementById('profileTextSizeActiveLabel');
+      if (labelEl) {
+        labelEl.textContent = labels[scaleKey] || 'Standard (100%)';
+      }
+
+      // Update option cards in Text Size modal
+      document.querySelectorAll('#textSizeModal .text-size-option-card').forEach(card => {
+        const isMatch = card.getAttribute('data-scale') === scaleKey;
+        card.classList.toggle('active', isMatch);
+      });
+    }
+
+    function openTextSizeModal() {
+      const currentScale = getUserTextScale();
+      updateTextScaleUI(currentScale);
+      const modal = document.getElementById('textSizeModal');
+      if (modal) {
+        modal.showModal();
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    window.getUserTextScale = getUserTextScale;
+    window.setUserTextScale = setUserTextScale;
+    window.updateTextScaleUI = updateTextScaleUI;
+    window.openTextSizeModal = openTextSizeModal;
 
     async function loginAdvisor(usernameOrEmail, password) {
       const query = (usernameOrEmail || '').trim().toLowerCase();
@@ -4174,6 +4591,11 @@
       state.currentUser = profile;
       localStorage.setItem('dr_logged_in_username', user.username);
       localStorage.setItem('dr_current_user', JSON.stringify(profile));
+
+      // Apply user's text size preference
+      const userScale = profile.textSize || localStorage.getItem(`dr_text_scale_${user.username}`) || localStorage.getItem('dr_text_scale') || 'standard';
+      setUserTextScale(userScale, false);
+
       renderAuthUser();
       await initConsultations();
       renderGrid();
@@ -4191,6 +4613,11 @@
       state.currentUser = null;
       localStorage.removeItem('dr_logged_in_username');
       localStorage.removeItem('dr_current_user');
+
+      // Revert text size to device default
+      const defaultScale = localStorage.getItem('dr_text_scale') || 'standard';
+      setUserTextScale(defaultScale, false);
+
       renderAuthUser();
       await initConsultations();
       renderGrid();
@@ -4373,15 +4800,22 @@
         user.role = newRole;
       }
 
+      if (updates.textSize !== undefined) {
+        user.textSize = updates.textSize;
+      }
+
       user.updatedAt = Date.now();
       users[idx] = user;
       saveUsersCache(users);
       await syncUserToFirestore(user);
 
-      // If this user is currently logged in, update current session profile & header
+      // If this user is currently logged in, update current session profile & header & text size
       if (state.currentUser && state.currentUser.username === user.username) {
         state.currentUser = userRecordToProfile(user);
         localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
+        if (updates.textSize) {
+          setUserTextScale(updates.textSize, false);
+        }
         renderAuthUser();
       }
 
@@ -6215,6 +6649,8 @@
         adminBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
       }
 
+      updateTextScaleUI(getUserTextScale());
+
       document.getElementById('userProfileModal').showModal();
       if (window.lucide) lucide.createIcons();
     }
@@ -6351,6 +6787,11 @@
       const monikerPreview = document.getElementById('editUserMonikerPreview');
       if (monikerPreview) {
         monikerPreview.textContent = getUserInitials(u);
+      }
+
+      const textSizeSelect = document.getElementById('editUserTextSize');
+      if (textSizeSelect) {
+        textSizeSelect.value = u.textSize || u.text_size || 'standard';
       }
 
       modal.showModal();
@@ -8523,6 +8964,30 @@
         if (window.lucide) lucide.createIcons();
       }
 
+      // Text Size Quick Button
+      document.getElementById('textSizeToggleBtn')?.addEventListener('click', () => {
+        openTextSizeModal();
+      });
+
+      // Segmented Text Size controls in Profile Modal
+      document.querySelectorAll('#profileTextSizeControls .text-size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const scale = btn.getAttribute('data-scale');
+          if (scale) setUserTextScale(scale);
+        });
+      });
+
+      // Option cards in Text Size Quick Modal
+      document.querySelectorAll('#textSizeModal .text-size-option-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const scale = card.getAttribute('data-scale');
+          if (scale) {
+            setUserTextScale(scale);
+            document.getElementById('textSizeModal')?.close();
+          }
+        });
+      });
+
       // Drawer open/close
       const drawer = document.getElementById('stagingDrawer');
       const overlay = document.getElementById('drawerOverlay');
@@ -9176,6 +9641,7 @@
         const phoneNumber = document.getElementById('editUserPhone').value.trim();
         const advisorType = document.getElementById('editUserAdvisorType').value;
         const role = document.getElementById('editUserRole').value;
+        const textSize = document.getElementById('editUserTextSize')?.value || 'standard';
         const banner = document.getElementById('editUserErrorBanner');
         const submitBtn = document.getElementById('submitEditUserBtn');
 
@@ -9189,7 +9655,8 @@
             email,
             phoneNumber,
             advisorType,
-            role
+            role,
+            textSize
           });
 
           if (res.success) {
