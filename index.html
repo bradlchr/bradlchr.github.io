@@ -1119,6 +1119,8 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       transition: all var(--transition-fast);
       font-family: inherit;
     }
@@ -1134,6 +1136,29 @@
     .catalog-mode-btn.active.is-invasive {
       background: #b91c1c;
       color: #ffffff;
+    }
+
+    /* Mobile Catalog Bar */
+    .mobile-catalog-bar {
+      display: none;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .catalog-mode-switcher.mobile-switcher {
+      width: 100%;
+      display: flex;
+      padding: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+    }
+    .catalog-mode-switcher.mobile-switcher .catalog-mode-btn {
+      flex: 1;
+      justify-content: center;
+      padding: 9px 12px;
+      font-size: 13px;
+      min-height: 42px;
     }
 
     /* Invasive Plant Card Specifics */
@@ -1757,6 +1782,12 @@
     }
 
     @media (max-width: 768px) {
+      .header-actions .catalog-mode-switcher {
+        display: none !important;
+      }
+      .mobile-catalog-bar {
+        display: flex !important;
+      }
       header {
         height: 60px;
         padding: 0 14px;
@@ -1940,11 +1971,11 @@
       
       <!-- Catalog Mode Switcher (Native vs Invasive) -->
       <div class="catalog-mode-switcher" id="catalogModeSwitcher" title="Switch between Native Plant Palette and Invasive Species Field Guide">
-        <button type="button" id="catalogNativeBtn" class="catalog-mode-btn active">
+        <button type="button" id="catalogNativeBtn" class="catalog-mode-btn active" onclick="setCatalogMode('native')">
           <i data-lucide="sprout" style="width:14px;height:14px;"></i>
           <span>Native Plants (<span id="nativeCountHeader">185</span>)</span>
         </button>
-        <button type="button" id="catalogInvasiveBtn" class="catalog-mode-btn">
+        <button type="button" id="catalogInvasiveBtn" class="catalog-mode-btn" onclick="setCatalogMode('invasive')">
           <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
           <span>Invasive Species (10)</span>
         </button>
@@ -2203,6 +2234,20 @@
             <i data-lucide="x" style="width:14px;height:14px;"></i>
           </button>
         </div>
+      <!-- Mobile Catalog Switcher (prominent on mobile / <= 768px) -->
+      <div class="mobile-catalog-bar" id="mobileCatalogBar">
+        <div class="catalog-mode-switcher mobile-switcher">
+          <button type="button" class="catalog-mode-btn active" id="mobileCatalogNativeBtn" onclick="setCatalogMode('native')">
+            <i data-lucide="sprout" style="width:14px;height:14px;"></i>
+            <span>Native Plants (<span id="nativeCountMobile">185</span>)</span>
+          </button>
+          <button type="button" class="catalog-mode-btn" id="mobileCatalogInvasiveBtn" onclick="setCatalogMode('invasive')">
+            <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
+            <span>Invasive Species (10)</span>
+          </button>
+        </div>
+      </div>
+
       </div>
 
       <!-- Controls Bar -->
@@ -2361,6 +2406,21 @@
         </div>
       </div>
 
+      <!-- Staged Plants List -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
+            Selected Plants (<span id="stagedCount">0</span>)
+          </span>
+          <button id="clearAllStagedBtn" class="clear-all-btn">Clear All</button>
+        </div>
+        <div id="stagedList" class="staged-list">
+          <div style="text-align:center;padding:30px 10px;color:var(--text-muted);font-size:13px;">
+            No plants added to report yet.<br>Click <strong>+ Add to Report</strong> on any plant card.
+          </div>
+        </div>
+      </div>
+
 
 
       <!-- Invasive Plants Section in Consultation -->
@@ -2434,20 +2494,7 @@
         </div>
       </div>
 
-            <!-- Staged Plants List -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
-            Selected Plants (<span id="stagedCount">0</span>)
-          </span>
-          <button id="clearAllStagedBtn" class="clear-all-btn">Clear All</button>
-        </div>
-        <div id="stagedList" class="staged-list">
-          <div style="text-align:center;padding:30px 10px;color:var(--text-muted);font-size:13px;">
-            No plants added to report yet.<br>Click <strong>+ Add to Report</strong> on any plant card.
-          </div>
-        </div>
-      </div>
+            
     </div>
 
     <!-- Drawer Footer Actions -->
@@ -4125,33 +4172,39 @@
     // ==================== Invasive Species & Stewardship Management ====================
     function setCatalogMode(mode) {
       state.catalogMode = mode;
-      const nativeBtn = document.getElementById('catalogNativeBtn');
-      const invBtn = document.getElementById('catalogInvasiveBtn');
-      const filterSidebar = document.getElementById('filterSidebar');
+      const nativeBtns = [document.getElementById('catalogNativeBtn'), document.getElementById('mobileCatalogNativeBtn')];
+      const invBtns = [document.getElementById('catalogInvasiveBtn'), document.getElementById('mobileCatalogInvasiveBtn')];
       const topFilters = document.querySelector('.filter-chips-row');
+      const openSidebarBtn = document.getElementById('openSidebarBtn');
+      const sortControls = document.querySelector('.controls-actions');
 
       if (mode === 'invasive') {
-        nativeBtn?.classList.remove('active');
-        invBtn?.classList.add('active', 'is-invasive');
+        nativeBtns.forEach(b => b?.classList.remove('active'));
+        invBtns.forEach(b => b?.classList.add('active', 'is-invasive'));
         if (topFilters) topFilters.style.display = 'none';
+        if (openSidebarBtn) openSidebarBtn.style.display = 'none';
+        if (sortControls) sortControls.style.display = 'none';
         renderInvasiveGrid();
         showToast('Viewing Kansas City High-Threat Invasive Species Guide');
       } else {
-        invBtn?.classList.remove('active', 'is-invasive');
-        nativeBtn?.classList.add('active');
+        invBtns.forEach(b => b?.classList.remove('active', 'is-invasive'));
+        nativeBtns.forEach(b => b?.classList.add('active'));
         if (topFilters) topFilters.style.display = 'flex';
+        if (openSidebarBtn) openSidebarBtn.style.display = '';
+        if (sortControls) sortControls.style.display = 'flex';
         renderGrid();
       }
       if (window.lucide) lucide.createIcons();
     }
+    window.setCatalogMode = setCatalogMode;
 
     function renderInvasiveGrid() {
       const grid = document.getElementById('plantGrid');
-      const countEl = document.getElementById('plantCount');
+      const countEl = document.getElementById('resultsCount');
       if (!grid) return;
 
       const invasives = state.invasivePlants || [];
-      if (countEl) countEl.textContent = `${invasives.length} invasive species`;
+      if (countEl) countEl.innerHTML = `Showing <strong>${invasives.length}</strong> Kansas City High-Threat Invasive Species`;
 
       grid.innerHTML = '';
 
@@ -6516,6 +6569,14 @@
             }
           }
 
+          // Strip red and purple instructional colors from the first page (cover / letter) so text renders in black
+          const tocIdx = docXml.indexOf('Table of Contents');
+          if (tocIdx !== -1) {
+            const firstPageXml = docXml.slice(0, tocIdx);
+            const cleanFirstPageXml = firstPageXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '');
+            docXml = cleanFirstPageXml + docXml.slice(tocIdx);
+          }
+
           // Header placeholders
           docXml = docXml.replace(/\[Name of client\]/g, escapeXml(clientName));
           docXml = docXml.replace(/\[Address\]/g, escapeXml(streetLine || 'Kansas City Region'));
@@ -6794,7 +6855,27 @@
           }
 
           const removals = [];
-          const opts = state.reportOptions || {};
+
+          // Read live checkbox states directly from DOM
+          const readCheck = (id, fallback) => {
+            const el = document.getElementById(id);
+            return el ? el.checked : fallback;
+          };
+
+          const opts = {
+            invasivePresent: readCheck('toggleInvasivePresent', Boolean(state.reportOptions.invasivePresent)),
+            birdNestBox: readCheck('toggleBirdNestBox', state.reportOptions.birdNestBox !== false),
+            birdBath: readCheck('toggleBirdBath', state.reportOptions.birdBath !== false),
+            batBox: readCheck('toggleBatBox', state.reportOptions.batBox === true),
+            beeHabitat: readCheck('toggleBeeHabitat', state.reportOptions.beeHabitat !== false),
+            johnsonCounty: readCheck('toggleJohnsonCounty', state.reportOptions.johnsonCounty === true),
+            wyandotteCounty: readCheck('toggleWyandotteCounty', state.reportOptions.wyandotteCounty === true),
+            rainwaterHarvesting: readCheck('toggleRainwaterHarvesting', state.reportOptions.rainwaterHarvesting !== false)
+          };
+
+          state.reportOptions = { ...state.reportOptions, ...opts };
+          persistReportOptions();
+
           const stagedInvs = state.stagedInvasives || [];
           const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
 
@@ -6999,6 +7080,9 @@
           // 6. Clean (IF Discussed)
           docXml = docXml.replace("Bat Box (IF Discussed)", "Bat Box");
           docXml = docXml.replace("Rainwater Harvesting (IF Discussed)", "Rainwater Harvesting");
+
+          // Strip any stray red instructional colors across the document
+          docXml = docXml.replace(/<w:color\s+w:val="FF0000"[^>]*\/>/gi, '');
 
           // 7. Deduplicate and execute replacements backwards
           const removalsMap = new Map();
@@ -7781,6 +7865,58 @@
           updateCanonicalPreview();
         } else {
           showToast(res.error || "Failed to provision advisor", "danger");
+        }
+      });
+
+      // Catalog Mode Switcher Listeners (Desktop & Mobile)
+      ['catalogNativeBtn', 'mobileCatalogNativeBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setCatalogMode('native');
+          });
+        }
+      });
+
+      ['catalogInvasiveBtn', 'mobileCatalogInvasiveBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setCatalogMode('invasive');
+          });
+        }
+      });
+
+      // Browse Invasives Button inside Consultation Drawer
+      document.getElementById('browseInvasivesBtn')?.addEventListener('click', () => {
+        setCatalogMode('invasive');
+        closeDrawer();
+      });
+
+      // Report Section & Stewardship Checkbox Listeners
+      const reportTogglesList = [
+        ['toggleInvasivePresent', 'invasivePresent'],
+        ['toggleBirdNestBox', 'birdNestBox'],
+        ['toggleBirdBath', 'birdBath'],
+        ['toggleBatBox', 'batBox'],
+        ['toggleBeeHabitat', 'beeHabitat'],
+        ['toggleJohnsonCounty', 'johnsonCounty'],
+        ['toggleWyandotteCounty', 'wyandotteCounty'],
+        ['toggleRainwaterHarvesting', 'rainwaterHarvesting']
+      ];
+
+      reportTogglesList.forEach(([elemId, propKey]) => {
+        const inputEl = document.getElementById(elemId);
+        if (inputEl) {
+          inputEl.addEventListener('change', (e) => {
+            state.reportOptions[propKey] = e.target.checked;
+            persistReportOptions();
+            if (propKey === 'invasivePresent') {
+              renderStagedInvasives();
+            }
+          });
         }
       });
     }
