@@ -7042,6 +7042,57 @@
       document.getElementById('editPlantModal').close();
     });
 
+    // Canonical Big Three Invasive Species Reference Metadata
+    const BIG_THREE_DATA = {
+      bush_honeysuckle: {
+        id: 'inv-bush-honeysuckle',
+        name: 'Bush Honeysuckle',
+        scientific: 'Lonicera maackii',
+        info_url: 'https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles',
+        control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/bush-honeysuckle-control',
+        summary: 'Dense deciduous arching shrub (6–18 ft) with opposite leaves, fragrant spring flowers, paired red autumn berries, and allelopathic roots that chemically inhibit native tree and wildflower regeneration.'
+      },
+      japanese_honeysuckle: {
+        id: 'inv-japanese-honeysuckle',
+        name: 'Japanese Honeysuckle',
+        scientific: 'Lonicera japonica',
+        info_url: 'https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle',
+        control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/japanese-honeysuckle-control',
+        summary: 'Vigorous twining woody vine with opposite leaves, fragrant white/yellow tubular flowers, and black berries. Stems twist clockwise around saplings, girdling young trees and smothering native understory shrubs.'
+      },
+      wintercreeper: {
+        id: 'inv-wintercreeper',
+        name: 'Wintercreeper',
+        scientific: 'Euonymus fortunei',
+        info_url: 'https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus',
+        control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/wintercreeper-control',
+        summary: 'Aggressive evergreen groundcover and climbing vine with glossy, pale-veined opposite leaves. Forms dense carpets that choke out native spring ephemerals and climbs mature trees with aerial rootlets, increasing storm damage risk.'
+      }
+    };
+
+    function getUnobservedBigThree(stagedInvasives) {
+      const staged = stagedInvasives || [];
+      const text = staged.map(i => {
+        return [
+          i.name, i.common_name,
+          i.scientific, i.scientific_name,
+          i.id
+        ].filter(Boolean).join(' ').toLowerCase();
+      }).join(' ');
+
+      const unobserved = [];
+      if (!text.includes('bush honeysuckle') && !text.includes('lonicera maackii') && !text.includes('inv-bush-honeysuckle')) {
+        unobserved.push(BIG_THREE_DATA.bush_honeysuckle);
+      }
+      if (!text.includes('wintercreeper') && !text.includes('euonymus fortunei') && !text.includes('inv-wintercreeper')) {
+        unobserved.push(BIG_THREE_DATA.wintercreeper);
+      }
+      if (!text.includes('japanese honeysuckle') && !text.includes('lonicera japonica') && !text.includes('inv-japanese-honeysuckle')) {
+        unobserved.push(BIG_THREE_DATA.japanese_honeysuckle);
+      }
+      return unobserved;
+    }
+
     // Generate Markdown Report
     function generateMarkdownReport() {
       const meta = state.clientMeta || {};
@@ -7103,28 +7154,32 @@
       md += `## Non-Native, Invasive Plants & Problematic Species\n\n`;
       if (!hasInvasives) {
         md += `### Invasive-Free Landscape!\n\n`;
-        md += `Congratulations on an invasive-free landscape! We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei) and English Ivy (Hedera helix).\n\n`;
-        md += `* **Bush Honeysuckle** (*Lonicera maackii*)\n`;
-        md += `* **Japanese Honeysuckle** (*Lonicera japonica*)\n`;
-        md += `* **Wintercreeper** (*Euonymus fortunei*)\n`;
-        md += `* **English Ivy** (*Hedera helix*)\n\n`;
+        md += `Congratulations on an invasive-free landscape! We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: [Bush Honeysuckle (*Lonicera maackii*)](https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles), [Japanese Honeysuckle (*Lonicera japonica*)](https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle), and [Wintercreeper (*Euonymus fortunei*)](https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus).\n\n`;
+        md += `* **Bush Honeysuckle** (*Lonicera maackii*) – [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles) | [Control Protocol](https://mdc.mo.gov/trees-plants/invasive-plants/bush-honeysuckle-control)\n`;
+        md += `* **Japanese Honeysuckle** (*Lonicera japonica*) – [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle) | [Control Protocol](https://mdc.mo.gov/trees-plants/invasive-plants/japanese-honeysuckle-control)\n`;
+        md += `* **Wintercreeper** (*Euonymus fortunei*) – [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus) | [Control Protocol](https://mdc.mo.gov/trees-plants/invasive-plants/wintercreeper-control)\n\n`;
       } else {
         md += `### Invasive Species Observed on Property\n\n`;
         md += `We found the following invasive plants in your landscape during our visit:\n\n`;
         stagedInvs.forEach(inv => {
-          md += `* **${inv.name}** (*${inv.scientific}*)\n`;
-          if (inv.notes) md += `  * *Removal Guidance & Notes:* ${inv.notes}\n`;
+          const invName = inv.name || inv.common_name || 'Invasive Species';
+          const invSci = inv.scientific || inv.scientific_name || '';
+          const invNotes = inv.notes || inv.removal_tips || '';
+          md += `* **${invName}** (*${invSci}*)\n`;
+          if (invNotes) md += `  * *Removal Guidance & Notes:* ${invNotes}\n`;
         });
         md += `\n`;
 
-        const foundNames = stagedInvs.map(i => (i.name || '').toLowerCase());
-        const otherBigThree = [];
-        if (!foundNames.some(n => n.includes('bush honeysuckle'))) otherBigThree.push("Bush Honeysuckle (*Lonicera maackii*)");
-        if (!foundNames.some(n => n.includes('wintercreeper'))) otherBigThree.push("Wintercreeper (*Euonymus fortunei*)");
-        if (!foundNames.some(n => n.includes('japanese honeysuckle'))) otherBigThree.push("Japanese Honeysuckle (*Lonicera japonica*)");
-
-        if (otherBigThree.length > 0) {
-          md += `*More Information:* Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherBigThree.join(', ')}.\n\n`;
+        const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+        if (unobservedBigThree.length > 0) {
+          const otherNamesStr = unobservedBigThree.map(b => `${b.name} (*${b.scientific}*)`).join(', ');
+          md += `### Regional High-Threat Invasives to Monitor\n\n`;
+          md += `*More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.*\n\n`;
+          unobservedBigThree.forEach(other => {
+            md += `* **${other.name}** (*${other.scientific}*) – [MDC Field Guide](${other.info_url}) | [Control Protocol](${other.control_url})\n`;
+            md += `  * *Identification & Ecology:* ${other.summary}\n`;
+          });
+          md += `\n`;
         }
       }
 
@@ -7254,18 +7309,44 @@
         html += `
   <div class="stewardship-box">
     <h3 style="color:#15803d;margin-top:0;">Congratulations on an invasive-free landscape!</h3>
-    <p>We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei) and English Ivy (Hedera helix).</p>
+    <p>We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: <a href="https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles" target="_blank">Bush Honeysuckle (Lonicera maackii)</a>, <a href="https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle" target="_blank">Japanese Honeysuckle (Lonicera japonica)</a>, and <a href="https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus" target="_blank">Wintercreeper (Euonymus fortunei)</a>.</p>
   </div>`;
       } else {
         html += `
   <p>We found the following invasive plants in your landscape during our visit:</p>`;
         stagedInvs.forEach(inv => {
+          const invName = inv.name || inv.common_name || 'Invasive Species';
+          const invSci = inv.scientific || inv.scientific_name || '';
+          const invNotes = inv.notes || inv.removal_tips || 'High-threat invasive. Prompt removal recommended.';
           html += `
   <div class="invasive-box">
-    <h4 style="margin:0 0 4pt 0;color:#991b1b;">• ${escapeHtml(inv.name)} <em>(${escapeHtml(inv.scientific)})</em></h4>
-    <p style="margin:0;font-size:13px;">${escapeHtml(inv.notes || 'High-threat invasive. Prompt removal recommended.')}</p>
+    <h4 style="margin:0 0 4pt 0;color:#991b1b;">• ${escapeHtml(invName)} <em>(${escapeHtml(invSci)})</em></h4>
+    <p style="margin:0;font-size:13px;">${escapeHtml(invNotes)}</p>
   </div>`;
         });
+
+        const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+        if (unobservedBigThree.length > 0) {
+          const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
+          html += `
+  <div style="margin-top: 18pt;">
+    <h3 style="color:#334155;font-size:12pt;margin-bottom:6pt;">Regional High-Threat Invasives to Monitor</h3>
+    <p style="font-style:italic;color:#475569;margin-bottom:10pt;">
+      <strong>More Information:</strong> Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${escapeHtml(otherNamesStr)}.
+    </p>`;
+          unobservedBigThree.forEach(other => {
+            html += `
+    <div class="invasive-box" style="background:#fef2f2;border-left:4pt solid #ea580c;margin-bottom:10pt;padding:10pt 12pt;">
+      <h4 style="margin:0 0 4pt 0;color:#991b1b;">
+        • <a href="${other.info_url}" target="_blank" style="color:#1155cc;text-decoration:underline;">${escapeHtml(other.name)}</a>
+        <em>(${escapeHtml(other.scientific)})</em>
+        <span style="font-size:11px;font-weight:normal;margin-left:6px;">[<a href="${other.control_url}" target="_blank" style="color:#c00000;font-weight:bold;">Control Protocol</a>]</span>
+      </h4>
+      <p style="margin:0;font-size:12px;color:#334155;">${escapeHtml(other.summary)}</p>
+    </div>`;
+          });
+          html += `</div>`;
+        }
       }
 
       html += `
@@ -7754,11 +7835,12 @@
               }
             }
           } else {
-            // Case B: Remove Case A: from "Congratulations..." until "We found the following..."
+            // Case B: Remove Case A text (from section heading down to "We found the following...")
             let inCaseA = false;
             for (const p of paras) {
-              if (p.text.includes("Congratulations on an invasive-free landscape!")) {
+              if (p.text.includes("NON-NATIVE, INVASIVE PLANTS") && !p.text.includes("PAGEREF")) {
                 inCaseA = true;
+                continue;
               }
               if (inCaseA) {
                 if (p.text.includes("We found the following invasive plants in your landscape")) {
@@ -7772,10 +7854,12 @@
             // Replace red instruction [keep the invasive plants found here...] with staged invasives!
             let invXml = '';
             for (const inv of stagedInvs) {
-              const catalogEntry = (state.invasivePlants || []).find(ip => ip.id === inv.id || ip.scientific_name === inv.scientific || ip.common_name === inv.name);
+              const invName = inv.name || inv.common_name || 'Invasive Species';
+              const invSci = inv.scientific || inv.scientific_name || '';
+              const catalogEntry = (state.invasivePlants || []).find(ip => ip.id === inv.id || ip.scientific_name === invSci || ip.common_name === invName);
               const infoUrl = (catalogEntry && (catalogEntry.info_url || catalogEntry.ref_url)) || inv.ref_url || 'https://mdc.mo.gov';
               const controlUrl = (catalogEntry && catalogEntry.control_url) || 'https://mdc.mo.gov/trees-plants/invasive-plants';
-              const invNotes = inv.notes || (catalogEntry && catalogEntry.removal_tips) || 'High-threat non-native invasive. Prompt removal recommended.';
+              const invNotes = inv.notes || inv.removal_tips || (catalogEntry && catalogEntry.removal_tips) || 'High-threat non-native invasive. Prompt removal recommended.';
 
               const rIdInfo = `rId${relCounter++}`;
               const rIdCtrl = `rId${relCounter++}`;
@@ -7789,10 +7873,10 @@
     <w:hyperlink r:id="${rIdInfo}">
         <w:r>
             <w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr>
-            <w:t>${escapeXml(inv.name)}</w:t>
+            <w:t>${escapeXml(invName)}</w:t>
         </w:r>
     </w:hyperlink>
-    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(inv.scientific || (catalogEntry && catalogEntry.scientific_name) || '')})</w:t></w:r>
+    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(invSci || (catalogEntry && catalogEntry.scientific_name) || '')})</w:t></w:r>
     <w:r><w:t xml:space="preserve"> [</w:t></w:r>
     <w:hyperlink r:id="${rIdCtrl}">
         <w:r>
@@ -7805,58 +7889,24 @@
 </w:p>`;
             }
 
-            const foundNames = stagedInvs.map(i => (i.name || '').toLowerCase());
-            const unobservedBigThree = [];
+            const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+            if (unobservedBigThree.length > 0) {
+              const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
+              const moreInfoIntro = `More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.`;
 
-            if (!foundNames.some(n => n.includes('bush honeysuckle') || n.includes('lonicera maackii'))) {
-              unobservedBigThree.push({
-                name: 'Bush Honeysuckle',
-                scientific: 'Lonicera maackii',
-                info_url: 'https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles',
-                control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/bush-honeysuckle-control',
-                summary: 'Dense deciduous arching shrub (6–18 ft) with opposite leaves, paired red berries, and allelopathic roots that chemically inhibit native tree and wildflower regeneration.'
-              });
-            }
-
-            if (!foundNames.some(n => n.includes('wintercreeper') || n.includes('euonymus fortunei'))) {
-              unobservedBigThree.push({
-                name: 'Wintercreeper',
-                scientific: 'Euonymus fortunei',
-                info_url: 'https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus',
-                control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/wintercreeper-control',
-                summary: 'Vigorous evergreen groundcover and climbing vine with glossy pale-veined leaves. Forms dense carpets that choke out native wildflowers and climbs mature trees with aerial rootlets.'
-              });
-            }
-
-            if (!foundNames.some(n => n.includes('japanese honeysuckle') || n.includes('lonicera japonica'))) {
-              unobservedBigThree.push({
-                name: 'Japanese Honeysuckle',
-                scientific: 'Lonicera japonica',
-                info_url: 'https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle',
-                control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/japanese-honeysuckle-control',
-                summary: 'Twining woody vine with fragrant white/yellow flowers and black berries. Stems twist clockwise around saplings, girdling young trees and smothering native shrubs.'
-              });
-            }
-
-            const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
-
-            const moreInfoIntro = unobservedBigThree.length > 0
-              ? `More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.`
-              : `More Information: Please continue monitoring boundaries and fence lines regularly for any reappearance of invasive shoots or seedlings.`;
-
-            invXml += `
+              invXml += `
 <w:p>
     <w:pPr><w:spacing w:before="160" w:after="80"/></w:pPr>
     <w:r><w:rPr><w:i/><w:color w:val="334155"/></w:rPr><w:t>${escapeXml(moreInfoIntro)}</w:t></w:r>
 </w:p>`;
 
-            for (const other of unobservedBigThree) {
-              const rIdOtherInfo = `rId${relCounter++}`;
-              const rIdOtherCtrl = `rId${relCounter++}`;
-              newRels += `<Relationship Id="${rIdOtherInfo}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.info_url)}" TargetMode="External"/>`;
-              newRels += `<Relationship Id="${rIdOtherCtrl}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.control_url)}" TargetMode="External"/>`;
+              for (const other of unobservedBigThree) {
+                const rIdOtherInfo = `rId${relCounter++}`;
+                const rIdOtherCtrl = `rId${relCounter++}`;
+                newRels += `<Relationship Id="${rIdOtherInfo}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.info_url)}" TargetMode="External"/>`;
+                newRels += `<Relationship Id="${rIdOtherCtrl}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.control_url)}" TargetMode="External"/>`;
 
-              invXml += `
+                invXml += `
 <w:p>
     <w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr>
     <w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r>
@@ -7871,10 +7921,11 @@
     <w:r><w:t xml:space="preserve">] – </w:t></w:r>
     <w:r><w:t>${escapeXml(other.summary)}</w:t></w:r>
 </w:p>`;
+              }
             }
 
             for (const p of paras) {
-              if (p.text.includes("[keep the invasive plants found here")) {
+              if (p.text.toLowerCase().includes("keep the invasive plants")) {
                 removals.push({ start: p.start, end: p.end, repl: invXml });
                 break;
               }
@@ -8123,8 +8174,39 @@
         } else {
           miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:t>We found the following invasive plants in your landscape during our visit:</w:t></w:r></w:p>`;
           stagedInvs.forEach(inv => {
-            miniBody += `<w:p><w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>${escapeXml(inv.name)}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(inv.scientific)})</w:t></w:r><w:r><w:t> – ${escapeXml(inv.notes || 'High-threat invasive. Removal recommended.')}</w:t></w:r></w:p>`;
+            const invName = inv.name || inv.common_name || 'Invasive Species';
+            const invSci = inv.scientific || inv.scientific_name || '';
+            const invNotes = inv.notes || inv.removal_tips || 'High-threat invasive. Removal recommended.';
+            miniBody += `<w:p><w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>${escapeXml(invName)}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(invSci)})</w:t></w:r><w:r><w:t> – ${escapeXml(invNotes)}</w:t></w:r></w:p>`;
           });
+
+          const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+          if (unobservedBigThree.length > 0) {
+            const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
+            miniBody += `<w:p><w:pPr><w:spacing w:before="160" w:after="80"/></w:pPr><w:r><w:rPr><w:i/><w:color w:val="334155"/></w:rPr><w:t>${escapeXml(`More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.`)}</w:t></w:r></w:p>`;
+            unobservedBigThree.forEach(other => {
+              const rIdOtherInfo = `rId${relCounter++}`;
+              const rIdOtherCtrl = `rId${relCounter++}`;
+              miniRelsBody += `<Relationship Id="${rIdOtherInfo}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.info_url)}" TargetMode="External"/>`;
+              miniRelsBody += `<Relationship Id="${rIdOtherCtrl}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.control_url)}" TargetMode="External"/>`;
+
+              miniBody += `
+<w:p>
+    <w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r>
+    <w:hyperlink r:id="${rIdOtherInfo}">
+        <w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(other.name)}</w:t></w:r>
+    </w:hyperlink>
+    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(other.scientific)})</w:t></w:r>
+    <w:r><w:t xml:space="preserve"> [</w:t></w:r>
+    <w:hyperlink r:id="${rIdOtherCtrl}">
+        <w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="C00000"/><w:u w:val="single"/></w:rPr><w:t>Control Protocol</w:t></w:r>
+    </w:hyperlink>
+    <w:r><w:t xml:space="preserve">] – </w:t></w:r>
+    <w:r><w:t>${escapeXml(other.summary)}</w:t></w:r>
+</w:p>`;
+            });
+          }
         }
 
         miniRels += miniRelsBody + `</Relationships>`;
