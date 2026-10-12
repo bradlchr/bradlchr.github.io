@@ -2603,6 +2603,10 @@
           <i data-lucide="folder-kanban"></i>
           <span>My Consultations (<span id="profileConsultationsCount">0</span>)</span>
         </button>
+        <button id="openEditSelfBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--primary);border-color:var(--primary-border);">
+          <i data-lucide="user-cog"></i>
+          <span>Edit Advisor Details</span>
+        </button>
         <button id="openAdminConsoleBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--accent-gold);border-color:var(--accent-gold-border);">
           <i data-lucide="shield"></i>
           <span>Advisor Administration Console</span>
@@ -2778,6 +2782,90 @@
       </div>
 
     </div>
+  </dialog>
+
+  <!-- Edit Advisor Record Modal (Admin Only) -->
+  <dialog id="editUserModal" style="max-width:580px;width:95%;">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="user-cog" style="color:var(--primary);width:22px;height:22px;"></i>
+        <div>
+          <h3 style="font-size:16px;font-weight:800;margin:0;">Edit Advisor Record</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Modify profile details, contact information, and security permissions</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('editUserModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="editUserForm" class="dialog-body" style="display:flex;flex-direction:column;gap:12px;">
+      <div id="editUserErrorBanner" style="display:none;background:var(--danger-bg);color:var(--danger);border:1px solid rgba(211,47,47,0.3);padding:8px 12px;border-radius:var(--radius-md);font-size:12px;"></div>
+
+      <input type="hidden" id="editUserUsername">
+
+      <!-- Moniker Profile Circle & Username Badge -->
+      <div style="background:var(--bg-base);padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="editUserMonikerPreview" style="width:42px;height:42px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:2px solid var(--primary-border);flex-shrink:0;">
+            CB
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.04em;">Username (Immutable ID)</div>
+            <strong id="editUserUsernameDisplay" style="font-family:monospace;color:var(--text-main);font-size:14px;">@chris.bradley</strong>
+          </div>
+        </div>
+        <span id="editUserRoleTag" class="role-badge admin">Admin</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editUserFirstName">First Name</label>
+          <input type="text" id="editUserFirstName" required placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label for="editUserLastName">Last Name</label>
+          <input type="text" id="editUserLastName" required placeholder="Last name">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editUserEmail">Email Address</label>
+          <input type="email" id="editUserEmail" required placeholder="Email address">
+        </div>
+        <div class="form-group">
+          <label for="editUserPhone">Phone Number</label>
+          <input type="tel" id="editUserPhone" placeholder="e.g. 913-424-2205">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editUserAdvisorType">Advisor Type</label>
+          <select id="editUserAdvisorType">
+            <option value="Advisor in Training">Advisor in Training</option>
+            <option value="Advisor">Advisor</option>
+            <option value="Senior Advisor">Senior Advisor</option>
+            <option value="Program Manager">Program Manager</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editUserRole">Security Role</label>
+          <select id="editUserRole">
+            <option value="user">User (Standard Nature Advisor)</option>
+            <option value="admin">Admin (Full Administrative Privileges)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button type="button" onclick="document.getElementById('editUserModal').close()" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="submitEditUserBtn" class="btn btn-primary">
+          <i data-lucide="check"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
   </dialog>
 
   <!-- Consultation Manager Dialog -->
@@ -4001,6 +4089,38 @@
       }).catch(e => console.warn("Remote users refresh notice:", e));
     }
 
+    function getUserInitials(u) {
+      if (!u) return 'NA';
+      let first = '';
+      let last = '';
+      if (typeof u === 'object') {
+        if (u.firstName && u.lastName) {
+          first = u.firstName.trim();
+          last = u.lastName.trim();
+        } else if (u.first_name && u.last_name) {
+          first = u.first_name.trim();
+          last = u.last_name.trim();
+        } else if (u.name) {
+          const parts = u.name.trim().split(/\s+/);
+          first = parts[0] || '';
+          last = parts.length > 1 ? parts[parts.length - 1] : '';
+        } else if (u.username) {
+          const parts = u.username.split(/[._-]/);
+          first = parts[0] || '';
+          last = parts.length > 1 ? parts[parts.length - 1] : '';
+        }
+      } else if (typeof u === 'string') {
+        const parts = u.trim().split(/\s+/);
+        first = parts[0] || '';
+        last = parts.length > 1 ? parts[parts.length - 1] : '';
+      }
+      const fInit = first ? first[0].toUpperCase() : '';
+      const lInit = last ? last[0].toUpperCase() : '';
+      if (fInit && lInit) return `${fInit}${lInit}`;
+      if (fInit) return fInit;
+      return 'NA';
+    }
+
     function userRecordToProfile(u) {
       return {
         id: u.id || `user-${u.username}`,
@@ -4199,6 +4319,73 @@
       await syncUserToFirestore(users[idx]);
 
       return { success: true, newRole };
+    }
+
+    async function updateAdvisorUser(username, updates) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        return { success: false, error: 'Only administrators have privilege to edit advisor records.' };
+      }
+      if (!username) {
+        return { success: false, error: 'Username is required.' };
+      }
+
+      const users = loadUsersCache();
+      const idx = users.findIndex(u => u.username === username);
+      if (idx < 0) {
+        return { success: false, error: `User @${username} not found.` };
+      }
+
+      const user = users[idx];
+
+      if (updates.firstName !== undefined) {
+        if (!updates.firstName.trim()) return { success: false, error: 'First name cannot be empty.' };
+        user.firstName = updates.firstName.trim();
+      }
+      if (updates.lastName !== undefined) {
+        if (!updates.lastName.trim()) return { success: false, error: 'Last name cannot be empty.' };
+        user.lastName = updates.lastName.trim();
+      }
+      user.name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
+
+      if (updates.email !== undefined) {
+        if (!updates.email || !updates.email.includes('@')) {
+          return { success: false, error: 'A valid email address is required.' };
+        }
+        user.email = updates.email.trim();
+      }
+
+      if (updates.phoneNumber !== undefined) {
+        user.phoneNumber = updates.phoneNumber.trim();
+      }
+
+      if (updates.advisorType !== undefined) {
+        user.advisorType = updates.advisorType.trim() || 'Advisor in Training';
+      }
+
+      if (updates.role !== undefined) {
+        const newRole = updates.role.toLowerCase() === 'admin' ? 'admin' : 'user';
+        if (user.username === state.currentUser.username && newRole !== 'admin') {
+          const otherAdmins = users.filter(u => u.username !== user.username && (u.role || '').toLowerCase() === 'admin');
+          if (otherAdmins.length === 0) {
+            return { success: false, error: 'You are the only active administrator. Please designate another administrator before changing your own role.' };
+          }
+        }
+        user.role = newRole;
+      }
+
+      user.updatedAt = Date.now();
+      users[idx] = user;
+      saveUsersCache(users);
+      await syncUserToFirestore(user);
+
+      // If this user is currently logged in, update current session profile & header
+      if (state.currentUser && state.currentUser.username === user.username) {
+        state.currentUser = userRecordToProfile(user);
+        localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
+        renderAuthUser();
+      }
+
+      return { success: true, user: userRecordToProfile(user) };
     }
 
     // ==================== User Consultation Reports & Switching System ====================
@@ -5952,7 +6139,7 @@
           <button id="userProfileBtn" class="btn btn-secondary" style="padding:4px 10px;gap:8px;" title="View Advisor Profile">
             ${u.photoURL ? `<img src="${u.photoURL}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : `
               <div style="width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">
-                ${u.name.substring(0,2).toUpperCase()}
+                ${getUserInitials(u)}
               </div>
             `}
             <span class="user-profile-name" style="font-size:12px;font-weight:700;">${firstName}</span>
@@ -6002,7 +6189,7 @@
       if (u.photoURL) {
         avatarBox.innerHTML = `<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;">`;
       } else {
-        avatarBox.textContent = (u.name || 'NA').substring(0, 2).toUpperCase();
+        avatarBox.textContent = getUserInitials(u);
       }
 
       document.getElementById('profileNameTxt').textContent = u.name;
@@ -6017,6 +6204,11 @@
       document.getElementById('profileAdvisorTypeTxt').textContent = u.advisorType || 'Advisor in Training';
       document.getElementById('profileEmailTxt').textContent = u.email || 'None';
       document.getElementById('profilePhoneTxt').textContent = u.phoneNumber || 'None';
+
+      const editSelfBtn = document.getElementById('openEditSelfBtn');
+      if (editSelfBtn) {
+        editSelfBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
+      }
 
       const adminBtn = document.getElementById('openAdminConsoleBtn');
       if (adminBtn) {
@@ -6121,6 +6313,50 @@
       if (preview) preview.textContent = canon;
     }
 
+    function openEditUserModal(username) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast('Administrator privileges required.', 'danger');
+        return;
+      }
+      const users = loadUsersCache();
+      const u = users.find(user => user.username === username);
+      if (!u) {
+        showToast(`Advisor @${username} not found.`, 'danger');
+        return;
+      }
+
+      const modal = document.getElementById('editUserModal');
+      const errBanner = document.getElementById('editUserErrorBanner');
+      if (errBanner) {
+        errBanner.style.display = 'none';
+        errBanner.textContent = '';
+      }
+
+      document.getElementById('editUserUsername').value = u.username;
+      document.getElementById('editUserUsernameDisplay').textContent = `@${u.username}`;
+      document.getElementById('editUserFirstName').value = u.firstName || u.first_name || '';
+      document.getElementById('editUserLastName').value = u.lastName || u.last_name || '';
+      document.getElementById('editUserEmail').value = u.email || '';
+      document.getElementById('editUserPhone').value = u.phoneNumber || u.phone_number || '';
+      document.getElementById('editUserAdvisorType').value = u.advisorType || u.advisor_type || 'Advisor in Training';
+      document.getElementById('editUserRole').value = (u.role || '').toLowerCase() === 'admin' ? 'admin' : 'user';
+
+      const roleTag = document.getElementById('editUserRoleTag');
+      if (roleTag) {
+        const isAdmin = (u.role || '').toLowerCase() === 'admin';
+        roleTag.className = `role-badge ${isAdmin ? 'admin' : 'user'}`;
+        roleTag.textContent = isAdmin ? 'Admin' : 'User';
+      }
+
+      const monikerPreview = document.getElementById('editUserMonikerPreview');
+      if (monikerPreview) {
+        monikerPreview.textContent = getUserInitials(u);
+      }
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
     function renderAdminRoster(searchQuery = '') {
       const listEl = document.getElementById('adminRosterList');
       if (!listEl) return;
@@ -6152,7 +6388,7 @@
         card.innerHTML = `
           <div style="display:flex;align-items:center;gap:10px;min-width:240px;">
             <div style="width:38px;height:38px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;border:1px solid var(--primary-border);flex-shrink:0;">
-              ${(u.firstName?.[0] || '') + (u.lastName?.[0] || 'A')}
+              ${getUserInitials(u)}
             </div>
             <div>
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -6164,7 +6400,11 @@
               <div style="font-size:11px;color:var(--text-secondary);">${u.email || ''} ${u.phoneNumber ? `&bull; ${u.phoneNumber}` : ''}</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;">
+            <button class="btn btn-secondary edit-user-btn" data-username="${u.username}" style="font-size:11px;padding:5px 9px;" title="Edit Advisor Record">
+              <i data-lucide="pencil" style="width:12px;height:12px;"></i>
+              <span>Edit</span>
+            </button>
             ${!isSelf ? `
               <button class="btn btn-secondary toggle-role-btn" data-username="${u.username}" style="font-size:11px;padding:5px 9px;">
                 <i data-lucide="${isAdmin ? 'user-minus' : 'shield'}" style="width:12px;height:12px;"></i>
@@ -6179,6 +6419,13 @@
         `;
 
         // Listeners for card actions
+        const editBtn = card.querySelector('.edit-user-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => {
+            openEditUserModal(u.username);
+          });
+        }
+
         const toggleBtn = card.querySelector('.toggle-role-btn');
         if (toggleBtn) {
           toggleBtn.addEventListener('click', async () => {
@@ -8791,6 +9038,11 @@
       });
 
       // Profile Actions
+      document.getElementById('openEditSelfBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal').close();
+        if (state.currentUser) openEditUserModal(state.currentUser.username);
+      });
+
       document.getElementById('openAdminConsoleBtn')?.addEventListener('click', () => {
         document.getElementById('userProfileModal').close();
         openAdminConsoleModal();
@@ -8892,6 +9144,79 @@
           updateCanonicalPreview();
         } else {
           showToast(res.error || "Failed to provision advisor", "danger");
+        }
+      });
+
+      // Edit User Form Live Moniker & Role Preview
+      const updateEditMonikerPreview = () => {
+        const fn = document.getElementById('editUserFirstName')?.value || '';
+        const ln = document.getElementById('editUserLastName')?.value || '';
+        const mon = document.getElementById('editUserMonikerPreview');
+        if (mon) mon.textContent = getUserInitials({ firstName: fn, lastName: ln });
+      };
+      document.getElementById('editUserFirstName')?.addEventListener('input', updateEditMonikerPreview);
+      document.getElementById('editUserLastName')?.addEventListener('input', updateEditMonikerPreview);
+
+      document.getElementById('editUserRole')?.addEventListener('change', (e) => {
+        const tag = document.getElementById('editUserRoleTag');
+        if (tag) {
+          const isAdmin = e.target.value === 'admin';
+          tag.className = `role-badge ${isAdmin ? 'admin' : 'user'}`;
+          tag.textContent = isAdmin ? 'Admin' : 'User';
+        }
+      });
+
+      // Edit User Form Submit
+      document.getElementById('editUserForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('editUserUsername').value;
+        const firstName = document.getElementById('editUserFirstName').value.trim();
+        const lastName = document.getElementById('editUserLastName').value.trim();
+        const email = document.getElementById('editUserEmail').value.trim();
+        const phoneNumber = document.getElementById('editUserPhone').value.trim();
+        const advisorType = document.getElementById('editUserAdvisorType').value;
+        const role = document.getElementById('editUserRole').value;
+        const banner = document.getElementById('editUserErrorBanner');
+        const submitBtn = document.getElementById('submitEditUserBtn');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Saving...</span>`;
+
+        try {
+          const res = await updateAdvisorUser(username, {
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            advisorType,
+            role
+          });
+
+          if (res.success) {
+            document.getElementById('editUserModal').close();
+            showToast(`Advisor @${username} updated successfully!`, 'success');
+            renderAdminRoster(document.getElementById('adminRosterSearchInput')?.value || '');
+            const profModal = document.getElementById('userProfileModal');
+            if (profModal && profModal.open && state.currentUser && state.currentUser.username === username) {
+              openUserProfileModal();
+            }
+          } else {
+            if (banner) {
+              banner.textContent = res.error || "Failed to update advisor record.";
+              banner.style.display = 'block';
+            } else {
+              showToast(res.error || "Failed to update advisor record.", "danger");
+            }
+          }
+        } catch (err) {
+          if (banner) {
+            banner.textContent = err.message || "An unexpected error occurred.";
+            banner.style.display = 'block';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="check"></i> <span>Save Changes</span>`;
+          if (window.lucide) lucide.createIcons();
         }
       });
 
