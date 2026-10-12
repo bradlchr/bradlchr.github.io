@@ -2649,10 +2649,14 @@
         <div id="stagedInvasivesList" style="display:none;flex-direction:column;gap:6px;margin-top:8px;">
           <!-- Dynamically populated invasive cards -->
         </div>
-        <div style="margin-top:8px;">
+        <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
           <button type="button" id="browseInvasivesBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:#dc2626;display:inline-flex;align-items:center;gap:4px;">
             <i data-lucide="search" style="width:12px;height:12px;"></i>
             <span>Browse & Add Invasives from Catalog</span>
+          </button>
+          <button type="button" id="sidebarContractorsBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:#991b1b;display:inline-flex;align-items:center;gap:4px;">
+            <i data-lucide="phone-call" style="width:12px;height:12px;"></i>
+            <span>View Vetted Removal Contractors (10)</span>
           </button>
         </div>
       </div>
@@ -3455,32 +3459,32 @@
   </dialog>
 
   <!-- Invasive Removal Professionals Modal -->
-  <dialog id="contractorsModal" style="max-width: 650px; width: 90%; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface);">
-    <div class="dialog-header" style="background: #fff1f2; border-bottom: 1px solid #fecdd3; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 20px;">🚜</span>
+  <dialog id="contractorsModal" style="max-width: 680px; width: 92vw; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface); color: var(--text-main);" aria-labelledby="contractorsModalTitle">
+    <div class="dialog-header" style="background: var(--bg-surface-elevated, #fff1f2); border-bottom: 1px solid var(--border-subtle); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 22px;">🚜</span>
         <div>
-          <h3 style="font-size: 16px; font-weight: 800; color: #991b1b; margin: 0;">Invasive Removal &amp; Natural Resource Contractors</h3>
-          <p style="font-size: 11px; color: #7f1d1d; margin: 2px 0 0 0;">Recommended local contractors from official Deep Roots Nature Advisor templates</p>
+          <h3 id="contractorsModalTitle" style="font-size: 16px; font-weight: 800; color: #dc2626; margin: 0;">Invasive Removal &amp; Natural Resource Contractors</h3>
+          <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Vetted local ecological contractors from official Deep Roots Nature Advisor templates</p>
         </div>
       </div>
-      <button type="button" onclick="document.getElementById('contractorsModal').close()" class="btn-icon">
+      <button type="button" id="closeContractorsModalBtn" onclick="document.getElementById('contractorsModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
     <div class="dialog-body" style="padding: 16px 18px; max-height: 70vh; overflow-y: auto;">
       <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
-        The following vetted contractors specialize in invasive plant removal, forestry mulching, cut-stump treatment, and natural resources management in the Greater Kansas City area:
+        The following vetted contractors specialize in invasive plant removal, forestry mulching, cut-stump herbicide treatments, and ecological restoration in the Greater Kansas City metropolitan area:
       </p>
       <div id="contractorsList" style="display: flex; flex-direction: column; gap: 10px;">
         <!-- Populated dynamically via JS -->
       </div>
-      <div style="margin-top: 14px; padding: 12px; background: var(--bg-base); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-size: 12px;">
-        <strong>Looking for more design or maintenance help?</strong> Visit the <a href="https://grownative.org/resource-guide/" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Grow Native! Professional Resource Guide</a> for a full statewide directory of native landscapers and suppliers.
+      <div style="margin-top: 14px; padding: 12px; background: var(--bg-base); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-size: 12px; line-height: 1.5;">
+        <strong style="color: var(--text-main);">Looking for more native landscaping or design help?</strong> Visit the <a href="https://grownative.org/resource-guide/" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Grow Native! Professional Resource Guide</a> for a full regional directory of native nurseries, seed suppliers, and certified landscape designers.
       </div>
     </div>
-    <div class="dialog-footer" style="padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end;">
-      <button type="button" class="btn btn-secondary" onclick="document.getElementById('contractorsModal').close()">Close</button>
+    <div class="dialog-footer" style="padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; background: var(--bg-surface-elevated, transparent);">
+      <button type="button" class="btn btn-secondary" id="closeContractorsModalFooterBtn" onclick="document.getElementById('contractorsModal').close()">Close</button>
     </div>
   </dialog>
 
@@ -4062,6 +4066,80 @@
   }
 ];
 
+    const INVASIVE_REMOVAL_PROFESSIONALS = [
+      {
+        name: "Belfield Botanica Co.",
+        phone: "913.660.2420",
+        email: "BelfieldBotanica@gmail.com",
+        specialty: "Invasive removal, ecological planting, and stewardship",
+        url: "https://belfieldbotanica.com/"
+      },
+      {
+        name: "Bluestem Habitat Restoration",
+        phone: "816.714.8342",
+        email: "bluestemhabitatrestoration@gmail.com",
+        specialty: "Woodland restoration and woody invasive removal",
+        url: "https://bluestemhabitatrestoration.square.site/"
+      },
+      {
+        name: "Bur Oak Ventures",
+        phone: "816.974.3462",
+        email: "kyle@buroakventures.com",
+        specialty: "Brush management, mechanical and cut-stump removal",
+        url: "https://www.buroakventures.com/"
+      },
+      {
+        name: "Habitat Architects, LLC",
+        phone: "816.645.0026",
+        email: "",
+        specialty: "Large-scale invasive clearing and landscape restoration",
+        url: "https://www.habitatarchitects.net/"
+      },
+      {
+        name: "Kansas Property Services",
+        phone: "785.845.4072",
+        email: "kansaspropertyservices@gmail.com",
+        specialty: "Targeted invasive shrub and vine eradication",
+        url: ""
+      },
+      {
+        name: "Orris Horticulture",
+        phone: "573.355.0786 / 816.785.3773",
+        email: "travis@orrishorticulture.com, iris@orrishorticulture.com",
+        specialty: "Horticultural consulting, native plant care and invasive control",
+        url: "https://www.orrishorticulture.com/"
+      },
+      {
+        name: "Otto’s Environmental Improvements",
+        phone: "816.652.6886",
+        email: "",
+        specialty: "Habitat improvements and invasive species removal",
+        url: "https://ottosenvironmental.com/"
+      },
+      {
+        name: "Polli-Native",
+        phone: "913.701.4565",
+        email: "Paul@atgib.com, nanette@atgib.com",
+        specialty: "Pollinator habitat installation and invasive clearing",
+        url: "https://www.polli-native.com/"
+      },
+      {
+        name: "Rogue Natives",
+        phone: "913.244.7327",
+        email: "roguenativesllc@gmail.com",
+        specialty: "Native landscape establishment and weed management",
+        url: "https://roguenatives.godaddysites.com/"
+      },
+      {
+        name: "Grow Native! Professional Resource Guide",
+        phone: "",
+        email: "",
+        specialty: "Statewide directory of certified native landscape professionals and contractors",
+        url: "https://grownative.org/resource-guide/"
+      }
+    ];
+    window.INVASIVE_REMOVAL_PROFESSIONALS = INVASIVE_REMOVAL_PROFESSIONALS;
+
     function openContractorsModal() {
       const modal = document.getElementById('contractorsModal');
       const list = document.getElementById('contractorsList');
@@ -4069,22 +4147,59 @@
       if (list && list.children.length === 0) {
         INVASIVE_REMOVAL_PROFESSIONALS.forEach(pro => {
           const item = document.createElement('div');
-          item.style.cssText = 'padding:10px 14px;background:var(--bg-base);border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:4px;';
+          item.className = 'contractor-card-item';
+          item.style.cssText = 'padding:12px 14px;background:var(--bg-base);border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:6px;transition:box-shadow 0.15s, border-color 0.15s;';
+          
+          const phones = pro.phone ? pro.phone.split('/').map(p => p.trim()).filter(Boolean) : [];
+          const phoneHtml = phones.map(p => {
+            const digits = p.replace(/[^0-9]/g, '');
+            return `<a href="tel:${digits}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);font-weight:600;font-size:12px;" title="Call ${escapeHtml(pro.name)}">📞 ${escapeHtml(p)}</a>`;
+          }).join('');
+
+          const emails = pro.email ? pro.email.split(',').map(e => e.trim()).filter(Boolean) : [];
+          const emailHtml = emails.map(e => {
+            return `<a href="mailto:${e}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);font-weight:600;font-size:12px;" title="Email ${escapeHtml(pro.name)}">✉️ ${escapeHtml(e)}</a>`;
+          }).join('');
+
+          const webHtml = pro.url ? `<a href="${escapeHtml(pro.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);font-weight:700;font-size:12px;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;" title="Visit website">🌐 ${pro.name.includes('Grow Native') ? 'Official Directory' : 'Website'} &rarr;</a>` : '';
+
           item.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;">
-              <strong style="color:var(--text-main);font-size:14px;">${escapeHtml(pro.name)}</strong>
-              ${pro.url ? `<a href="${escapeHtml(pro.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--primary);text-decoration:underline;">Visit Directory &rarr;</a>` : ''}
+              <strong style="color:var(--text-main);font-size:14px;font-weight:700;">${escapeHtml(pro.name)}</strong>
+              ${webHtml}
             </div>
-            <div style="font-size:12px;color:var(--text-muted);">${escapeHtml(pro.specialty)}</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:2px;">
-              ${pro.phone ? `<a href="tel:${pro.phone.replace(/[^0-9]/g, '')}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📞 ${escapeHtml(pro.phone)}</a>` : ''}
-              ${pro.email ? `<a href="mailto:${pro.email.split(',')[0].trim()}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">✉️ ${escapeHtml(pro.email)}</a>` : ''}
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.4;">${escapeHtml(pro.specialty)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;margin-top:2px;">
+              ${phoneHtml}
+              ${emailHtml}
             </div>
           `;
           list.appendChild(item);
         });
       }
-      modal.showModal();
+
+      // Configure backdrop click once
+      if (!modal.dataset.backdropReady) {
+        modal.dataset.backdropReady = 'true';
+        modal.addEventListener('click', (e) => {
+          const rect = modal.getBoundingClientRect();
+          const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height
+            && rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+          if (!isInDialog) {
+            modal.close();
+          }
+        });
+      }
+
+      try {
+        if (!modal.open) {
+          modal.showModal();
+        }
+      } catch (e) {
+        modal.setAttribute('open', '');
+      }
+
+      if (window.lucide) lucide.createIcons();
     }
     window.openContractorsModal = openContractorsModal;
 
@@ -5536,7 +5651,6 @@
       modal.querySelector('#closeInvasiveModalBtn')?.addEventListener('click', () => modal.close());
       modal.querySelector('#modalCloseFooterBtn')?.addEventListener('click', () => modal.close());
       modal.querySelector('#modalOpenContractorsBtn')?.addEventListener('click', () => {
-        modal.close();
         openContractorsModal();
       });
       modal.querySelector('#modalToggleStagedBtn')?.addEventListener('click', () => {
@@ -9712,6 +9826,11 @@
       document.getElementById('browseInvasivesBtn')?.addEventListener('click', () => {
         setCatalogMode('invasive');
         closeDrawer();
+      });
+
+      // Vetted Contractors Button inside Consultation Drawer
+      document.getElementById('sidebarContractorsBtn')?.addEventListener('click', () => {
+        openContractorsModal();
       });
 
       // Report Section & Stewardship Checkbox Listeners
