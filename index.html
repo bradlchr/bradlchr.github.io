@@ -2740,12 +2740,6 @@
     };
 
     function shouldShowScientificFirst() {
-      if (state.sortOrder === 'sci_asc' || state.sortOrder === 'sci_desc') {
-        return true;
-      }
-      if (state.sortOrder === 'common_asc' || state.sortOrder === 'common_desc') {
-        return false;
-      }
       return state.defaultNameDisplay === 'scientific_first';
     }
 
@@ -4985,11 +4979,11 @@
             `}
             <div class="staged-item-info">
               <div class="staged-item-name">
-                <a href="${item.plant_url}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;">
-                  ${item.common_name}
+                <a href="${item.plant_url}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline; font-style: ${shouldShowScientificFirst() ? 'italic' : 'normal'};">
+                  ${shouldShowScientificFirst() ? item.scientific_name : item.common_name}
                 </a>
               </div>
-              <div class="staged-item-sci">${item.scientific_name}</div>
+              <div class="staged-item-sci" style="font-style: ${shouldShowScientificFirst() ? 'normal' : 'italic'};">${shouldShowScientificFirst() ? item.common_name : item.scientific_name}</div>
             </div>
             <div class="quantity-control">
               <button class="qty-btn qty-minus">-</button>
@@ -5041,10 +5035,21 @@
     function openPlantDetail(plant) {
       state.activeModalPlant = plant;
       const modal = document.getElementById('plantDetailModal');
+      const showSciFirst = shouldShowScientificFirst();
       const commonName = (plant.common_names && plant.common_names[0]) || plant.scientific_name;
+      const primaryName = showSciFirst ? (plant.scientific_name || commonName) : commonName;
+      const secondaryName = showSciFirst ? commonName : (plant.scientific_name || '');
 
-      document.getElementById('modalCommonName').textContent = commonName;
-      document.getElementById('modalSciName').textContent = plant.scientific_name || '';
+      const modalCommon = document.getElementById('modalCommonName');
+      const modalSci = document.getElementById('modalSciName');
+      if (modalCommon) {
+        modalCommon.textContent = primaryName;
+        modalCommon.style.fontStyle = showSciFirst ? 'italic' : 'normal';
+      }
+      if (modalSci) {
+        modalSci.textContent = secondaryName;
+        modalSci.style.fontStyle = showSciFirst ? 'normal' : 'italic';
+      }
       
       const badgeContainer = document.getElementById('modalBadges');
       if (badgeContainer) {
@@ -5952,8 +5957,23 @@
         localStorage.setItem('dr_sort_order', state.sortOrder);
         if (sortSelect) sortSelect.value = state.sortOrder;
         if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+
+        // Auto-align default name display when explicitly sorting by scientific or common
+        if (newOrder === 'sci_asc' || newOrder === 'sci_desc') {
+          state.defaultNameDisplay = 'scientific_first';
+          localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
+          if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+          if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+        } else if (newOrder === 'common_asc' || newOrder === 'common_desc') {
+          state.defaultNameDisplay = 'common_first';
+          localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
+          if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+          if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+        }
+
         sortPlants();
         renderGrid();
+        renderStaging();
       };
 
       if (sortSelect) {
@@ -5974,8 +5994,23 @@
         localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
         if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
         if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+
+        // If user changed to Scientific First and is sorting alphabetically, update sort to Scientific A-Z
+        if (newDisplay === 'scientific_first' && (state.sortOrder === 'common_asc' || state.sortOrder === 'common_desc')) {
+          state.sortOrder = 'sci_asc';
+          localStorage.setItem('dr_sort_order', state.sortOrder);
+          if (sortSelect) sortSelect.value = state.sortOrder;
+          if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+        } else if (newDisplay === 'common_first' && (state.sortOrder === 'sci_asc' || state.sortOrder === 'sci_desc')) {
+          state.sortOrder = 'common_asc';
+          localStorage.setItem('dr_sort_order', state.sortOrder);
+          if (sortSelect) sortSelect.value = state.sortOrder;
+          if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+        }
+
         sortPlants();
         renderGrid();
+        renderStaging();
       };
 
       if (nameDisplaySelect) {
