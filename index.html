@@ -7742,26 +7742,72 @@
             }
 
             const foundNames = stagedInvs.map(i => (i.name || '').toLowerCase());
-            const otherBigThree = [];
-            if (!foundNames.some(n => n.includes('bush honeysuckle'))) {
-              otherBigThree.push("Bush Honeysuckle (Lonicera maackii)");
-            }
-            if (!foundNames.some(n => n.includes('wintercreeper'))) {
-              otherBigThree.push("Wintercreeper (Euonymus fortunei)");
-            }
-            if (!foundNames.some(n => n.includes('japanese honeysuckle'))) {
-              otherBigThree.push("Japanese Honeysuckle (Lonicera japonica)");
+            const unobservedBigThree = [];
+
+            if (!foundNames.some(n => n.includes('bush honeysuckle') || n.includes('lonicera maackii'))) {
+              unobservedBigThree.push({
+                name: 'Bush Honeysuckle',
+                scientific: 'Lonicera maackii',
+                info_url: 'https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles',
+                control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/bush-honeysuckle-control',
+                summary: 'Dense deciduous arching shrub (6–18 ft) with opposite leaves, paired red berries, and allelopathic roots that chemically inhibit native tree and wildflower regeneration.'
+              });
             }
 
-            const otherText = otherBigThree.length > 0
-              ? `More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherBigThree.join(', ')}.`
+            if (!foundNames.some(n => n.includes('wintercreeper') || n.includes('euonymus fortunei'))) {
+              unobservedBigThree.push({
+                name: 'Wintercreeper',
+                scientific: 'Euonymus fortunei',
+                info_url: 'https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus',
+                control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/wintercreeper-control',
+                summary: 'Vigorous evergreen groundcover and climbing vine with glossy pale-veined leaves. Forms dense carpets that choke out native wildflowers and climbs mature trees with aerial rootlets.'
+              });
+            }
+
+            if (!foundNames.some(n => n.includes('japanese honeysuckle') || n.includes('lonicera japonica'))) {
+              unobservedBigThree.push({
+                name: 'Japanese Honeysuckle',
+                scientific: 'Lonicera japonica',
+                info_url: 'https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle',
+                control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/japanese-honeysuckle-control',
+                summary: 'Twining woody vine with fragrant white/yellow flowers and black berries. Stems twist clockwise around saplings, girdling young trees and smothering native shrubs.'
+              });
+            }
+
+            const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
+
+            const moreInfoIntro = unobservedBigThree.length > 0
+              ? `More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.`
               : `More Information: Please continue monitoring boundaries and fence lines regularly for any reappearance of invasive shoots or seedlings.`;
 
             invXml += `
 <w:p>
-    <w:pPr><w:spacing w:before="120" w:after="80"/></w:pPr>
-    <w:r><w:rPr><w:i/><w:color w:val="4A5568"/></w:rPr><w:t>${escapeXml(otherText)}</w:t></w:r>
+    <w:pPr><w:spacing w:before="160" w:after="80"/></w:pPr>
+    <w:r><w:rPr><w:i/><w:color w:val="334155"/></w:rPr><w:t>${escapeXml(moreInfoIntro)}</w:t></w:r>
 </w:p>`;
+
+            for (const other of unobservedBigThree) {
+              const rIdOtherInfo = `rId${relCounter++}`;
+              const rIdOtherCtrl = `rId${relCounter++}`;
+              newRels += `<Relationship Id="${rIdOtherInfo}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.info_url)}" TargetMode="External"/>`;
+              newRels += `<Relationship Id="${rIdOtherCtrl}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.control_url)}" TargetMode="External"/>`;
+
+              invXml += `
+<w:p>
+    <w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r>
+    <w:hyperlink r:id="${rIdOtherInfo}">
+        <w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(other.name)}</w:t></w:r>
+    </w:hyperlink>
+    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(other.scientific)})</w:t></w:r>
+    <w:r><w:t xml:space="preserve"> [</w:t></w:r>
+    <w:hyperlink r:id="${rIdOtherCtrl}">
+        <w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="C00000"/><w:u w:val="single"/></w:rPr><w:t>Control Protocol</w:t></w:r>
+    </w:hyperlink>
+    <w:r><w:t xml:space="preserve">] – </w:t></w:r>
+    <w:r><w:t>${escapeXml(other.summary)}</w:t></w:r>
+</w:p>`;
+            }
 
             for (const p of paras) {
               if (p.text.includes("[keep the invasive plants found here")) {
@@ -7806,6 +7852,14 @@
               if (p.text.includes("Bat Box")) inBat = true;
               else if (p.text.includes("Native Bee Habitat")) inBat = false;
               if (inBat) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          } else {
+            for (const p of paras) {
+              if (p.text === "Bat Box (IF Discussed)") {
+                const cleanBat = `<w:p w:rsidR="00EB4026" w:rsidP="00EB4026" w:rsidRDefault="2BF76EF1"><w:pPr><w:pStyle w:val="Heading2"/><w:widowControl/><w:rPr><w:color w:val="000000"/></w:rPr></w:pPr><w:r><w:t>Bat Box</w:t></w:r></w:p>`;
+                removals.push({ start: p.start, end: p.end, repl: cleanBat });
+                break;
+              }
             }
           }
 
@@ -7859,6 +7913,14 @@
               else if (p.text.includes("Why we care about stormwater management")) inRain = false;
               if (inRain) removals.push({ start: p.start, end: p.end, repl: '' });
             }
+          } else {
+            for (const p of paras) {
+              if (p.text === "Rainwater Harvesting (IF Discussed)") {
+                const cleanRain = `<w:p w:rsidRPr="00AA5BCC" w:rsidR="00567618" w:rsidP="007C29BE" w:rsidRDefault="2BF76EF1"><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:bookmarkStart w:name="_44sinio" w:id="61"/><w:bookmarkEnd w:id="61"/><w:r><w:t>Rainwater Harvesting</w:t></w:r></w:p>`;
+                removals.push({ start: p.start, end: p.end, repl: cleanRain });
+                break;
+              }
+            }
           }
 
           // 5. Red instruction removals
@@ -7895,6 +7957,8 @@
           }
 
           // 7. Post-splicing global cleanups (MUST run AFTER index-based slicing is complete)
+          docXml = docXml.replace(/<w:r[^>]*><w:rPr><w:color\s+w:val="(?:FF0000|C00000|red)"[^>]*\/><\/w:rPr><w:t[^>]*>\s*\(IF\s*<\/w:t>[\s\S]*?<\/w:r>/gi, '');
+          docXml = docXml.replace(/\(IF\s*Discussed\)/gi, '');
           docXml = docXml.replace(/Bat Box \(IF Discussed\)/g, "Bat Box");
           docXml = docXml.replace(/Rainwater Harvesting \(IF Discussed\)/g, "Rainwater Harvesting");
 
