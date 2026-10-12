@@ -927,6 +927,172 @@
       gap: 20px;
     }
 
+    /* Consultation Switcher & Management */
+    .consultation-switcher-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--primary-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .consultation-switcher-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .consultation-active-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+    }
+    .btn-text-action {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 6px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .btn-text-action:hover {
+      background: var(--primary-light);
+    }
+    .btn-text-action.text-danger {
+      color: var(--danger);
+    }
+    .btn-text-action.text-danger:hover {
+      background: var(--danger-bg);
+    }
+    .consultation-select-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .consultation-select-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    .consultation-select {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .consultation-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+    .consultation-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-subtle);
+    }
+    .consultation-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .status-dot.synced {
+      background: #16a34a;
+    }
+    .status-dot.unsaved {
+      background: var(--accent-gold);
+    }
+    .btn-sm-icon {
+      padding: 4px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-sm-icon:hover {
+      border-color: var(--border-strong);
+      color: var(--text-main);
+    }
+    .btn-sm-icon.text-danger:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    /* Consultation Manager Modal Cards */
+    .consultation-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .consultation-card:hover {
+      border-color: var(--primary-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .consultation-card.is-active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .consultation-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .consultation-card-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .consultation-card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .consultation-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
     .client-meta-form {
       display: flex;
       flex-direction: column;
@@ -1907,6 +2073,47 @@
     </div>
 
     <div class="drawer-body">
+      <!-- Consultation Switcher Panel -->
+      <div class="consultation-switcher-panel">
+        <div class="consultation-switcher-header">
+          <div class="consultation-active-label">
+            <i data-lucide="folder-kanban" style="width:15px;height:15px;color:var(--primary);"></i>
+            <span>Active Consultation</span>
+          </div>
+          <button type="button" id="openConsultationsManagerBtn" class="btn-text-action" title="View and switch between all consultations">
+            <i data-lucide="list" style="width:13px;height:13px;"></i>
+            <span>All Consultations (<span id="consultationCountBadge">0</span>)</span>
+          </button>
+        </div>
+
+        <div class="consultation-select-container">
+          <div class="consultation-select-wrapper">
+            <select id="consultationSelect" class="consultation-select" aria-label="Switch Consultation">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <button type="button" id="newConsultationBtn" class="btn btn-secondary" style="padding:6px 10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Start a New Consultation">
+            <i data-lucide="plus" style="width:14px;height:14px;"></i>
+            <span>New</span>
+          </button>
+        </div>
+
+        <div class="consultation-meta-bar">
+          <div class="consultation-status-indicator">
+            <span id="consultationSavedDot" class="status-dot"></span>
+            <span id="consultationStatusText" style="font-size:11px;color:var(--text-muted);">Saved locally</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" id="duplicateConsultationBtn" class="btn-sm-icon" title="Duplicate this consultation">
+              <i data-lucide="copy" style="width:13px;height:13px;"></i>
+            </button>
+            <button type="button" id="deleteCurrentConsultationBtn" class="btn-sm-icon text-danger" title="Delete this consultation">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Client Metadata Form -->
       <div class="client-meta-form">
         <div class="form-group">
@@ -1923,7 +2130,7 @@
         </div>
         <div class="form-group">
           <label for="advisorNameInput">Nature Advisor Name</label>
-          <input type="text" id="advisorNameInput" placeholder="Sign in with Google to auto-fill">
+          <input type="text" id="advisorNameInput" placeholder="Sign in as Advisor to auto-fill">
         </div>
         <div class="form-group">
           <label for="advisorNotesInput">Advisor Overview & Site Strategy</label>
@@ -2048,6 +2255,10 @@
       </div>
 
       <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="openUserConsultationsBtn" class="btn btn-secondary" style="width:100%;">
+          <i data-lucide="folder-kanban"></i>
+          <span>My Consultations (<span id="profileConsultationsCount">0</span>)</span>
+        </button>
         <button id="openAdminConsoleBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--accent-gold);border-color:var(--accent-gold-border);">
           <i data-lucide="shield"></i>
           <span>Advisor Administration Console</span>
@@ -2222,6 +2433,38 @@
         </form>
       </div>
 
+    </div>
+  </dialog>
+
+  <!-- Consultation Manager Dialog -->
+  <dialog id="consultationsModal" style="max-width:700px;width:95%;">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="folder-kanban" style="color:var(--primary);width:24px;height:24px;"></i>
+        <div>
+          <h3 style="font-size:17px;font-weight:800;margin:0;">My Consultations</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Manage and switch between your client consultation reports</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('consultationsModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="padding:16px 20px;">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+        <div style="position:relative;flex:1;min-width:200px;">
+          <input type="text" id="consultationSearchInput" placeholder="Search consultations by client, location, date..." style="width:100%;padding:9px 12px 9px 34px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-size:13px;box-sizing:border-box;">
+          <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted);"></i>
+        </div>
+        <button type="button" id="modalNewConsultationBtn" class="btn btn-primary" style="white-space:nowrap;padding:9px 14px;font-size:13px;font-weight:700;">
+          <i data-lucide="plus"></i>
+          <span>New Consultation</span>
+        </button>
+      </div>
+
+      <div id="consultationsListContainer" style="display:flex;flex-direction:column;gap:10px;max-height:440px;overflow-y:auto;padding-right:4px;">
+        <!-- Populated dynamically with consultation cards -->
+      </div>
     </div>
   </dialog>
 
@@ -2469,6 +2712,8 @@
       stagedPlants: JSON.parse(localStorage.getItem('dr_staged_plants') || '[]'),
       clientMeta: JSON.parse(localStorage.getItem('dr_client_meta') || '{"name":"","address":"","date":"","advisor":"","notes":""}'),
       customPlants: JSON.parse(localStorage.getItem('dr_custom_plants') || '{}'),
+      consultations: [],
+      activeConsultationId: null,
       filters: {
         search: '',
         sweet16: false,
@@ -2759,6 +3004,7 @@
       }
 
       renderAuthUser();
+      await initConsultations();
 
       // Refresh users from remote in background
       fetchAllRemoteUsers().then(remoteUsers => {
@@ -2834,6 +3080,7 @@
       localStorage.setItem('dr_logged_in_username', user.username);
       localStorage.setItem('dr_current_user', JSON.stringify(profile));
       renderAuthUser();
+      await initConsultations();
       renderGrid();
 
       // If user has a temporary password, force password change
@@ -2844,11 +3091,13 @@
       return { success: true, user: profile };
     }
 
-    function signOutAdvisor() {
+    async function signOutAdvisor() {
+      saveActiveConsultation(false);
       state.currentUser = null;
       localStorage.removeItem('dr_logged_in_username');
       localStorage.removeItem('dr_current_user');
       renderAuthUser();
+      await initConsultations();
       renderGrid();
       const modal = document.getElementById('userProfileModal');
       if (modal && modal.open) modal.close();
@@ -2977,6 +3226,551 @@
       return { success: true, newRole };
     }
 
+    // ==================== User Consultation Reports & Switching System ====================
+    function formatTimeAgo(timestamp) {
+      if (!timestamp) return 'recently';
+      const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+      if (diffSec < 10) return 'just now';
+      if (diffSec < 60) return `${diffSec}s ago`;
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHours = Math.floor(diffMin / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    }
+
+    function getActiveUsername() {
+      return state.currentUser ? state.currentUser.username : 'guest';
+    }
+
+    function persistConsultations() {
+      const username = getActiveUsername();
+      localStorage.setItem(`dr_reports_${username}`, JSON.stringify(state.consultations));
+      updateConsultationCounts();
+    }
+
+    function updateConsultationCounts() {
+      const count = (state.consultations || []).length;
+      const drawerBadge = document.getElementById('consultationCountBadge');
+      if (drawerBadge) drawerBadge.textContent = count;
+      const profileBadge = document.getElementById('profileConsultationsCount');
+      if (profileBadge) profileBadge.textContent = count;
+    }
+
+    function parseFirestoreReportDoc(doc, fallbackUsername = '') {
+      if (!doc || !doc.fields) return null;
+      const f = doc.fields;
+      const docName = doc.name || '';
+      const rawId = f.id?.stringValue || docName.split('/').pop().replace(/^_report_[^_]+_/, '') || `rep-${Date.now()}`;
+      
+      const clientName = f.client_name?.stringValue || f.project_name?.stringValue || 'Native Consultation';
+      const clientAddress = f.client_address?.stringValue || '';
+      const consultationDate = f.consultation_date?.stringValue || '';
+      const advisorName = f.advisor_name?.stringValue || '';
+      const advisorNotes = f.site_summary?.stringValue || '';
+      const lastModified = parseInt(f.last_modified?.integerValue || Date.now(), 10);
+      const uName = f.username?.stringValue || fallbackUsername;
+
+      const staged = [];
+      const vals = f.staged_recommendations?.arrayValue?.values || [];
+      for (const item of vals) {
+        const sf = item.mapValue?.fields || {};
+        const plantId = sf.plant_id?.stringValue || '';
+        const plantCommon = sf.plant_common?.stringValue || '';
+        const plantSci = sf.plant_scientific?.stringValue || '';
+        const qty = parseInt(sf.recommended_count?.integerValue || '1', 10);
+        const notes = sf.notes?.stringValue || '';
+        const layer = sf.target_area?.stringValue || 'Landscape Bed';
+
+        const catalogMatch = state.allPlants.find(p => p.id === plantId || p.scientific_name === plantSci);
+
+        staged.push({
+          id: plantId || (catalogMatch ? catalogMatch.id : plantSci),
+          common_name: plantCommon || (catalogMatch ? catalogMatch.common_names?.[0] : plantSci),
+          scientific_name: plantSci || (catalogMatch ? catalogMatch.scientific_name : ''),
+          image_url: catalogMatch?.images?.[0]?.url || '',
+          plant_url: catalogMatch ? getPlantUrl(catalogMatch) : `https://grownative.org/native_plants/${(plantCommon || plantSci).toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`,
+          advisor_description: catalogMatch ? getPlantDesc(catalogMatch) : '',
+          quantity: qty,
+          custom_notes: notes,
+          sun: catalogMatch ? (catalogMatch.light_requirements || []).join(', ') : '',
+          moisture: catalogMatch ? (catalogMatch.moisture_requirements || []).join(', ') : '',
+          height: catalogMatch ? getPlantHeight(catalogMatch) : '',
+          layer: layer,
+          sociability: catalogMatch ? getPlantSociability(catalogMatch) : '',
+          environment: catalogMatch?.native_environment || ''
+        });
+      }
+
+      return {
+        id: rawId,
+        username: uName,
+        clientName,
+        clientAddress,
+        consultationDate,
+        advisorName,
+        advisorNotes,
+        stagedPlants: staged,
+        createdAt: lastModified,
+        lastModified
+      };
+    }
+
+    async function fetchRemoteConsultations(username) {
+      if (!username || username === 'guest') return [];
+      const reports = [];
+      const seenIds = new Set();
+
+      // Primary: /users/{username}/reports
+      try {
+        const url = `${getFirestoreBaseUrl()}/users/${username}/reports?pageSize=100`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const r = parseFirestoreReportDoc(doc, username);
+            if (r && !seenIds.has(r.id)) {
+              seenIds.add(r.id);
+              reports.push(r);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Fetch user reports notice:", e);
+      }
+
+      // Fallback: /plants collection looking for documents starting with _report_{username}_
+      try {
+        const url = `${getFirestoreBaseUrl()}/plants?pageSize=300`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const prefix = `_report_${username}_`;
+          for (const doc of data.documents || []) {
+            const docId = doc.name ? doc.name.split('/').pop() : '';
+            if (docId.startsWith(prefix)) {
+              const r = parseFirestoreReportDoc(doc, username);
+              if (r && !seenIds.has(r.id)) {
+                seenIds.add(r.id);
+                reports.push(r);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Fetch fallback reports notice:", e);
+      }
+
+      return reports;
+    }
+
+    async function initConsultations() {
+      const username = getActiveUsername();
+      let rawLocal = [];
+      try {
+        rawLocal = JSON.parse(localStorage.getItem(`dr_reports_${username}`) || '[]');
+      } catch (e) {
+        rawLocal = [];
+      }
+
+      // Filter and normalize local consultations
+      state.consultations = Array.isArray(rawLocal) ? rawLocal.filter(c => c && c.id) : [];
+
+      // If user has no consultations, check if there's any active draft to adopt
+      if (state.consultations.length === 0) {
+        const draftPlants = JSON.parse(localStorage.getItem('dr_staged_plants') || '[]');
+        const draftMeta = JSON.parse(localStorage.getItem('dr_client_meta') || '{}');
+        const hasExistingData = draftPlants.length > 0 || (draftMeta.name && draftMeta.name.trim().length > 0);
+
+        const newId = `rep-${Date.now()}`;
+        const initial = {
+          id: newId,
+          username: username,
+          clientName: draftMeta.name || (state.currentUser ? `${state.currentUser.firstName || state.currentUser.name}'s Consultation` : 'Draft Consultation'),
+          clientAddress: draftMeta.address || '',
+          consultationDate: draftMeta.date || new Date().toISOString().split('T')[0],
+          advisorName: draftMeta.advisor || (state.currentUser ? state.currentUser.name : ''),
+          advisorNotes: draftMeta.notes || '',
+          stagedPlants: hasExistingData ? draftPlants : [],
+          createdAt: Date.now(),
+          lastModified: Date.now()
+        };
+        state.consultations = [initial];
+        persistConsultations();
+      }
+
+      // Restore active consultation ID
+      const savedActiveId = localStorage.getItem(`dr_active_consultation_id_${username}`);
+      const activeMatch = state.consultations.find(c => c.id === savedActiveId);
+      const targetId = activeMatch ? activeMatch.id : state.consultations[0].id;
+
+      switchActiveConsultation(targetId, true);
+      renderConsultationSwitcher();
+      updateConsultationCounts();
+
+      // Asynchronously fetch from Cloud Firestore in background if logged in
+      if (state.currentUser) {
+        fetchRemoteConsultations(username).then(remoteReports => {
+          if (remoteReports && remoteReports.length > 0) {
+            let changed = false;
+            const currentMap = new Map();
+            for (const c of state.consultations) currentMap.set(c.id, c);
+
+            for (const rem of remoteReports) {
+              const loc = currentMap.get(rem.id);
+              if (!loc) {
+                currentMap.set(rem.id, rem);
+                changed = true;
+              } else if ((rem.lastModified || 0) > (loc.lastModified || 0)) {
+                currentMap.set(rem.id, rem);
+                changed = true;
+              }
+            }
+
+            if (changed) {
+              state.consultations = Array.from(currentMap.values()).sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+              persistConsultations();
+              renderConsultationSwitcher();
+              // If active consultation was updated remotely, reload its contents
+              const currentActive = state.consultations.find(c => c.id === state.activeConsultationId);
+              if (currentActive) {
+                switchActiveConsultation(currentActive.id, true);
+              }
+            }
+          }
+        }).catch(e => console.warn("Background consultation sync notice:", e));
+      }
+    }
+
+    function saveActiveConsultation(syncToCloud = false) {
+      if (!state.activeConsultationId || !state.consultations) return;
+      const idx = state.consultations.findIndex(c => c.id === state.activeConsultationId);
+      if (idx < 0) return;
+
+      const active = state.consultations[idx];
+      active.clientName = state.clientMeta.name || '';
+      active.clientAddress = state.clientMeta.address || '';
+      active.consultationDate = state.clientMeta.date || '';
+      active.advisorName = state.clientMeta.advisor || (state.currentUser ? state.currentUser.name : '');
+      active.advisorNotes = state.clientMeta.notes || '';
+      active.stagedPlants = JSON.parse(JSON.stringify(state.stagedPlants || []));
+      active.lastModified = Date.now();
+
+      persistConsultations();
+      updateConsultationOption(active);
+
+      if (syncToCloud && state.currentUser) {
+        saveCurrentReportToCloud();
+      }
+    }
+
+    function switchActiveConsultation(targetId, skipSaveCurrent = false) {
+      if (!skipSaveCurrent && state.activeConsultationId && state.activeConsultationId !== targetId) {
+        saveActiveConsultation(false);
+      }
+
+      let consultation = state.consultations.find(c => c.id === targetId);
+      if (!consultation) {
+        if (state.consultations.length > 0) {
+          consultation = state.consultations[0];
+          targetId = consultation.id;
+        } else {
+          createNewConsultation({ clientName: 'New Consultation' });
+          return;
+        }
+      }
+
+      state.activeConsultationId = targetId;
+      const username = getActiveUsername();
+      localStorage.setItem(`dr_active_consultation_id_${username}`, targetId);
+
+      state.clientMeta = {
+        name: consultation.clientName || '',
+        address: consultation.clientAddress || '',
+        date: consultation.consultationDate || '',
+        advisor: consultation.advisorName || (state.currentUser ? state.currentUser.name : ''),
+        notes: consultation.advisorNotes || ''
+      };
+      localStorage.setItem('dr_client_meta', JSON.stringify(state.clientMeta));
+
+      state.stagedPlants = JSON.parse(JSON.stringify(consultation.stagedPlants || []));
+      localStorage.setItem('dr_staged_plants', JSON.stringify(state.stagedPlants));
+
+      // Update Form Inputs in Drawer
+      const nameInput = document.getElementById('clientNameInput');
+      if (nameInput) nameInput.value = state.clientMeta.name;
+      const addrInput = document.getElementById('projectAddressInput');
+      if (addrInput) addrInput.value = state.clientMeta.address;
+      const dateInput = document.getElementById('consultDateInput');
+      if (dateInput) dateInput.value = state.clientMeta.date;
+      const advInput = document.getElementById('advisorNameInput');
+      if (advInput) advInput.value = state.clientMeta.advisor;
+      const notesInput = document.getElementById('advisorNotesInput');
+      if (notesInput) notesInput.value = state.clientMeta.notes;
+
+      renderStaging();
+      renderGrid();
+      renderConsultationSwitcher();
+
+      const modal = document.getElementById('consultationsModal');
+      if (modal && modal.open) {
+        renderConsultationsModalList(document.getElementById('consultationSearchInput')?.value || '');
+      }
+    }
+
+    function updateConsultationOption(consultation) {
+      const select = document.getElementById('consultationSelect');
+      if (!select) return;
+      const opt = select.querySelector(`option[value="${consultation.id}"]`);
+      if (opt) {
+        const name = consultation.clientName || 'Untitled Client';
+        const dateStr = consultation.consultationDate ? ` (${consultation.consultationDate})` : '';
+        const plantCount = `${(consultation.stagedPlants || []).length} plants`;
+        opt.textContent = `${name}${dateStr} · ${plantCount}`;
+      }
+    }
+
+    function createNewConsultation(options = {}) {
+      if (state.activeConsultationId) {
+        saveActiveConsultation(false);
+      }
+
+      const username = getActiveUsername();
+      const newId = `rep-${Date.now()}`;
+      const today = new Date().toISOString().split('T')[0];
+      const advisor = state.currentUser ? state.currentUser.name : '';
+
+      const newConsultation = {
+        id: newId,
+        username: username,
+        clientName: options.clientName || '',
+        clientAddress: options.clientAddress || '',
+        consultationDate: options.consultationDate || today,
+        advisorName: options.advisorName || advisor,
+        advisorNotes: options.advisorNotes || '',
+        stagedPlants: [],
+        createdAt: Date.now(),
+        lastModified: Date.now()
+      };
+
+      state.consultations.unshift(newConsultation);
+      persistConsultations();
+      switchActiveConsultation(newId, true);
+
+      // Open drawer and focus on client name input
+      document.getElementById('stagingDrawer')?.classList.add('open');
+      document.getElementById('drawerOverlay')?.classList.add('open');
+      const nameInput = document.getElementById('clientNameInput');
+      if (nameInput) {
+        setTimeout(() => {
+          nameInput.focus();
+          nameInput.select();
+        }, 150);
+      }
+
+      showToast("Started new consultation report.");
+    }
+
+    function duplicateConsultation(consultationId) {
+      const targetId = consultationId || state.activeConsultationId;
+      const original = state.consultations.find(c => c.id === targetId);
+      if (!original) return;
+
+      const newId = `rep-${Date.now()}`;
+      const clone = JSON.parse(JSON.stringify(original));
+      clone.id = newId;
+      clone.clientName = `${original.clientName || 'Consultation'} (Copy)`;
+      clone.createdAt = Date.now();
+      clone.lastModified = Date.now();
+
+      state.consultations.unshift(clone);
+      persistConsultations();
+      switchActiveConsultation(newId, false);
+      showToast(`Duplicated to "${clone.clientName}".`);
+    }
+
+    async function deleteConsultation(consultationId) {
+      const c = state.consultations.find(item => item.id === consultationId);
+      const name = c ? (c.clientName || 'Untitled Consultation') : 'this consultation';
+      if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) {
+        return;
+      }
+
+      const idx = state.consultations.findIndex(item => item.id === consultationId);
+      if (idx >= 0) {
+        state.consultations.splice(idx, 1);
+      }
+      persistConsultations();
+
+      // If signed in, delete from Cloud Firestore
+      if (state.currentUser) {
+        const username = state.currentUser.username;
+        fetch(`${getFirestoreBaseUrl()}/users/${username}/reports/${consultationId}`, {
+          method: 'DELETE'
+        }).catch(e => console.warn("Firestore report delete notice:", e));
+
+        fetch(`${getFirestoreBaseUrl()}/plants/_report_${username}_${consultationId}`, {
+          method: 'DELETE'
+        }).catch(e => console.warn("Firestore fallback report delete notice:", e));
+      }
+
+      showToast(`Deleted "${name}".`);
+
+      if (state.activeConsultationId === consultationId) {
+        if (state.consultations.length > 0) {
+          switchActiveConsultation(state.consultations[0].id, true);
+        } else {
+          createNewConsultation({ clientName: 'New Consultation' });
+        }
+      } else {
+        renderConsultationSwitcher();
+        const modal = document.getElementById('consultationsModal');
+        if (modal && modal.open) {
+          renderConsultationsModalList(document.getElementById('consultationSearchInput')?.value || '');
+        }
+      }
+    }
+
+    function renderConsultationSwitcher() {
+      const select = document.getElementById('consultationSelect');
+      if (!select) return;
+
+      updateConsultationCounts();
+      select.innerHTML = '';
+
+      if (state.consultations.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No Consultations';
+        select.appendChild(opt);
+        return;
+      }
+
+      state.consultations.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        const name = c.clientName || 'Untitled Client';
+        const dateStr = c.consultationDate ? ` (${c.consultationDate})` : '';
+        const plantCount = `${(c.stagedPlants || []).length} plants`;
+        opt.textContent = `${name}${dateStr} · ${plantCount}`;
+        if (c.id === state.activeConsultationId) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+
+      // Update status text & indicator
+      const statusText = document.getElementById('consultationStatusText');
+      const statusDot = document.getElementById('consultationSavedDot');
+      if (statusText && statusDot) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active && active.lastModified) {
+          const timeAgo = formatTimeAgo(active.lastModified);
+          statusText.textContent = `Saved (${timeAgo})`;
+          statusDot.className = 'status-dot synced';
+        } else {
+          statusText.textContent = 'Saved locally';
+          statusDot.className = 'status-dot';
+        }
+      }
+    }
+
+    function renderConsultationsModalList(filterQuery = '') {
+      const container = document.getElementById('consultationsListContainer');
+      if (!container) return;
+
+      const q = (filterQuery || '').trim().toLowerCase();
+      const filtered = (state.consultations || []).filter(c => {
+        if (!q) return true;
+        return (c.clientName || '').toLowerCase().includes(q) ||
+               (c.clientAddress || '').toLowerCase().includes(q) ||
+               (c.consultationDate || '').toLowerCase().includes(q) ||
+               (c.advisorNotes || '').toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px 10px;color:var(--text-muted);font-size:13px;">
+            <i data-lucide="folder-search" style="width:36px;height:36px;opacity:0.4;margin:0 auto 10px;display:block;"></i>
+            No consultations match your search.<br>Click <strong>+ New Consultation</strong> to create one.
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach(c => {
+        const isActive = c.id === state.activeConsultationId;
+        const card = document.createElement('div');
+        card.className = `consultation-card ${isActive ? 'is-active' : ''}`;
+
+        const plantCount = (c.stagedPlants || []).length;
+        const dateDisplay = c.consultationDate || 'No date set';
+        const clientNameDisplay = c.clientName || 'Untitled Client Consultation';
+
+        card.innerHTML = `
+          <div class="consultation-card-header">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="consultation-card-title">${clientNameDisplay}</span>
+                ${isActive ? `<span class="badge-keystone" style="font-size:10px;padding:2px 8px;font-weight:800;">Active</span>` : ''}
+              </div>
+              <div class="consultation-card-meta" style="margin-top:4px;">
+                <span><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:-1px;"></i> ${dateDisplay}</span>
+                ${c.clientAddress ? `<span><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i> ${c.clientAddress}</span>` : ''}
+                <span><i data-lucide="sprout" style="width:12px;height:12px;vertical-align:-1px;"></i> ${plantCount} species</span>
+                <span><i data-lucide="clock" style="width:12px;height:12px;vertical-align:-1px;"></i> ${formatTimeAgo(c.lastModified)}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button class="btn btn-secondary btn-sm switch-btn" style="padding:6px 12px;font-size:12px;font-weight:700;">
+                <i data-lucide="${isActive ? 'check' : 'arrow-right-left'}" style="width:13px;height:13px;"></i>
+                <span>${isActive ? 'Selected' : 'Switch'}</span>
+              </button>
+              <button class="btn-icon btn-sm-icon duplicate-btn" title="Duplicate consultation">
+                <i data-lucide="copy" style="width:13px;height:13px;"></i>
+              </button>
+              <button class="btn-icon btn-sm-icon text-danger delete-btn" title="Delete consultation">
+                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.switch-btn').addEventListener('click', () => {
+          switchActiveConsultation(c.id);
+          document.getElementById('consultationsModal').close();
+          document.getElementById('stagingDrawer')?.classList.add('open');
+          document.getElementById('drawerOverlay')?.classList.add('open');
+          showToast(`Switched active consultation to "${clientNameDisplay}".`);
+        });
+
+        card.querySelector('.duplicate-btn').addEventListener('click', () => {
+          duplicateConsultation(c.id);
+        });
+
+        card.querySelector('.delete-btn').addEventListener('click', () => {
+          deleteConsultation(c.id);
+        });
+
+        container.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openConsultationsManagerModal() {
+      const modal = document.getElementById('consultationsModal');
+      if (!modal) return;
+      const searchInput = document.getElementById('consultationSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderConsultationsModalList('');
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
     // ==================== User Consultation Reports Cloud Sync ====================
     async function saveCurrentReportToCloud() {
       if (!state.currentUser) {
@@ -2990,9 +3784,22 @@
         return;
       }
 
+      // Ensure active consultation is up-to-date with current state
       const username = state.currentUser.username;
-      const reportId = `rep-${Date.now()}`;
+      const reportId = state.activeConsultationId || `rep-${Date.now()}`;
+      state.activeConsultationId = reportId;
+
       const meta = state.clientMeta || {};
+      const activeIdx = state.consultations.findIndex(c => c.id === reportId);
+      if (activeIdx >= 0) {
+        state.consultations[activeIdx].clientName = meta.name || 'Kansas City Native Garden';
+        state.consultations[activeIdx].clientAddress = meta.address || '';
+        state.consultations[activeIdx].consultationDate = meta.date || new Date().toISOString().split('T')[0];
+        state.consultations[activeIdx].advisorName = meta.advisor || state.currentUser.name;
+        state.consultations[activeIdx].advisorNotes = meta.notes || '';
+        state.consultations[activeIdx].stagedPlants = JSON.parse(JSON.stringify(state.stagedPlants));
+        state.consultations[activeIdx].lastModified = Date.now();
+      }
 
       const reportPayload = {
         fields: {
@@ -3047,22 +3854,21 @@
           });
         }
 
-        // Cache locally under user scope
-        const userReportsKey = `dr_reports_${username}`;
-        const existingReports = JSON.parse(localStorage.getItem(userReportsKey) || '[]');
-        existingReports.unshift({
-          id: reportId,
-          clientName: meta.name || 'Kansas City Native Garden',
-          clientAddress: meta.address || '',
-          consultationDate: meta.date || new Date().toISOString().split('T')[0],
-          stagedCount: state.stagedPlants.length,
-          lastModified: Date.now()
-        });
-        localStorage.setItem(userReportsKey, JSON.stringify(existingReports));
+        persistConsultations();
+        renderConsultationSwitcher();
+
+        const statusText = document.getElementById('consultationStatusText');
+        const statusDot = document.getElementById('consultationSavedDot');
+        if (statusText && statusDot) {
+          statusText.textContent = 'Saved to Cloud (just now)';
+          statusDot.className = 'status-dot synced';
+        }
 
         showToast("Consultation report saved to your advisor profile in Firestore!", "success");
       } catch (err) {
         console.warn("Report cloud save notice:", err);
+        persistConsultations();
+        renderConsultationSwitcher();
         showToast("Saved report locally to your advisor profile.", "success");
       }
     }
@@ -4124,6 +4930,15 @@
     function saveStaging() {
       localStorage.setItem('dr_staged_plants', JSON.stringify(state.stagedPlants));
       updateStagedBadge();
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.stagedPlants = JSON.parse(JSON.stringify(state.stagedPlants));
+          active.lastModified = Date.now();
+          persistConsultations();
+          updateConsultationOption(active);
+        }
+      }
     }
 
     function updateStagedBadge() {
@@ -4746,6 +5561,21 @@
         clientInputs[k].addEventListener('input', (e) => {
           state.clientMeta[k] = e.target.value;
           localStorage.setItem('dr_client_meta', JSON.stringify(state.clientMeta));
+
+          // Auto-sync into active consultation
+          if (state.activeConsultationId && state.consultations) {
+            const active = state.consultations.find(c => c.id === state.activeConsultationId);
+            if (active) {
+              if (k === 'name') active.clientName = e.target.value;
+              if (k === 'address') active.clientAddress = e.target.value;
+              if (k === 'date') active.consultationDate = e.target.value;
+              if (k === 'advisor') active.advisorName = e.target.value;
+              if (k === 'notes') active.advisorNotes = e.target.value;
+              active.lastModified = Date.now();
+              persistConsultations();
+              updateConsultationOption(active);
+            }
+          }
         });
       });
 
@@ -4783,6 +5613,44 @@
       // Save Report to Advisor Profile (Cloud Sync)
       document.getElementById('saveCloudReportBtn')?.addEventListener('click', () => {
         saveCurrentReportToCloud();
+      });
+
+      // Consultation Switcher & Management Listeners
+      document.getElementById('consultationSelect')?.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val) switchActiveConsultation(val);
+      });
+
+      document.getElementById('newConsultationBtn')?.addEventListener('click', () => {
+        createNewConsultation();
+      });
+
+      document.getElementById('modalNewConsultationBtn')?.addEventListener('click', () => {
+        document.getElementById('consultationsModal')?.close();
+        createNewConsultation();
+      });
+
+      document.getElementById('openConsultationsManagerBtn')?.addEventListener('click', () => {
+        openConsultationsManagerModal();
+      });
+
+      document.getElementById('openUserConsultationsBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openConsultationsManagerModal();
+      });
+
+      document.getElementById('duplicateConsultationBtn')?.addEventListener('click', () => {
+        duplicateConsultation();
+      });
+
+      document.getElementById('deleteCurrentConsultationBtn')?.addEventListener('click', () => {
+        if (state.activeConsultationId) {
+          deleteConsultation(state.activeConsultationId);
+        }
+      });
+
+      document.getElementById('consultationSearchInput')?.addEventListener('input', (e) => {
+        renderConsultationsModalList(e.target.value);
       });
 
       // Sync Modal Controls
