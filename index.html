@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400;1,600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
     :root {
@@ -2166,7 +2167,7 @@
       </button>
       <button id="downloadHtmlReportBtn" class="btn btn-secondary" style="width:100%;">
         <i data-lucide="download"></i>
-        <span>Download Formatted Document (.doc / .html)</span>
+        <span>Download Official Word Document (.docx)</span>
       </button>
     </div>
   </aside>
@@ -2706,6 +2707,7 @@
   <!-- Main ES Module Application Logic -->
   <script type="module">
     // Application State
+    try { localStorage.removeItem('dr_gdrive_token'); } catch(e){}
     const state = {
       allPlants: [],
       filteredPlants: [],
@@ -2731,7 +2733,8 @@
       sortOrder: localStorage.getItem('dr_sort_order') || 'common_asc',
       defaultNameDisplay: localStorage.getItem('dr_default_name_display') || 'common_first',
       currentUser: JSON.parse(localStorage.getItem('dr_current_user') || 'null'),
-      gdriveToken: localStorage.getItem('dr_gdrive_token') || null,
+      // No google drive token needed
+      gdriveToken: null,
       activeModalPlant: null,
       lastSyncTime: new Date().toLocaleTimeString()
     };
@@ -4001,11 +4004,8 @@
         dbId = 'deep-roots-nature-advisors';
         localStorage.setItem('dr_firestore_database_id', dbId);
       }
-      const token = state.gdriveToken || (state.currentUser && state.currentUser.accessToken);
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      // Cloud Firestore read is open for community species catalog without Google tokens
+      const headers = { 'Accept': 'application/json' };
 
       async function queryFirestoreDb(targetDb) {
         let docs = [];
@@ -4066,7 +4066,7 @@
           } else if (msg.includes('does not exist')) {
             showToast(`Database '${dbId}' does not exist in project '${projectId}'.`, "warning", 9000);
           } else if (syncError.status === 401 || syncError.status === 403) {
-            if (showNotification) showToast("Firestore access denied. Sign in with Google to authenticate.", "warning");
+            if (showNotification) showToast("Firestore access restricted. Please sign in with your Nature Advisor account.", "warning");
           } else {
             console.warn("Firestore sync warning:", msg);
             if (showNotification) showToast("Firestore sync notice: " + msg, "warning");
@@ -4115,6 +4115,12 @@
       }
       if (!res.id && doc.name) {
         res.id = doc.name.split('/').pop();
+      }
+      if (res.id && (res.id.startsWith('_user_') || res.id.startsWith('_report_'))) {
+        return null;
+      }
+      if (!res.scientific_name) {
+        return null;
       }
 
       // Format mature height display
@@ -5316,18 +5322,450 @@
 
 
 
-    function downloadHtmlDocument() {
-      const html = buildHtmlReport();
-      const meta = state.clientMeta;
-      const filename = `Deep_Roots_Report_${(meta.name || 'Kansas_City_Garden').replace(/[^a-z0-9]/gi, '_')}.doc`;
-      const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast(`Downloaded formatted report as ${filename}`);
+    async function downloadDocxReport() {
+      const meta = state.clientMeta || {};
+      const clientName = meta.name || 'Client Consultation';
+      const clientFirstName = (clientName.trim().split(/[\s,]+/)[0] || clientName).trim();
+
+      // Parse address for street and city/state/zip
+      const fullAddress = (meta.address || '').trim();
+      let streetLine = fullAddress;
+      let cityStateZipLine = '';
+      if (fullAddress.includes('\n')) {
+        const lines = fullAddress.split('\n').map(l => l.trim()).filter(Boolean);
+        streetLine = lines[0] || fullAddress;
+        cityStateZipLine = lines.slice(1).join(', ');
+      } else if (fullAddress.includes(',')) {
+        const parts = fullAddress.split(',');
+        if (parts.length >= 2) {
+          streetLine = parts[0].trim();
+          cityStateZipLine = parts.slice(1).join(',').trim();
+        }
+      }
+
+      // Date formatting
+      let dateStr = meta.date || '';
+      try {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const parsed = new Date(y, m - 1, d);
+          dateStr = parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } else if (!dateStr) {
+          dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+      } catch (e) {
+        dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+
+      const currentUser = state.currentUser;
+      const advisorName = meta.advisor || (currentUser ? currentUser.name : 'Deep Roots Nature Advisor');
+
+      showToast('Generating official Word document (.docx)...');
+
+      function escapeXml(text) {
+        if (!text) return '';
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      }
+
+      function findParagraphStart(xml, pos) {
+        const idx1 = xml.lastIndexOf('<w:p ', pos);
+        const idx2 = xml.lastIndexOf('<w:p>', pos);
+        return Math.max(idx1, idx2);
+      }
+
+      function findParagraphEnd(xml, pos) {
+        const idx = xml.indexOf('</w:p>', pos);
+        return idx !== -1 ? idx + 6 : -1;
+      }
+
+      // Check JSZip
+      if (!window.JSZip) {
+        showToast('Error: JSZip library not loaded. Please verify internet connection.');
+        return;
+      }
+
+      // 1. Fetch official report_template.docx
+      let templateBuffer = null;
+      const templateUrls = [
+        './report_template.docx',
+        'report_template.docx',
+        'https://bradlchr.github.io/report_template.docx',
+        'https://raw.githubusercontent.com/bradlchr/deep-roots-nature-advisors/main/report_template.docx'
+      ];
+
+      for (const u of templateUrls) {
+        try {
+          const resp = await fetch(u);
+          if (resp.ok) {
+            templateBuffer = await resp.arrayBuffer();
+            break;
+          }
+        } catch (fetchErr) {
+          // try next URL
+        }
+      }
+
+      if (templateBuffer) {
+        try {
+          const zip = await JSZip.loadAsync(templateBuffer);
+          let docXml = await zip.file('word/document.xml').async('string');
+          let relsXml = await zip.file('word/_rels/document.xml.rels').async('string');
+
+          // Remove copy warning banner
+          const copyIdx = docXml.indexOf('PLEASE MAKE A COPY BEFORE YOU EDIT');
+          if (copyIdx !== -1) {
+            const pStart = findParagraphStart(docXml, copyIdx);
+            const pEnd = findParagraphEnd(docXml, copyIdx);
+            if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+              docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+            }
+          }
+
+          // Header placeholders
+          docXml = docXml.replace(/\[Name of client\]/g, escapeXml(clientName));
+          docXml = docXml.replace(/\[Address\]/g, escapeXml(streetLine || 'Kansas City Region'));
+
+          if (cityStateZipLine) {
+            docXml = docXml.replace(/\[City, State ZIP\]/g, escapeXml(cityStateZipLine));
+          } else {
+            const cityIdx = docXml.indexOf('[City, State ZIP]');
+            if (cityIdx !== -1) {
+              const pStart = findParagraphStart(docXml, cityIdx);
+              const pEnd = findParagraphEnd(docXml, cityIdx);
+              if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+                docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+              }
+            }
+          }
+
+          docXml = docXml.replace(/\[Date of Visit\]/g, escapeXml(dateStr));
+          docXml = docXml.replace(/\[Nature Advisor Names\]/g, escapeXml(advisorName));
+          docXml = docXml.replace(/\[Nature Advisor\(s\) names\]/g, escapeXml(advisorName));
+          docXml = docXml.replace(/\[Client first name\]/g, escapeXml(clientFirstName));
+
+          // Introductory summary replacement
+          const introIdx = docXml.indexOf('introductory');
+          if (introIdx !== -1) {
+            const pStart = findParagraphStart(docXml, introIdx);
+            const pEnd = findParagraphEnd(docXml, introIdx);
+            if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+              const customIntro = (meta.notes && meta.notes.trim())
+                ? `It was such a pleasure to visit your property and discuss your goals for your home’s ecosystem support. ${meta.notes.trim()} The following is a detailed report of our conversation, highlights of your property’s existing nature-supporting qualities, and tailored native plant recommendations. We hope that the report provides you with more ideas to further your conservation and wildlife adventures.`
+                : `It was such a pleasure to visit your property and discuss your goals for your home’s ecosystem support. The following is a detailed report of our conversation, highlights of your property’s existing nature-supporting qualities, and tailored native plant recommendations. We hope that the report provides you with more ideas to further your conservation and wildlife adventures.`;
+              const newIntroPara = `<w:p>
+    <w:pPr><w:spacing w:after="160"/></w:pPr>
+    <w:r>
+        <w:rPr><w:rFonts w:cs="Times New Roman"/></w:rPr>
+        <w:t>${escapeXml(customIntro)}</w:t>
+    </w:r>
+</w:p>`;
+              docXml = docXml.slice(0, pStart) + newIntroPara + docXml.slice(pEnd);
+            }
+          }
+
+          // Group staged plants by target area / layer
+          const stagedList = state.stagedPlants || [];
+          const groups = {};
+          stagedList.forEach(p => {
+            const area = p.target_area || p.targetArea || p.layer || 'Landscape & Garden Bed';
+            if (!groups[area]) groups[area] = [];
+            groups[area].push(p);
+          });
+          const areaKeys = Object.keys(groups);
+          const area1Name = areaKeys[0] || 'Landscape & Garden Bed';
+          const area2Name = areaKeys[1];
+          const area3Name = areaKeys[2];
+
+          docXml = docXml.replace("Area 1 – [Location – e.g., next to driveway] ([Front/Back/Side Yard])", "Area 1 – " + area1Name);
+          if (area2Name) {
+            docXml = docXml.replace("Area 2 – [Location – e.g., west side of house] ([Front/Back/Side Yard])", "Area 2 – " + area2Name);
+          } else {
+            const a2Idx = docXml.indexOf("Area 2 – [Location – e.g., west side of house]");
+            if (a2Idx !== -1) {
+              const pStart = findParagraphStart(docXml, a2Idx);
+              const pEnd = findParagraphEnd(docXml, a2Idx);
+              if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+                docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+              }
+            }
+          }
+          if (area3Name) {
+            docXml = docXml.replace("Area 3 – [Location – e.g., Hell strip along street] ([Front/Back/Side Yard])", "Area 3 – " + area3Name);
+          } else {
+            const a3Idx = docXml.indexOf("Area 3 – [Location – e.g., Hell strip along street]");
+            if (a3Idx !== -1) {
+              const pStart = findParagraphStart(docXml, a3Idx);
+              const pEnd = findParagraphEnd(docXml, a3Idx);
+              if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+                docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+              }
+            }
+          }
+
+          // Build plant blocks & hyperlink relationships
+          let newRels = '';
+          let plantBlocks = '';
+          let relCounter = 600;
+
+          if (stagedList.length > 0) {
+            let areaCounter = 1;
+            for (const [area, plants] of Object.entries(groups)) {
+              const areaTitle = `Area ${areaCounter++} – ${area}`;
+              plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:pStyle w:val="Heading2"/>
+        <w:spacing w:before="240" w:after="120"/>
+    </w:pPr>
+    <w:r>
+        <w:rPr>
+            <w:b/>
+            <w:color w:val="2D5A27"/>
+            <w:sz w:val="28"/>
+        </w:rPr>
+        <w:t>${escapeXml(areaTitle)}</w:t>
+    </w:r>
+</w:p>`;
+
+              for (const staged of plants) {
+                const master = (state.plants || []).find(mp => mp.id === staged.id || (mp.scientific_name && mp.scientific_name.toLowerCase().trim() === (staged.scientific_name || '').toLowerCase().trim()));
+                const rId = `rId${relCounter++}`;
+                const targetUrl = staged.plant_url || (master && (master.plant_url || master.url)) || 'https://grownative.org';
+                newRels += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(targetUrl)}" TargetMode="External"/>`;
+
+                const commonName = staged.common_name || (master && master.common_names && master.common_names[0]) || staged.scientific_name;
+                const sciName = staged.scientific_name || (master && master.scientific_name) || '';
+                const desc = staged.advisor_description || (master && (master.advisor_description || master.description)) || '';
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="360" w:hanging="360"/>
+        <w:spacing w:before="120" w:after="60"/>
+    </w:pPr>
+    <w:r>
+        <w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr>
+        <w:t>• </w:t>
+    </w:r>
+    <w:hyperlink r:id="${rId}">
+        <w:r>
+            <w:rPr>
+                <w:rStyle w:val="Hyperlink"/>
+                <w:b/>
+                <w:color w:val="1B6535"/>
+                <w:u w:val="single"/>
+            </w:rPr>
+            <w:t>${escapeXml(commonName)}</w:t>
+        </w:r>
+    </w:hyperlink>
+    <w:r>
+        <w:rPr><w:i/></w:rPr>
+        <w:t xml:space="preserve"> (${escapeXml(sciName)}) – </w:t>
+    </w:r>
+    <w:r>
+        <w:t>${escapeXml(desc)}</w:t>
+    </w:r>
+</w:p>`;
+
+                // Botanical bullet point 1: Quantity, Layer, Habitat, Height
+                const layer = staged.layer || (master && master.architectural_layer) || 'Landscape Bed';
+                const habitat = staged.environment || (master && master.native_environment) || 'Garden / Native Landscape';
+                const height = staged.height || (master && (master.mature_height || master.height)) || 'Variable';
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="40"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Quantity: </w:t></w:r>
+    <w:r><w:t>${staged.quantity || 1} specimen(s) | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Layer: </w:t></w:r>
+    <w:r><w:t>${escapeXml(layer)} | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Habitat: </w:t></w:r>
+    <w:r><w:t>${escapeXml(habitat)} | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Height: </w:t></w:r>
+    <w:r><w:t>${escapeXml(height)}</w:t></w:r>
+</w:p>`;
+
+                // Botanical bullet point 2: Bloom, Sun & Moisture
+                const bloomColors = (master && (master.bloom_color || master.bloomColor)) || [];
+                const bloomSeasons = (master && (master.bloom_period || master.bloom_season || master.bloomSeason)) || [];
+                let bloomInfo = 'Seasonal interest';
+                if (bloomColors.length > 0 || bloomSeasons.length > 0) {
+                  bloomInfo = [bloomColors.join(', '), bloomSeasons.length ? `(${bloomSeasons.join(', ')})` : ''].filter(Boolean).join(' ');
+                }
+                const sunVal = staged.sun || (master && (master.light_requirements || []).join(', ')) || 'Sun to Part Sun';
+                const moistVal = staged.moisture || (master && (master.moisture_requirements || []).join(', ')) || 'Average';
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="60"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Bloom: </w:t></w:r>
+    <w:r><w:t>${escapeXml(bloomInfo)} | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Sun/Moisture: </w:t></w:r>
+    <w:r><w:t>${escapeXml(sunVal)} / ${escapeXml(moistVal)}</w:t></w:r>
+</w:p>`;
+
+                // Botanical bullet point 3: Advisor notes
+                if (staged.custom_notes && staged.custom_notes.trim()) {
+                  plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="100"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t>Advisor Notes: </w:t></w:r>
+    <w:r><w:t>${escapeXml(staged.custom_notes.trim())}</w:t></w:r>
+</w:p>`;
+                }
+              }
+            }
+          } else {
+            plantBlocks += `
+<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr>
+    <w:r><w:rPr><w:i/></w:rPr><w:t>No species currently staged in this consultation report draft.</w:t></w:r>
+</w:p>`;
+          }
+
+          // Replace placeholder instructions block with active plant recommendations
+          const startMarker = "[INSTRUCTIONS: Divide up the areas";
+          const endMarker = "Basic Design Tips";
+          const startIdx = docXml.indexOf(startMarker);
+          const endIdx = docXml.indexOf(endMarker);
+
+          if (startIdx !== -1 && endIdx !== -1) {
+            const pStart = findParagraphStart(docXml, startIdx);
+            const pEnd = findParagraphStart(docXml, endIdx);
+            if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+              docXml = docXml.slice(0, pStart) + plantBlocks + docXml.slice(pEnd);
+            }
+          }
+
+          // Append hyperlink relationships
+          if (newRels.length > 0) {
+            relsXml = relsXml.replace("</Relationships>", newRels + "</Relationships>");
+          }
+
+          zip.file("word/document.xml", docXml);
+          zip.file("word/_rels/document.xml.rels", relsXml);
+
+          const docxBlob = await zip.generateAsync({
+            type: "blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            compression: "DEFLATE",
+            compressionOptions: { level: 6 }
+          });
+
+          const sanitized = (clientName || 'Client').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Client';
+          const filename = `DeepRoots_Consultation_Report_${sanitized}.docx`;
+
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(docxBlob);
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          showToast(`Downloaded official Word report: ${filename}`);
+          return;
+        } catch (genErr) {
+          console.error('Error modifying official template docx:', genErr);
+          showToast('Template load issue; generating clean Word document...');
+        }
+      }
+
+      // Offline / fallback genuine OOXML .docx generator using JSZip
+      try {
+        const zip = new JSZip();
+        zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`);
+
+        zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+
+        let miniRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
+        let miniRelsBody = '';
+        let relCounter = 10;
+
+        let miniBody = `<w:p><w:pPr><w:pStyle w:val="Title"/><w:spacing w:after="160"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="48"/><w:color w:val="235C36"/></w:rPr><w:t>Deep Roots Nature Advisors</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="26"/><w:color w:val="3E5643"/></w:rPr><w:t>Native Plant Consultation Report</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Client: </w:t></w:r><w:r><w:t>${escapeXml(clientName)}</w:t></w:r></w:p>`;
+        if (fullAddress) miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Address: </w:t></w:r><w:r><w:t>${escapeXml(fullAddress)}</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Date: </w:t></w:r><w:r><w:t>${escapeXml(dateStr)}</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Advisor: </w:t></w:r><w:r><w:t>${escapeXml(advisorName)}</w:t></w:r></w:p>`;
+
+        if (meta.notes) {
+          miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="235C36"/></w:rPr><w:t>Site Analysis &amp; Ecological Strategy</w:t></w:r></w:p>`;
+          miniBody += `<w:p><w:pPr><w:spacing w:after="200"/></w:pPr><w:r><w:t>${escapeXml(meta.notes)}</w:t></w:r></w:p>`;
+        }
+
+        miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="235C36"/></w:rPr><w:t>Recommended Native Plant Palette</w:t></w:r></w:p>`;
+
+        (state.stagedPlants || []).forEach(p => {
+          const rId = `rId${relCounter++}`;
+          miniRelsBody += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(p.plant_url || 'https://grownative.org')}" TargetMode="External"/>`;
+
+          miniBody += `<w:p><w:pPr><w:spacing w:before="140" w:after="40"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t>• </w:t></w:r><w:hyperlink r:id="${rId}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1B6535"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(p.common_name)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(p.scientific_name)}) – </w:t></w:r><w:r><w:t>${escapeXml(p.advisor_description || '')}</w:t></w:r></w:p>`;
+          miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:t>• Quantity: ${p.quantity || 1} | Layer: ${escapeXml(p.layer || 'Landscape Bed')} | Height: ${escapeXml(p.height || 'Variable')}</w:t></w:r></w:p>`;
+          miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:t>• Sun/Moisture: ${escapeXml(p.sun || 'Any')} / ${escapeXml(p.moisture || 'Average')}</w:t></w:r></w:p>`;
+          if (p.custom_notes) {
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t>• Advisor Notes: </w:t></w:r><w:r><w:t>${escapeXml(p.custom_notes)}</w:t></w:r></w:p>`;
+          }
+        });
+
+        miniRels += miniRelsBody + `</Relationships>`;
+        zip.file('word/_rels/document.xml.rels', miniRels);
+
+        const miniDocXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:body>
+    ${miniBody}
+  </w:body>
+</w:document>`;
+        zip.file('word/document.xml', miniDocXml);
+
+        const docxBlob = await zip.generateAsync({
+          type: 'blob',
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          compression: 'DEFLATE'
+        });
+
+        const sanitized = (clientName || 'Client').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Client';
+        const filename = `DeepRoots_Consultation_Report_${sanitized}.docx`;
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(docxBlob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast(`Downloaded Word report: ${filename}`);
+      } catch (fallbackErr) {
+        console.error('Fallback DOCX generation failed:', fallbackErr);
+        copyMarkdownReport();
+        showToast('Could not build .docx binary. Markdown report copied to clipboard!');
+      }
     }
 
     // Setup Event Listeners
@@ -5607,7 +6045,7 @@
           showToast("No plants in report to export.", "warning");
           return;
         }
-        downloadHtmlDocument();
+        downloadDocxReport();
       });
 
       // Save Report to Advisor Profile (Cloud Sync)
