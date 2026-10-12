@@ -7118,10 +7118,14 @@
             }
           }
 
-          // Build plant blocks & hyperlink relationships
           let newRels = '';
           let plantBlocks = '';
           let relCounter = 600;
+          const rIdMatches = relsXml.match(/Id="rId(\d+)"/g);
+          if (rIdMatches) {
+            const maxExisting = Math.max(...rIdMatches.map(m => parseInt(m.replace(/\D/g, ''), 10) || 0));
+            if (maxExisting >= relCounter) relCounter = maxExisting + 1;
+          }
 
           if (stagedList.length > 0) {
             let areaCounter = 0;
@@ -7551,15 +7555,7 @@
             }
           }
 
-          // 6. Clean (IF Discussed)
-          docXml = docXml.replace("Bat Box (IF Discussed)", "Bat Box");
-          docXml = docXml.replace("Rainwater Harvesting (IF Discussed)", "Rainwater Harvesting");
-
-          // Strip any stray red instructional colors across the document
-          docXml = docXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
-          docXml = docXml.replace("You might be interested/You also expressed interest", "You may also be interested");
-
-          // 7. Deduplicate and execute replacements backwards
+          // 6. Deduplicate and execute replacements backwards
           const removalsMap = new Map();
           for (const item of removals) {
             const key = `${item.start}:${item.end}`;
@@ -7572,6 +7568,14 @@
           for (const item of sortedRemovalsList) {
             docXml = docXml.slice(0, item.start) + (item.repl || '') + docXml.slice(item.end);
           }
+
+          // 7. Post-splicing global cleanups (MUST run AFTER index-based slicing is complete)
+          docXml = docXml.replace(/Bat Box \(IF Discussed\)/g, "Bat Box");
+          docXml = docXml.replace(/Rainwater Harvesting \(IF Discussed\)/g, "Rainwater Harvesting");
+
+          // Strip any stray red instructional colors across the document
+          docXml = docXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
+          docXml = docXml.replace(/You might be interested\/You also expressed interest/g, "You may also be interested");
 
           // Append hyperlink relationships
           if (newRels.length > 0) {
