@@ -1,46 +1,190 @@
 # Deep Roots Nature Advisors - Kansas City Native Plant Database
 ### *Deep Roots Database*
 
-Global web portal and distribution site for the **Deep Roots Nature Advisors - Kansas City Native Plant Database** (or **Deep Roots Database** for short), serving Greater Kansas City ecological landscape advisors, botanists, and homeowners.
+A multi-platform, production-grade ecological conservation planning application and plant intelligence database built for **Deep Roots Nature Advisors** in the Greater Kansas City region.
 
-- 🌐 **Live Web Application**: [**https://bradlchr.github.io/**](https://bradlchr.github.io/)
-- 📱 **Download Android App (APK)**: [**Download DeepRootsAdvisor-debug.apk**](https://bradlchr.github.io/DeepRootsAdvisor-debug.apk) (20 MB)
-- 📄 **Source Repository**: [github.com/bradlchr/deep-roots-nature-advisors](https://github.com/bradlchr/deep-roots-nature-advisors)
-- 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Quick start walkthrough for field advisors.
+Available across platforms:
+- 🌐 **Web Application**: [`index.html`](./index.html), hosted live on GitHub Pages at [**bradlchr.github.io**](https://bradlchr.github.io/).
+- 📱 **Native Android & ChromeOS Application**: Pre-compiled [`DeepRootsAdvisor-debug.apk`](./DeepRootsAdvisor-debug.apk) (20 MB), built with Kotlin, Jetpack Compose, and Material 3 Adaptive WindowSizeClass.
+- 📄 **Official Word Report Generator**: Integrates the official Deep Roots Word template ([`report_template.docx`](./report_template.docx)) to output genuine, formatted `.docx` consultation reports.
+- 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Step-by-step field guide for searching plants, configuring garden zones, and exporting reports.
+
+Nature Advisors use the **Deep Roots Database** in the office and out in the field to research native species, evaluate site conditions, curate plant palettes into personalized client reports, and synchronize botanical records in real time via Cloud Firestore.
 
 ---
 
-## 🌟 Platform Highlights
+## 🌟 Key Features & Capabilities
 
-### 1. 185 Kansas City Native Plant Species
-- Complete botanical taxonomy, 5 mature height brackets, 7 plant types, and 5 ecological layers.
-- **Dynamic Bloom Color Mesh Gradients**: Real-time card background color gradients matching 11 heartland bloom colors.
-- **Flagship Conservation Programs**: ⭐ Deep Roots Sweet 16 & 🌿 KC Keystone Species.
-- **Author Attribution**: Live tracking of plant creators and editors (*"Last edited by: [Advisor]"*).
-- **Interactive Plant Editor**: Supports editing taxonomy, descriptions, requirements, and **Bloom Color & Bloom Season**.
-- **Display Name Toggle**: Seamlessly switch between **Common Name First** and **Scientific Name First** across all cards, modals, and report stages.
+### 1. 185 Curated Kansas City Native Plant Species
+- **Authoritative Heartland Taxonomy**: Scientific binomials, regional common aliases, native habitats (*Prairie*, *Savannah/Woodland*, *Forest*, *Cliff/Glade*, *Stream Edge/Wetland*).
+- **Physical Characteristics & Architecture**: Mature height brackets (`< 1 ft`, `1–3 ft`, `3–6 ft`, `6–15 ft`, `15+ ft`), plant types (*Wildflower*, *Grass*, *Sedge*, *Shrub*, *Tree*, *Vine*, *Fern*), and ecological layers (*Canopy*, *Understory*, *Structural*, *Herbaceous*, *Groundcover*).
+- **Phenology & Dynamic Bloom Color Mesh Gradients**: 11 native bloom colors (*Yellow*, *White*, *Purple*, *Pink*, *Blue*, *Orange*, *Red*, *Lavender*, *Cream*, *Greenish*, *Brown/Tan*) with seasonal bloom months. Plant cards render luminous background gradients matching flower colors with frosted glass styling (`backdrop-filter: blur(12px)`).
+- **Flagship Conservation Programs**:
+  - **⭐ Deep Roots Sweet 16**: 16 high-yield, resilient pollinator species selected for heartland landscapes.
+  - **🌿 KC Keystone Species**: Vital ecological host plants (e.g., *Quercus*, *Asclepias*, *Solidago*, *Symphyotrichum*) supporting local biodiversity.
+- **Sociability Taxonomy**: *Less Social / Solitary*, *Moderate Spreading*, and *Highly Social / Matrix Groundcover*.
+- **Advisor 3-Line Descriptions**: Concise, high-impact summaries designed for quick review and direct inclusion in client reports.
+- **Botanical Photography**: Field photography verified and attributed to Grow Native!, Missouri Botanical Garden, and regional botanists.
 
-### 2. Native Advisor Authentication & RBAC
-- **Read-Only Guest Browsing**: Public visitors can search and explore the full catalog without signing in.
-- **Roles**:
-  - `user` (Nature Advisor): Stage species, switch between consultations, create reports, edit botanical entries.
-  - `admin` (Program Administrator): Provision new advisors, assign roles, reset passwords.
-- **Advisor Types**: `Advisor in Training`, `Advisor`, `Senior Advisor`, `Program Manager`.
+---
+
+### 2. Native Advisor Authentication & Role-Based Access Control (RBAC)
+Replaces third-party Google Sign-In with an integrated, standalone Nature Advisor identity system:
+- **Read-Only Guest Mode**: Public visitors and unauthenticated users can freely search, filter, and inspect all 185 plant records.
+- **Two User Roles**:
+  - **`user` (Nature Advisor)**: Full editing privileges, plant staging, multi-consultation management, client report creation, and botanical updates.
+  - **`admin` (Program Administrator)**: All user privileges plus provisioning new Nature Advisors, assigning roles, and issuing temporary password resets.
+- **Advisor Types**:
+  - `Advisor in Training`
+  - `Advisor`
+  - `Senior Advisor`
+  - `Program Manager`
+- **Canonical Username Schema**: Enforces `<first>.<last>` with automatic numerical collision handling (e.g., `chris.bradley`, `chris1.bradley`, `chris2.bradley`).
+- **Secure Provisioning Workflow**: Generates secure temporary passwords upon provisioning. New advisors are automatically prompted to set a permanent, strong password upon their initial login.
 - **Default Administrator Setup**:
+  - **Name**: Chris Bradley
   - **Username**: `chris.bradley`
   - **Email**: `ctbbradley@gmail.com`
   - **Role**: `admin`
-  - *Note: Initial administrative credentials are provisioned securely out-of-band by the Program Manager.*
-
-### 3. Consultation Reports & Official Word (.docx) Generation
-- **Garden Areas & Planting Zones**: Configure custom client property zones (e.g., *Area 1: Front Porch*, *Area 2: Front Sidewalk/Mailbox*, *Area 3: Backyard Shade Garden*) that propagate into the final generated `.docx` report.
-- **Multi-Consultation Switcher**: Manage drafts and switch between multiple client consultations.
-- **Cloud Firestore Storage**: Reports save directly to `/users/{username}/reports/{id}`.
-- **Real Word Document (.docx)**: Uses the official Deep Roots template (`report_template.docx`) via JSZip to output genuine Office Open XML `.docx` files formatted with client info, visit date, custom site analysis, grouped recommendation blocks, botanical bullets, and external Grow Native! hyperlinks.
+  - **Advisor Type**: `Advisor in Training`
+  - *Note: Initial administrative credentials are provisioned securely out-of-band by the Program Manager or set during initial initialization. No credentials are stored in public documentation.*
 
 ---
 
-## 🌿 Data Citations
-- **Deep Roots KC** (`deeproots.org`)
-- **Grow Native! / Missouri Prairie Foundation** (`grownative.org`)
-- **Missouri Botanical Garden** (`missouribotanicalgarden.org`)
+### 3. Author Attribution on Plant Edits
+- Every plant created or updated tracks the advisor who performed the change:
+  - `last_edited_by_user_id`
+  - `last_edited_by_user_name`
+  - `last_edited_by_user_email`
+  - `last_edited_timestamp`
+- **Live UI Display**: Plant detail views prominently display:
+  > *Last edited by: [Advisor Name] ([Advisor Email])*
+- Edits synchronize in real time to Cloud Firestore and update local offline caches.
+
+---
+
+### 4. Interactive Plant Editor (with Bloom Color & Season)
+- Accessible by signed-in Nature Advisors directly from the plant detail view.
+- Supports editing:
+  - Common Names & Scientific Binomial
+  - Official Plant Profile URL
+  - Advisor Description (≤ 3 lines)
+  - Light & Soil Moisture Requirements
+  - Mature Height Bracket & Sociability
+  - **Bloom Colors** (e.g. `Purple, Yellow, White`)
+  - **Bloom Season** (e.g. `Summer, Fall`)
+  - Image URL & Photographer Attribution
+- Saving immediately updates the card's background mesh gradient, bloom indicator dots, and Cloud Firestore catalog.
+
+---
+
+### 5. Name Display & Sorting Toggle
+- Interactive toggle in the top control bar and sidebar:
+  - **Common Name First**: Displays the common name as the primary bold heading and the scientific name in italics beneath.
+  - **Scientific Name First**: Displays the botanical scientific name as the primary italicized serif heading and the common name beneath.
+- Dynamically updates all plant cards, the plant detail modal, and the consultation report staging drawer.
+- Automatically keeps sorting aligned (Common A–Z vs Scientific A–Z) while allowing independent sorting by Height, Keystone status, or Staging frequency.
+
+---
+
+### 6. Client Consultation Reports & Custom Garden Areas
+- **Multi-Consultation Switcher**: Allows advisors to create, rename, switch between, and persist multiple active client consultations.
+- **Custom Garden Areas (Planting Zones)**:
+  - Dynamically define and rename property zones (e.g., *Area 1: Front Porch*, *Area 2: Front Sidewalk/Mailbox*, *Area 3: Backyard Shade Garden*, or custom additions).
+  - Staged plants are assigned to specific areas, which propagate directly into the report Table of Contents and formatted area recommendation blocks.
+- **Per-User Cloud Firestore Sync**: Reports are saved against the authenticated advisor's account in Cloud Firestore under `/users/{username}/reports/{reportId}`.
+- **Alternative Export Formats**: Formatted Markdown clipboard export (`Copy Markdown`) and standalone HTML reports.
+
+---
+
+### 7. Invasive Species Field Guide & Vetted Contractor Directory
+- **Catalog Switcher**: Toggle instantly between **🌿 Native Plants (185)** and **⚠️ Invasive Species (10)**.
+- **10 Curated Kansas City Invasive Threats**: Bush Honeysuckle, Japanese Honeysuckle, Wintercreeper, English Ivy, Callery/Bradford Pear, Multiflora Rose, Garlic Mustard, Tree of Heaven, Autumn Olive, and Privet.
+- **Identification & Eradication Cues**: Phenological indicators, bark textures, leaf arrangements, and MDC cut-stump/herbicide removal tips.
+- **Staging Invasives**: Add invasive species to consultation drafts with tailored observation and treatment notes.
+- **Vetted Local Contractors Directory**: Interactive modal directory featuring 10 vetted Kansas City invasive removal and habitat restoration contractors directly from the official template (Belfield Botanica Co., Bluestem Habitat Restoration, Bur Oak Ventures, Habitat Architects, Kansas Property Services, Orris Horticulture, Otto’s Environmental Improvements, Polli-Native, Rogue Natives, and the Grow Native! Professional Resource Guide).
+
+---
+
+### 8. Dynamic Word Report Generation (`.docx`) & Directive Compliance
+- **Official Deep Roots Template ([`report_template.docx`](./report_template.docx))**: Built using client-side `JSZip` without requiring external server dependencies.
+- **Directive & Red Text Processing**:
+  - **Red Instruction Removal**: Automatically removes all instructional red text paragraphs intended for Nature Advisors.
+  - **Invasive Logic**:
+    - **Invasive-Free Landscape (Case A)**: When no invasives are present, outputs the official congratulations text and the Big Three vigilance list (Bush Honeysuckle, Japanese Honeysuckle, Wintercreeper, English Ivy), cleanly deleting Case B.
+    - **Invasives Found (Case B)**: When invasives are found on site, outputs *"We found the following invasive plants in your landscape during our visit:"* with staged species and custom notes, followed by the *"More Information"* paragraph recommending vigilance for the remaining Big Three, cleanly deleting Case A.
+  - **Wildlife Stewardship Toggles**: Selectively includes or removes Bird Nest Box, Bird Bath, Bat Box, and Native Bee Habitat sections.
+  - **Stormwater Management Toggles**: Selectively includes or removes Johnson County (*Contain The Rain*), Wyandotte County (*Unified Government*), and Rainwater Harvesting sections.
+  - **(IF Discussed) Heading Cleanup**: Strips placeholder markers from active headings.
+- **OpenXML Reverse Offset Splicing**: Paragraphs are evaluated and spliced from highest offset to lowest offset (backwards), ensuring 100% XML validity and zero document corruption.
+
+---
+
+### 9. Cloud Architecture & Zero-Trust Security
+- **Cloud Firestore Database**: `deep-roots-nature-advisors` in project `deep-roots-nature-advisors`.
+- **Public Read Access**: Shared native plant catalog (`/plants/{plantId}`) is open for community and client reading without requiring Google OAuth tokens.
+- **Security Rules ([`firestore.rules`](./firestore.rules))**:
+  - Enforces schema validation for plants, user accounts, and consultation reports.
+  - Author attribution integrity checks.
+  - Admin-only access to user role modification and account deletion.
+  - Restricted report modification to authenticated user paths (`/users/{username}/reports/{reportId}`).
+
+---
+
+## 📂 Project Directory Structure
+
+```
+Deep Roots Database/
+├── index.html                                  # Standalone Single-File Web Application
+├── report_template.docx                        # Official Deep Roots Word Document Template (1.4 MB)
+├── DeepRootsAdvisor-debug.apk                  # Pre-compiled Android Debug APK (20 MB)
+├── firestore.rules                             # Hardened Cloud Firestore Security Rules
+├── README.md                                   # Project documentation
+├── implementation_plan.md                      # Web & system implementation specification
+├── mobile_architecture_plan.md                 # Mobile architecture specification
+├── android/                                    # Native Android Project (Kotlin / Jetpack Compose)
+│   ├── app/src/main/
+│   │   ├── java/org/deeproots/advisor/
+│   │   │   ├── auth/
+│   │   │   │   └── AuthManager.kt              # RBAC authentication & password hashing
+│   │   │   ├── data/
+│   │   │   │   ├── PlantRepository.kt          # Room database, caching, & report storage
+│   │   │   │   ├── CloudPlantSyncEngine.kt     # Firestore catalog synchronization
+│   │   │   │   └── FirestoreUserSyncEngine.kt  # User roster & consultation reports sync
+│   │   │   ├── sync/
+│   │   │   │   ├── ReportSyncManager.kt        # Two-way Firestore consultation report sync
+│   │   │   │   └── TemplateReportGenerator.kt  # Official .docx Word report builder
+│   │   │   ├── ui/
+│   │   │   │   ├── DeepRootsApp.kt             # Main navigation & top app bar
+│   │   │   │   ├── PlantViewModel.kt           # State management & reactive flows
+│   │   │   │   └── components/                 # Modals, plant cards, staging pane, filters
+│   │   └── assets/report_template.docx         # Bundled Word report template
+│   └── gradlew                                 # Gradle wrapper script
+└── scripts/
+    └── build_single_file_html.py               # Single-file HTML compiler script
+```
+
+---
+
+## 🚀 Running the Application
+
+### 1. Web Application (Zero-Build)
+- Open `index.html` in any web browser, or access the live GitHub Pages deployment at:
+  > **[https://bradlchr.github.io/](https://bradlchr.github.io/)**
+
+### 2. Android Application
+- Download [`DeepRootsAdvisor-debug.apk`](./DeepRootsAdvisor-debug.apk) directly or from [bradlchr.github.io/DeepRootsAdvisor-debug.apk](https://bradlchr.github.io/DeepRootsAdvisor-debug.apk).
+- To compile from source:
+  ```bash
+  cd android
+  ./gradlew assembleDebug --no-daemon
+  ```
+  The compiled APK will be at `android/app/build/outputs/apk/debug/DeepRootsAdvisor-debug.apk`.
+
+---
+
+## 🌿 Authoritative Data Sources & Partners
+- **Deep Roots KC** (`deeproots.org`) - Heartland native plant conservation, Sweet 16, and KC Keystones programs.
+- **Grow Native! / Missouri Prairie Foundation** (`grownative.org`) - Midwestern native plant resources, cultivation guides, and nursery listings.
+- **Missouri Botanical Garden** (`missouribotanicalgarden.org`) - Comprehensive botanical taxonomy and photographic documentation.
+- **Lady Bird Johnson Wildflower Center** (`wildflower.org`) - North American native plant database.

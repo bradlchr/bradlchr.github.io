@@ -1,7 +1,7 @@
 # Deep Roots Nature Advisors - Web Application User Guide
 ### *Deep Roots Database Quick Start & Field Guide*
 
-Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database** (short name: **Deep Roots Database**). This guide walks you through using the web application at [**https://bradlchr.github.io/**](https://bradlchr.github.io/) to research native species, conduct client property assessments, set up custom planting zones, and generate official branded Word (`.docx`) consultation reports.
+Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database** (short name: **Deep Roots Database**). This guide walks you through using the web application at [**https://bradlchr.github.io/**](https://bradlchr.github.io/) to research native species, identify and stage invasive plant threats, conduct client property assessments, configure garden planting zones, and generate official branded Word (`.docx`) consultation reports.
 
 ---
 
@@ -10,10 +10,11 @@ Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database*
 | Step | Action | Outcome |
 | :--- | :--- | :--- |
 | **1. Access** | Visit [**bradlchr.github.io**](https://bradlchr.github.io/) | Browse full catalog as Guest or click **Sign In** as an Advisor |
-| **2. Discover** | Search 185 KC species & apply ecological filters | Instant filtered plant grid with bloom color mesh gradients |
+| **2. Discover** | Search 185 KC native species or flip to 10 High-Threat Invasives | Filtered plant cards with bloom color gradients or invasive removal tips |
 | **3. Consult** | Open consultation drawer & name Garden Areas | Define custom planting zones (e.g., *Front Porch*, *Backyard Shade*) |
-| **4. Stage** | Click **+ Add to Report** & assign to Garden Areas | Curate tailored plant palettes with quantities & site notes |
-| **5. Export** | Click **Download Official Word Report (.docx)** | Complete, formatted Word document ready for client delivery |
+| **4. Stage** | Add native plants & invasive species with site notes | Curate tailored plant recommendations and flag invasive sightings |
+| **5. Customize** | Toggle Wildlife Stewardship & Stormwater County options | Enable/disable nest boxes, bird baths, bat boxes, county cost-share |
+| **6. Export** | Click **Download Official Word Report (.docx)** | Tailored Word document ready for client delivery (all red instructions removed) |
 
 ---
 
@@ -44,7 +45,37 @@ Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database*
 
 ---
 
-## 📋 2. Setting Up a Client Consultation
+## ⚠️ 2. Invasive Species Field Guide & Removal Contractors
+
+Kansas City landscapes frequently harbor aggressive non-native species that outcompete native plants. Deep Roots Database features a dedicated **Invasive Species Field Guide**:
+
+### Switching to Invasive Mode
+- Click the **⚠️ Invasive Species (10)** button in the top navigation bar.
+- The catalog flips from native plants to the 10 most damaging invasive species in the KC region (Bush Honeysuckle, Japanese Honeysuckle, Wintercreeper, English Ivy, Callery/Bradford Pear, Multiflora Rose, Garlic Mustard, Tree of Heaven, Autumn Olive, and Privet).
+
+### Invasive Plant Cards
+- **How to Identify**: Visual identification cues including bark textures, leaf arrangements, berries, and spring/autumn phenology.
+- **Removal Tips**: Mechanical and cut-stump herbicide treatments recommended by the Missouri Department of Conservation (MDC).
+- **MDC Guide**: Direct external link to official MDC problem plant control guides.
+- **+ Add to Report**: Stages the invasive species in the active consultation report with editable removal notes.
+
+### Vetted Removal & Habitat Contractors Directory
+- Click **View Removal Professionals (10)** in the banner or on any invasive card.
+- Opens a curated directory of 10 vetted local ecological contractors specializing in invasive plant eradication, cut-stump treatment, forestry mulching, and natural resources management in the Greater Kansas City area:
+  1. **Belfield Botanica Co.** – (913) 660-2420 | `BelfieldBotanica@gmail.com`
+  2. **Bluestem Habitat Restoration** – (816) 714-8342 | `bluestemhabitatrestoration@gmail.com`
+  3. **Bur Oak Ventures** – (816) 974-3462 | `kyle@buroakventures.com`
+  4. **Habitat Architects** – (816) 645-0026
+  5. **Kansas Property Services** – (785) 845-4072 | `kansaspropertyservices@gmail.com`
+  6. **Orris Horticulture** – (573) 355-0786 / (816) 785-3773 | `travis@orrishorticulture.com`, `iris@orrishorticulture.com`
+  7. **Otto’s Environmental Improvements** – (816) 652-6886
+  8. **Polli-Native** – (913) 701-4565 | `Paul@atgib.com`, `nanette@atgib.com`
+  9. **Rogue Natives** – (913) 244-7327 | `roguenativesllc@gmail.com`
+  10. **Grow Native! Professional Resource Guide** – Statewide directory link (`grownative.org/resource-guide/`).
+
+---
+
+## 📋 3. Setting Up a Client Consultation
 
 1. **Open Consultation Drawer**:
    - Click the green **Selected Plants** button in the top navigation bar.
@@ -61,7 +92,7 @@ Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database*
 
 ---
 
-## 🏡 3. Setting Up Garden Areas (Planting Zones)
+## 🏡 4. Setting Up Garden Areas (Planting Zones)
 
 Each property consultation is divided into specific planting zones so recommendations are practical and organized for the client.
 
@@ -80,7 +111,7 @@ Each property consultation is divided into specific planting zones so recommenda
 
 ---
 
-## 🌸 4. Staging Plants & Assigning to Garden Areas
+## 🌸 5. Staging Plants & Assigning to Garden Areas
 
 1. **Add Plants to Report**:
    - On any plant card in the main catalog, click **+ Add to Report** (or from the plant detail modal).
@@ -94,15 +125,47 @@ Each property consultation is divided into specific planting zones so recommenda
 
 ---
 
-## 📄 5. Generating & Downloading the Client Report
+## ⚙️ 6. Consultation Options & Report Toggles
+
+The consultation drawer provides dynamic toggles to customize the report based on landowner preferences:
+
+### Invasive Species Present on Property
+- **Auto-Toggle**: Adding any invasive plant from the Invasive Field Guide automatically turns this toggle **ON**.
+- **Manual Toggle**: Can also be manually toggled ON or OFF.
+- **When OFF (Invasive-Free Landscape)**:
+  - Generates the official *"Congratulations on an invasive-free landscape!"* section with links to the Big Three vigilance list (Bush Honeysuckle, Japanese Honeysuckle, Wintercreeper, English Ivy).
+  - Case B text and placeholder plants are completely removed.
+- **When ON (Invasives Found)**:
+  - Generates *"We found the following invasive plants in your landscape during our visit:"* with your staged species and tailored removal notes.
+  - Automatically appends a *"More Information"* paragraph advising vigilance for whichever of the Big Three were *not* found on the property.
+  - Case A text is completely removed.
+
+### Wildlife Stewardship Structure Toggles
+Select which habitat structures to include in the client deliverable:
+- **Include Bird Nest Box Section** *(Default: ON)*
+- **Include Bird Bath Section** *(Default: ON)*
+- **Include Bat Box Section** *(Default: OFF)*
+- **Include Bee Habitat Section** *(Default: ON)*
+*(If all four wildlife options are turned off, the entire Wildlife Stewardship chapter is cleanly omitted.)*
+
+### Stormwater Management & County Cost-Share Toggles
+- **Johnson County, KS (*Contain The Rain*)** *(Default: OFF)*: Includes cost-share reimbursement information for Johnson County homeowners (rain gardens, rain barrels).
+- **Wyandotte County, KS (*Unified Government Stormwater*)** *(Default: OFF)*: Includes cost-share grant details for Wyandotte County homeowners.
+- **Include Rainwater Harvesting Section** *(Default: ON)*: Includes best-practice guidance for rain barrels, overflow, winterization, and mosquito prevention.
+
+---
+
+## 📄 7. Generating & Downloading the Client Report
 
 ### Official Word Document (`.docx`)
 1. Click **Download Official Word Report (.docx)** at the bottom of the consultation drawer.
-2. The application automatically takes the official Deep Roots Microsoft Word template and:
+2. The application dynamically processes the official Deep Roots Microsoft Word template:
    - Fills in client details, address, date of visit, and advisor names.
    - Formats your customized Site Overview and Strategy intro.
-   - Updates the Table of Contents with your named Garden Areas.
+   - Updates the Table of Contents with your custom Garden Areas.
    - Formats professional plant recommendation cards grouped by Garden Area, complete with Grow Native! hyperlinks, botanical bullet points, bloom seasons, and your custom site notes.
+   - Applies your Invasive Species and Wildlife/Stormwater toggles.
+   - **Removes all red instructional text** from the template, producing a clean, final deliverable ready for client presentation.
    - Downloads a genuine, non-corrupt `.docx` file ready for Microsoft Word or Google Docs.
 
 ### Copy Markdown Report
@@ -114,7 +177,7 @@ Each property consultation is divided into specific planting zones so recommenda
 
 ---
 
-## ✏️ 6. Editing Botanical Records (Advisors)
+## ✏️ 8. Editing Botanical Records (Advisors)
 
 Advisors can update species records to reflect regional field observations:
 1. Sign in to your advisor account.
@@ -124,7 +187,7 @@ Advisors can update species records to reflect regional field observations:
 
 ---
 
-## 👥 7. Program Administrator Functions
+## 👥 9. Program Administrator Functions
 
 Advisors with the `admin` role can manage the advisor roster:
 1. Click your name / avatar in the top right and select **Admin Panel**.

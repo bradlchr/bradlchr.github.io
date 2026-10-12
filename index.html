@@ -1095,6 +1095,128 @@
     }
 
     
+    
+    /* Catalog Mode Switcher (Native vs Invasive) */
+    .catalog-mode-switcher {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      gap: 3px;
+      box-shadow: var(--shadow-sm);
+    }
+    .catalog-mode-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+    .catalog-mode-btn:hover {
+      color: var(--text-main);
+      background: var(--bg-base);
+    }
+    .catalog-mode-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .catalog-mode-btn.active.is-invasive {
+      background: #b91c1c;
+      color: #ffffff;
+    }
+
+    /* Invasive Plant Card Specifics */
+    .invasive-card {
+      border-color: rgba(220, 38, 38, 0.35) !important;
+      background: linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(255, 255, 255, 0.98)) !important;
+    }
+    [data-theme="dark"] .invasive-card {
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      background: linear-gradient(135deg, rgba(45, 15, 15, 0.95), rgba(28, 25, 23, 0.98)) !important;
+    }
+    .badge-invasive {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+    .invasive-box {
+      font-size: 11px;
+      line-height: 1.45;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      margin-top: 6px;
+    }
+    .invasive-id-box {
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 3px solid #f59e0b;
+      color: var(--text-main);
+    }
+    .invasive-removal-box {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid #ef4444;
+      color: var(--text-main);
+    }
+
+    /* Stewardship & Section Toggles Panel */
+    .stewardship-panel {
+      margin-bottom: 18px;
+      padding: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 8px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color var(--transition-fast);
+    }
+    .toggle-row:hover {
+      border-color: var(--border-strong);
+    }
+    .toggle-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+    .toggle-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .toggle-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: 22px;
+    }
+
     /* Garden Areas Setup & Planting Zones */
     .garden-areas-panel {
       margin-bottom: 18px;
@@ -1815,7 +1937,20 @@
       </button>
 
       <!-- Consultation Report Drawer Toggle -->
-      <button id="reportDrawerBtn" class="btn btn-report">
+      
+      <!-- Catalog Mode Switcher (Native vs Invasive) -->
+      <div class="catalog-mode-switcher" id="catalogModeSwitcher" title="Switch between Native Plant Palette and Invasive Species Field Guide">
+        <button type="button" id="catalogNativeBtn" class="catalog-mode-btn active">
+          <i data-lucide="sprout" style="width:14px;height:14px;"></i>
+          <span>Native Plants (<span id="nativeCountHeader">185</span>)</span>
+        </button>
+        <button type="button" id="catalogInvasiveBtn" class="catalog-mode-btn">
+          <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
+          <span>Invasive Species (10)</span>
+        </button>
+      </div>
+
+        <button id="reportDrawerBtn" class="btn btn-report">
         <i data-lucide="clipboard-list"></i>
         <span class="btn-text-long">Report Staging</span>
         <span class="btn-text-short">Report</span>
@@ -2227,7 +2362,79 @@
       </div>
 
 
-      <!-- Staged Plants List -->
+
+      <!-- Invasive Plants Section in Consultation -->
+      <div class="stewardship-panel" style="border-left: 3px solid #dc2626;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i data-lucide="alert-triangle" style="width:15px;height:15px;color:#dc2626;"></i>
+            <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#dc2626;">
+              Invasive Species (<span id="stagedInvasivesCountBadge">0</span>)
+            </span>
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;">
+            <input type="checkbox" id="toggleInvasivePresent" style="width:15px;height:15px;accent-color:#dc2626;">
+            <span>Found on site</span>
+          </label>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 8px 0;line-height:1.4;" id="invasiveStatusSummary">
+          🌿 Landscape is currently clean. Report will include the Big Three vigilance warning.
+        </p>
+        <div id="stagedInvasivesList" style="display:none;flex-direction:column;gap:6px;margin-top:8px;">
+          <!-- Dynamically populated invasive cards -->
+        </div>
+        <div style="margin-top:8px;">
+          <button type="button" id="browseInvasivesBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:#dc2626;display:inline-flex;align-items:center;gap:4px;">
+            <i data-lucide="search" style="width:12px;height:12px;"></i>
+            <span>Browse & Add Invasives from Catalog</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Report Sections & Stewardship Toggles -->
+      <div class="stewardship-panel">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i data-lucide="sliders" style="width:14px;height:14px;color:var(--primary);"></i>
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
+            Report Section Toggles
+          </span>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 0;line-height:1.4;">
+          Select which wildlife stewardship and municipal cost-share sections to include in the client’s Word report.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="box" style="width:13px;height:13px;color:var(--primary);"></i> Bird Nest Box Section</span>
+            <input type="checkbox" id="toggleBirdNestBox" checked>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="droplet" style="width:13px;height:13px;color:var(--primary);"></i> Bird Bath Section</span>
+            <input type="checkbox" id="toggleBirdBath" checked>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="moon" style="width:13px;height:13px;color:var(--primary);"></i> Bat Box Section (If Discussed)</span>
+            <input type="checkbox" id="toggleBatBox">
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="flower-2" style="width:13px;height:13px;color:var(--primary);"></i> Native Bee Habitat Section</span>
+            <input type="checkbox" id="toggleBeeHabitat" checked>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="map" style="width:13px;height:13px;color:#d97706;"></i> Johnson County (Contain The Rain)</span>
+            <input type="checkbox" id="toggleJohnsonCounty">
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="map" style="width:13px;height:13px;color:#d97706;"></i> Wyandotte County (UG Stormwater Cost-Share)</span>
+            <input type="checkbox" id="toggleWyandotteCounty">
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label"><i data-lucide="cloud-rain" style="width:13px;height:13px;color:var(--primary);"></i> Rainwater Harvesting Section</span>
+            <input type="checkbox" id="toggleRainwaterHarvesting" checked>
+          </label>
+        </div>
+      </div>
+
+            <!-- Staged Plants List -->
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
@@ -2792,6 +2999,36 @@
     </div>
   </dialog>
 
+  <!-- Invasive Removal Professionals Modal -->
+  <dialog id="contractorsModal" style="max-width: 650px; width: 90%; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface);">
+    <div class="dialog-header" style="background: #fff1f2; border-bottom: 1px solid #fecdd3; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 20px;">🚜</span>
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; color: #991b1b; margin: 0;">Invasive Removal &amp; Natural Resource Contractors</h3>
+          <p style="font-size: 11px; color: #7f1d1d; margin: 2px 0 0 0;">Recommended local contractors from official Deep Roots Nature Advisor templates</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('contractorsModal').close()" class="btn-icon">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="padding: 16px 18px; max-height: 70vh; overflow-y: auto;">
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
+        The following vetted contractors specialize in invasive plant removal, forestry mulching, cut-stump treatment, and natural resources management in the Greater Kansas City area:
+      </p>
+      <div id="contractorsList" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Populated dynamically via JS -->
+      </div>
+      <div style="margin-top: 14px; padding: 12px; background: var(--bg-base); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-size: 12px;">
+        <strong>Looking for more design or maintenance help?</strong> Visit the <a href="https://grownative.org/resource-guide/" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Grow Native! Professional Resource Guide</a> for a full statewide directory of native landscapers and suppliers.
+      </div>
+    </div>
+    <div class="dialog-footer" style="padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end;">
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('contractorsModal').close()">Close</button>
+    </div>
+  </dialog>
+
 
 
   <!-- Toast Notification Container -->
@@ -2804,9 +3041,187 @@
 
   <!-- Main ES Module Application Logic -->
   <script type="module">
+
+    // ==================== Global Utility Helpers ====================
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeXml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
     // Application State
     try { localStorage.removeItem('dr_gdrive_token'); } catch(e){}
+    const INVASIVE_SPECIES_CATALOG = [
+  {
+    "id": "inv-bush-honeysuckle",
+    "common_name": "Bush Honeysuckle",
+    "scientific_name": "Lonicera maackii",
+    "plant_type": "Deciduous Shrub (6\u201318 ft)",
+    "image_url": "https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&w=800&q=80",
+    "identification": "Opposite dark green ovate leaves, fragrant white-to-yellow spring flowers, paired bright red berries in autumn. Stems have hollow brown pith and shaggy striped bark. Retains green leaves weeks after native trees drop foliage.",
+    "removal_tips": "Pull small seedlings with roots intact (Extractigator). Cut larger shrubs at ground level and immediately paint the outer cut ring with 20\u201325% glyphosate or triclopyr within 5 minutes. Foliar spray in late fall after native leaf drop.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/bush-honeysuckles-control",
+    "threat": "Allelopathic roots poison native tree and wildflower seedlings. Forms impenetrable dense shade preventing forest regeneration."
+  },
+  {
+    "id": "inv-japanese-honeysuckle",
+    "common_name": "Japanese Honeysuckle",
+    "scientific_name": "Lonicera japonica",
+    "plant_type": "Woody Climbing Vine",
+    "image_url": "https://images.unsplash.com/photo-1534710961216-75c88202f43e?auto=format&fit=crop&w=800&q=80",
+    "identification": "Semi-evergreen opposite leaves, highly fragrant white-to-yellow tubular flowers, shiny black berries in late summer/fall. Twining reddish-brown hairy stems twist clockwise around supporting trees and shrubs.",
+    "removal_tips": "Hand-pull shallow runners when soil is moist. Sever thick climbing vines near ground level and paint cut stems with systemic herbicide. Apply late autumn foliar spray (2\u20133% glyphosate) when natives are dormant.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/japanese-honeysuckle-control",
+    "threat": "Girdles and topples saplings; blankets and smothers structural layer shrubs and prairie groundcovers."
+  },
+  {
+    "id": "inv-wintercreeper",
+    "common_name": "Wintercreeper",
+    "scientific_name": "Euonymus fortunei",
+    "plant_type": "Evergreen Groundcover & Vine",
+    "image_url": "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80",
+    "identification": "Evergreen opposite, leathery, dark green oval leaves with distinct silvery-white veins and finely toothed margins. Climbs trees via aerial rootlets; climbing forms produce small pink capsules with orange seeds.",
+    "removal_tips": "Cut a 3-foot 'window' in all climbing vines around tree trunks to prevent fruiting and kill canopy growth. Dig ground roots or apply triclopyr ester with non-ionic surfactant during sunny warm winter days or early spring.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/wintercreeper-control",
+    "threat": "Forms a suffocating evergreen monoculture that blocks sunlight from native spring wildflowers and adds hazardous ice weight to trees."
+  },
+  {
+    "id": "inv-english-ivy",
+    "common_name": "English Ivy",
+    "scientific_name": "Hedera helix",
+    "plant_type": "Evergreen Climbing Vine",
+    "image_url": "https://images.unsplash.com/photo-1546842931-886c185b4c8c?auto=format&fit=crop&w=800&q=80",
+    "identification": "Alternate, thick, waxy evergreen leaves with 3\u20135 shallow lobes and pale veins. Adult flowering foliage becomes unlobed and diamond-shaped, bearing umbrella clusters of black poisonous berries.",
+    "removal_tips": "Sever climbing stems in a clear band around tree bases (do not pull off bark). Carefully dig up ground root crowns; repeat mowing or targeted triclopyr spray with methylated seed oil.",
+    "ref_url": "https://www.invasive.org/browse/subinfo.cfm?sub=3026",
+    "threat": "Girdles and suffocates mature trees, traps moisture causing fungal rot, and creates barren ground deserts."
+  },
+  {
+    "id": "inv-callery-pear",
+    "common_name": "Callery / Bradford Pear",
+    "scientific_name": "Pyrus calleryana",
+    "plant_type": "Deciduous Tree (20\u201340 ft)",
+    "image_url": "https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?auto=format&fit=crop&w=800&q=80",
+    "identification": "Dense masses of white 5-petaled spring flowers with a distinct foul, rotting odor. Glossy leathery round leaves turning reddish-purple in late fall. Wild escapes produce sharp, tire-puncturing thorns.",
+    "removal_tips": "Chainsaw trees and treat cut stump immediately (within 5 minutes) with concentrated 25% triclopyr or glyphosate. Apply basal bark oil sprays to young saplings.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/callery-pear-control",
+    "threat": "Cross-pollinates readily to invade pastures, roadsides, and prairies with impenetrable thorny thickets that destroy native grasslands."
+  },
+  {
+    "id": "inv-multiflora-rose",
+    "common_name": "Multiflora Rose",
+    "scientific_name": "Rosa multiflora",
+    "plant_type": "Thorny Shrub (10\u201315 ft)",
+    "image_url": "https://images.unsplash.com/photo-1559563458-527698bf5295?auto=format&fit=crop&w=800&q=80",
+    "identification": "Vigorous arching green-to-red stems with sharp curved prickles. Fringed (feather-like) stipules at the base of each leaf stalk (key diagnostic ID). Clusters of white flowers followed by small persistent red rose hips.",
+    "removal_tips": "Uproot whole plants with root claws or tractor pull. Cut thick canes and treat crowns with systemic herbicide. Controlled burns set back above-ground growth.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/multiflora-rose-control",
+    "threat": "Invades woodland borders and open pastures, creating dense thorny hedges that exclude wildlife and livestock."
+  },
+  {
+    "id": "inv-garlic-mustard",
+    "common_name": "Garlic Mustard",
+    "scientific_name": "Alliaria petiolata",
+    "plant_type": "Biennial Herb (1\u20133 ft)",
+    "image_url": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=80",
+    "identification": "First year: low rosette of dark green kidney-shaped leaves. Second year: upright stems with triangular toothed leaves and small white 4-petaled cross flowers. Strong garlic aroma when any plant part is crushed.",
+    "removal_tips": "Hand-pull entire plants before seed capsules ripen (ensure entire S-shaped taproot is extracted). Bag and trash; do NOT compost as pulled plants continue ripening seeds.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/garlic-mustard-control",
+    "threat": "Releases toxic glucosinolates that sterilize soil by killing beneficial mycorrhizal fungi required by native tree roots."
+  },
+  {
+    "id": "inv-tree-of-heaven",
+    "common_name": "Tree of Heaven",
+    "scientific_name": "Ailanthus altissima",
+    "plant_type": "Deciduous Tree (40\u201370 ft)",
+    "image_url": "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80",
+    "identification": "Large pinnate leaves (1\u20133 ft long) with 10\u201340 leaflets, each having 1\u20132 glandular notches at the base. Crushed leaves smell like burnt peanut butter. Smooth light gray cantaloupe-patterned bark.",
+    "removal_tips": "NEVER simply cut down, or it will send up hundreds of aggressive root suckers. Use 'hack-and-squirt' or basal bark triclopyr in late summer/fall. Wait 30 days until tree dies before cutting.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/tree-heaven-control",
+    "threat": "Primary preferred breeding host for the destructive Spotted Lanternfly; spreads aggressive underground runner clones."
+  },
+  {
+    "id": "inv-autumn-olive",
+    "common_name": "Autumn Olive",
+    "scientific_name": "Elaeagnus umbellata",
+    "plant_type": "Deciduous Shrub (up to 20 ft)",
+    "image_url": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80",
+    "identification": "Undersides of leaves, young stems, and red berries are covered in dense silvery shimmering scales. Pale yellow fragrant tubular flowers in spring; dotted red berries in autumn.",
+    "removal_tips": "Cut stump treatment with 20% triclopyr ester or glyphosate. Basal bark application around bottom 15 inches of stems during dormant season.",
+    "ref_url": "https://mdc.mo.gov/trees-plants/problem-plant-control/invasive-plants/autumn-olive-control",
+    "threat": "Fixes atmospheric nitrogen into the soil, disrupting natural nutrient-poor prairie chemistry and outcompeting native shrubs."
+  },
+  {
+    "id": "inv-privet",
+    "common_name": "Privet",
+    "scientific_name": "Ligustrum sinense / vulgare",
+    "plant_type": "Semi-evergreen Shrub (8\u201315 ft)",
+    "image_url": "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80",
+    "identification": "Dense opposite, oval, dark green leaves with smooth edges. Clusters of heavily scented small white flowers in early summer followed by persistent dark blue-black berries.",
+    "removal_tips": "Uproot shallow root systems when young. Cut larger stems close to ground and apply 20% glyphosate or triclopyr to cut stump. Foliar spray in late fall.",
+    "ref_url": "https://www.invasive.org/browse/subinfo.cfm?sub=3035",
+    "threat": "Rapidly dominates woodland understories, preventing oak and hickory seedling regeneration and displacing native shrub layers."
+  }
+];
+
+    const INVASIVE_REMOVAL_PROFESSIONALS = [
+      { name: "Belfield Botanica Co.", phone: "913.660.2420", email: "BelfieldBotanica@gmail.com", specialty: "Invasive removal, ecological planting, and stewardship" },
+      { name: "Bluestem Habitat Restoration", phone: "816.714.8342", email: "bluestemhabitatrestoration@gmail.com", specialty: "Woodland restoration and woody invasive removal" },
+      { name: "Bur Oak Ventures", phone: "816.974.3462", email: "kyle@buroakventures.com", specialty: "Brush management, mechanical and cut-stump removal" },
+      { name: "Habitat Architects", phone: "816.645.0026", email: "", specialty: "Large-scale invasive clearing and landscape restoration" },
+      { name: "Kansas Property Services", phone: "785.845.4072", email: "kansaspropertyservices@gmail.com", specialty: "Targeted invasive shrub and vine eradication" },
+      { name: "Orris Horticulture", phone: "573.355.0786 / 816.785.3773", email: "travis@orrishorticulture.com, iris@orrishorticulture.com", specialty: "Horticultural consulting, native plant care and invasive control" },
+      { name: "Otto’s Environmental Improvements", phone: "816.652.6886", email: "", specialty: "Habitat improvements and invasive species removal" },
+      { name: "Polli-Native", phone: "913.701.4565", email: "Paul@atgib.com, nanette@atgib.com", specialty: "Pollinator habitat installation and invasive clearing" },
+      { name: "Rogue Natives", phone: "913.244.7327", email: "roguenativesllc@gmail.com", specialty: "Native landscape establishment and weed management" },
+      { name: "Grow Native! Professional Resource Guide", phone: "", email: "", specialty: "Statewide directory of certified native landscape professionals and contractors", url: "https://grownative.org/resource-guide/" }
+    ];
+
+    function openContractorsModal() {
+      const modal = document.getElementById('contractorsModal');
+      const list = document.getElementById('contractorsList');
+      if (!modal) return;
+      if (list && list.children.length === 0) {
+        INVASIVE_REMOVAL_PROFESSIONALS.forEach(pro => {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 14px;background:var(--bg-base);border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:4px;';
+          item.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;">
+              <strong style="color:var(--text-main);font-size:14px;">${escapeHtml(pro.name)}</strong>
+              ${pro.url ? `<a href="${escapeHtml(pro.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--primary);text-decoration:underline;">Visit Directory &rarr;</a>` : ''}
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);">${escapeHtml(pro.specialty)}</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:2px;">
+              ${pro.phone ? `<a href="tel:${pro.phone.replace(/[^0-9]/g, '')}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📞 ${escapeHtml(pro.phone)}</a>` : ''}
+              ${pro.email ? `<a href="mailto:${pro.email.split(',')[0].trim()}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">✉️ ${escapeHtml(pro.email)}</a>` : ''}
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+      modal.showModal();
+    }
+    window.openContractorsModal = openContractorsModal;
+
     const state = {
+      catalogMode: 'native', // 'native' | 'invasive'
+      invasivePlants: INVASIVE_SPECIES_CATALOG,
+      stagedInvasives: JSON.parse(localStorage.getItem('dr_staged_invasives') || '[]'),
+      reportOptions: JSON.parse(localStorage.getItem('dr_report_options') || '{"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true}'),
       allPlants: [],
       filteredPlants: [],
       stagedPlants: JSON.parse(localStorage.getItem('dr_staged_plants') || '[]'),
@@ -3608,6 +4023,12 @@
       state.stagedPlants = JSON.parse(JSON.stringify(consultation.stagedPlants || []));
       localStorage.setItem('dr_staged_plants', JSON.stringify(state.stagedPlants));
 
+      state.stagedInvasives = JSON.parse(JSON.stringify(consultation.stagedInvasives || []));
+      localStorage.setItem('dr_staged_invasives', JSON.stringify(state.stagedInvasives));
+
+      state.reportOptions = JSON.parse(JSON.stringify(consultation.reportOptions || {"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true}));
+      localStorage.setItem('dr_report_options', JSON.stringify(state.reportOptions));
+
       // Update Form Inputs in Drawer
       const nameInput = document.getElementById('clientNameInput');
       if (nameInput) nameInput.value = state.clientMeta.name;
@@ -3621,8 +4042,14 @@
       if (notesInput) notesInput.value = state.clientMeta.notes;
 
       renderGardenAreasManager();
+      renderStagedInvasives();
       renderStaging();
-      renderGrid();
+      syncReportOptionsUI();
+      if (state.catalogMode === 'invasive') {
+        renderInvasiveGrid();
+      } else {
+        renderGrid();
+      }
       renderConsultationSwitcher();
 
       const modal = document.getElementById('consultationsModal');
@@ -3668,6 +4095,8 @@
         advisorNotes: options.advisorNotes || '',
         gardenAreas: options.gardenAreas ? JSON.parse(JSON.stringify(options.gardenAreas)) : defaultAreas,
         stagedPlants: [],
+        stagedInvasives: [],
+        reportOptions: {"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true},
         createdAt: Date.now(),
         lastModified: Date.now()
       };
@@ -3692,6 +4121,263 @@
 
     
     // ==================== Garden Areas & Planting Zones Manager ====================
+    
+    // ==================== Invasive Species & Stewardship Management ====================
+    function setCatalogMode(mode) {
+      state.catalogMode = mode;
+      const nativeBtn = document.getElementById('catalogNativeBtn');
+      const invBtn = document.getElementById('catalogInvasiveBtn');
+      const filterSidebar = document.getElementById('filterSidebar');
+      const topFilters = document.querySelector('.filter-chips-row');
+
+      if (mode === 'invasive') {
+        nativeBtn?.classList.remove('active');
+        invBtn?.classList.add('active', 'is-invasive');
+        if (topFilters) topFilters.style.display = 'none';
+        renderInvasiveGrid();
+        showToast('Viewing Kansas City High-Threat Invasive Species Guide');
+      } else {
+        invBtn?.classList.remove('active', 'is-invasive');
+        nativeBtn?.classList.add('active');
+        if (topFilters) topFilters.style.display = 'flex';
+        renderGrid();
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderInvasiveGrid() {
+      const grid = document.getElementById('plantGrid');
+      const countEl = document.getElementById('plantCount');
+      if (!grid) return;
+
+      const invasives = state.invasivePlants || [];
+      if (countEl) countEl.textContent = `${invasives.length} invasive species`;
+
+      grid.innerHTML = '';
+
+      // Render contractors banner at top of invasive grid
+      const banner = document.createElement('div');
+      banner.className = 'invasive-contractors-banner';
+      banner.style.cssText = 'grid-column: 1 / -1; background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-md); padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; box-shadow: var(--shadow-sm);';
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">🚜</span>
+          <div>
+            <div style="font-weight: 700; color: #991b1b; font-size: 14px;">Kansas City Invasive Removal &amp; Natural Resource Contractors</div>
+            <div style="font-size: 12px; color: #7f1d1d;">Need professional removal or forestry mulching? Refer clients to vetted local ecological contractors from our official report template.</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenContractorsBanner" style="border-color: #f87171; color: #991b1b; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; background: #fff;">
+          <i data-lucide="phone-call" style="width: 14px; height: 14px;"></i>
+          <span>View Removal Professionals (10)</span>
+        </button>
+      `;
+      banner.querySelector('#btnOpenContractorsBanner')?.addEventListener('click', () => {
+        openContractorsModal();
+      });
+      grid.appendChild(banner);
+
+      invasives.forEach(plant => {
+        const isStaged = (state.stagedInvasives || []).some(inv => inv.id === plant.id || inv.scientific_name === plant.scientific_name);
+        const card = document.createElement('div');
+        card.className = 'plant-card invasive-card';
+        card.innerHTML = `
+          <div class="plant-card-inner">
+            <div class="card-media">
+              <img src="${plant.image_url}" alt="${plant.common_name}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&w=600&q=80';">
+              <div class="card-badges">
+                <span class="badge-invasive">⚠️ High Threat</span>
+              </div>
+              <span class="badge-layer" style="background:#b91c1c;color:#fff;">${plant.plant_type}</span>
+            </div>
+            <div class="card-body">
+              <div class="card-title-group">
+                <h3 class="card-common-name">${escapeHtml(plant.common_name)}</h3>
+                <p class="card-sci-name" style="font-style:italic;color:#dc2626;">${escapeHtml(plant.scientific_name)}</p>
+              </div>
+
+              <div class="invasive-box invasive-id-box">
+                <strong><i data-lucide="eye" style="width:12px;height:12px;vertical-align:-1px;"></i> How to Identify:</strong><br>
+                ${escapeHtml(plant.identification)}
+              </div>
+
+              <div class="invasive-box invasive-removal-box">
+                <strong><i data-lucide="shield-alert" style="width:12px;height:12px;vertical-align:-1px;"></i> Removal Tips:</strong><br>
+                ${escapeHtml(plant.removal_tips)}
+                <div style="margin-top: 6px;">
+                  <button type="button" class="hire-pro-btn" style="background: none; border: none; padding: 0; color: #b91c1c; text-decoration: underline; font-weight: 600; cursor: pointer; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-lucide="wrench" style="width: 11px; height: 11px;"></i>
+                    <span>Need help removing this? View local contractors</span>
+                  </button>
+                </div>
+              </div>
+
+              <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">
+                <em>Impact:</em> ${escapeHtml(plant.threat)}
+              </p>
+            </div>
+            <div class="card-footer">
+              <a href="${plant.ref_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:11px;">
+                <i data-lucide="external-link" style="width:12px;height:12px;"></i>
+                <span>MDC Guide</span>
+              </a>
+              <button class="btn btn-primary btn-sm add-invasive-btn" style="flex:1.4;background:${isStaged ? '#15803d' : '#b91c1c'};border-color:${isStaged ? '#15803d' : '#b91c1c'};font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:4px;">
+                <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width:13px;height:13px;"></i>
+                <span>${isStaged ? 'In Report' : 'Add to Report'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.hire-pro-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openContractorsModal();
+        });
+
+        card.querySelector('.add-invasive-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleStagedInvasive(plant);
+        });
+
+        grid.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+    function toggleStagedInvasive(plant) {
+      if (!state.stagedInvasives) state.stagedInvasives = [];
+      const idx = state.stagedInvasives.findIndex(i => i.id === plant.id || i.scientific_name === plant.scientific_name);
+      if (idx >= 0) {
+        state.stagedInvasives.splice(idx, 1);
+        if (state.stagedInvasives.length === 0) {
+          state.reportOptions.invasivePresent = false;
+        }
+        showToast(`Removed ${plant.common_name} from report.`);
+      } else {
+        state.stagedInvasives.push({
+          id: plant.id,
+          name: plant.common_name,
+          scientific: plant.scientific_name,
+          image_url: plant.image_url,
+          notes: plant.removal_tips,
+          added_at: Date.now()
+        });
+        state.reportOptions.invasivePresent = true;
+        showToast(`Added ${plant.common_name} to consultation invasives!`);
+      }
+
+      persistStagedInvasives();
+      renderStagedInvasives();
+      if (state.catalogMode === 'invasive') renderInvasiveGrid();
+    }
+
+    function persistStagedInvasives() {
+      localStorage.setItem('dr_staged_invasives', JSON.stringify(state.stagedInvasives));
+      localStorage.setItem('dr_report_options', JSON.stringify(state.reportOptions));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.stagedInvasives = JSON.parse(JSON.stringify(state.stagedInvasives));
+          active.reportOptions = JSON.parse(JSON.stringify(state.reportOptions));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+
+    
+    function syncReportOptionsUI() {
+      const opts = state.reportOptions || {};
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = Boolean(val);
+      };
+      setVal('toggleInvasivePresent', opts.invasivePresent);
+      setVal('toggleBirdNestBox', opts.birdNestBox !== false);
+      setVal('toggleBirdBath', opts.birdBath !== false);
+      setVal('toggleBatBox', opts.batBox === true);
+      setVal('toggleBeeHabitat', opts.beeHabitat !== false);
+      setVal('toggleJohnsonCounty', opts.johnsonCounty === true);
+      setVal('toggleWyandotteCounty', opts.wyandotteCounty === true);
+      setVal('toggleRainwaterHarvesting', opts.rainwaterHarvesting !== false);
+    }
+
+    function renderStagedInvasives() {
+      const container = document.getElementById('stagedInvasivesList');
+      const badge = document.getElementById('stagedInvasivesCountBadge');
+      const checkbox = document.getElementById('toggleInvasivePresent');
+      const summary = document.getElementById('invasiveStatusSummary');
+      if (!container) return;
+
+      const invasives = state.stagedInvasives || [];
+      const isPresent = state.reportOptions.invasivePresent || invasives.length > 0;
+
+      if (badge) badge.textContent = invasives.length;
+      if (checkbox) checkbox.checked = isPresent;
+
+      if (summary) {
+        if (isPresent) {
+          summary.innerHTML = `<span style="color:#dc2626;font-weight:700;">⚠️ Invasive plants present.</span> Found species will be listed with removal instructions.`;
+        } else {
+          summary.innerHTML = `🌿 <strong>Clean Landscape:</strong> No invasive plants recorded. Report will include the Big Three vigilance warning.`;
+        }
+      }
+
+      if (isPresent) {
+        container.style.display = 'flex';
+      } else {
+        container.style.display = 'none';
+      }
+
+      container.innerHTML = '';
+      if (invasives.length === 0) {
+        container.innerHTML = `
+          <div style="font-size:11px;color:var(--text-muted);background:var(--bg-base);padding:8px;border-radius:var(--radius-sm);text-align:center;">
+            Toggle is ON. No specific species added yet.<br>Click <strong>Browse & Add Invasives</strong> below.
+          </div>
+        `;
+        return;
+      }
+
+      invasives.forEach((inv, iIdx) => {
+        const row = document.createElement('div');
+        row.className = 'garden-area-row';
+        row.style.borderColor = 'rgba(220, 38, 38, 0.4)';
+        row.innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;flex:1;">
+            <img src="${inv.image_url}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none';">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-main);">${escapeHtml(inv.name)}</div>
+              <div style="font-size:10px;font-style:italic;color:#dc2626;">${escapeHtml(inv.scientific)}</div>
+            </div>
+          </div>
+          <input type="text" class="inv-note-input" value="${escapeHtml(inv.notes || '')}" placeholder="Observation / location on property..." style="flex:1.2;font-size:11px;padding:3px 6px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-main);">
+          <button type="button" class="btn-icon remove-inv-btn" title="Remove invasive from report" style="color:var(--danger);padding:3px;">
+            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+          </button>
+        `;
+
+        row.querySelector('.inv-note-input').addEventListener('input', (e) => {
+          inv.notes = e.target.value;
+          persistStagedInvasives();
+        });
+
+        row.querySelector('.remove-inv-btn').addEventListener('click', () => {
+          state.stagedInvasives.splice(iIdx, 1);
+          if (state.stagedInvasives.length === 0) {
+            state.reportOptions.invasivePresent = false;
+          }
+          persistStagedInvasives();
+          renderStagedInvasives();
+          if (state.catalogMode === 'invasive') renderInvasiveGrid();
+        });
+
+        container.appendChild(row);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
     function renderGardenAreasManager() {
       const container = document.getElementById('gardenAreasList');
       const countBadge = document.getElementById('gardenAreasCountBadge');
@@ -3791,6 +4477,8 @@
       clone.gardenAreas = original.gardenAreas
         ? JSON.parse(JSON.stringify(original.gardenAreas))
         : ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+      clone.stagedInvasives = original.stagedInvasives ? JSON.parse(JSON.stringify(original.stagedInvasives)) : [];
+      clone.reportOptions = original.reportOptions ? JSON.parse(JSON.stringify(original.reportOptions)) : {"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true};
       clone.createdAt = Date.now();
       clone.lastModified = Date.now();
 
@@ -5525,7 +6213,7 @@
           md += `*No plants currently staged for this area.*\n\n`;
         } else {
           plants.forEach(p => {
-            md += `#### [${p.common_name}](${p.plant_url}) (*${p.scientific_name}*)\n\n`;
+            md += `#### [${p.common_name}](${p.plant_url || 'https://grownative.org'}) (*${p.scientific_name}*)\n\n`;
             if (p.advisor_description) md += `${p.advisor_description}\n\n`;
             md += `* **Quantity:** ${p.quantity || 1}\n`;
             if (p.sun) md += `* **Light Requirements:** ${p.sun}\n`;
@@ -5540,28 +6228,100 @@
         md += `---\n\n`;
       });
 
+      // Invasive Species Section
+      const opts = state.reportOptions || {};
+      const stagedInvs = state.stagedInvasives || [];
+      const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+
+      md += `## Non-Native, Invasive Plants & Problematic Species\n\n`;
+      if (!hasInvasives) {
+        md += `### Invasive-Free Landscape!\n\n`;
+        md += `Congratulations on an invasive-free landscape! We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei) and English Ivy (Hedera helix).\n\n`;
+        md += `* **Bush Honeysuckle** (*Lonicera maackii*)\n`;
+        md += `* **Japanese Honeysuckle** (*Lonicera japonica*)\n`;
+        md += `* **Wintercreeper** (*Euonymus fortunei*)\n`;
+        md += `* **English Ivy** (*Hedera helix*)\n\n`;
+      } else {
+        md += `### Invasive Species Observed on Property\n\n`;
+        md += `We found the following invasive plants in your landscape during our visit:\n\n`;
+        stagedInvs.forEach(inv => {
+          md += `* **${inv.name}** (*${inv.scientific}*)\n`;
+          if (inv.notes) md += `  * *Removal Guidance & Notes:* ${inv.notes}\n`;
+        });
+        md += `\n`;
+
+        const foundNames = stagedInvs.map(i => (i.name || '').toLowerCase());
+        const otherBigThree = [];
+        if (!foundNames.some(n => n.includes('bush honeysuckle'))) otherBigThree.push("Bush Honeysuckle (*Lonicera maackii*)");
+        if (!foundNames.some(n => n.includes('wintercreeper'))) otherBigThree.push("Wintercreeper (*Euonymus fortunei*)");
+        if (!foundNames.some(n => n.includes('japanese honeysuckle'))) otherBigThree.push("Japanese Honeysuckle (*Lonicera japonica*)");
+
+        if (otherBigThree.length > 0) {
+          md += `*More Information:* Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherBigThree.join(', ')}.\n\n`;
+        }
+      }
+
+      // Wildlife Stewardship Section
+      const showWildlife = opts.birdNestBox !== false || opts.birdBath !== false || opts.batBox === true || opts.beeHabitat !== false;
+      if (showWildlife) {
+        md += `## Wildlife Stewardship Structures\n\n`;
+        if (opts.birdNestBox !== false) {
+          md += `### Bird Nest Box\nAn artificial nest box provides supplemental nesting opportunities for native birds while giving you and your family a chance to observe bird breeding biology up close.\n\n`;
+        }
+        if (opts.birdBath !== false) {
+          md += `### Bird Bath\nBirds seek water to clean their feathers for optimum flight ability as well as to quench their thirst. Maintain shallow, fresh water with perching stones.\n\n`;
+        }
+        if (opts.batBox === true) {
+          md += `### Bat Box\nBat houses support insect-eating bats. Mount on steel poles or sides of buildings 15–20 feet high receiving direct morning sun.\n\n`;
+        }
+        if (opts.beeHabitat !== false) {
+          md += `### Native Bee Habitat\nSupport native solitary bees by preserving perennial stems over winter, retaining dead wood logs/stumps, and using leaf mulch instead of wood mulch.\n\n`;
+        }
+      }
+
+      // Stormwater Section
+      const showStormwater = opts.johnsonCounty === true || opts.wyandotteCounty === true || opts.rainwaterHarvesting !== false;
+      if (showStormwater) {
+        md += `## Stormwater Management\n\n`;
+        if (opts.johnsonCounty === true) {
+          md += `### Cost-Share Reimbursement (Johnson County, KS)\nThe **Contain The Rain** program in Johnson County encourages homeowners to make stormwater improvements (rain gardens, rain barrels) with cost-share reimbursements.\n\n`;
+        }
+        if (opts.wyandotteCounty === true) {
+          md += `### Cost-Share Reimbursement (Wyandotte County, KS)\nThe **Unified Government Stormwater Quality Cost-Share Program** in Wyandotte County provides grant reimbursement for residential green infrastructure.\n\n`;
+        }
+        if (opts.rainwaterHarvesting !== false) {
+          md += `### Rainwater Harvesting\nCapturing rainwater on downspouts with rain barrels or cisterns reduces stormwater runoff and erosion while providing naturally unchlorinated irrigation water.\n\n`;
+        }
+      }
+
       return md;
     }
 
     function buildHtmlReport() {
-      const meta = state.clientMeta;
+      const meta = state.clientMeta || {};
       const docTitle = `Deep Roots Consultation Report - ${meta.name || 'Kansas City Native Garden'}`;
+      const opts = state.reportOptions || {};
+      const stagedInvs = state.stagedInvasives || [];
+      const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
 
       let html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${docTitle}</title>
+  <title>${escapeHtml(docTitle)}</title>
   <style>
-    body { font-family: Arial, sans-serif; color: #1c281e; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    h1 { color: #235c36; font-size: 24pt; border-bottom: 2pt solid #235c36; padding-bottom: 6pt; }
-    h2 { color: #235c36; font-size: 16pt; margin-top: 18pt; }
+    body { font-family: Arial, sans-serif; color: #1c281e; line-height: 1.6; max-width: 820px; margin: 40px auto; padding: 0 20px; }
+    h1 { color: #235c36; font-size: 24pt; border-bottom: 2pt solid #235c36; padding-bottom: 6pt; margin-bottom: 4pt; }
+    h2 { color: #235c36; font-size: 16pt; margin-top: 22pt; border-bottom: 1pt solid #c2d1c4; padding-bottom: 4pt; }
     h3 { color: #1c281e; font-size: 13pt; margin-top: 14pt; }
     a { color: #235c36; text-decoration: underline; }
-    .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20pt; }
+    .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20pt; margin-top: 12pt; }
     .meta-table td { padding: 6pt 10pt; border: 1pt solid #c2d1c4; }
     .meta-label { font-weight: bold; background: #e8f5ec; width: 25%; }
-    .plant-block { margin-bottom: 16pt; padding: 12pt; background: #f4f7f4; border-left: 4pt solid #235c36; border-radius: 4px; }
+    .area-block { margin-top: 18pt; margin-bottom: 20pt; }
+    .plant-block { margin-bottom: 14pt; padding: 12pt; background: #f4f7f4; border-left: 4pt solid #235c36; border-radius: 4px; }
+    .invasive-box { margin-bottom: 12pt; padding: 12pt; background: #fff1f2; border-left: 4pt solid #dc2626; border-radius: 4px; }
+    .stewardship-box { margin-bottom: 12pt; padding: 12pt; background: #f0fdf4; border-left: 4pt solid #16a34a; border-radius: 4px; }
     ul { margin-top: 6pt; }
   </style>
 </head>
@@ -5570,34 +6330,76 @@
   <p><strong>Kansas City Native Plant Consultation Report</strong></p>
   
   <table class="meta-table">
-    <tr><td class="meta-label">Client Name:</td><td>${meta.name || 'Client'}</td></tr>
-    <tr><td class="meta-label">Project Address:</td><td>${meta.address || '-'}</td></tr>
-    <tr><td class="meta-label">Date:</td><td>${meta.date || new Date().toLocaleDateString()}</td></tr>
-    <tr><td class="meta-label">Nature Advisor:</td><td>${meta.advisor || (state.currentUser ? state.currentUser.name : 'Nature Advisor')}</td></tr>
+    <tr><td class="meta-label">Client Name:</td><td>${escapeHtml(meta.name || 'Client')}</td></tr>
+    <tr><td class="meta-label">Project Address:</td><td>${escapeHtml(meta.address || '-')}</td></tr>
+    <tr><td class="meta-label">Date:</td><td>${escapeHtml(meta.date || new Date().toLocaleDateString())}</td></tr>
+    <tr><td class="meta-label">Nature Advisor:</td><td>${escapeHtml(meta.advisor || (state.currentUser ? state.currentUser.name : 'Nature Advisor'))}</td></tr>
   </table>
 
-  ${meta.notes ? `<h2>Site Analysis & Ecological Strategy</h2><p>${meta.notes.replace(/\n/g, '<br>')}</p>` : ''}
+  ${meta.notes ? `<h2>Site Analysis &amp; Ecological Strategy</h2><p>${escapeHtml(meta.notes).replace(/\n/g, '<br>')}</p>` : ''}
 
-  <h2>Recommended Native Plant Palette</h2>
+  <h2>Recommended Native Plant Palette by Garden Area</h2>
 `;
 
-      state.stagedPlants.forEach(p => {
-        html += `
-  <div class="plant-block">
-    <h3><a href="${p.plant_url}">${p.common_name}</a> <em>(${p.scientific_name})</em></h3>
-    <p>${p.advisor_description || ''}</p>
-    <ul>
-      <li><strong>Quantity:</strong> ${p.quantity || 1}</li>
-      ${p.sun ? `<li><strong>Light Requirements:</strong> ${p.sun}</li>` : ''}
-      ${p.moisture ? `<li><strong>Soil Moisture:</strong> ${p.moisture}</li>` : ''}
-      ${p.height ? `<li><strong>Mature Height:</strong> ${p.height}</li>` : ''}
-      ${p.layer ? `<li><strong>Garden Layer:</strong> ${p.layer}</li>` : ''}
-      ${p.sociability ? `<li><strong>Plant Sociability:</strong> ${p.sociability}</li>` : ''}
-      ${p.custom_notes ? `<li><strong>Advisor Recommendation:</strong> ${p.custom_notes}</li>` : ''}
-    </ul>
-  </div>
-`;
+      const definedAreas = (state.gardenAreas && state.gardenAreas.length > 0)
+        ? state.gardenAreas
+        : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'];
+
+      const groups = {};
+      definedAreas.forEach(a => { groups[a] = []; });
+      (state.stagedPlants || []).forEach(p => {
+        let areaKey = p.target_area || p.targetArea;
+        if (!areaKey || !groups[areaKey]) {
+          const match = definedAreas.find(a => a.toLowerCase().trim() === (areaKey || '').toLowerCase().trim());
+          if (match) areaKey = match;
+          else areaKey = definedAreas[0];
+        }
+        if (!groups[areaKey]) groups[areaKey] = [];
+        groups[areaKey].push(p);
       });
+
+      definedAreas.forEach((area, aIdx) => {
+        const plants = groups[area] || [];
+        const heading = (/^area\s*\d+[\s:–-]/i.test(area.trim())) ? area.trim() : `Area ${aIdx + 1} – ${area.trim()}`;
+        html += `<div class="area-block"><h3>${escapeHtml(heading)}</h3>`;
+        if (plants.length === 0) {
+          html += `<p style="font-style:italic;color:#718096;">No plants currently staged for this area.</p>`;
+        } else {
+          plants.forEach(p => {
+            html += `
+  <div class="plant-block">
+    <h4 style="margin:0 0 6pt 0;"><a href="${p.plant_url || 'https://grownative.org'}" target="_blank">${escapeHtml(p.common_name)}</a> <em>(${escapeHtml(p.scientific_name)})</em></h4>
+    ${p.advisor_description ? `<p style="margin:4pt 0 8pt 0;">${escapeHtml(p.advisor_description)}</p>` : ''}
+    <ul style="margin:0;padding-left:20px;">
+      <li><strong>Quantity:</strong> ${p.quantity || 1} | <strong>Layer:</strong> ${escapeHtml(p.layer || 'Landscape Bed')} | <strong>Height:</strong> ${escapeHtml(p.height || 'Variable')}</li>
+      <li><strong>Sun &amp; Moisture:</strong> ${escapeHtml(p.sun || 'Any')} / ${escapeHtml(p.moisture || 'Average')}</li>
+      ${p.custom_notes ? `<li><strong>Advisor Notes:</strong> ${escapeHtml(p.custom_notes)}</li>` : ''}
+    </ul>
+  </div>`;
+          });
+        }
+        html += `</div>`;
+      });
+
+      // Invasives in HTML
+      html += `<h2>Non-Native, Invasive Plants &amp; Problematic Species</h2>`;
+      if (!hasInvasives) {
+        html += `
+  <div class="stewardship-box">
+    <h3 style="color:#15803d;margin-top:0;">Congratulations on an invasive-free landscape!</h3>
+    <p>We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei) and English Ivy (Hedera helix).</p>
+  </div>`;
+      } else {
+        html += `
+  <p>We found the following invasive plants in your landscape during our visit:</p>`;
+        stagedInvs.forEach(inv => {
+          html += `
+  <div class="invasive-box">
+    <h4 style="margin:0 0 4pt 0;color:#991b1b;">• ${escapeHtml(inv.name)} <em>(${escapeHtml(inv.scientific)})</em></h4>
+    <p style="margin:0;font-size:13px;">${escapeHtml(inv.notes || 'High-threat invasive. Prompt removal recommended.')}</p>
+  </div>`;
+        });
+      }
 
       html += `
   <hr style="margin-top: 30pt; border: none; border-top: 1pt solid #c2d1c4;">
@@ -5606,12 +6408,9 @@
     <a href="https://deeproots.org">deeproots.org</a> and <a href="https://grownative.org">grownative.org</a>.
   </p>
 </body>
-</html>
-`;
+</html>`;
       return html;
     }
-
-
 
     async function downloadDocxReport() {
       const meta = state.clientMeta || {};
@@ -5740,10 +6539,11 @@
           docXml = docXml.replace(/\[Client first name\]/g, escapeXml(clientFirstName));
 
           // Introductory summary replacement
-          const introIdx = docXml.indexOf('introductory');
-          if (introIdx !== -1) {
-            const pStart = findParagraphStart(docXml, introIdx);
-            const pEnd = findParagraphEnd(docXml, introIdx);
+          const introIdx = docXml.indexOf('Sample introductory letter:');
+          const fallbackIntroIdx = introIdx !== -1 ? introIdx : docXml.indexOf('introductory');
+          if (fallbackIntroIdx !== -1) {
+            const pStart = findParagraphStart(docXml, fallbackIntroIdx);
+            const pEnd = findParagraphEnd(docXml, fallbackIntroIdx);
             if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
               const customIntro = (meta.notes && meta.notes.trim())
                 ? `It was such a pleasure to visit your property and discuss your goals for your home’s ecosystem support. ${meta.notes.trim()} The following is a detailed report of our conversation, highlights of your property’s existing nature-supporting qualities, and tailored native plant recommendations. We hope that the report provides you with more ideas to further your conservation and wildlife adventures.`
@@ -5980,6 +6780,240 @@
             }
           }
 
+          // Backwards Paragraph Replacement Pipeline for Invasives, Wildlife, and Stormwater
+          const pRegex = /<w:p[ >][\s\S]*?<\/w:p>/g;
+          const paras = [];
+          let pMatch;
+          while ((pMatch = pRegex.exec(docXml)) !== null) {
+            paras.push({
+              start: pMatch.index,
+              end: pMatch.index + pMatch[0].length,
+              xml: pMatch[0],
+              text: pMatch[0].replace(/<[^>]+>/g, '').trim()
+            });
+          }
+
+          const removals = [];
+          const opts = state.reportOptions || {};
+          const stagedInvs = state.stagedInvasives || [];
+          const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+
+          // 1. Invasives Section
+          if (!hasInvasives) {
+            // Case A: Update Congratulations text
+            for (const p of paras) {
+              if (p.text.includes("Congratulations on an invasive-free landscape!")) {
+                const congratsXml = `<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t>Congratulations on an invasive-free landscape!</w:t></w:r>
+    <w:r><w:t xml:space="preserve"> We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei) and English Ivy (Hedera helix).</w:t></w:r>
+</w:p>`;
+                removals.push({ start: p.start, end: p.end, repl: congratsXml });
+                break;
+              }
+            }
+
+            // Remove Case B: from "We found the following..." until "Why We Care About Invasive Plants"
+            let inCaseB = false;
+            for (const p of paras) {
+              if (p.text.includes("We found the following invasive plants in your landscape")) {
+                inCaseB = true;
+              }
+              if (inCaseB) {
+                if (p.text.includes("Why We Care About Invasive Plants")) {
+                  inCaseB = false;
+                } else {
+                  removals.push({ start: p.start, end: p.end, repl: '' });
+                }
+              }
+            }
+          } else {
+            // Case B: Remove Case A: from "Congratulations..." until "We found the following..."
+            let inCaseA = false;
+            for (const p of paras) {
+              if (p.text.includes("Congratulations on an invasive-free landscape!")) {
+                inCaseA = true;
+              }
+              if (inCaseA) {
+                if (p.text.includes("We found the following invasive plants in your landscape")) {
+                  inCaseA = false;
+                } else {
+                  removals.push({ start: p.start, end: p.end, repl: '' });
+                }
+              }
+            }
+
+            // Replace red instruction [keep the invasive plants found here...] with staged invasives!
+            let invXml = '';
+            for (const inv of stagedInvs) {
+              const invNotes = inv.notes || 'High-threat non-native invasive. Prompt removal recommended.';
+              invXml += `
+<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/><w:u w:val="single"/><w:color w:val="1155CC"/></w:rPr><w:t>${escapeXml(inv.name)}</w:t></w:r>
+    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(inv.scientific)})</w:t></w:r>
+    <w:r><w:t> – ${escapeXml(invNotes)}</w:t></w:r>
+</w:p>`;
+            }
+
+            const foundNames = stagedInvs.map(i => (i.name || '').toLowerCase());
+            const otherBigThree = [];
+            if (!foundNames.some(n => n.includes('bush honeysuckle'))) {
+              otherBigThree.push("Bush Honeysuckle (Lonicera maackii)");
+            }
+            if (!foundNames.some(n => n.includes('wintercreeper'))) {
+              otherBigThree.push("Wintercreeper (Euonymus fortunei)");
+            }
+            if (!foundNames.some(n => n.includes('japanese honeysuckle'))) {
+              otherBigThree.push("Japanese Honeysuckle (Lonicera japonica)");
+            }
+
+            const otherText = otherBigThree.length > 0
+              ? `More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherBigThree.join(', ')}.`
+              : `More Information: Please continue monitoring boundaries and fence lines regularly for any reappearance of invasive shoots or seedlings.`;
+
+            invXml += `
+<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="80"/></w:pPr>
+    <w:r><w:rPr><w:i/><w:color w:val="4A5568"/></w:rPr><w:t>${escapeXml(otherText)}</w:t></w:r>
+</w:p>`;
+
+            for (const p of paras) {
+              if (p.text.includes("[keep the invasive plants found here")) {
+                removals.push({ start: p.start, end: p.end, repl: invXml });
+                break;
+              }
+            }
+
+            // Remove placeholder plants
+            for (const p of paras) {
+              const t = p.text;
+              if (t.startsWith("Bush Honeysuckle (Lonicera Maackii)") ||
+                  t.startsWith("Japanese Honeysuckle (Lonicera japonica)") ||
+                  t.startsWith("Wintercreeper (Euonymus fortunei)")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          // 2. Wildlife Stewardship toggles
+          if (opts.birdNestBox === false) {
+            let inNest = false;
+            for (const p of paras) {
+              if (p.text.includes("Bird Nest Box")) inNest = true;
+              else if (p.text.includes("Bird Bath")) inNest = false;
+              if (inNest) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.birdBath === false) {
+            let inBath = false;
+            for (const p of paras) {
+              if (p.text.includes("Bird Bath")) inBath = true;
+              else if (p.text.includes("Bat Box")) inBath = false;
+              if (inBath) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.batBox !== true) {
+            let inBat = false;
+            for (const p of paras) {
+              if (p.text.includes("Bat Box")) inBat = true;
+              else if (p.text.includes("Native Bee Habitat")) inBat = false;
+              if (inBat) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.beeHabitat === false) {
+            let inBee = false;
+            for (const p of paras) {
+              if (p.text.includes("Native Bee Habitat")) inBee = true;
+              else if (p.text.includes("STORMWATER MANAGEMENT")) inBee = false;
+              if (inBee) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.birdNestBox === false && opts.birdBath === false && opts.batBox !== true && opts.beeHabitat === false) {
+            for (const p of paras) {
+              if (p.text.includes("WILDLIFE STEWARDSHIP STRUCTURES") && p.start > 25000) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          // 3. Stormwater County toggles
+          if (opts.johnsonCounty !== true) {
+            for (const p of paras) {
+              if (p.text.includes("Contain The Rain program in Johnson County")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          if (opts.wyandotteCounty !== true) {
+            for (const p of paras) {
+              if (p.text.includes("Unified Government Stormwater Quality Cost-Share Program in Wyandotte County")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          if (opts.johnsonCounty !== true && opts.wyandotteCounty !== true) {
+            for (const p of paras) {
+              if (p.text.includes("Cost-Share Reimbursement Programs for Residential Stormwater Solutions")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          // 4. Rainwater Harvesting
+          if (opts.rainwaterHarvesting === false) {
+            let inRain = false;
+            for (const p of paras) {
+              if (p.text.includes("Rainwater Harvesting")) inRain = true;
+              else if (p.text.includes("Why we care about stormwater management")) inRain = false;
+              if (inRain) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          // 5. Red instruction removals
+          const redMarkers = [
+            "IF NO INVASIVE PLANTS WERE FOUND IN THE LANDSCAPE",
+            "IF INVASIVE PLANTS WERE FOUND IN THE LANDSCAPE",
+            "Attention, Nature Advisors:",
+            "There are four management practices listed below",
+            "*If they do not seem interested in incorporating these",
+            "Once you have completed this section, please return to this instruction",
+            "***(if in Johnson or Wyandotte County"
+          ];
+          for (const p of paras) {
+            for (const rm of redMarkers) {
+              if (p.text.includes(rm)) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+                break;
+              }
+            }
+          }
+
+          // 6. Clean (IF Discussed)
+          docXml = docXml.replace("Bat Box (IF Discussed)", "Bat Box");
+          docXml = docXml.replace("Rainwater Harvesting (IF Discussed)", "Rainwater Harvesting");
+
+          // 7. Deduplicate and execute replacements backwards
+          const removalsMap = new Map();
+          for (const item of removals) {
+            const key = `${item.start}:${item.end}`;
+            if (!removalsMap.has(key) || item.repl) {
+              removalsMap.set(key, item);
+            }
+          }
+
+          const sortedRemovalsList = Array.from(removalsMap.values()).sort((a, b) => b.start - a.start);
+          for (const item of sortedRemovalsList) {
+            docXml = docXml.slice(0, item.start) + (item.repl || '') + docXml.slice(item.end);
+          }
+
           // Append hyperlink relationships
           if (newRels.length > 0) {
             relsXml = relsXml.replace("</Relationships>", newRels + "</Relationships>");
@@ -6058,6 +7092,20 @@
             miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t>• Advisor Notes: </w:t></w:r><w:r><w:t>${escapeXml(p.custom_notes)}</w:t></w:r></w:p>`;
           }
         });
+
+        // Invasives in fallback
+        const opts = state.reportOptions || {};
+        const stagedInvs = state.stagedInvasives || [];
+        const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+        miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="235C36"/></w:rPr><w:t>Non-Native, Invasive Plants &amp; Problematic Species</w:t></w:r></w:p>`;
+        if (!hasInvasives) {
+          miniBody += `<w:p><w:pPr><w:spacing w:after="100"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t>Congratulations on an invasive-free landscape!</w:t></w:r><w:r><w:t xml:space="preserve"> We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei) and English Ivy (Hedera helix).</w:t></w:r></w:p>`;
+        } else {
+          miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:t>We found the following invasive plants in your landscape during our visit:</w:t></w:r></w:p>`;
+          stagedInvs.forEach(inv => {
+            miniBody += `<w:p><w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>${escapeXml(inv.name)}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(inv.scientific)})</w:t></w:r><w:r><w:t> – ${escapeXml(inv.notes || 'High-threat invasive. Removal recommended.')}</w:t></w:r></w:p>`;
+          });
+        }
 
         miniRels += miniRelsBody + `</Relationships>`;
         zip.file('word/_rels/document.xml.rels', miniRels);
@@ -6739,11 +7787,16 @@
 
     // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
-      loadMasterPlants();
-      renderStaging();
-      setupEventListeners();
-      initAdvisorAuth();
-      if (window.lucide) lucide.createIcons();
+      try { loadMasterPlants(); } catch(e) { console.error('loadMasterPlants error:', e); }
+      try { setupEventListeners(); } catch(e) { console.error('setupEventListeners error:', e); }
+      try { initAdvisorAuth(); } catch(e) { console.error('initAdvisorAuth error:', e); }
+      try { renderGardenAreasManager(); } catch(e) { console.error('renderGardenAreasManager error:', e); }
+      try { renderStagedInvasives(); } catch(e) { console.error('renderStagedInvasives error:', e); }
+      try { renderStaging(); } catch(e) { console.error('renderStaging error:', e); }
+      try { syncReportOptionsUI(); } catch(e) { console.error('syncReportOptionsUI error:', e); }
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch(e) {}
+      }
     });
   </script>
 </body>
