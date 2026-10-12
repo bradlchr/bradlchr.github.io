@@ -2615,6 +2615,16 @@
           <input type="text" id="editSociability">
         </div>
       </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editBloomColor">Bloom Colors</label>
+          <input type="text" id="editBloomColor" placeholder="e.g. Purple, Yellow, White">
+        </div>
+        <div class="form-group">
+          <label for="editBloomPeriod">Bloom Season</label>
+          <input type="text" id="editBloomPeriod" placeholder="e.g. Summer, Fall">
+        </div>
+      </div>
       <div class="form-group">
         <label for="editImageUrl">Image URL</label>
         <input type="url" id="editImageUrl">
@@ -5143,6 +5153,10 @@
       document.getElementById('editMoisture').value = (plant.moisture_requirements || []).join(', ');
       document.getElementById('editHeight').value = getPlantHeight(plant);
       document.getElementById('editSociability').value = getPlantSociability(plant);
+      const colors = plant.bloom_color || plant.bloomColor || plant.bloom_colors || [];
+      document.getElementById('editBloomColor').value = Array.isArray(colors) ? colors.join(', ') : String(colors || '');
+      const seasons = plant.bloom_period || plant.bloomSeason || plant.bloom_seasons || [];
+      document.getElementById('editBloomPeriod').value = Array.isArray(seasons) ? seasons.join(', ') : String(seasons || '');
       document.getElementById('editImageUrl').value = plant.images?.[0]?.url || '';
       document.getElementById('editImageAttr').value = plant.images?.[0]?.attribution_name || plant.images?.[0]?.source || '';
       
@@ -5169,6 +5183,10 @@
           moisture_requirements: document.getElementById('editMoisture').value.split(',').map(s => s.trim()).filter(Boolean),
           height_display: document.getElementById('editHeight').value,
           sociability: document.getElementById('editSociability').value,
+          bloom_color: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
+          bloomColor: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
+          bloom_period: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
+          bloomSeason: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
           last_edited_by_user_id: state.currentUser.id || state.currentUser.username,
           last_edited_by_user_name: state.currentUser.name || `${state.currentUser.firstName} ${state.currentUser.lastName}`,
           last_edited_by_user_email: state.currentUser.email || '',
@@ -5208,6 +5226,11 @@
                 plant_url: { stringValue: edits.plant_url },
                 advisor_description: { stringValue: edits.advisor_description },
                 height_display: { stringValue: edits.height_display },
+                bloom_color: { arrayValue: { values: (edits.bloom_color || []).map(c => ({ stringValue: String(c) })) } },
+                bloom_period: { arrayValue: { values: (edits.bloom_period || []).map(s => ({ stringValue: String(s) })) } },
+                light_requirements: { arrayValue: { values: (edits.light_requirements || []).map(s => ({ stringValue: String(s) })) } },
+                moisture_requirements: { arrayValue: { values: (edits.moisture_requirements || []).map(s => ({ stringValue: String(s) })) } },
+                sociability: { stringValue: edits.sociability || '' },
                 last_edited_by_user_id: { stringValue: edits.last_edited_by_user_id },
                 last_edited_by_user_name: { stringValue: edits.last_edited_by_user_name },
                 last_edited_by_user_email: { stringValue: edits.last_edited_by_user_email },
