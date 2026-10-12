@@ -16,6 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400;1,600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="report_template_base64.js"></script>
 
   <style>
     :root {
@@ -4177,6 +4178,7 @@
       const topFilters = document.querySelector('.filter-chips-row');
       const openSidebarBtn = document.getElementById('openSidebarBtn');
       const sortControls = document.querySelector('.controls-actions');
+      const activeFiltersBar = document.getElementById('activeFiltersBar');
 
       if (mode === 'invasive') {
         nativeBtns.forEach(b => b?.classList.remove('active'));
@@ -4184,6 +4186,7 @@
         if (topFilters) topFilters.style.display = 'none';
         if (openSidebarBtn) openSidebarBtn.style.display = 'none';
         if (sortControls) sortControls.style.display = 'none';
+        if (activeFiltersBar) activeFiltersBar.style.display = 'none';
         renderInvasiveGrid();
         showToast('Viewing Kansas City High-Threat Invasive Species Guide');
       } else {
@@ -4192,20 +4195,53 @@
         if (topFilters) topFilters.style.display = 'flex';
         if (openSidebarBtn) openSidebarBtn.style.display = '';
         if (sortControls) sortControls.style.display = 'flex';
-        renderGrid();
+        applyFilters();
       }
       if (window.lucide) lucide.createIcons();
     }
     window.setCatalogMode = setCatalogMode;
 
-    function renderInvasiveGrid() {
-      const grid = document.getElementById('plantGrid');
+    function renderInvasiveGrid(searchTerm) {
+      const grid = document.getElementById('plantsGrid');
+      const empty = document.getElementById('emptyState');
       const countEl = document.getElementById('resultsCount');
+      const activeFiltersBar = document.getElementById('activeFiltersBar');
       if (!grid) return;
 
-      const invasives = state.invasivePlants || [];
-      if (countEl) countEl.innerHTML = `Showing <strong>${invasives.length}</strong> Kansas City High-Threat Invasive Species`;
+      if (activeFiltersBar) activeFiltersBar.style.display = 'none';
 
+      let invasives = state.invasivePlants || [];
+      const query = (searchTerm !== undefined ? searchTerm : (state.filters.search || '')).toLowerCase().trim();
+      if (query) {
+        invasives = invasives.filter(p => 
+          (p.common_name || '').toLowerCase().includes(query) ||
+          (p.scientific_name || '').toLowerCase().includes(query) ||
+          (p.identification || '').toLowerCase().includes(query) ||
+          (p.removal_tips || '').toLowerCase().includes(query) ||
+          (p.threat || '').toLowerCase().includes(query)
+        );
+      }
+
+      if (countEl) countEl.innerHTML = `Showing <strong>${invasives.length}</strong> Kansas City High-Threat Invasive Species`;
+      const mobileFilteredCount = document.getElementById('mobileFilteredCount');
+      if (mobileFilteredCount) mobileFilteredCount.textContent = invasives.length;
+
+      if (invasives.length === 0) {
+        grid.style.display = 'none';
+        if (empty) {
+          empty.style.display = 'block';
+          const h3 = empty.querySelector('h3');
+          if (h3) h3.textContent = 'No Kansas City invasive species match your search';
+        }
+        return;
+      }
+
+      grid.style.display = 'grid';
+      if (empty) {
+        empty.style.display = 'none';
+        const h3 = empty.querySelector('h3');
+        if (h3) h3.textContent = 'No Kansas City native plants match your filters';
+      }
       grid.innerHTML = '';
 
       // Render contractors banner at top of invasive grid
@@ -4339,6 +4375,18 @@
     }
 
     
+    function persistReportOptions() {
+      localStorage.setItem('dr_report_options', JSON.stringify(state.reportOptions));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.reportOptions = JSON.parse(JSON.stringify(state.reportOptions));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+
     function syncReportOptionsUI() {
       const opts = state.reportOptions || {};
       const setVal = (id, val) => {
@@ -5401,6 +5449,10 @@
 
     // Filter Logic
     function applyFilters() {
+      if (state.catalogMode === 'invasive') {
+        renderInvasiveGrid();
+        return;
+      }
       const f = state.filters;
       const search = f.search.toLowerCase().trim();
 
@@ -5635,6 +5687,10 @@
 
     // Render Grid
     function renderGrid() {
+      if (state.catalogMode === 'invasive') {
+        renderInvasiveGrid();
+        return;
+      }
       const grid = document.getElementById('plantsGrid');
       const empty = document.getElementById('emptyState');
       const countEl = document.getElementById('resultsCount');
@@ -6553,6 +6609,20 @@
         }
       }
 
+      if (!templateBuffer && window.EMBEDDED_REPORT_TEMPLATE_BASE64) {
+        try {
+          const binaryStr = atob(window.EMBEDDED_REPORT_TEMPLATE_BASE64);
+          const len = binaryStr.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          templateBuffer = bytes.buffer;
+        } catch (b64Err) {
+          console.error('Base64 decode failed:', b64Err);
+        }
+      }
+
       if (templateBuffer) {
         try {
           const zip = await JSZip.loadAsync(templateBuffer);
@@ -6573,7 +6643,7 @@
           const tocIdx = docXml.indexOf('Table of Contents');
           if (tocIdx !== -1) {
             const firstPageXml = docXml.slice(0, tocIdx);
-            const cleanFirstPageXml = firstPageXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '');
+            const cleanFirstPageXml = firstPageXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
             docXml = cleanFirstPageXml + docXml.slice(tocIdx);
           }
 
@@ -6720,7 +6790,7 @@
               }
 
               for (const staged of plants) {
-                const master = (state.plants || []).find(mp => mp.id === staged.id || (mp.scientific_name && mp.scientific_name.toLowerCase().trim() === (staged.scientific_name || '').toLowerCase().trim()));
+                const master = (state.allPlants || []).find(mp => mp.id === staged.id || (mp.scientific_name && mp.scientific_name.toLowerCase().trim() === (staged.scientific_name || '').toLowerCase().trim()));
                 const rId = `rId${relCounter++}`;
                 const targetUrl = staged.plant_url || (master && (master.plant_url || master.url)) || 'https://grownative.org';
                 newRels += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(targetUrl)}" TargetMode="External"/>`;
@@ -7082,7 +7152,8 @@
           docXml = docXml.replace("Rainwater Harvesting (IF Discussed)", "Rainwater Harvesting");
 
           // Strip any stray red instructional colors across the document
-          docXml = docXml.replace(/<w:color\s+w:val="FF0000"[^>]*\/>/gi, '');
+          docXml = docXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
+          docXml = docXml.replace("You might be interested/You also expressed interest", "You may also be interested");
 
           // 7. Deduplicate and execute replacements backwards
           const removalsMap = new Map();
@@ -7127,11 +7198,15 @@
           return;
         } catch (genErr) {
           console.error('Error modifying official template docx:', genErr);
-          showToast('Template load issue; generating clean Word document...');
+          showToast('Error modifying template report: ' + genErr.message, 'danger');
+          return;
         }
+      } else {
+        showToast('Error: Official report_template.docx could not be loaded. Please ensure you are connected to the internet.', 'danger');
+        return;
       }
 
-      // Offline / fallback genuine OOXML .docx generator using JSZip
+      // Fallback genuine OOXML generator (retained only if template unavailable)
       try {
         const zip = new JSZip();
         zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
