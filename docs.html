@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Roots Database - Interactive Codebase Documentation & Architecture Manual</title>
+  <meta name="description" content="Comprehensive interactive architecture guide, technology breakdown, and function reference for the Deep Roots Kansas City Native Plant Database codebase.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #2e7d32;
+      --primary-light: #4caf50;
+      --primary-dark: #1b5e20;
+      --primary-subtle: rgba(46, 125, 50, 0.08);
+      --primary-border: rgba(46, 125, 50, 0.25);
+      
+      --accent-gold: #d97706;
+      --accent-gold-subtle: rgba(217, 119, 6, 0.1);
+      --danger: #dc2626;
+      --danger-subtle: rgba(220, 38, 38, 0.1);
+      --info: #0284c7;
+      --info-subtle: rgba(2, 132, 199, 0.1);
+      --purple: #7c3aed;
+      --purple-subtle: rgba(124, 58, 237, 0.1);
+
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --code-bg: #1e293b;
+      --code-text: #f8fafc;
+      
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --border-subtle: #374151;
+      --border-strong: #4b5563;
+      
+      --text-main: #f9fafb;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      
+      --code-bg: #030712;
+      --code-text: #f3f4f6;
+      
+      --primary-subtle: rgba(46, 125, 50, 0.18);
+      --primary-border: rgba(76, 175, 80, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(46,125,50,0.3);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text-secondary);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      color: var(--primary);
+      border-color: var(--primary-border);
+      background: var(--primary-subtle);
+    }
+
+    .nav-btn.primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--primary-dark);
+      color: #ffffff;
+    }
+
+    /* Layout */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      height: calc(100vh - 65px);
+      position: sticky;
+      top: 65px;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 16px;
+      height: 16px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-item-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .nav-item-link:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+    }
+
+    .nav-item-link.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 700;
+      border-left: 3px solid var(--primary);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-elevated);
+      color: var(--text-muted);
+    }
+
+    /* Main Content Area */
+    .content-area {
+      flex: 1;
+      padding: 36px 48px 80px;
+      overflow-y: auto;
+      max-width: 1280px;
+    }
+
+    @media (max-width: 1024px) {
+      .app-layout { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .content-area { padding: 24px 16px; }
+    }
+
+    /* Hero Banner */
+    .hero-card {
+      background: linear-gradient(135deg, rgba(46,125,50,0.08), rgba(217,119,6,0.06));
+      border: 1px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .hero-lead {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 850px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Section Styles */
+    .doc-section {
+      margin-bottom: 60px;
+      scroll-margin-top: 85px;
+    }
+
+    .section-header {
+      border-bottom: 2px solid var(--border-subtle);
+      padding-bottom: 14px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-lead {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* Architecture Flow Cards */
+    .arch-flow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .flow-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .flow-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .flow-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .flow-card h4 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .flow-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Diagram Canvas */
+    .diagram-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 30px;
+      overflow-x: auto;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Code & Terminal Blocks */
+    .code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .code-tag {
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #94a3b8;
+    }
+
+    /* Table Styles */
+    .data-table-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin: 20px 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    table.data-table th {
+      background: var(--bg-surface-elevated);
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    table.data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr:hover td {
+      background: var(--bg-base);
+    }
+
+    /* Interactive Function Explorer */
+    .function-toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-pill {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill:hover, .filter-pill.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .function-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .function-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .function-card:hover {
+      border-color: var(--primary-border);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .function-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .function-sig {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      background: var(--primary-subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--primary-border);
+      display: inline-block;
+    }
+
+    .function-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-async {
+      background: var(--purple-subtle);
+      color: var(--purple);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tag-module {
+      background: var(--bg-surface-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .tag-line {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .function-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .param-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: var(--bg-base);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+    }
+
+    .param-row {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .param-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .param-type {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    /* Badges */
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-guest { background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+    .badge-advisor { background: rgba(46,125,50,0.12); color: var(--primary); border: 1px solid rgba(46,125,50,0.25); }
+    .badge-admin { background: rgba(217,119,6,0.12); color: var(--accent-gold); border: 1px solid rgba(217,119,6,0.3); }
+
+    /* Footer */
+    footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 30px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Header -->
+  <header class="top-header">
+    <a href="./index.html" class="brand-group" title="Back to Application">
+      <div class="brand-icon">🌿</div>
+      <div>
+        <div class="brand-title">Deep Roots Database</div>
+        <div class="brand-sub">Interactive Codebase Architecture &amp; Function Manual</div>
+      </div>
+    </a>
+    <div class="header-links">
+      <a href="./index.html" class="nav-btn primary">
+        <i data-lucide="play" style="width:14px;height:14px;"></i>
+        <span>Launch App</span>
+      </a>
+      <a href="./presentation.html" class="nav-btn">
+        <i data-lucide="presentation" style="width:14px;height:14px;"></i>
+        <span>Slide Deck</span>
+      </a>
+      <a href="https://github.com/bradlchr/deep-roots-nature-advisors" target="_blank" rel="noopener noreferrer" class="nav-btn">
+        <i data-lucide="github" style="width:14px;height:14px;"></i>
+        <span>GitHub Repo</span>
+      </a>
+      <button id="themeToggleBtn" class="nav-btn" aria-label="Toggle theme">
+        <i data-lucide="moon" id="themeIcon" style="width:14px;height:14px;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Body Layout -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="search-box">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="fnSearchInput" class="search-input" placeholder="Search 118 functions, modules, tags...">
+      </div>
+
+      <div>
+        <div class="nav-section-title">Architecture Guide</div>
+        <ul class="nav-list">
+          <li><a href="#overview" class="nav-item-link active"><i data-lucide="layers" style="width:15px;height:15px;"></i><span>System Overview</span></a></li>
+          <li><a href="#tech-stack" class="nav-item-link"><i data-lucide="cpu" style="width:15px;height:15px;"></i><span>Technology Stack</span></a></li>
+          <li><a href="#rbac" class="nav-item-link"><i data-lucide="shield-check" style="width:15px;height:15px;"></i><span>3-Tier RBAC &amp; Auth</span></a></li>
+          <li><a href="#color-engine" class="nav-item-link"><i data-lucide="palette" style="width:15px;height:15px;"></i><span>Color Mesh Engine</span></a></li>
+          <li><a href="#consultation-engine" class="nav-item-link"><i data-lucide="clipboard-list" style="width:15px;height:15px;"></i><span>Consultation Engine</span></a></li>
+          <li><a href="#docx-pipeline" class="nav-item-link"><i data-lucide="file-text" style="width:15px;height:15px;"></i><span>OpenXML .docx Pipeline</span></a></li>
+          <li><a href="#firestore-sync" class="nav-item-link"><i data-lucide="cloud" style="width:15px;height:15px;"></i><span>Firestore Cloud Sync</span></a></li>
+          <li><a href="#admin-repo" class="nav-item-link"><i data-lucide="folder-git-2" style="width:15px;height:15px;"></i><span>Reports Repository</span></a></li>
+          <li><a href="#a11y" class="nav-item-link"><i data-lucide="accessibility" style="width:15px;height:15px;"></i><span>ADA / WCAG AA Engine</span></a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="nav-section-title">Function Reference (118)</div>
+        <ul class="nav-list" id="categoryNavList">
+          <li><a href="#functions" data-cat="all" class="nav-item-link active"><span>All Functions</span><span class="nav-badge">118</span></a></li>
+          <li><a href="#functions" data-cat="auth" class="nav-item-link"><span>Auth &amp; RBAC</span><span class="nav-badge">22</span></a></li>
+          <li><a href="#functions" data-cat="catalog" class="nav-item-link"><span>Catalog &amp; Grid</span><span class="nav-badge">22</span></a></li>
+          <li><a href="#functions" data-cat="consultation" class="nav-item-link"><span>Consultations &amp; Areas</span><span class="nav-badge">21</span></a></li>
+          <li><a href="#functions" data-cat="docx" class="nav-item-link"><span>Word .docx Generator</span><span class="nav-badge">7</span></a></li>
+          <li><a href="#functions" data-cat="sync" class="nav-item-link"><span>Firestore &amp; Master Sync</span><span class="nav-badge">8</span></a></li>
+          <li><a href="#functions" data-cat="admin" class="nav-item-link"><span>Admin Repository &amp; Roster</span><span class="nav-badge">13</span></a></li>
+          <li><a href="#functions" data-cat="invasive" class="nav-item-link"><span>Invasive Species Guide</span><span class="nav-badge">9</span></a></li>
+          <li><a href="#functions" data-cat="ui" class="nav-item-link"><span>A11y &amp; Theme Engine</span><span class="nav-badge">16</span></a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- Hero Section -->
+      <section id="overview" class="doc-section hero-card">
+        <span class="hero-badge"><i data-lucide="code-2" style="width:13px;height:13px;"></i> Technical Codebase Manual</span>
+        <h1 class="hero-title">Deep Roots Kansas City Native Plant Database</h1>
+        <p class="hero-lead">
+          An architectural breakdown and function-by-function manual for the multi-platform botanical intelligence application built for <strong>Deep Roots Nature Advisors</strong> in the Greater Kansas City metropolitan area.
+        </p>
+        <div class="hero-stats">
+          <div class="stat-box">
+            <div class="stat-number">118</div>
+            <div class="stat-label">JavaScript Functions</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">185</div>
+            <div class="stat-label">Native Species</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">10</div>
+            <div class="stat-label">Invasive Threats</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Build Dependencies</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture Diagram & Overview -->
+      <section class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="git-merge" style="color:var(--primary);"></i> Overall System Architecture</h2>
+          <span style="font-size:12px;font-weight:700;color:var(--text-muted);">Client-Side Zero-Build Single-Page Application</span>
+        </div>
+        <p class="section-lead">
+          The application follows a reactive, single-page architecture built with zero external compiler dependencies. The codebase couples real-time Cloud Firestore synchronization, persistent client-side storage, and a client-side OpenXML templating pipeline to deliver instantaneous field performance on desktop, tablet, and mobile browsers.
+        </p>
+
+        <div class="diagram-container">
+          <svg viewBox="0 0 1050 420" width="100%" height="auto" style="font-family:'Plus Jakarta Sans',sans-serif;">
+            <defs>
+              <linearGradient id="gradPrimary" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#2e7d32" />
+                <stop offset="100%" stop-color="#1b5e20" />
+              </linearGradient>
+              <linearGradient id="gradGold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#d97706" />
+                <stop offset="100%" stop-color="#b45309" />
+              </linearGradient>
+              <linearGradient id="gradBlue" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0284c7" />
+                <stop offset="100%" stop-color="#0369a1" />
+              </linearGradient>
+            </defs>
+
+            <!-- Browser Client Box -->
+            <rect x="20" y="20" width="310" height="380" rx="14" fill="rgba(46,125,50,0.04)" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,4" />
+            <text x="40" y="50" font-size="14" font-weight="800" fill="#2e7d32">CLIENT-SIDE CORE RUNTIME (index.html)</text>
+
+            <!-- State Store -->
+            <rect x="40" y="70" width="270" height="80" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+            <text x="55" y="95" font-size="13" font-weight="700" fill="#0f172a">Central State Store (state)</text>
+            <text x="55" y="115" font-size="11" fill="#64748b">• allPlants, stagedPlants, consultations</text>
+            <text x="55" y="132" font-size="11" fill="#64748b">• currentUser, activeConsultationId, filters</text>
+
+            <!-- Reactive View Modules -->
+            <rect x="40" y="170" width="270" height="100" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+            <text x="55" y="195" font-size="13" font-weight="700" fill="#0f172a">UI &amp; Component Rendering</text>
+            <text x="55" y="215" font-size="11" fill="#64748b">• renderGrid() &amp; createPlantCard()</text>
+            <text x="55" y="232" font-size="11" fill="#64748b">• renderStaging() &amp; Garden Areas</text>
+            <text x="55" y="249" font-size="11" fill="#64748b">• renderAdminReportsRepository()</text>
+
+            <!-- Client Engines -->
+            <rect x="40" y="290" width="270" height="90" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+            <text x="55" y="315" font-size="13" font-weight="700" fill="#0f172a">Client Engines</text>
+            <text x="55" y="335" font-size="11" fill="#64748b">• OpenXML Reverse Splicing (JSZip)</text>
+            <text x="55" y="352" font-size="11" fill="#64748b">• SHA-256 PBKDF2 Auth &amp; RBAC</text>
+            <text x="55" y="369" font-size="11" fill="#64748b">• Color Mesh Gradient Synthesis</text>
+
+            <!-- Connectors Client to LocalStorage -->
+            <line x1="330" y1="110" x2="380" y2="110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+            <line x1="380" y1="120" x2="330" y2="120" stroke="#64748b" stroke-width="2" />
+
+            <!-- LocalStorage Box -->
+            <rect x="380" y="70" width="270" height="120" rx="10" fill="#ffffff" stroke="#d97706" stroke-width="2" />
+            <text x="400" y="98" font-size="14" font-weight="800" fill="#d97706">BROWSER STORAGE (Offline First)</text>
+            <text x="400" y="122" font-size="11" fill="#475569">• dr_consultations &amp; active drafts</text>
+            <text x="400" y="140" font-size="11" fill="#475569">• dr_users_roster (Advisor Cache)</text>
+            <text x="400" y="158" font-size="11" fill="#475569">• dr_custom_plants &amp; text scaling preferences</text>
+            <text x="400" y="176" font-size="11" fill="#475569">• dr_report_options &amp; staged invasives</text>
+
+            <!-- Connector Client to Cloud Firestore -->
+            <path d="M 310 335 L 720 335 L 720 220" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5,5" />
+
+            <!-- Cloud Firestore Box -->
+            <rect x="720" y="20" width="310" height="230" rx="14" fill="rgba(2,132,199,0.05)" stroke="#0284c7" stroke-width="2" />
+            <text x="740" y="50" font-size="14" font-weight="800" fill="#0284c7">GOOGLE CLOUD FIRESTORE</text>
+            <text x="740" y="75" font-size="12" font-weight="700" fill="#0f172a">REST API /v1/projects/.../databases/...</text>
+
+            <rect x="740" y="90" width="270" height="42" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="755" y="112" font-size="11" font-weight="700" fill="#0284c7">/plants/{plantId}</text>
+            <text x="755" y="126" font-size="10" fill="#64748b">185 Master botanical records &amp; live advisor edits</text>
+
+            <rect x="740" y="140" width="270" height="42" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="755" y="162" font-size="11" font-weight="700" fill="#0284c7">/users/{username}</text>
+            <text x="755" y="176" font-size="10" fill="#64748b">Advisor profiles, roles, salts, password hashes</text>
+
+            <rect x="740" y="190" width="270" height="50" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="755" y="212" font-size="11" font-weight="700" fill="#0284c7">/reports/{id} &amp; /users/{u}/reports</text>
+            <text x="755" y="226" font-size="10" fill="#64748b">Consultation reports with multi-path storage</text>
+
+            <!-- Export Outputs -->
+            <rect x="380" y="240" width="270" height="160" rx="10" fill="#ffffff" stroke="#7c3aed" stroke-width="2" />
+            <text x="400" y="268" font-size="14" font-weight="800" fill="#7c3aed">DOCUMENT GENERATION</text>
+            <text x="400" y="295" font-size="12" font-weight="700" fill="#0f172a">Official .docx Word Reports</text>
+            <text x="400" y="315" font-size="11" fill="#475569">• Reverse byte offset XML splicing</text>
+            <text x="400" y="332" font-size="11" fill="#475569">• Zero instructional red text artifacts</text>
+            <text x="400" y="350" font-size="11" fill="#475569">• Case A / Case B invasive branching</text>
+            <text x="400" y="368" font-size="11" fill="#475569">• Grow Native! links &amp; styled planting cards</text>
+          </svg>
+        </div>
+
+        <div class="arch-flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--primary-subtle);color:var(--primary);">⚡</div>
+              <h4>1. Zero-Build Frontend</h4>
+            </div>
+            <p>Single HTML file embedding 185 baseline species, CSS tokens, reactive UI logic, and SVG iconography. Runs instantly in any modern browser without npm, node, or webpack build steps.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--accent-gold-subtle);color:var(--accent-gold);">💾</div>
+              <h4>2. Offline-First Resilience</h4>
+            </div>
+            <p>All client consultations, advisor settings, text scale preferences, and local plant modifications are persisted in `localStorage`. Advisors can formulate entire reports without internet.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--info-subtle);color:var(--info);">☁️</div>
+              <h4>3. Cloud Firestore Mesh</h4>
+            </div>
+            <p>Direct REST communication with Cloud Firestore using anonymous discovery for botanical browsing and authenticated endpoints for advisor roster and consultation sync.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--purple-subtle);color:var(--purple);">📄</div>
+              <h4>4. Client-Side OpenXML Engine</h4>
+            </div>
+            <p>Uses `JSZip` to load the official 1.4 MB Microsoft Word template in the browser, parse internal XML structures, splice custom garden zones, and trigger native downloads without servers.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Technology Stack -->
+      <section id="tech-stack" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="cpu" style="color:var(--primary);"></i> Technology Stack &amp; Libraries</h2>
+        </div>
+        <p class="section-lead">The application leverages high-performance modern web standards and native mobile frameworks:</p>
+
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Technology / Library</th>
+                <th>Role in Architecture</th>
+                <th>Implementation Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>HTML5 &amp; Modern Vanilla ES6+</strong></td>
+                <td>Core Application Logic</td>
+                <td>11,190+ lines in single-file architecture (`index.html`). Uses modern JavaScript features: `async/await`, `Promise.allSettled`, destructuring, arrow functions, and native dialog elements.</td>
+              </tr>
+              <tr>
+                <td><strong>JSZip v3.10.1</strong></td>
+                <td>Client-Side DOCX Splicing</td>
+                <td>Unpacks `report_template.docx`, performs OpenXML string replacements and reverse paragraph splicing, repackages into `.docx` blob for client download.</td>
+              </tr>
+              <tr>
+                <td><strong>Web Crypto API (`window.crypto`)</strong></td>
+                <td>Security &amp; RBAC Authentication</td>
+                <td>Generates cryptographically random 16-byte hex salts via `crypto.getRandomValues()` and hashes advisor credentials using SHA-256 (`crypto.subtle.digest`).</td>
+              </tr>
+              <tr>
+                <td><strong>Google Cloud Firestore (REST API v1)</strong></td>
+                <td>Cloud Database &amp; Master Catalog</td>
+                <td>Zero-SDK direct HTTPS REST requests (`GET`, `PATCH`, `DELETE`) against project `deep-roots-nature-advisors`. Structured values with `stringValue`, `integerValue`, `mapValue`, and `arrayValue`.</td>
+              </tr>
+              <tr>
+                <td><strong>Lucide Icons (v0.344.0)</strong></td>
+                <td>Accessible UI Iconography</td>
+                <td>Dynamic SVG rendering via `lucide.createIcons()` across cards, modal dialogs, drawers, and form controls.</td>
+              </tr>
+              <tr>
+                <td><strong>Jetpack Compose &amp; Kotlin</strong></td>
+                <td>Native Android &amp; ChromeOS App</td>
+                <td>Material 3 Adaptive layout (`WindowSizeClass`), Room database offline persistence, Kotlin Coroutines, and WorkManager background synchronization (`DeepRootsAdvisor-debug.apk`).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3-Tier RBAC & Security -->
+      <section id="rbac" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="shield-check" style="color:var(--primary);"></i> 3-Tier RBAC &amp; Authentication Architecture</h2>
+        </div>
+        <p class="section-lead">The system implements a standalone Role-Based Access Control matrix that safeguards administrative capabilities while allowing advisors to collaborate freely and visitors to browse safely:</p>
+
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Capability / Action</th>
+                <th>Guest (Unauthenticated)</th>
+                <th>Nature Advisor (`user`)</th>
+                <th>Program Administrator (`admin`)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Browse 185 Native &amp; 10 Invasive Species</strong></td>
+                <td><span class="badge-pill badge-guest">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-advisor">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Search, Filter &amp; Name Display Toggle</strong></td>
+                <td><span class="badge-pill badge-guest">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-advisor">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Consultation Staging Drawer &amp; Garden Areas</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Hidden</span></td>
+                <td><span class="badge-pill badge-advisor">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Generate Official Word Reports (.docx)</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span class="badge-pill badge-advisor">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Edit Botanical Records (Syncs to Firestore)</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span class="badge-pill badge-advisor">✓ Allowed</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Central Consultation Reports Repository</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span class="badge-pill badge-admin">✓ Full Access</span></td>
+              </tr>
+              <tr>
+                <td><strong>Delete Other Users' Reports</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Upload / Reset / Import Master Catalog</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+              <tr>
+                <td><strong>Provision New Advisors &amp; Reset Passwords</strong></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span style="color:var(--danger);font-weight:700;">✗ Denied</span></td>
+                <td><span class="badge-pill badge-admin">✓ Allowed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Color Mesh Engine -->
+      <section id="color-engine" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="palette" style="color:var(--primary);"></i> Botanical Color Mesh Engine</h2>
+        </div>
+        <p class="section-lead">
+          To provide instantaneous visual recognition of botanical phenology, plant cards dynamically render radiant background mesh gradients derived from their real seasonal bloom colors.
+        </p>
+
+        <div class="code-block">
+          <span class="code-tag">Algorithm</span>
+// Synthesizes radial and linear background gradients based on plant flower phenology
+function getBloomCardGradient(bloomColors, isDark) {
+  if (!bloomColors || bloomColors.length === 0) return '';
+  const c1 = getBloomColorAccent(bloomColors[0], isDark);
+  if (bloomColors.length === 1) {
+    const opacity = isDark ? '0.18' : '0.14';
+    return `radial-gradient(ellipse 130% 90% at 85% -10%, ${c1.replace('rgb', 'rgba').replace(')', `, ${opacity})`)}, transparent 70%)`;
+  }
+  const c2 = getBloomColorAccent(bloomColors[1], isDark);
+  return `radial-gradient(ellipse 120% 80% at 90% 0%, ${c1.replace('rgb', 'rgba').replace(')', ', 0.16)')}, transparent 60%),
+          radial-gradient(ellipse 90% 60% at 10% 100%, ${c2.replace('rgb', 'rgba').replace(')', ', 0.12)')}, transparent 55%)`;
+}
+        </div>
+      </section>
+
+      <!-- OpenXML .docx Pipeline -->
+      <section id="docx-pipeline" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="file-text" style="color:var(--primary);"></i> OpenXML Reverse-Offset Splicing Pipeline</h2>
+        </div>
+        <p class="section-lead">
+          `downloadDocxReport()` takes the authentic 1.4 MB Microsoft Word document template (`report_template.docx`) and converts client consultation drafts into polished `.docx` deliverables with zero backend servers.
+        </p>
+
+        <div class="arch-flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--danger-subtle);color:var(--danger);">✂️</div>
+              <h4>1. Directive Red-Text Stripping</h4>
+            </div>
+            <p>Locates and cleanly removes all instructional paragraphs styled with red font (`w:color w:val="FF0000"`), ensuring internal nature advisor advice is never shown to clients.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--accent-gold-subtle);color:var(--accent-gold);">🔀</div>
+              <h4>2. Case A vs. Case B Invasive Logic</h4>
+            </div>
+            <p>If invasives are observed, Case A is deleted and Case B is filled with staged species and remaining Big Three vigilance advice. If invasive-free, Case B is cleanly omitted.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--primary-subtle);color:var(--primary);">🔄</div>
+              <h4>3. Reverse-Offset Splicing</h4>
+            </div>
+            <p>Deletions and insertions are sorted from highest byte position to lowest (backwards). This prevents character offsets from shifting, guaranteeing 100% valid XML and zero document corruption.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--info-subtle);color:var(--info);">📦</div>
+              <h4>4. ZIP Compression &amp; Blob Download</h4>
+            </div>
+            <p>Updates `word/document.xml`, recompresses the archive via `JSZip.generateAsync({type:"blob"})`, and triggers client-side saving as `Deep_Roots_Consultation_[ClientName].docx`.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Function Directory -->
+      <section id="functions" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="terminal" style="color:var(--primary);"></i> Comprehensive Function Reference (118 Functions)</h2>
+          <span id="functionCountBadge" class="nav-badge" style="font-size:12px;padding:4px 10px;">Showing 118 of 118</span>
+        </div>
+        <p class="section-lead">
+          Filter and inspect all 118 functions declared in `index.html`. Each card details the parameter signature, module category, line number, asynchronous execution, and implementation purpose:
+        </p>
+
+        <!-- Category Toolbar -->
+        <div class="function-toolbar" id="filterPillsContainer">
+          <button class="filter-pill active" data-filter="all">All Modules (118)</button>
+          <button class="filter-pill" data-filter="auth">Auth &amp; RBAC (22)</button>
+          <button class="filter-pill" data-filter="catalog">Catalog &amp; Filtering (22)</button>
+          <button class="filter-pill" data-filter="consultation">Consultations &amp; Staging (21)</button>
+          <button class="filter-pill" data-filter="docx">Word .docx Pipeline (7)</button>
+          <button class="filter-pill" data-filter="sync">Firestore &amp; Master Sync (8)</button>
+          <button class="filter-pill" data-filter="admin">Admin Repository &amp; Roster (13)</button>
+          <button class="filter-pill" data-filter="invasive">Invasive Species Guide (9)</button>
+          <button class="filter-pill" data-filter="ui">Accessibility &amp; Theming (16)</button>
+        </div>
+
+        <!-- Dynamic Function Cards Container -->
+        <div class="function-grid" id="functionCardsContainer">
+          <!-- Populated dynamically via JS from catalog -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p><strong>Deep Roots Nature Advisors - Kansas City Native Plant Database</strong></p>
+    <p style="margin-top:6px;font-size:12px;">Authored and Maintained for Deep Roots KC · Open Source GPL/MIT Architecture · Grounded in Heartland Native Ecology</p>
+  </footer>
+
+  <!-- Documentation Interactive Engine Script -->
+  <script>
+    // Complete catalog of 118 functions from index.html
+    const FUNCTIONS_CATALOG = [
+      // Core & Utility
+      { name: "escapeHtml", params: "str", module: "ui", line: 3841, isAsync: false, desc: "Escapes special characters in strings (&, <, >, \", ') to prevent XSS vulnerabilities in dynamically constructed DOM strings." },
+      { name: "escapeXml", params: "str", module: "docx", line: 3851, isAsync: false, desc: "Sanitizes raw text content for safe inclusion inside OpenXML Word tags, encoding ampersands, tags, and quotes." },
+      { name: "formatTimeAgo", params: "timestamp", module: "ui", line: 5277, isAsync: false, desc: "Converts epoch timestamps into human-readable relative time strings (e.g. 'Just now', '5m ago', '2h ago', '3d ago')." },
+      { name: "getActiveUsername", params: "", module: "consultation", line: 5290, isAsync: false, desc: "Returns the username of the currently authenticated Nature Advisor, or 'guest' if unauthenticated." },
+      
+      // Taxonomy & Helpers
+      { name: "shouldShowScientificFirst", params: "", module: "catalog", line: 4578, isAsync: false, desc: "Evaluates the user's active display preference to determine whether botanical scientific names appear before common names." },
+      { name: "isSweet16", params: "plant", module: "catalog", line: 4592, isAsync: false, desc: "Returns true if the specified plant belongs to the flagship Deep Roots Sweet 16 heartland pollinator program." },
+      { name: "isKcKeystone", params: "plant", module: "catalog", line: 4601, isAsync: false, desc: "Returns true if the plant is a recognized Kansas City Keystone species supporting hundreds of specialist pollinator and caterpillar species." },
+      { name: "getPlantUrl", params: "p", module: "catalog", line: 6873, isAsync: false, desc: "Computes the canonical Grow Native! or educational web profile URL for a given plant record." },
+      { name: "getPlantHeight", params: "p", module: "catalog", line: 6885, isAsync: false, desc: "Formats and returns the standardized mature height bracket display string (e.g. '1–3 ft', '3–6 ft')." },
+      { name: "getPlantLayer", params: "p", module: "catalog", line: 6894, isAsync: false, desc: "Returns the architectural layer of the plant (Canopy, Understory, Structural, Seasonal, or Groundcover)." },
+      { name: "getPlantDesc", params: "p", module: "catalog", line: 6898, isAsync: false, desc: "Returns the concise 3-line advisor field description for inclusion in plant cards and consultation reports." },
+      { name: "getPlantSociability", params: "p", module: "catalog", line: 6902, isAsync: false, desc: "Retrieves the Curious by Nature matrix sociability behavior (Solitary, Moderate Spreading, Highly Social Matrix)." },
+      { name: "getBloomColorAccent", params: "colorName, isDark", module: "catalog", line: 8437, isAsync: false, desc: "Maps a textual bloom color to an exact high-contrast RGB/HEX color value calibrated for light or dark mode." },
+      { name: "getBloomCardGradient", params: "bloomColors, isDark", module: "catalog", line: 8476, isAsync: false, desc: "Generates multi-stop radial and linear CSS background mesh gradients based on the plant's bloom colors." },
+
+      // Auth & Security
+      { name: "hashPassword", params: "password, salt", module: "auth", line: 4609, isAsync: true, desc: "Computes a secure cryptographic SHA-256 hash using the Web Crypto API subtle digest combining salt and password." },
+      { name: "generateSalt", params: "", module: "auth", line: 4617, isAsync: false, desc: "Generates a cryptographically secure 16-byte random hex salt using window.crypto.getRandomValues." },
+      { name: "isPasswordStrong", params: "pw", module: "auth", line: 4623, isAsync: false, desc: "Audits a prospective password against the security policy (≥8 chars, uppercase, lowercase, and numeric digits)." },
+      { name: "generateCanonicalUsername", params: "firstName, lastName, existingUsers", module: "auth", line: 4631, isAsync: false, desc: "Constructs canonical <first>.<last> usernames and resolves collisions with numerical increments." },
+      { name: "generateTemporaryPassword", params: "", module: "auth", line: 4650, isAsync: false, desc: "Generates a cryptographically randomized temporary password for newly provisioned advisors." },
+      { name: "loadUsersCache", params: "", module: "auth", line: 4661, isAsync: false, desc: "Reads and parses the local advisor roster cache stored in localStorage under dr_users_roster." },
+      { name: "saveUsersCache", params: "users", module: "auth", line: 4669, isAsync: false, desc: "Serializes and commits the advisor roster array to localStorage." },
+      { name: "userToFirestoreDoc", params: "u", module: "auth", line: 4681, isAsync: false, desc: "Transforms an internal advisor user object into a Google Cloud Firestore REST document payload." },
+      { name: "parseFirestoreUser", params: "doc", module: "auth", line: 4703, isAsync: false, desc: "Parses a Firestore user document payload into an internal Nature Advisor record." },
+      { name: "syncUserToFirestore", params: "user", module: "auth", line: 4735, isAsync: true, desc: "Sends an authenticated PATCH request to synchronize an advisor profile and security credentials to Firestore." },
+      { name: "fetchAllRemoteUsers", params: "", module: "auth", line: 4758, isAsync: true, desc: "Fetches all provisioned Nature Advisors from Cloud Firestore collection /users and updates local roster cache." },
+      { name: "initAdvisorAuth", params: "", module: "auth", line: 4800, isAsync: true, desc: "Initializes the authentication system on startup, seeds default administrators, and validates active sessions." },
+      { name: "getUserInitials", params: "u", module: "auth", line: 4876, isAsync: false, desc: "Extracts uppercase two-letter initials from an advisor's full name for header avatar badges." },
+      { name: "userRecordToProfile", params: "u", module: "auth", line: 4908, isAsync: false, desc: "Sanitizes an internal user record into a safe, client-facing profile object omitting sensitive credentials." },
+      { name: "loginAdvisor", params: "usernameOrEmail, password", module: "auth", line: 5009, isAsync: true, desc: "Authenticates an advisor using their username/email and password, verifying salt hashes and initializing state." },
+      { name: "signOutAdvisor", params: "", module: "auth", line: 5062, isAsync: true, desc: "Terminates the active advisor session, clears authentication storage, reverts text scale, and resets UI to guest mode." },
+      { name: "changeAdvisorPassword", params: "newPassword", module: "auth", line: 5080, isAsync: true, desc: "Updates an advisor's password, generating a new salt and hash, and syncing to Cloud Firestore." },
+      { name: "provisionAdvisor", params: "firstName, lastName, email, phoneNumber, advisorType, role", module: "auth", line: 5110, isAsync: true, desc: "Admin function to provision a new Nature Advisor, generate canonical credentials, and save to Firestore." },
+      { name: "resetAdvisorPassword", params: "username", module: "auth", line: 5151, isAsync: true, desc: "Admin tool to generate a temporary password reset token for a locked or returning advisor." },
+      { name: "toggleAdvisorRole", params: "username", module: "auth", line: 5177, isAsync: true, desc: "Admin privilege to toggle an advisor's role between 'user' (Nature Advisor) and 'admin' (Program Administrator)." },
+      { name: "updateAdvisorUser", params: "username, updates", module: "auth", line: 5202, isAsync: true, desc: "Applies administrative updates to an advisor profile (phone, email, advisor type, full name) in cloud and cache." },
+      { name: "openEditUserModal", params: "username", module: "auth", line: 8004, isAsync: false, desc: "Opens the administrative user record editor dialog pre-populated with an advisor's current data." },
+
+      // Catalog & Grid
+      { name: "loadMasterPlants", params: "", module: "catalog", line: 6907, isAsync: false, desc: "Loads the 185 baseline native plant species from memory into the active catalog state." },
+      { name: "applyCustomEditsToPlants", params: "", module: "catalog", line: 6949, isAsync: false, desc: "Merges local advisor plant customizations stored in dr_custom_plants into active species records." },
+      { name: "applyFilters", params: "", module: "catalog", line: 8158, isAsync: false, desc: "Filters the full catalog against active search terms, environmental tags, moisture, sun, height, and flagship badges." },
+      { name: "sortPlants", params: "", module: "catalog", line: 8268, isAsync: false, desc: "Sorts the filtered plant dataset according to the active sorting preference (Common A-Z, Scientific A-Z, Height, etc.)." },
+      { name: "renderActiveFilterTags", params: "", module: "catalog", line: 8307, isAsync: false, desc: "Renders dismissible active filter tag chips above the catalog grid." },
+      { name: "resetAllFilters", params: "", module: "catalog", line: 8371, isAsync: false, desc: "Clears all search inputs and filter chips, restoring the full catalog view." },
+      { name: "renderGrid", params: "", module: "catalog", line: 8405, isAsync: false, desc: "Renders the main plant card grid with virtualized cards, bloom gradients, and accessible attributes." },
+      { name: "createPlantCard", params: "plant", module: "catalog", line: 8532, isAsync: false, desc: "Constructs the DOM element for an individual plant card with photo, badges, bloom mesh background, and actions." },
+      { name: "openPlantDetail", params: "plant", module: "catalog", line: 8821, isAsync: false, desc: "Opens the full botanical detail modal displaying high-res imagery, cultural advice, and wildlife benefits." },
+      { name: "openEditModal", params: "plant", module: "catalog", line: 8918, isAsync: false, desc: "Opens the plant record editing modal allowing advisors to update descriptions, bloom colors, and heights." },
+      { name: "updateHeaderInfo", params: "", module: "catalog", line: 7146, isAsync: false, desc: "Updates species counters, sync times, and synchronizes the header authentication bar." },
+      { name: "renderAuthUser", params: "", module: "catalog", line: 7181, isAsync: false, desc: "Renders the top header user badge (avatar/initials for advisors, sign-in button for guests) and enforces guest staging rules." },
+
+      // Consultations & Areas
+      { name: "persistConsultations", params: "", module: "consultation", line: 5294, isAsync: false, desc: "Saves the consultations array to localStorage under dr_consultations." },
+      { name: "updateConsultationCounts", params: "", module: "consultation", line: 5300, isAsync: false, desc: "Recalculates active consultation counts and updates badge indicators across the UI." },
+      { name: "initConsultations", params: "", module: "consultation", line: 5460, isAsync: true, desc: "Initializes consultation drafts from localStorage and synchronizes with the advisor's cloud reports." },
+      { name: "saveActiveConsultation", params: "syncToCloud = false", module: "consultation", line: 5539, isAsync: false, desc: "Serializes the active consultation draft, garden zones, staged plants, and options into state and local storage." },
+      { name: "switchActiveConsultation", params: "targetId, skipSaveCurrent = false", module: "consultation", line: 5562, isAsync: false, desc: "Switches the active consultation workspace to another draft, restoring form values and staged species." },
+      { name: "updateConsultationOption", params: "consultation", module: "consultation", line: 5634, isAsync: false, desc: "Syncs report options (wildlife boxes, stormwater county choices) into consultation objects." },
+      { name: "createNewConsultation", params: "options = {}", module: "consultation", line: 5646, isAsync: false, desc: "Creates a brand new client consultation draft with default garden areas and switches workspace to it." },
+      { name: "persistReportOptions", params: "", module: "consultation", line: 6261, isAsync: false, desc: "Stores report customization options in localStorage." },
+      { name: "syncReportOptionsUI", params: "", module: "consultation", line: 6273, isAsync: false, desc: "Updates the checkbox toggle inputs in the staging drawer to match the active consultation's report options." },
+      { name: "renderGardenAreasManager", params: "", module: "consultation", line: 6365, isAsync: false, desc: "Renders the garden areas list in the staging drawer, supporting renaming, adding, and deleting planting zones." },
+      { name: "persistGardenAreas", params: "", module: "consultation", line: 6440, isAsync: false, desc: "Commits custom garden areas to localStorage and the active consultation object." },
+      { name: "duplicateConsultation", params: "consultationId", module: "consultation", line: 6452, isAsync: false, desc: "Clones an existing consultation draft and adds it to the active advisor workspace as a copy." },
+      { name: "deleteConsultation", params: "consultationId", module: "consultation", line: 6475, isAsync: true, desc: "Deletes a consultation draft locally and sends DELETE requests to Cloud Firestore across all document paths." },
+      { name: "renderConsultationSwitcher", params: "", module: "consultation", line: 6529, isAsync: false, desc: "Populates the consultation dropdown in the staging drawer with all available client drafts." },
+      { name: "renderConsultationsModalList", params: "filterQuery = ''", module: "consultation", line: 6573, isAsync: false, desc: "Renders the searchable list of saved client consultations inside the All Consultations dialog." },
+      { name: "openConsultationsManagerModal", params: "", module: "consultation", line: 6658, isAsync: false, desc: "Opens the consultation management modal dialog." },
+      { name: "renderStaging", params: "", module: "consultation", line: 8716, isAsync: false, desc: "Renders the list of staged native plants in the drawer, grouped by their assigned garden planting zone." },
+      { name: "toggleStagedPlant", params: "plant", module: "consultation", line: 8652, isAsync: false, desc: "Adds or removes a native plant from the active consultation report." },
+      { name: "saveStaging", params: "", module: "consultation", line: 8690, isAsync: false, desc: "Commits staged plants to localStorage and updates active consultation draft." },
+      { name: "updateStagedBadge", params: "", module: "consultation", line: 8704, isAsync: false, desc: "Updates the numeric pill badge on the Selected Plants header button." },
+      { name: "formatAreaHeadingLabel", params: "idx, rawName", module: "consultation", line: 9528, isAsync: false, desc: "Cleans and normalizes garden area labels for Word report section titles." },
+
+      // Word .docx Pipeline
+      { name: "getUnobservedBigThree", params: "stagedInvasives", module: "docx", line: 9057, isAsync: false, desc: "Determines which of the Big Three invasive threats were NOT found on site, for inclusion in the vigilance paragraph." },
+      { name: "generateMarkdownReport", params: "", module: "docx", line: 9081, isAsync: false, desc: "Generates an email-friendly structured Markdown representation of the consultation report." },
+      { name: "buildHtmlReport", params: "", module: "docx", line: 9206, isAsync: false, desc: "Builds a standalone styled HTML report ready for printing or direct client review." },
+      { name: "downloadDocxReport", params: "customReport = null", module: "docx", line: 9347, isAsync: true, desc: "Main OpenXML report compiler. Injects client data, garden areas, and staged palettes into the official Word template." },
+      { name: "findParagraphStart", params: "xml, pos", module: "docx", line: 9403, isAsync: false, desc: "Scans backwards from a match position to find the enclosing <w:p> OpenXML start tag." },
+      { name: "findParagraphEnd", params: "xml, pos", module: "docx", line: 9409, isAsync: false, desc: "Scans forward from a match position to locate the closing </w:p> OpenXML end tag." },
+
+      // Cloud Firestore Sync & Governance
+      { name: "getFirestoreBaseUrl", params: "", module: "sync", line: 4673, isAsync: false, desc: "Constructs the base Firestore REST API endpoint URL using active project and database identifiers." },
+      { name: "tryLiveSyncFromDatabase", params: "showNotification = false", module: "sync", line: 6962, isAsync: true, desc: "Queries Firestore for remote botanical updates and synchronizes changes into local storage." },
+      { name: "queryFirestoreDb", params: "targetDb", module: "sync", line: 6989, isAsync: true, desc: "Dispatches HTTP requests to Firestore to retrieve all documents from the plants collection." },
+      { name: "replaceWithRemotePlants", params: "remoteList", module: "sync", line: 7060, isAsync: false, desc: "Replaces local plant catalog definitions with verified remote master records from cloud." },
+      { name: "parseFirestoreValue", params: "val", module: "sync", line: 7069, isAsync: false, desc: "Recursively unwraps Firestore typed values (stringValue, integerValue, booleanValue, mapValue, arrayValue)." },
+      { name: "parseFirestoreDoc", params: "doc", module: "sync", line: 7089, isAsync: false, desc: "Converts a raw Firestore document response into a native botanical plant object." },
+      { name: "saveCurrentReportToCloud", params: "", module: "sync", line: 6673, isAsync: true, desc: "Saves the active consultation to Firestore under user subcollections and the top-level repository." },
+      { name: "renderSyncModal", params: "", module: "sync", line: 7155, isAsync: false, desc: "Updates species and sync metrics in the Database Sync modal and enforces admin visibility on governance options." },
+
+      // Admin Repository & Console
+      { name: "parseFirestoreReportDoc", params: "doc, fallbackUsername = ''", module: "admin", line: 5308, isAsync: false, desc: "Transforms a Firestore report document into a consultation report model." },
+      { name: "fetchRemoteConsultations", params: "username", module: "admin", line: 5412, isAsync: true, desc: "Fetches all saved consultation reports belonging to a specific advisor username from Firestore." },
+      { name: "fetchAllAdvisorReports", params: "", module: "admin", line: 7356, isAsync: true, desc: "Admin function that aggregates consultation reports across all advisors, collections, and fallback locations." },
+      { name: "addReport", params: "r", module: "admin", line: 7360, isAsync: false, desc: "Deduplicates and registers a consultation report into the central repository dataset." },
+      { name: "updateAdminReportsBadge", params: "count", module: "admin", line: 7349, isAsync: false, desc: "Updates the repository report counter badge in the Admin Console and profile menu." },
+      { name: "renderAdminReportsRepository", params: "searchQuery = '', advisorFilter = '', sortOrder = 'newest'", module: "admin", line: 7462, isAsync: false, desc: "Renders the central consultation report repository grid with search, advisor filters, and sorting." },
+      { name: "openAdminReportDetailModal", params: "report", module: "admin", line: 7671, isAsync: false, desc: "Opens the administrative inspection dialog for a selected report showing garden areas and options." },
+      { name: "adminDeleteConsultationReport", params: "report", module: "admin", line: 7839, isAsync: true, desc: "Admin capability to permanently delete any advisor's consultation report across all Cloud Firestore endpoints." },
+      { name: "loadReportIntoWorkspace", params: "report", module: "admin", line: 7809, isAsync: false, desc: "Loads a historical consultation report from the repository directly into the active editing workspace." },
+      { name: "openAdminConsoleModal", params: "initialTab = 'roster'", module: "admin", line: 7940, isAsync: false, desc: "Opens the Program Administrator management dialog, gating access to authenticated admins." },
+      { name: "switchAdminTab", params: "tab", module: "admin", line: 7953, isAsync: false, desc: "Switches between Admin Console tabs: Advisor Roster, Provision New Advisor, and Consultation Repository." },
+      { name: "renderAdminRoster", params: "searchQuery = ''", module: "admin", line: 8053, isAsync: false, desc: "Renders the table of registered Nature Advisors with role toggles, password reset triggers, and metadata." },
+      { name: "updateCanonicalPreview", params: "", module: "admin", line: 7995, isAsync: false, desc: "Live preview helper in the provision form showing the generated <first>.<last> username as names are typed." },
+
+      // Invasive Species Guide
+      { name: "setCatalogMode", params: "mode", module: "invasive", line: 5699, isAsync: false, desc: "Switches the catalog view mode between 'native' (185 species) and 'invasive' (10 high-threat invasives)." },
+      { name: "renderInvasiveGrid", params: "searchTerm", module: "invasive", line: 5729, isAsync: false, desc: "Renders the invasive species field guide grid with identification cues, threat ratings, and MDC links." },
+      { name: "openInvasiveDetailModal", params: "plant", module: "invasive", line: 5918, isAsync: false, desc: "Opens the invasive species identification modal with MDC control advice and high-res gallery." },
+      { name: "openInvasiveLightbox", params: "plant, initialIdx = 0", module: "invasive", line: 6052, isAsync: false, desc: "Opens the full-screen photo identification lightbox for an invasive species." },
+      { name: "renderSlide", params: "idx", module: "invasive", line: 6080, isAsync: false, desc: "Renders an active photo slide with caption and attribution inside the invasive photo lightbox." },
+      { name: "toggleStagedInvasive", params: "plant", module: "invasive", line: 6219, isAsync: false, desc: "Adds or removes an invasive species from the report staging panel and updates report options." },
+      { name: "persistStagedInvasives", params: "", module: "invasive", line: 6246, isAsync: false, desc: "Commits staged invasive species to localStorage." },
+      { name: "renderStagedInvasives", params: "", module: "invasive", line: 6289, isAsync: false, desc: "Renders the staged invasives list in the drawer with editable observation and removal notes." },
+      { name: "openContractorsModal", params: "", module: "invasive", line: 4479, isAsync: false, desc: "Opens the modal directory of 10 vetted Kansas City invasive removal and habitat contractors." },
+
+      // Accessibility & Theming
+      { name: "getUserTextScale", params: "", module: "ui", line: 4927, isAsync: false, desc: "Retrieves the active font scaling key ('standard', 'large', 'xlarge', 'huge') from preferences." },
+      { name: "setUserTextScale", params: "scaleKey, persistUser = true", module: "ui", line: 4938, isAsync: false, desc: "Applies a dynamic text scaling factor to the root document element and persists to user storage." },
+      { name: "updateTextScaleUI", params: "scaleKey", module: "ui", line: 4965, isAsync: false, desc: "Updates active button states in the text size preferences modal dialog." },
+      { name: "openTextSizeModal", params: "", module: "ui", line: 4994, isAsync: false, desc: "Opens the accessible font size adjustment dialog." },
+      { name: "announceToScreenReader", params: "msg, immediate = false", module: "ui", line: 6816, isAsync: false, desc: "Dispatches polite screen reader status announcements to the aria-live accessibility announcer region." },
+      { name: "openLoginModal", params: "", module: "ui", line: 7242, isAsync: false, desc: "Opens the Nature Advisor sign-in dialog." },
+      { name: "openUserProfileModal", params: "", module: "ui", line: 7253, isAsync: false, desc: "Opens the Nature Advisor profile modal showing user metadata, role badge, and quick management links." },
+      { name: "openChangePasswordModal", params: "isFirstLogin = false", module: "ui", line: 7301, isAsync: false, desc: "Opens the password update modal dialog, enforcing mandatory changes for first-time logins." },
+      { name: "updatePasswordStrengthUI", params: "pw", module: "ui", line: 7324, isAsync: false, desc: "Audits a prospective password and updates live requirement checkmark badges in the password form." },
+      { name: "setReqState", params: "elementId, isValid", module: "ui", line: 7336, isAsync: false, desc: "Toggles checkmark/cross indicators for individual password complexity criteria." },
+      { name: "setupEventListeners", params: "", module: "ui", line: 10242, isAsync: false, desc: "Binds DOM event listeners across all top header controls, drawers, modals, filters, and forms." },
+      { name: "updateThemeIcon", params: "t", module: "ui", line: 10259, isAsync: false, desc: "Synchronizes the theme toggle button icon (sun or moon) with the active dark/light mode state." }
+    ];
+
+    // Module category human-readable names
+    const MODULE_NAMES = {
+      all: "All Modules",
+      auth: "Authentication & RBAC",
+      catalog: "Plant Catalog & Filtering",
+      consultation: "Consultation & Staging",
+      docx: "OpenXML Word Pipeline",
+      sync: "Firestore & Master Sync",
+      admin: "Admin Repository & Roster",
+      invasive: "Invasive Field Guide",
+      ui: "Accessibility & Theme Engine"
+    };
+
+    let activeFilter = 'all';
+    let searchQuery = '';
+
+    // Render Function Cards
+    function renderFunctionCards() {
+      const container = document.getElementById('functionCardsContainer');
+      const countBadge = document.getElementById('functionCountBadge');
+      if (!container) return;
+
+      const q = searchQuery.toLowerCase().trim();
+      const filtered = FUNCTIONS_CATALOG.filter(fn => {
+        const matchesCategory = activeFilter === 'all' || fn.module === activeFilter;
+        if (!matchesCategory) return false;
+        if (!q) return true;
+        return fn.name.toLowerCase().includes(q) ||
+               fn.params.toLowerCase().includes(q) ||
+               fn.desc.toLowerCase().includes(q) ||
+               (MODULE_NAMES[fn.module] || '').toLowerCase().includes(q);
+      });
+
+      if (countBadge) {
+        countBadge.textContent = `Showing ${filtered.length} of ${FUNCTIONS_CATALOG.length}`;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-muted);background:var(--bg-surface);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);">
+            <i data-lucide="search-x" style="width:36px;height:36px;opacity:0.4;margin:0 auto 10px;display:block;"></i>
+            No functions matched your query <strong>"${escapeHtml(searchQuery)}"</strong>.
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(fn => `
+        <div class="function-card" id="fn-${fn.name}">
+          <div class="function-top">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="function-sig">${escapeHtml(fn.name)}(${escapeHtml(fn.params)})</span>
+              ${fn.isAsync ? '<span class="tag-async">async</span>' : ''}
+            </div>
+            <div class="function-meta">
+              <span class="tag-module">${escapeHtml(MODULE_NAMES[fn.module] || fn.module)}</span>
+              <span class="tag-line">Line ${fn.line}</span>
+            </div>
+          </div>
+          <p class="function-desc">${escapeHtml(fn.desc)}</p>
+          ${fn.params ? `
+            <div class="param-list">
+              <div class="param-row">
+                <span class="param-name">Parameters:</span>
+                <span class="param-type">${escapeHtml(fn.params)}</span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Set active category filter
+    function setCategoryFilter(cat) {
+      activeFilter = cat;
+      document.querySelectorAll('#filterPillsContainer .filter-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === cat);
+      });
+      document.querySelectorAll('#categoryNavList .nav-item-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.cat === cat);
+      });
+      renderFunctionCards();
+    }
+
+    // Initialize Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFunctionCards();
+
+      // Search input handler
+      const searchInput = document.getElementById('fnSearchInput');
+      searchInput?.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderFunctionCards();
+      });
+
+      // Filter pills toolbar
+      document.getElementById('filterPillsContainer')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter-pill');
+        if (btn) {
+          setCategoryFilter(btn.dataset.filter);
+        }
+      });
+
+      // Sidebar category navigation
+      document.getElementById('categoryNavList')?.addEventListener('click', (e) => {
+        const link = e.target.closest('.nav-item-link');
+        if (link && link.dataset.cat) {
+          e.preventDefault();
+          setCategoryFilter(link.dataset.cat);
+          document.getElementById('functions')?.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+
+      // Theme toggle
+      const themeBtn = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      const isDark = localStorage.getItem('dr_docs_theme') === 'dark' || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      
+      function applyTheme(dark) {
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (themeIcon) {
+          themeIcon.setAttribute('data-lucide', dark ? 'sun' : 'moon');
+        }
+        localStorage.setItem('dr_docs_theme', dark ? 'dark' : 'light');
+        if (window.lucide) lucide.createIcons();
+      }
+
+      applyTheme(isDark);
+
+      themeBtn?.addEventListener('click', () => {
+        const currentlyDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        applyTheme(!currentlyDark);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

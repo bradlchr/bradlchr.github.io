@@ -5,6 +5,7 @@ A multi-platform, production-grade ecological conservation planning application 
 
 Available across platforms:
 - 🌐 **Web Application**: [`index.html`](./index.html), hosted live on GitHub Pages at [**bradlchr.github.io**](https://bradlchr.github.io/).
+- 💻 **Interactive Code Documentation**: [**`docs.html`**](https://bradlchr.github.io/docs.html) (Live Interactive Portal) and [**`CODE_DOCUMENTATION.md`**](./CODE_DOCUMENTATION.md) — Full technical manual detailing the architecture, technologies used, security, OpenXML pipeline, and reference of all 118 functions.
 - 📱 **Native Android & ChromeOS Application**: Pre-compiled [`DeepRootsAdvisor-debug.apk`](./DeepRootsAdvisor-debug.apk) (20 MB), built with Kotlin, Jetpack Compose, and Material 3 Adaptive WindowSizeClass.
 - 📄 **Official Word Report Generator**: Integrates the official Deep Roots Word template ([`report_template.docx`](./report_template.docx)) to output genuine, formatted `.docx` consultation reports.
 - 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Step-by-step field guide for searching plants, configuring garden zones, and exporting reports.

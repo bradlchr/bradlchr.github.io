@@ -16,6 +16,8 @@ Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database*
 | **5. Customize** | Toggle Wildlife Stewardship & Stormwater County options | Enable/disable nest boxes, bird baths, bat boxes, county cost-share |
 | **6. Export** | Click **Download Official Word Report (.docx)** | Tailored Word document ready for client delivery (all red instructions removed) |
 
+> 💡 **Developer & System Architecture**: For an interactive breakdown of the system architecture, OpenXML Word pipeline, and reference of all 118 functions, visit [**bradlchr.github.io/docs.html**](https://bradlchr.github.io/docs.html) or read [**`CODE_DOCUMENTATION.md`**](./CODE_DOCUMENTATION.md).
+
 ---
 
 ## 🌿 1. Browsing & Filtering Kansas City Native Plants
