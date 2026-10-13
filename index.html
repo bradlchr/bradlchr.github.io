@@ -3397,10 +3397,16 @@
       </div>
     </div>
     <div class="dialog-footer" style="padding:12px 20px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg-base);">
-      <button type="button" id="adminDetailLoadToEditorBtn" class="btn btn-secondary" style="font-size:12px;">
-        <i data-lucide="folder-input"></i>
-        <span>Load into Workspace</span>
-      </button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button type="button" id="adminDetailLoadToEditorBtn" class="btn btn-secondary" style="font-size:12px;">
+          <i data-lucide="folder-input"></i>
+          <span>Load into Workspace</span>
+        </button>
+        <button type="button" id="adminDetailDeleteReportBtn" class="btn btn-secondary" style="font-size:12px;color:var(--danger);border-color:rgba(220,38,38,0.35);" title="Permanently delete this consultation report">
+          <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+          <span>Delete Report</span>
+        </button>
+      </div>
       <div style="display:flex;gap:8px;">
         <button type="button" onclick="document.getElementById('adminReportDetailModal').close()" class="btn btn-secondary" style="font-size:12px;">Close</button>
         <button type="button" id="adminDetailRegenerateDocxBtn" class="btn btn-primary" style="font-size:12px;font-weight:700;">
@@ -6474,13 +6480,25 @@
       // If signed in, delete from Cloud Firestore
       if (state.currentUser) {
         const username = state.currentUser.username;
-        fetch(`${getFirestoreBaseUrl()}/users/${username}/reports/${consultationId}`, {
-          method: 'DELETE'
-        }).catch(e => console.warn("Firestore report delete notice:", e));
+        const authorUsername = c?.username || username;
+        const baseUrl = getFirestoreBaseUrl();
+        const deleteUrls = [
+          `${baseUrl}/reports/${consultationId}`,
+          `${baseUrl}/plants/_report_${consultationId}`,
+          `${baseUrl}/users/${username}/reports/${consultationId}`,
+          `${baseUrl}/plants/_report_${username}_${consultationId}`
+        ];
+        if (authorUsername && authorUsername !== username) {
+          deleteUrls.push(`${baseUrl}/users/${authorUsername}/reports/${consultationId}`);
+          deleteUrls.push(`${baseUrl}/plants/_report_${authorUsername}_${consultationId}`);
+        }
+        Promise.allSettled(deleteUrls.map(u => fetch(u, { method: 'DELETE' }))).catch(e => console.warn("Firestore report delete notice:", e));
+      }
 
-        fetch(`${getFirestoreBaseUrl()}/plants/_report_${username}_${consultationId}`, {
-          method: 'DELETE'
-        }).catch(e => console.warn("Firestore fallback report delete notice:", e));
+      // Sync with admin repository state if present
+      if (state.allAdvisorReports) {
+        state.allAdvisorReports = state.allAdvisorReports.filter(r => r.id !== consultationId);
+        updateAdminReportsBadge(state.allAdvisorReports.length);
       }
 
       showToast(`Deleted "${name}".`);
@@ -7550,6 +7568,9 @@
               <button type="button" class="btn btn-secondary btn-sm repo-load-workspace-btn" style="padding:6px 10px;font-size:12px;" title="Load into your active consultation workspace">
                 <i data-lucide="folder-input" style="width:13px;height:13px;"></i>
               </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-delete-btn" style="padding:6px 10px;font-size:12px;color:var(--danger);border-color:rgba(220,38,38,0.35);" title="Permanently delete consultation report" aria-label="Delete consultation report for ${escapeHtml(clientDisplay)}">
+                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+              </button>
             </div>
           </div>
 
@@ -7599,6 +7620,11 @@
 
         card.querySelector('.repo-load-workspace-btn').addEventListener('click', () => {
           loadReportIntoWorkspace(r);
+        });
+
+        card.querySelector('.repo-delete-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          adminDeleteConsultationReport(r);
         });
 
         listEl.appendChild(card);
@@ -7773,6 +7799,107 @@
 
       showToast(`Loaded "${report.clientName || 'consultation'}" into workspace!`, 'success');
       announceToScreenReader(`Consultation report for ${report.clientName} loaded into staging workspace.`);
+    }
+
+    async function adminDeleteConsultationReport(report) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast("Administrator privileges required to delete consultation reports.", "danger");
+        return;
+      }
+      if (!report || !report.id) return;
+
+      const clientName = report.clientName || 'Untitled Consultation';
+      const authorDisplay = report.advisorName
+        ? `${report.advisorName}${report.username ? ` (@${report.username})` : ''}`
+        : (report.username ? `@${report.username}` : 'unknown advisor');
+
+      const confirmed = confirm(
+        `Are you sure you want to permanently delete the consultation report for "${clientName}" by ${authorDisplay}?\n\nThis will remove the report from Cloud Firestore and all repository records. This action cannot be undone.`
+      );
+      if (!confirmed) return;
+
+      const reportId = report.id;
+      const authorUsername = report.username || '';
+      const baseUrl = getFirestoreBaseUrl();
+
+      showToast(`Deleting report for "${clientName}"...`, "info");
+
+      // Build list of all potential Firestore delete endpoints
+      const deleteUrls = [
+        `${baseUrl}/reports/${reportId}`,
+        `${baseUrl}/plants/_report_${reportId}`
+      ];
+      if (authorUsername) {
+        deleteUrls.push(`${baseUrl}/users/${authorUsername}/reports/${reportId}`);
+        deleteUrls.push(`${baseUrl}/plants/_report_${authorUsername}_${reportId}`);
+      }
+      if (state.currentUser.username && state.currentUser.username !== authorUsername) {
+        deleteUrls.push(`${baseUrl}/users/${state.currentUser.username}/reports/${reportId}`);
+        deleteUrls.push(`${baseUrl}/plants/_report_${state.currentUser.username}_${reportId}`);
+      }
+
+      // Execute deletion across all Firestore paths
+      try {
+        await Promise.allSettled(
+          deleteUrls.map(url => fetch(url, { method: 'DELETE' }))
+        );
+      } catch (err) {
+        console.warn("Firestore delete reports notice:", err);
+      }
+
+      // Purge from active memory state
+      if (state.allAdvisorReports) {
+        state.allAdvisorReports = state.allAdvisorReports.filter(r => r.id !== reportId);
+      }
+      if (state.consultations) {
+        state.consultations = state.consultations.filter(c => c.id !== reportId);
+        persistConsultations();
+        renderConsultationSwitcher();
+        updateConsultationCounts();
+      }
+
+      // Purge from author's local storage cache if available
+      if (authorUsername) {
+        try {
+          const key = `dr_reports_${authorUsername}`;
+          const cached = JSON.parse(localStorage.getItem(key) || '[]');
+          const filtered = cached.filter(r => r.id !== reportId);
+          localStorage.setItem(key, JSON.stringify(filtered));
+        } catch (e) {}
+      }
+      if (state.currentUser.username && state.currentUser.username !== authorUsername) {
+        try {
+          const key = `dr_reports_${state.currentUser.username}`;
+          const cached = JSON.parse(localStorage.getItem(key) || '[]');
+          const filtered = cached.filter(r => r.id !== reportId);
+          localStorage.setItem(key, JSON.stringify(filtered));
+        } catch (e) {}
+      }
+
+      // If active consultation in workspace matches, switch or create new
+      if (state.activeConsultationId === reportId) {
+        if (state.consultations && state.consultations.length > 0) {
+          switchActiveConsultation(state.consultations[0].id, true);
+        } else {
+          createNewConsultation({ clientName: 'New Consultation' });
+        }
+      }
+
+      // Close detail modal if currently viewing this report
+      if (state.currentViewingReport && state.currentViewingReport.id === reportId) {
+        state.currentViewingReport = null;
+        document.getElementById('adminReportDetailModal')?.close();
+      }
+
+      // Re-render admin reports repository view
+      const searchInput = document.getElementById('adminReportsSearchInput')?.value || '';
+      const advFilter = document.getElementById('adminReportsAdvisorFilter')?.value || '';
+      const sortSelect = document.getElementById('adminReportsSortSelect')?.value || 'newest';
+      renderAdminReportsRepository(searchInput, advFilter, sortSelect);
+      updateAdminReportsBadge(state.allAdvisorReports?.length || 0);
+
+      showToast(`Successfully deleted consultation report for "${clientName}".`, "success");
+      announceToScreenReader(`Consultation report for ${clientName} permanently deleted by administrator.`);
     }
 
     function openAdminConsoleModal(initialTab = 'roster') {
@@ -10819,6 +10946,12 @@
       document.getElementById('adminDetailLoadToEditorBtn')?.addEventListener('click', () => {
         if (state.currentViewingReport) {
           loadReportIntoWorkspace(state.currentViewingReport);
+        }
+      });
+
+      document.getElementById('adminDetailDeleteReportBtn')?.addEventListener('click', () => {
+        if (state.currentViewingReport) {
+          adminDeleteConsultationReport(state.currentViewingReport);
         }
       });
 
