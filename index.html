@@ -7090,14 +7090,18 @@
 
       const cached = localStorage.getItem('dr_firestore_cache_plants');
       if (cached) {
-        try {
-          const parsedCache = JSON.parse(cached);
-          const hasMobot = parsedCache.some(p => p.plantfinder_url || (p.images && p.images.some(img => img.url && img.url.includes('mobot.org'))));
-          if (hasMobot && Array.isArray(parsedCache) && parsedCache.length > 50) {
-            state.allPlants = parsedCache;
-            document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore (Cached)';
-          }
-        } catch (e) {}
+        if (cached.includes('prairiemoon.com') || !cached.includes('mobot.org')) {
+          localStorage.removeItem('dr_firestore_cache_plants');
+        } else {
+          try {
+            const parsedCache = JSON.parse(cached);
+            const hasMobot = parsedCache.some(p => p.plantfinder_url || (p.images && p.images.some(img => img.url && img.url.includes('mobot.org'))));
+            if (hasMobot && Array.isArray(parsedCache) && parsedCache.length > 50) {
+              state.allPlants = parsedCache;
+              document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore (Cached)';
+            }
+          } catch (e) {}
+        }
       }
 
       if (!state.allPlants || state.allPlants.length === 0) {
@@ -7253,6 +7257,32 @@
 
     function replaceWithRemotePlants(remoteList) {
       if (!Array.isArray(remoteList) || remoteList.length === 0) return;
+
+      const rawEmbedded = document.getElementById('embeddedMasterPlants')?.textContent;
+      let embeddedMap = new Map();
+      if (rawEmbedded) {
+        try {
+          const emb = JSON.parse(rawEmbedded);
+          emb.forEach(p => {
+            if (p.scientific_name) embeddedMap.set(p.scientific_name.toLowerCase().trim(), p);
+            if (p.id) embeddedMap.set(p.id, p);
+          });
+        } catch (e) {}
+      }
+
+      remoteList.forEach(p => {
+        const sciKey = (p.scientific_name || '').toLowerCase().trim();
+        const emb = embeddedMap.get(sciKey) || (p.id ? embeddedMap.get(p.id) : null);
+        if (emb && emb.images && emb.images.length > 0) {
+          const remoteHasPm = (p.images || []).some(im => (im.url || '').includes('prairiemoon.com'));
+          const remoteHasMobot = (p.images || []).some(im => (im.url || '').includes('mobot.org'));
+          if (remoteHasPm || !remoteHasMobot || (emb.images.length > (p.images || []).length)) {
+            p.images = emb.images;
+            p.plantfinder_url = emb.plantfinder_url || p.plantfinder_url;
+          }
+        }
+      });
+
       state.allPlants = remoteList;
       applyCustomEditsToPlants();
       applyFilters();
