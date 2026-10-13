@@ -1081,6 +1081,84 @@ function getBloomCardGradient(bloomColors, isDark) {
         </div>
       </section>
 
+      <!-- Consultation Engine & Planting Zones -->
+      <section id="consultation-engine" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="clipboard-list" style="color:var(--primary);"></i> Consultation Engine &amp; Garden Planting Zones</h2>
+          <span class="badge-pill badge-advisor">Advisor &amp; Admin Tool</span>
+        </div>
+        <p class="section-lead">
+          The Consultation Engine manages active client consultations, dynamic garden planting zones, staged native species allocations, automated invasive threat detection, and regional stormwater rebate incentives. All consultation states synchronize instantaneously to browser storage (`dr_consultations`) and sync to Cloud Firestore upon report generation.
+        </p>
+
+        <div class="arch-flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--primary-subtle);color:var(--primary);">🗂️</div>
+              <h4>1. Multi-Consultation Switcher</h4>
+            </div>
+            <p>Advisors can create, rename, duplicate, or delete multiple client drafts simultaneously via `state.consultations`. Switching consultations (`switchConsultation()`) instantly recalculates staged counts, invasive toggles, and UI inputs.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--accent-gold-subtle);color:var(--accent-gold);">🏡</div>
+              <h4>2. Dynamic Garden Planting Zones</h4>
+            </div>
+            <p>Garden areas (e.g., "Front Foundation", "Rain Garden", "Woodland Border") are dynamically added, renamed, or reordered. Species are staged directly into designated zones with specific plant quantities and custom site notes.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--danger-subtle);color:var(--danger);">⚠️</div>
+              <h4>3. Automated Threat Detection</h4>
+            </div>
+            <p>When an advisor identifies invasive species in client yards, selecting species auto-enables the invasive presence toggles, unlocking tailored eradication protocols and species-specific herbicide guidelines in the Word report.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--info-subtle);color:var(--info);">💧</div>
+              <h4>4. Stormwater &amp; Wildlife Modules</h4>
+            </div>
+            <p>Integrates regional cost-share incentive checkboxes (Johnson County SMAC "Contain The Rain", Wyandotte County Green Infrastructure) alongside wildlife habitat options (bird nest boxes, bat houses, solitary native bee nesting).</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top:20px;">
+          <span class="code-tag">Data Structure</span>
+// Internal Schema for Consultation State and Planting Zones
+{
+  id: "consultation_1728841200000",
+  clientName: "Eleanor Vance",
+  propertyAddress: "4201 W 69th St, Prairie Village, KS 66208",
+  advisorName: "Sarah Jenkins",
+  consultationDate: "2026-10-14",
+  gardenAreas: [
+    {
+      id: "area_1",
+      name: "Front Yard Pollinator Border",
+      sunlight: "Full Sun (6+ hrs)",
+      soil: "Moist to Average Loam",
+      stagedPlants: [
+        { id: 42, commonName: "Butterfly Milkweed", scientificName: "Asclepias tuberosa", qty: 5, notes: "Cluster near driveway edge" },
+        { id: 108, commonName: "Purple Coneflower", scientificName: "Echinacea purpurea", qty: 3, notes: "Interplant with Little Bluestem" }
+      ]
+    },
+    {
+      id: "area_2",
+      name: "Downspout Rain Garden",
+      sunlight: "Partial Shade",
+      soil: "Wet to Saturated",
+      stagedPlants: [
+        { id: 89, commonName: "Blue Flag Iris", scientificName: "Iris versicolor", qty: 4, notes: "Deepest center ponding zone" }
+      ]
+    }
+  ],
+  observedInvasives: ["Bush Honeysuckle", "Wintercreeper"],
+  stormwaterPrograms: ["Johnson County SMAC - Contain The Rain"],
+  wildlifeStructures: ["Bird Nest Box", "Native Solitary Bee Hotel"]
+}
+        </div>
+      </section>
+
       <!-- OpenXML .docx Pipeline -->
       <section id="docx-pipeline" class="doc-section">
         <div class="section-header">
@@ -1119,6 +1197,206 @@ function getBloomCardGradient(bloomColors, isDark) {
             </div>
             <p>Updates `word/document.xml`, recompresses the archive via `JSZip.generateAsync({type:"blob"})`, and triggers client-side saving as `Deep_Roots_Consultation_[ClientName].docx`.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- Google Cloud Firestore REST Synchronization & Master Catalog Governance -->
+      <section id="firestore-sync" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="cloud" style="color:var(--primary);"></i> Google Cloud Firestore REST Sync &amp; Catalog Governance</h2>
+          <span class="badge-pill badge-admin">Zero-SDK Architecture</span>
+        </div>
+        <p class="section-lead">
+          The application communicates with Google Cloud Firestore via direct REST endpoints (`https://firestore.googleapis.com/v1/projects/deep-roots-nature-advisors/databases/(default)/documents/...`), eliminating 800+ KB of client SDK weight while maintaining high-speed real-time synchronization, offline caching, and administrative catalog controls.
+        </p>
+
+        <div class="arch-flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--info-subtle);color:var(--info);">⚡</div>
+              <h4>1. Lightweight REST Engine</h4>
+            </div>
+            <p>Utilizes native browser `fetch()` calls with JSON payload transformation. Typed Firestore fields (`stringValue`, `integerValue`, `booleanValue`, `arrayValue`, `mapValue`) are unwrapped transparently by `parseFirestoreValue()`.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--primary-subtle);color:var(--primary);">🔄</div>
+              <h4>2. Master Catalog Synchronization</h4>
+            </div>
+            <p>On initial load, `syncPlantsFromFirestore()` polls the remote `/plants` collection. Verified advisor edits merge cleanly into client memory and `localStorage`, ensuring all advisors have immediate access to botanical updates.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--danger-subtle);color:var(--danger);">🛡️</div>
+              <h4>3. Master Catalog Governance</h4>
+            </div>
+            <p>Critical administrative operations—uploading the 185 baseline species master seed (`seedFirestoreBtn`), resetting local edits to pristine defaults, and importing Android backups—are locked strictly to Administrators.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--accent-gold-subtle);color:var(--accent-gold);">📶</div>
+              <h4>4. Resilient Offline Fallback</h4>
+            </div>
+            <p>If network connectivity is disrupted during field consultations, the system transparently logs an offline warning, persists draft state locally, and gracefully queues synchronization operations without crashing or dropping user edits.</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top:20px;">
+          <span class="code-tag">REST Serialization &amp; Parsing</span>
+// Converts raw Firestore REST typed values into standard JavaScript primitives and objects
+function parseFirestoreValue(val) {
+  if (!val || typeof val !== 'object') return val;
+  if ('stringValue' in val) return val.stringValue;
+  if ('integerValue' in val) return parseInt(val.integerValue, 10);
+  if ('doubleValue' in val) return parseFloat(val.doubleValue);
+  if ('booleanValue' in val) return val.booleanValue;
+  if ('nullValue' in val) return null;
+  if ('arrayValue' in val) {
+    const values = val.arrayValue.values || [];
+    return values.map(parseFirestoreValue);
+  }
+  if ('mapValue' in val) {
+    const fields = val.mapValue.fields || {};
+    const res = {};
+    for (const [k, v] of Object.entries(fields)) {
+      res[k] = parseFirestoreValue(v);
+    }
+    return res;
+  }
+  return val;
+}
+        </div>
+      </section>
+
+      <!-- Central Consultation Reports Repository & Multi-Path Deletion -->
+      <section id="admin-repo" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="folder-git-2" style="color:var(--primary);"></i> Central Reports Repository &amp; Multi-Path Deletion</h2>
+          <span class="badge-pill badge-admin">Administrative Governance</span>
+        </div>
+        <p class="section-lead">
+          The Central Reports Repository provides Nature Advisors and Administrators with a unified dashboard to search, inspect, filter, re-download, and manage historical client consultation reports across the entire organization.
+        </p>
+
+        <div class="arch-flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--primary-subtle);color:var(--primary);">📊</div>
+              <h4>1. Multi-Collection Aggregation</h4>
+            </div>
+            <p>`fetchReportsFromFirestore()` queries `/reports`, individual `/users/{username}/reports`, and legacy `_report_*` records in parallel, de-duplicating documents by Consultation ID and presenting a cohesive organizational archive.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--info-subtle);color:var(--info);">🔍</div>
+              <h4>2. Instant Multi-Facet Filtering</h4>
+            </div>
+            <p>Advisors can filter hundreds of records by Advisor Name, Client Name, Zip Code, Date Range, and full-text keyword search in real-time. Result metrics and badge counts update dynamically as filters change.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--purple-subtle);color:var(--purple);">📄</div>
+              <h4>3. On-Demand .docx Re-generation</h4>
+            </div>
+            <p>Any archived consultation can be re-downloaded as an official Microsoft Word `.docx` report with one click. The system loads the archived JSON directly into the OpenXML reverse-offset pipeline without requiring the advisor to reopen the editor.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--danger-subtle);color:var(--danger);">🗑️</div>
+              <h4>4. Admin Multi-Path Deletion</h4>
+            </div>
+            <p>Administrators have elevated authority to delete stale or obsolete reports across all Firestore storage locations (`/reports/{id}`, `/users/{u}/reports/{id}`, etc.) and local caches, complete with double-confirmation modal safeguards.</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top:20px;">
+          <span class="code-tag">Multi-Path Deletion Logic</span>
+// Multi-location deletion executed by administrators to eliminate redundant or deleted reports
+async function deleteReportFromFirestore(reportId, advisorUsername) {
+  if (state.currentUser?.role !== 'admin') {
+    throw new Error("Unauthorized: Only administrators can delete consultation reports.");
+  }
+  const deleteEndpoints = [
+    `${FIRESTORE_BASE}/reports/${encodeURIComponent(reportId)}`,
+    `${FIRESTORE_BASE}/users/${encodeURIComponent(advisorUsername)}/reports/${encodeURIComponent(reportId)}`,
+    `${FIRESTORE_BASE}/plants/${encodeURIComponent('_report_' + reportId)}`
+  ];
+  
+  // Concurrently attempt deletion across all canonical and legacy Firestore paths
+  await Promise.allSettled(deleteEndpoints.map(url => 
+    fetch(url, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
+  ));
+  
+  // Evict from local in-memory registry and advisor browser storage
+  state.reportsRepository = state.reportsRepository.filter(r => r.id !== reportId);
+  renderAdminReportsRepository();
+  showToast("Consultation report permanently deleted across all cloud repositories.", "success");
+}
+        </div>
+      </section>
+
+      <!-- ADA Title III & WCAG 2.1 AA Accessibility Engine -->
+      <section id="a11y" class="doc-section">
+        <div class="section-header">
+          <h2 class="section-title"><i data-lucide="accessibility" style="color:var(--primary);"></i> ADA Title III &amp; WCAG 2.1 Level AA Accessibility Engine</h2>
+          <span class="badge-pill badge-guest">100% Inclusive Design</span>
+        </div>
+        <p class="section-lead">
+          The codebase incorporates rigorous accessibility engineering adhering to <strong>ADA Title III</strong> and <strong>WCAG 2.1 Level AA</strong> standards, ensuring seamless usability for people with low vision, cognitive differences, motor impairments, or those navigating via screen readers and keyboard switches.
+        </p>
+
+        <div class="arch-flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--primary-subtle);color:var(--primary);">🔤</div>
+              <h4>1. Root Rem Text Scaling</h4>
+            </div>
+            <p>Four tactile text sizing modes (`100%`, `115%`, `130%`, `145%`) dynamically modify `document.documentElement.style.fontSize`. Because all dimensions and typography use `rem` units, the entire interface scales fluidly without overflow bugs.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--info-subtle);color:var(--info);">🗣️</div>
+              <h4>2. Polite ARIA Live Announcer</h4>
+            </div>
+            <p>A persistent screen reader live region (`#a11yAnnouncer`, `aria-live="polite"`, `aria-atomic="true"`) broadcasts catalog filter counts, species staging additions, consultation switches, and authentication alerts to assistive technology.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--accent-gold-subtle);color:var(--accent-gold);">🎯</div>
+              <h4>3. Keyboard Navigation &amp; Focus</h4>
+            </div>
+            <p>Includes an accessible `#skip-to-content` jump link, high-visibility `:focus-visible` focus rings (`3px solid #15803d; outline-offset: 3px;`), focus trapping within modals, and global Escape key listeners for modal dismissals.</p>
+          </div>
+          <div class="flow-card">
+            <div class="flow-card-header">
+              <div class="flow-icon" style="background:var(--purple-subtle);color:var(--purple);">🌓</div>
+              <h4>4. Color Contrast &amp; Motion</h4>
+            </div>
+            <p>All text elements, pills, and status tags exceed WCAG AA 4.5:1 contrast ratios across both light and dark themes. The system also honors `@media (prefers-reduced-motion: reduce)` by disabling transitions and animations automatically.</p>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top:20px;">
+          <span class="code-tag">A11y Implementation</span>
+// Screen reader announcement utility function with polite live region queuing
+function announceToScreenReader(message) {
+  const announcer = document.getElementById('a11yAnnouncer');
+  if (!announcer) return;
+  announcer.textContent = '';
+  // Brief timeout ensures assistive tech detects the mutation event
+  setTimeout(() => {
+    announcer.textContent = message;
+  }, 50);
+}
+
+// Root rem text scaling system preserving user ergonomics across sessions
+function setTextScale(scalePercentage) {
+  const validScales = [100, 115, 130, 145];
+  const targetScale = validScales.includes(scalePercentage) ? scalePercentage : 100;
+  document.documentElement.style.fontSize = `${targetScale}%`;
+  localStorage.setItem('dr_text_scale', targetScale.toString());
+  announceToScreenReader(`Interface font scale adjusted to ${targetScale} percent.`);
+}
         </div>
       </section>
 
@@ -1427,6 +1705,40 @@ function getBloomCardGradient(bloomColors, isDark) {
           document.getElementById('functions')?.scrollIntoView({ behavior: 'smooth' });
         }
       });
+
+      // Architecture guide navigation click & scroll spy
+      const archNavLinks = document.querySelectorAll('.sidebar .nav-list:first-of-type .nav-item-link');
+      document.querySelector('.sidebar .nav-list:first-of-type')?.addEventListener('click', (e) => {
+        const link = e.target.closest('.nav-item-link');
+        if (link) {
+          const href = link.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            const targetEl = document.querySelector(href);
+            if (targetEl) {
+              e.preventDefault();
+              targetEl.scrollIntoView({ behavior: 'smooth' });
+              history.pushState(null, '', href);
+              archNavLinks.forEach(l => l.classList.toggle('active', l === link));
+            }
+          }
+        }
+      });
+
+      // Intersection Observer for scroll-spy highlighting
+      const archSections = document.querySelectorAll('.content-area .doc-section[id]');
+      if ('IntersectionObserver' in window && archSections.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              archNavLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+              });
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '-60px 0px -60% 0px' });
+        archSections.forEach(sec => observer.observe(sec));
+      }
 
       // Theme toggle
       const themeBtn = document.getElementById('themeToggleBtn');
