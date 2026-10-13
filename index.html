@@ -116,6 +116,68 @@
       --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
+    /* ==========================================================================
+       ADA / Accessibility Enhancements (WCAG 2.1 Level AA Compliance)
+       ========================================================================== */
+
+    /* 1. Accessible Skip Navigation Link (WCAG 2.4.1 Bypass Blocks) */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 16px;
+      background: var(--primary);
+      color: #ffffff !important;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 14px;
+      z-index: 100000;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      border: 2px solid #ffffff;
+      transition: top 0.15s ease-in-out;
+    }
+    .skip-link:focus,
+    .skip-link:focus-visible {
+      top: 16px;
+      outline: 3px solid var(--accent-gold);
+      outline-offset: 2px;
+    }
+
+    /* 2. Screen Reader Only Utility Class (WCAG 1.3.1 Info and Relationships) */
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    /* 3. Global Visible Focus Indicator (WCAG 2.4.7 Focus Visible) */
+    :focus-visible {
+      outline: 3px solid var(--primary) !important;
+      outline-offset: 2px !important;
+    }
+    [data-theme="dark"] :focus-visible {
+      outline-color: #4bae6d !important;
+    }
+
+    /* 4. Motion Sensitivity / Vestibular Disorder Support (WCAG 2.3.3 Animation from Interactions) */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
     /* Dynamic User Text Size Scaling */
     html {
       font-size: 16px;
@@ -2280,6 +2342,11 @@
   </style>
 </head>
 <body data-theme="light">
+  <!-- Accessible Skip Navigation Link (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA Live Region for Screen Reader Announcements (WCAG 4.1.3) -->
+  <div id="a11yAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Header -->
   <header>
@@ -2310,12 +2377,12 @@
 
     <div class="header-actions">
       <!-- Theme Toggle -->
-      <button id="themeToggleBtn" class="btn btn-icon" title="Toggle Dark/Light Mode">
+      <button id="themeToggleBtn" class="btn btn-icon" title="Toggle Dark/Light Mode" aria-label="Switch to dark mode">
         <i data-lucide="moon" id="themeIcon"></i>
       </button>
 
       <!-- Text Size Quick Toggle -->
-      <button id="textSizeToggleBtn" class="btn btn-icon" title="Adjust Text &amp; Display Size" onclick="openTextSizeModal()">
+      <button id="textSizeToggleBtn" class="btn btn-icon" title="Adjust Text &amp; Display Size" aria-label="Adjust Text and Display Size" onclick="openTextSizeModal()">
         <span style="font-size:13px;font-weight:800;letter-spacing:-0.5px;line-height:1;">Aa</span>
       </button>
 
@@ -2329,7 +2396,7 @@
       </div>
 
       <!-- Sync / Database Info -->
-      <button id="syncModalBtn" class="btn btn-icon" title="Database Sync & Master DB Status">
+      <button id="syncModalBtn" class="btn btn-icon" title="Database Sync & Master DB Status" aria-label="Shared Database Sync and Master Catalog Status">
         <i data-lucide="cloud-cog"></i>
       </button>
 
@@ -2347,7 +2414,7 @@
         </button>
       </div>
 
-        <button id="reportDrawerBtn" class="btn btn-report">
+        <button id="reportDrawerBtn" class="btn btn-report" aria-label="View staged plant consultation report" aria-expanded="false" aria-controls="stagingDrawer">
         <i data-lucide="clipboard-list"></i>
         <span class="btn-text-long">Report Staging</span>
         <span class="btn-text-short">Report</span>
@@ -2381,8 +2448,8 @@
         <div class="filter-card">
         <div class="search-box">
           <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
-          <input type="text" id="searchInput" class="search-input" placeholder="Search Kansas City natives...">
-          <button id="searchClearBtn" class="search-clear">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search Kansas City natives..." aria-label="Search Kansas City native plants by common or scientific name">
+          <button id="searchClearBtn" class="search-clear" aria-label="Clear search input">
             <i data-lucide="x" style="width:14px;height:14px;"></i>
           </button>
         </div>
@@ -2390,11 +2457,11 @@
 
       <!-- Quick Toggles -->
       <div class="filter-card quick-filters">
-        <button class="quick-toggle-btn sweet16" id="toggleSweet16Btn">
+        <button class="quick-toggle-btn sweet16" id="toggleSweet16Btn" role="switch" aria-checked="false" aria-label="Filter by Deep Roots Sweet 16 species">
           <span>⭐ Deep Roots Sweet 16</span>
           <span class="badge-count" style="background:var(--accent-gold);">16</span>
         </button>
-        <button class="quick-toggle-btn keystone" id="toggleKeystoneBtn">
+        <button class="quick-toggle-btn keystone" id="toggleKeystoneBtn" role="switch" aria-checked="false" aria-label="Filter by Kansas City Keystone species">
           <span>🌿 KC Keystone Species</span>
           <span class="badge-count" style="background:var(--accent-keystone);">25</span>
         </button>
@@ -2409,21 +2476,21 @@
 
         <!-- Card Display & Sort Settings -->
         <div class="accordion">
-          <button class="accordion-header" data-target="sortDisplayFilterContent">
+          <button class="accordion-header" data-target="sortDisplayFilterContent" aria-expanded="true" aria-controls="sortDisplayFilterContent">
             <span>Card Display &amp; Sort</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
           <div class="accordion-content" id="sortDisplayFilterContent" style="display:flex;flex-direction:column;gap:10px;padding-top:6px;">
             <div>
-              <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Default Name Display:</label>
-              <select id="sidebarNameDisplaySelect" class="sort-select" style="width:100%;">
+              <label for="sidebarNameDisplaySelect" style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Default Name Display:</label>
+              <select id="sidebarNameDisplaySelect" class="sort-select" style="width:100%;" aria-label="Default Name Display">
                 <option value="common_first">Common Name First</option>
                 <option value="scientific_first">Scientific Name First</option>
               </select>
             </div>
             <div>
-              <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Sort By:</label>
-              <select id="sidebarSortOrderSelect" class="sort-select" style="width:100%;">
+              <label for="sidebarSortOrderSelect" style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Sort By:</label>
+              <select id="sidebarSortOrderSelect" class="sort-select" style="width:100%;" aria-label="Sort plant cards by">
                 <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
                 <option value="common_asc">Common Name (A to Z)</option>
                 <option value="common_desc">Common Name (Z to A)</option>
@@ -2438,7 +2505,7 @@
 
         <!-- Habitat / Environment -->
         <div class="accordion">
-          <button class="accordion-header" data-target="habitatFilterContent">
+          <button class="accordion-header" data-target="habitatFilterContent" aria-expanded="true" aria-controls="habitatFilterContent">
             <span>Native Environment</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2453,7 +2520,7 @@
 
         <!-- Light Requirements -->
         <div class="accordion">
-          <button class="accordion-header" data-target="lightFilterContent">
+          <button class="accordion-header" data-target="lightFilterContent" aria-expanded="true" aria-controls="lightFilterContent">
             <span>Light Requirements</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2467,7 +2534,7 @@
 
         <!-- Soil Moisture -->
         <div class="accordion">
-          <button class="accordion-header" data-target="moistureFilterContent">
+          <button class="accordion-header" data-target="moistureFilterContent" aria-expanded="true" aria-controls="moistureFilterContent">
             <span>Soil Moisture</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2482,7 +2549,7 @@
 
         <!-- Mature Height -->
         <div class="accordion">
-          <button class="accordion-header" data-target="heightFilterContent">
+          <button class="accordion-header" data-target="heightFilterContent" aria-expanded="true" aria-controls="heightFilterContent">
             <span>Mature Height</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2497,7 +2564,7 @@
 
         <!-- Plant Type -->
         <div class="accordion">
-          <button class="accordion-header" data-target="typeFilterContent">
+          <button class="accordion-header" data-target="typeFilterContent" aria-expanded="true" aria-controls="typeFilterContent">
             <span>Plant Type</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2514,7 +2581,7 @@
 
         <!-- Ecological Layer -->
         <div class="accordion">
-          <button class="accordion-header" data-target="layerFilterContent">
+          <button class="accordion-header" data-target="layerFilterContent" aria-expanded="true" aria-controls="layerFilterContent">
             <span>Garden / Forest Layer</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2529,7 +2596,7 @@
 
         <!-- Bloom Season -->
         <div class="accordion">
-          <button class="accordion-header" data-target="bloomFilterContent">
+          <button class="accordion-header" data-target="bloomFilterContent" aria-expanded="true" aria-controls="bloomFilterContent">
             <span>Bloom Season</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2544,7 +2611,7 @@
 
         <!-- Bloom Color -->
         <div class="accordion">
-          <button class="accordion-header" data-target="bloomColorFilterContent">
+          <button class="accordion-header" data-target="bloomColorFilterContent" aria-expanded="true" aria-controls="bloomColorFilterContent">
             <span>Bloom Color</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2565,7 +2632,7 @@
 
         <!-- Plant Sociability -->
         <div class="accordion">
-          <button class="accordion-header" data-target="sociabilityFilterContent">
+          <button class="accordion-header" data-target="sociabilityFilterContent" aria-expanded="true" aria-controls="sociabilityFilterContent">
             <span>Plant Sociability</span>
             <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
           </button>
@@ -2589,14 +2656,14 @@
     </aside>
 
     <!-- Main Content Grid -->
-    <main class="main-content">
+    <main class="main-content" id="main-content" tabindex="-1">
       
       <!-- Mobile Search Bar (prominent on mobile / <= 1024px) -->
       <div class="mobile-search-bar">
         <div class="search-box">
           <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
-          <input type="text" id="mobileSearchInput" class="search-input" placeholder="Search Kansas City natives...">
-          <button id="mobileSearchClearBtn" class="search-clear">
+          <input type="text" id="mobileSearchInput" class="search-input" placeholder="Search Kansas City natives..." aria-label="Search Kansas City native plants by common or scientific name">
+          <button id="mobileSearchClearBtn" class="search-clear" aria-label="Clear search input">
             <i data-lucide="x" style="width:14px;height:14px;"></i>
           </button>
         </div>
@@ -2619,7 +2686,7 @@
       <!-- Controls Bar -->
       <div class="controls-bar">
         <div class="results-and-mobile-filter">
-          <button id="openSidebarBtn" class="btn btn-filter-toggle">
+          <button id="openSidebarBtn" class="btn btn-filter-toggle" aria-label="Toggle search and filter options" aria-expanded="false" aria-controls="filterSidebar">
             <i data-lucide="sliders-horizontal" style="width:15px;height:15px;"></i>
             <span>Filters</span>
             <span id="mobileFilterBadge" class="filter-count-badge" style="display:none;">0</span>
@@ -2632,7 +2699,7 @@
         <div class="controls-actions" style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;">
           <div class="sort-control">
             <label for="defaultNameDisplaySelect">Default Title:</label>
-            <select id="defaultNameDisplaySelect" class="sort-select" title="Default name shown first when sorting by criteria other than name">
+            <select id="defaultNameDisplaySelect" class="sort-select" title="Default name shown first when sorting by criteria other than name" aria-label="Default Title Name Display">
               <option value="common_first">Common Name First</option>
               <option value="scientific_first">Scientific Name First</option>
             </select>
@@ -2640,7 +2707,7 @@
 
           <div class="sort-control">
             <label for="sortOrderSelect">Sort by:</label>
-            <select id="sortOrderSelect" class="sort-select">
+            <select id="sortOrderSelect" class="sort-select" aria-label="Sort plant cards by">
               <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
               <option value="common_asc">Common Name (A to Z)</option>
               <option value="common_desc">Common Name (Z to A)</option>
@@ -2679,7 +2746,7 @@
         <i data-lucide="clipboard-check" style="color:var(--primary);"></i>
         <span>Consultation Report</span>
       </h2>
-      <button id="closeDrawerBtn" class="btn-icon">
+      <button id="closeDrawerBtn" class="btn-icon" aria-label="Close consultation report drawer">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -2716,10 +2783,10 @@
             <span id="consultationStatusText" style="font-size:11px;color:var(--text-muted);">Saved locally</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button type="button" id="duplicateConsultationBtn" class="btn-sm-icon" title="Duplicate this consultation">
+            <button type="button" id="duplicateConsultationBtn" class="btn-sm-icon" title="Duplicate this consultation" aria-label="Duplicate this consultation">
               <i data-lucide="copy" style="width:13px;height:13px;"></i>
             </button>
-            <button type="button" id="deleteCurrentConsultationBtn" class="btn-sm-icon text-danger" title="Delete this consultation">
+            <button type="button" id="deleteCurrentConsultationBtn" class="btn-sm-icon text-danger" title="Delete this consultation" aria-label="Delete this consultation">
               <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
             </button>
           </div>
@@ -2798,8 +2865,8 @@
               Invasive Species (<span id="stagedInvasivesCountBadge">0</span>)
             </span>
           </div>
-          <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;">
-            <input type="checkbox" id="toggleInvasivePresent" style="width:15px;height:15px;accent-color:#dc2626;">
+          <label for="toggleInvasivePresent" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;">
+            <input type="checkbox" id="toggleInvasivePresent" style="width:15px;height:15px;accent-color:#dc2626;" aria-label="Invasive species found on site">
             <span>Found on site</span>
           </label>
         </div>
@@ -2833,33 +2900,33 @@
           Select which wildlife stewardship and municipal cost-share sections to include in the client’s Word report.
         </p>
         <div style="display:flex;flex-direction:column;gap:4px;">
-          <label class="toggle-row">
+          <label for="toggleBirdNestBox" class="toggle-row">
             <span class="toggle-label"><i data-lucide="box" style="width:13px;height:13px;color:var(--primary);"></i> Bird Nest Box Section</span>
-            <input type="checkbox" id="toggleBirdNestBox" checked>
+            <input type="checkbox" id="toggleBirdNestBox" checked aria-label="Include Bird Nest Box Section in report">
           </label>
-          <label class="toggle-row">
+          <label for="toggleBirdBath" class="toggle-row">
             <span class="toggle-label"><i data-lucide="droplet" style="width:13px;height:13px;color:var(--primary);"></i> Bird Bath Section</span>
-            <input type="checkbox" id="toggleBirdBath" checked>
+            <input type="checkbox" id="toggleBirdBath" checked aria-label="Include Bird Bath Section in report">
           </label>
-          <label class="toggle-row">
+          <label for="toggleBatBox" class="toggle-row">
             <span class="toggle-label"><i data-lucide="moon" style="width:13px;height:13px;color:var(--primary);"></i> Bat Box Section (If Discussed)</span>
-            <input type="checkbox" id="toggleBatBox">
+            <input type="checkbox" id="toggleBatBox" aria-label="Include Bat Box Section in report">
           </label>
-          <label class="toggle-row">
+          <label for="toggleBeeHabitat" class="toggle-row">
             <span class="toggle-label"><i data-lucide="flower-2" style="width:13px;height:13px;color:var(--primary);"></i> Native Bee Habitat Section</span>
-            <input type="checkbox" id="toggleBeeHabitat" checked>
+            <input type="checkbox" id="toggleBeeHabitat" checked aria-label="Include Native Bee Habitat Section in report">
           </label>
-          <label class="toggle-row">
+          <label for="toggleJohnsonCounty" class="toggle-row">
             <span class="toggle-label"><i data-lucide="map" style="width:13px;height:13px;color:#d97706;"></i> Johnson County (Contain The Rain)</span>
-            <input type="checkbox" id="toggleJohnsonCounty">
+            <input type="checkbox" id="toggleJohnsonCounty" aria-label="Include Johnson County Contain The Rain Program">
           </label>
-          <label class="toggle-row">
+          <label for="toggleWyandotteCounty" class="toggle-row">
             <span class="toggle-label"><i data-lucide="map" style="width:13px;height:13px;color:#d97706;"></i> Wyandotte County (UG Stormwater Cost-Share)</span>
-            <input type="checkbox" id="toggleWyandotteCounty">
+            <input type="checkbox" id="toggleWyandotteCounty" aria-label="Include Wyandotte County UG Stormwater Cost-Share Program">
           </label>
-          <label class="toggle-row">
+          <label for="toggleRainwaterHarvesting" class="toggle-row">
             <span class="toggle-label"><i data-lucide="cloud-rain" style="width:13px;height:13px;color:var(--primary);"></i> Rainwater Harvesting Section</span>
-            <input type="checkbox" id="toggleRainwaterHarvesting" checked>
+            <input type="checkbox" id="toggleRainwaterHarvesting" checked aria-label="Include Rainwater Harvesting Section in report">
           </label>
         </div>
       </div>
@@ -2885,16 +2952,16 @@
   </aside>
 
   <!-- Nature Advisor Sign In Modal -->
-  <dialog id="advisorLoginModal">
+  <dialog id="advisorLoginModal" aria-modal="true" aria-labelledby="advisorLoginTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:10px;">
         <i data-lucide="shield-check" style="color:var(--primary);width:24px;height:24px;"></i>
         <div>
-          <h3 style="font-size:17px;font-weight:800;">Nature Advisor Sign In</h3>
+          <h3 id="advisorLoginTitle" style="font-size:17px;font-weight:800;">Nature Advisor Sign In</h3>
           <p style="font-size:11px;color:var(--text-muted);margin:0;">Deep Roots Nature Advisors Portal</p>
         </div>
       </div>
-      <button onclick="document.getElementById('advisorLoginModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('advisorLoginModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -2910,7 +2977,7 @@
         <label for="loginPasswordInput">Password</label>
         <div style="position:relative;">
           <input type="password" id="loginPasswordInput" placeholder="Enter advisor password" required autocomplete="current-password" style="padding-right:40px;width:100%;box-sizing:border-box;">
-          <button type="button" id="toggleLoginPasswordBtn" class="btn-icon" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);border:none;background:transparent;cursor:pointer;" title="Show/Hide Password">
+          <button type="button" id="toggleLoginPasswordBtn" class="btn-icon" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);border:none;background:transparent;cursor:pointer;" title="Show/Hide Password" aria-label="Toggle password visibility">
             <i data-lucide="eye" style="width:16px;height:16px;"></i>
           </button>
         </div>
@@ -2930,13 +2997,13 @@
   </dialog>
 
   <!-- Display & Text Size Quick Dialog -->
-  <dialog id="textSizeModal" style="max-width:480px;width:95%;">
+  <dialog id="textSizeModal" style="max-width:480px;width:95%;" aria-modal="true" aria-labelledby="textSizeTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <i data-lucide="type" style="color:var(--primary);width:20px;height:20px;"></i>
-        <h3 style="font-size:16px;font-weight:800;margin:0;">Display &amp; Text Size</h3>
+        <h3 id="textSizeTitle" style="font-size:16px;font-weight:800;margin:0;">Display &amp; Text Size</h3>
       </div>
-      <button onclick="document.getElementById('textSizeModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('textSizeModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3001,13 +3068,13 @@
   </dialog>
 
   <!-- User Profile & Administration Modal -->
-  <dialog id="userProfileModal">
+  <dialog id="userProfileModal" aria-modal="true" aria-labelledby="userProfileTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <i data-lucide="user" style="color:var(--primary);width:20px;height:20px;"></i>
-        <h3 style="font-size:16px;font-weight:800;">Advisor Profile</h3>
+        <h3 id="userProfileTitle" style="font-size:16px;font-weight:800;">Advisor Profile</h3>
       </div>
-      <button onclick="document.getElementById('userProfileModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('userProfileModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3101,13 +3168,13 @@
   </dialog>
 
   <!-- Change / Set Strong Password Dialog -->
-  <dialog id="changePasswordModal">
+  <dialog id="changePasswordModal" aria-modal="true" aria-labelledby="changePasswordTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <i data-lucide="lock" style="color:var(--primary);width:20px;height:20px;"></i>
         <h3 id="changePasswordTitle" style="font-size:16px;font-weight:800;">Set Strong Password</h3>
       </div>
-      <button onclick="document.getElementById('changePasswordModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('changePasswordModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3122,7 +3189,7 @@
         <label for="newPasswordInput">New Password</label>
         <div style="position:relative;">
           <input type="password" id="newPasswordInput" placeholder="Enter new strong password" required autocomplete="new-password" style="padding-right:40px;width:100%;box-sizing:border-box;">
-          <button type="button" id="toggleNewPasswordBtn" class="btn-icon" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);border:none;background:transparent;cursor:pointer;">
+          <button type="button" id="toggleNewPasswordBtn" class="btn-icon" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);border:none;background:transparent;cursor:pointer;" title="Show/Hide Password" aria-label="Toggle password visibility">
             <i data-lucide="eye" style="width:16px;height:16px;"></i>
           </button>
         </div>
@@ -3149,16 +3216,16 @@
   </dialog>
 
   <!-- Advisor Administration Console Modal (Admin Only) -->
-  <dialog id="adminManagementModal" style="max-width:680px;width:95%;">
+  <dialog id="adminManagementModal" style="max-width:680px;width:95%;" aria-modal="true" aria-labelledby="adminManagementTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:10px;">
         <i data-lucide="shield" style="color:var(--accent-gold);width:24px;height:24px;"></i>
         <div>
-          <h3 style="font-size:17px;font-weight:800;">Advisor Administration Console</h3>
+          <h3 id="adminManagementTitle" style="font-size:17px;font-weight:800;">Advisor Administration Console</h3>
           <p style="font-size:11px;color:var(--text-muted);margin:0;">Deep Roots Nature Advisors &bull; Administrator Privileges</p>
         </div>
       </div>
-      <button onclick="document.getElementById('adminManagementModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('adminManagementModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3178,7 +3245,7 @@
       <!-- Tab 1: Advisor Roster Panel -->
       <div id="adminRosterPanel">
         <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-          <input type="text" id="adminRosterSearchInput" placeholder="Search advisors by name, username, email..." style="width:100%;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:13px;">
+          <input type="text" id="adminRosterSearchInput" placeholder="Search advisors by name, username, email..." style="width:100%;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:13px;" aria-label="Search advisors by name, username, or email">
         </div>
         <div id="adminRosterList" style="display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto;padding-right:4px;">
           <!-- Dynamically populated roster cards -->
@@ -3262,16 +3329,16 @@
   </dialog>
 
   <!-- Edit Advisor Record Modal (Admin Only) -->
-  <dialog id="editUserModal" style="max-width:580px;width:95%;">
+  <dialog id="editUserModal" style="max-width:580px;width:95%;" aria-modal="true" aria-labelledby="editUserTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:10px;">
         <i data-lucide="user-cog" style="color:var(--primary);width:22px;height:22px;"></i>
         <div>
-          <h3 style="font-size:16px;font-weight:800;margin:0;">Edit Advisor Record</h3>
+          <h3 id="editUserTitle" style="font-size:16px;font-weight:800;margin:0;">Edit Advisor Record</h3>
           <p style="font-size:11px;color:var(--text-muted);margin:0;">Modify profile details, contact information, and security permissions</p>
         </div>
       </div>
-      <button type="button" onclick="document.getElementById('editUserModal').close()" class="btn-icon">
+      <button type="button" onclick="document.getElementById('editUserModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3356,23 +3423,23 @@
   </dialog>
 
   <!-- Consultation Manager Dialog -->
-  <dialog id="consultationsModal" style="max-width:700px;width:95%;">
+  <dialog id="consultationsModal" style="max-width:700px;width:95%;" aria-modal="true" aria-labelledby="consultationsTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:10px;">
         <i data-lucide="folder-kanban" style="color:var(--primary);width:24px;height:24px;"></i>
         <div>
-          <h3 style="font-size:17px;font-weight:800;margin:0;">My Consultations</h3>
+          <h3 id="consultationsTitle" style="font-size:17px;font-weight:800;margin:0;">My Consultations</h3>
           <p style="font-size:11px;color:var(--text-muted);margin:0;">Manage and switch between your client consultation reports</p>
         </div>
       </div>
-      <button onclick="document.getElementById('consultationsModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('consultationsModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
     <div class="dialog-body" style="padding:16px 20px;">
       <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
         <div style="position:relative;flex:1;min-width:200px;">
-          <input type="text" id="consultationSearchInput" placeholder="Search consultations by client, location, date..." style="width:100%;padding:9px 12px 9px 34px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-size:13px;box-sizing:border-box;">
+          <input type="text" id="consultationSearchInput" placeholder="Search consultations by client, location, date..." style="width:100%;padding:9px 12px 9px 34px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-size:13px;box-sizing:border-box;" aria-label="Search consultations by client name, project address, or date">
           <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted);"></i>
         </div>
         <button type="button" id="modalNewConsultationBtn" class="btn btn-primary" style="white-space:nowrap;padding:9px 14px;font-size:13px;font-weight:700;">
@@ -3388,14 +3455,14 @@
   </dialog>
 
   <!-- Plant Detail Dialog -->
-  <dialog id="plantDetailModal">
+  <dialog id="plantDetailModal" aria-modal="true" aria-labelledby="modalCommonName">
     <div class="dialog-header">
       <div>
         <h3 id="modalCommonName" style="font-size:18px;font-weight:800;line-height:1.2;"></h3>
         <p id="modalSciName" style="font-family:var(--font-serif);font-style:italic;font-size:13px;color:var(--text-muted);"></p>
         <div id="modalBadges" style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;"></div>
       </div>
-      <button onclick="document.getElementById('plantDetailModal').close()" class="btn-icon">
+      <button onclick="document.getElementById('plantDetailModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3488,10 +3555,10 @@
   </dialog>
 
   <!-- Edit Plant Dialog -->
-  <dialog id="editPlantModal">
+  <dialog id="editPlantModal" aria-modal="true" aria-labelledby="editPlantTitle">
     <div class="dialog-header">
-      <h3 style="font-size:16px;font-weight:800;">Edit Plant Record</h3>
-      <button onclick="document.getElementById('editPlantModal').close()" class="btn-icon">
+      <h3 id="editPlantTitle" style="font-size:16px;font-weight:800;">Edit Plant Record</h3>
+      <button onclick="document.getElementById('editPlantModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3559,10 +3626,10 @@
   </dialog>
 
   <!-- Database Sync & Admin Dialog -->
-  <dialog id="syncModal">
+  <dialog id="syncModal" aria-modal="true" aria-labelledby="syncModalTitle">
     <div class="dialog-header">
-      <h3 style="font-size:16px;font-weight:800;">Shared Master Database Status</h3>
-      <button onclick="document.getElementById('syncModal').close()" class="btn-icon">
+      <h3 id="syncModalTitle" style="font-size:16px;font-weight:800;">Shared Master Database Status</h3>
+      <button onclick="document.getElementById('syncModal').close()" class="btn-icon" aria-label="Close dialog">
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -3615,7 +3682,7 @@
           <label class="btn btn-secondary" style="width:100%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;">
             <i data-lucide="file-up"></i>
             <span>Import Plants JSON (Android Backup)</span>
-            <input type="file" id="importJsonFileInput" accept=".json" style="display:none;">
+            <input type="file" id="importJsonFileInput" accept=".json" style="display:none;" aria-label="Import plant database JSON file">
           </label>
         </div>
       </div>
@@ -3623,7 +3690,7 @@
   </dialog>
 
   <!-- Invasive Removal Professionals Modal -->
-  <dialog id="contractorsModal" style="max-width: 680px; width: 92vw; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface); color: var(--text-main);" aria-labelledby="contractorsModalTitle">
+  <dialog id="contractorsModal" style="max-width: 680px; width: 92vw; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface); color: var(--text-main);" aria-modal="true" aria-labelledby="contractorsModalTitle">
     <div class="dialog-header" style="background: var(--bg-surface-elevated, #fff1f2); border-bottom: 1px solid var(--border-subtle); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 22px;">🚜</span>
@@ -5604,7 +5671,7 @@
               ${images.length > 1 ? `
               <div class="invasive-thumb-strip" style="position:absolute;bottom:6px;right:6px;display:flex;gap:4px;background:rgba(0,0,0,0.78);backdrop-filter:blur(4px);padding:3px 5px;border-radius:6px;z-index:2;">
                 ${images.map((img, iIdx) => `
-                  <button type="button" class="invasive-thumb-btn ${iIdx === 0 ? 'active' : ''}" data-idx="${iIdx}" title="${escapeHtml(img.label)}: ${escapeHtml(img.caption)}" style="width:26px;height:26px;border-radius:4px;overflow:hidden;border:1.5px solid ${iIdx === 0 ? '#ef4444' : 'rgba(255,255,255,0.45)'};padding:0;background:#000;cursor:pointer;display:block;">
+                  <button type="button" class="invasive-thumb-btn ${iIdx === 0 ? 'active' : ''}" data-idx="${iIdx}" aria-label="Switch preview to photo ${iIdx + 1}: ${escapeHtml(img.label)}" title="${escapeHtml(img.label)}: ${escapeHtml(img.caption)}" style="width:26px;height:26px;border-radius:4px;overflow:hidden;border:1.5px solid ${iIdx === 0 ? '#ef4444' : 'rgba(255,255,255,0.45)'};padding:0;background:#000;cursor:pointer;display:block;">
                     <img src="${img.url}" alt="${escapeHtml(img.label)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&w=100&q=80';">
                   </button>
                 `).join('')}
@@ -5709,6 +5776,8 @@
       if (!modal) {
         modal = document.createElement('dialog');
         modal.id = 'invasiveDetailModal';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'invasiveDetailTitle');
         modal.style.cssText = 'max-width: 650px; width: 92vw; border: none; border-radius: var(--radius-lg); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface); color: var(--text-main);';
         document.body.appendChild(modal);
       }
@@ -5721,11 +5790,11 @@
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 18px;">⚠️</span>
-              <h3 style="font-size: 18px; font-weight: 800; color: #991b1b; margin: 0;">${escapeHtml(plant.common_name)}</h3>
+              <h3 id="invasiveDetailTitle" style="font-size: 18px; font-weight: 800; color: #991b1b; margin: 0;">${escapeHtml(plant.common_name)}</h3>
             </div>
             <p style="font-style: italic; color: #dc2626; font-size: 13px; margin: 2px 0 0 0;">${escapeHtml(plant.scientific_name)}</p>
           </div>
-          <button type="button" class="btn-icon" id="closeInvasiveModalBtn" style="border: none; background: transparent; cursor: pointer; color: #991b1b;">
+          <button type="button" class="btn-icon" id="closeInvasiveModalBtn" aria-label="Close invasive species guide" style="border: none; background: transparent; cursor: pointer; color: #991b1b;">
             <i data-lucide="x" style="width: 20px; height: 20px;"></i>
           </button>
         </div>
@@ -5839,6 +5908,8 @@
       if (!modal) {
         modal = document.createElement('dialog');
         modal.id = 'invasiveLightboxModal';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-label', 'Full size botanical photo preview');
         modal.className = 'lightbox-dialog';
         modal.style.cssText = 'max-width: 95vw; width: 920px; max-height: 94vh; border: 1px solid rgba(255,255,255,0.18); border-radius: var(--radius-lg); padding: 0; box-shadow: 0 25px 60px rgba(0,0,0,0.85); background: #0b1120; color: #f8fafc; overflow: hidden;';
         document.body.appendChild(modal);
@@ -5887,7 +5958,7 @@
                 <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
                 <span class="hide-mobile">Source Page</span>
               </a>
-              <button type="button" class="btn-icon" id="closeLightboxBtn" style="border: none; background: transparent; cursor: pointer; color: #cbd5e1; padding: 4px;" title="Close full size view">
+              <button type="button" class="btn-icon" id="closeLightboxBtn" aria-label="Close photo preview" style="border: none; background: transparent; cursor: pointer; color: #cbd5e1; padding: 4px;" title="Close full size view">
                 <i data-lucide="x" style="width: 20px; height: 20px;"></i>
               </button>
             </div>
@@ -5897,13 +5968,13 @@
             <img src="${fullResUrl}" alt="${escapeHtml(img.label)} - ${escapeHtml(plant.common_name)}" style="max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); user-select: none;" onerror="this.onerror=null; this.src='${img.url}';">
 
             ${hasPrev ? `
-              <button type="button" id="lightboxPrevBtn" class="btn-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(15,23,42,0.82); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Previous Photo (Left Arrow)">
+              <button type="button" id="lightboxPrevBtn" class="btn-icon" aria-label="Previous photo" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(15,23,42,0.82); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Previous Photo (Left Arrow)">
                 <i data-lucide="chevron-left" style="width: 22px; height: 22px;"></i>
               </button>
             ` : ''}
 
             ${hasNext ? `
-              <button type="button" id="lightboxNextBtn" class="btn-icon" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(15,23,42,0.82); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Next Photo (Right Arrow)">
+              <button type="button" id="lightboxNextBtn" class="btn-icon" aria-label="Next photo" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(15,23,42,0.82); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Next Photo (Right Arrow)">
                 <i data-lucide="chevron-right" style="width: 22px; height: 22px;"></i>
               </button>
             ` : ''}
@@ -5938,7 +6009,7 @@
             ${images.length > 1 ? `
               <div style="display: flex; gap: 8px; overflow-x: auto; padding-top: 10px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
                 ${images.map((item, iIdx) => `
-                  <button type="button" class="lightbox-nav-thumb ${iIdx === currentIdx ? 'active' : ''}" data-idx="${iIdx}" style="flex-shrink: 0; width: 56px; height: 42px; border-radius: 4px; overflow: hidden; border: 2px solid ${iIdx === currentIdx ? '#ef4444' : 'rgba(255,255,255,0.25)'}; padding: 0; background: #000; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative;" title="${escapeHtml(item.label)}">
+                  <button type="button" class="lightbox-nav-thumb ${iIdx === currentIdx ? 'active' : ''}" data-idx="${iIdx}" aria-label="View photo ${iIdx + 1}: ${escapeHtml(item.label)}" style="flex-shrink: 0; width: 56px; height: 42px; border-radius: 4px; overflow: hidden; border: 2px solid ${iIdx === currentIdx ? '#ef4444' : 'rgba(255,255,255,0.25)'}; padding: 0; background: #000; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative;" title="${escapeHtml(item.label)}">
                     <img src="${item.url}" alt="${escapeHtml(item.label)}" style="width: 100%; height: 100%; object-fit: cover;">
                     <span style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: #fff; font-size: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 1px 2px;">${escapeHtml(item.label)}</span>
                   </button>
@@ -6118,8 +6189,8 @@
               <div style="font-size:10px;font-style:italic;color:#dc2626;">${escapeHtml(inv.scientific)}</div>
             </div>
           </div>
-          <input type="text" class="inv-note-input" value="${escapeHtml(inv.notes || '')}" placeholder="Observation / location on property..." style="flex:1.2;font-size:11px;padding:3px 6px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-main);">
-          <button type="button" class="btn-icon remove-inv-btn" title="Remove invasive from report" style="color:var(--danger);padding:3px;">
+          <input type="text" class="inv-note-input" value="${escapeHtml(inv.notes || '')}" aria-label="Observation notes for ${escapeHtml(inv.name)}" placeholder="Observation / location on property..." style="flex:1.2;font-size:11px;padding:3px 6px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-main);">
+          <button type="button" class="btn-icon remove-inv-btn" title="Remove invasive from report" aria-label="Remove ${escapeHtml(inv.name)} from report" style="color:var(--danger);padding:3px;">
             <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
           </button>
         `;
@@ -6169,12 +6240,12 @@
           <span style="font-size:11px;font-weight:700;color:var(--primary);white-space:nowrap;">
             <i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i>
           </span>
-          <input type="text" class="garden-area-input" value="${escapeHtml(areaName)}" placeholder="e.g. Area ${idx + 1}: Front Porch">
+          <input type="text" class="garden-area-input" value="${escapeHtml(areaName)}" aria-label="Garden area name" placeholder="e.g. Area ${idx + 1}: Front Porch">
           <span class="garden-area-badge" title="${plantCount} plant(s) assigned to this area">
             ${plantCount} plant${plantCount === 1 ? '' : 's'}
           </span>
           ${canDelete ? `
-            <button type="button" class="btn-icon delete-area-btn" title="Remove this garden area" style="color:var(--danger);padding:3px;opacity:0.75;">
+            <button type="button" class="btn-icon delete-area-btn" title="Remove this garden area" aria-label="Remove garden area ${escapeHtml(areaName)}" style="color:var(--danger);padding:3px;opacity:0.75;">
               <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
             </button>
           ` : ''}
@@ -6394,10 +6465,10 @@
                 <i data-lucide="${isActive ? 'check' : 'arrow-right-left'}" style="width:13px;height:13px;"></i>
                 <span>${isActive ? 'Selected' : 'Switch'}</span>
               </button>
-              <button class="btn-icon btn-sm-icon duplicate-btn" title="Duplicate consultation">
+              <button class="btn-icon btn-sm-icon duplicate-btn" title="Duplicate consultation" aria-label="Duplicate consultation for ${escapeHtml(c.clientMeta?.name || 'client')}">
                 <i data-lucide="copy" style="width:13px;height:13px;"></i>
               </button>
-              <button class="btn-icon btn-sm-icon text-danger delete-btn" title="Delete consultation">
+              <button class="btn-icon btn-sm-icon text-danger delete-btn" title="Delete consultation" aria-label="Delete consultation for ${escapeHtml(c.clientMeta?.name || 'client')}">
                 <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
               </button>
             </div>
@@ -6543,8 +6614,52 @@
       }
     }
 
+    // Screen Reader Announcer Helper (WCAG 4.1.3 Status Messages)
+    let a11yAnnounceTimer = null;
+    function announceToScreenReader(msg, immediate = false) {
+      const announcer = document.getElementById('a11yAnnouncer');
+      if (!announcer) return;
+      if (a11yAnnounceTimer) clearTimeout(a11yAnnounceTimer);
+      const doAnnounce = () => {
+        announcer.textContent = '';
+        setTimeout(() => {
+          announcer.textContent = msg;
+        }, 50);
+      };
+      if (immediate) {
+        doAnnounce();
+      } else {
+        a11yAnnounceTimer = setTimeout(doAnnounce, 300);
+      }
+    }
+
+    // Modal Focus Management (WCAG 2.4.3 Focus Order)
+    if (typeof HTMLDialogElement !== 'undefined' && HTMLDialogElement.prototype.showModal) {
+      const originalShowModal = HTMLDialogElement.prototype.showModal;
+      HTMLDialogElement.prototype.showModal = function() {
+        this._previousActiveElement = document.activeElement;
+        originalShowModal.apply(this, arguments);
+        setTimeout(() => {
+          const focusable = this.querySelector('input:not([type="hidden"]), select, textarea, button.btn-primary, button.btn-icon, button:not([disabled])');
+          if (focusable) focusable.focus();
+        }, 50);
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('dialog').forEach(dlg => {
+          dlg.addEventListener('close', () => {
+            if (dlg._previousActiveElement && typeof dlg._previousActiveElement.focus === 'function') {
+              try { dlg._previousActiveElement.focus(); } catch (e) {}
+              dlg._previousActiveElement = null;
+            }
+          });
+        });
+      });
+    }
+
     // Toast Helper
     window.showToast = function(msg, type = "success") {
+      announceToScreenReader(msg, true);
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
@@ -7407,9 +7522,18 @@
       if (msClear) msClear.style.display = 'none';
 
       state.filters.sweet16 = false;
-      document.getElementById('toggleSweet16Btn').classList.remove('active');
+      const s16BtnEl = document.getElementById('toggleSweet16Btn');
+      if (s16BtnEl) {
+        s16BtnEl.classList.remove('active');
+        s16BtnEl.setAttribute('aria-checked', 'false');
+      }
       state.filters.keystone = false;
-      document.getElementById('toggleKeystoneBtn').classList.remove('active');
+      const kstoneBtnEl = document.getElementById('toggleKeystoneBtn');
+      if (kstoneBtnEl) {
+        kstoneBtnEl.classList.remove('active');
+        kstoneBtnEl.setAttribute('aria-checked', 'false');
+      }
+      announceToScreenReader('All filters reset. Showing all Kansas City native plants.', true);
       
       const groups = ['habitat', 'light', 'moisture', 'height', 'type', 'layer', 'season', 'bloomColor', 'sociability'];
       groups.forEach(g => state.filters[g].clear());
@@ -7429,6 +7553,7 @@
       const countEl = document.getElementById('resultsCount');
 
       countEl.innerHTML = `Showing <strong>${state.filteredPlants.length}</strong> of ${state.allPlants.length} Kansas City Native Plants`;
+      announceToScreenReader(`Showing ${state.filteredPlants.length} of ${state.allPlants.length} Kansas City native plants`);
       const mobileFilteredCount = document.getElementById('mobileFilteredCount');
       if (mobileFilteredCount) mobileFilteredCount.textContent = state.filteredPlants.length;
 
@@ -7590,7 +7715,7 @@
             ${layerStr ? `<span class="badge-layer">${layerStr}</span>` : ''}
           </div>
           <div class="card-body">
-            <div class="card-title-group">
+            <div class="card-title-group" tabindex="0" role="button" aria-label="View botanical details for ${escapeHtml(commonName)}">
               <h3 class="card-common-name card-primary-name ${showSciFirst ? 'is-scientific' : ''}">${primaryName}</h3>
               <p class="card-sci-name card-secondary-name ${!showSciFirst ? 'is-scientific' : ''}">${secondaryName}</p>
             </div>
@@ -7603,11 +7728,11 @@
             <p class="card-desc">${descStr}</p>
           </div>
           <div class="card-footer">
-            <button class="btn-copy-desc" title="Copy Advisor Description">
+            <button class="btn-copy-desc" title="Copy Advisor Description" aria-label="Copy description for ${escapeHtml(commonName)}">
               <i data-lucide="copy" style="width:13px;height:13px;"></i>
               <span>Copy</span>
             </button>
-            <button class="btn-add-report ${!state.currentUser ? '' : (isStaged ? 'staged' : '')}">
+            <button class="btn-add-report ${!state.currentUser ? '' : (isStaged ? 'staged' : '')}" aria-label="${!state.currentUser ? 'Sign in as advisor to add ' + escapeHtml(commonName) + ' to report' : (isStaged ? 'Remove ' + escapeHtml(commonName) + ' from report' : 'Add ' + escapeHtml(commonName) + ' to consultation report')}">
               <i data-lucide="${!state.currentUser ? 'lock' : (isStaged ? 'check' : 'plus')}" style="width:14px;height:14px;"></i>
               <span>${!state.currentUser ? 'Sign In to Stage' : (isStaged ? 'In Report' : 'Add to Report')}</span>
             </button>
@@ -7617,7 +7742,14 @@
 
       // Event Listeners
       card.querySelector('.card-media').addEventListener('click', () => openPlantDetail(plant));
-      card.querySelector('.card-title-group').addEventListener('click', () => openPlantDetail(plant));
+      const cardTitleGrp = card.querySelector('.card-title-group');
+      cardTitleGrp.addEventListener('click', () => openPlantDetail(plant));
+      cardTitleGrp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPlantDetail(plant);
+        }
+      });
 
       card.querySelector('.btn-copy-desc').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -7747,11 +7879,11 @@
               <div class="staged-item-sci" style="font-style: ${shouldShowScientificFirst() ? 'normal' : 'italic'};">${shouldShowScientificFirst() ? item.common_name : item.scientific_name}</div>
             </div>
             <div class="quantity-control">
-              <button class="qty-btn qty-minus">-</button>
+              <button class="qty-btn qty-minus" aria-label="Decrease quantity for ${escapeHtml(item.common_name || item.scientific_name)}">-</button>
               <span class="qty-val">${item.quantity || 1}</span>
-              <button class="qty-btn qty-plus">+</button>
+              <button class="qty-btn qty-plus" aria-label="Increase quantity for ${escapeHtml(item.common_name || item.scientific_name)}">+</button>
             </div>
-            <button class="btn-icon remove-btn" title="Remove plant" style="color:var(--danger);padding:4px;">
+            <button class="btn-icon remove-btn" title="Remove plant" aria-label="Remove ${escapeHtml(item.common_name || item.scientific_name)} from report" style="color:var(--danger);padding:4px;">
               <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
             </button>
           </div>
@@ -7759,11 +7891,11 @@
             <span style="font-size:11px;font-weight:700;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
               <i data-lucide="map-pin" style="width:12px;height:12px;color:var(--primary);"></i> Area:
             </span>
-            <select class="staged-area-select" title="Assign plant to garden area">
+            <select class="staged-area-select" title="Assign plant to garden area" aria-label="Assign ${escapeHtml(item.common_name || item.scientific_name)} to garden area">
               ${definedAreas.map(a => `<option value="${escapeHtml(a)}" ${item.target_area === a ? 'selected' : ''}>${escapeHtml(a)}</option>`).join('')}
             </select>
           </div>
-          <input type="text" class="staged-item-note" placeholder="Specific location / planting notes for client..." value="${item.custom_notes || ''}">
+          <input type="text" class="staged-item-note" aria-label="Planting notes for ${escapeHtml(item.common_name || item.scientific_name)}" placeholder="Specific location / planting notes for client..." value="${escapeHtml(item.custom_notes || '')}">
         `;
 
         // Stepper
@@ -9239,6 +9371,7 @@
 
       function updateThemeIcon(t) {
         themeIcon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+        themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
         if (window.lucide) lucide.createIcons();
       }
 
@@ -9269,13 +9402,22 @@
       // Drawer open/close
       const drawer = document.getElementById('stagingDrawer');
       const overlay = document.getElementById('drawerOverlay');
+      const reportDrawerBtn = document.getElementById('reportDrawerBtn');
       const openDrawer = () => {
         drawer.classList.add('open');
         overlay.classList.add('open');
+        if (reportDrawerBtn) reportDrawerBtn.setAttribute('aria-expanded', 'true');
+        setTimeout(() => {
+          document.getElementById('closeDrawerBtn')?.focus();
+        }, 50);
       };
       const closeDrawer = () => {
         drawer.classList.remove('open');
         overlay.classList.remove('open');
+        if (reportDrawerBtn) {
+          reportDrawerBtn.setAttribute('aria-expanded', 'false');
+          reportDrawerBtn.focus();
+        }
       };
 
       document.getElementById('reportDrawerBtn').addEventListener('click', openDrawer);
@@ -9296,10 +9438,18 @@
           filterSidebar.classList.add('open');
           sidebarOverlay.classList.add('open');
           document.body.style.overflow = 'hidden';
+          if (openSidebarBtn) openSidebarBtn.setAttribute('aria-expanded', 'true');
+          setTimeout(() => {
+            document.getElementById('closeSidebarBtn')?.focus();
+          }, 50);
         } else {
           filterSidebar.classList.remove('open');
           sidebarOverlay.classList.remove('open');
           document.body.style.overflow = '';
+          if (openSidebarBtn) {
+            openSidebarBtn.setAttribute('aria-expanded', 'false');
+            openSidebarBtn.focus();
+          }
         }
       };
 
@@ -9368,6 +9518,8 @@
       sweet16Btn.addEventListener('click', () => {
         state.filters.sweet16 = !state.filters.sweet16;
         sweet16Btn.classList.toggle('active', state.filters.sweet16);
+        sweet16Btn.setAttribute('aria-checked', state.filters.sweet16 ? 'true' : 'false');
+        announceToScreenReader(state.filters.sweet16 ? 'Deep Roots Sweet 16 filter activated.' : 'Sweet 16 filter deactivated.', true);
         applyFilters();
       });
 
@@ -9375,6 +9527,8 @@
       keystoneBtn.addEventListener('click', () => {
         state.filters.keystone = !state.filters.keystone;
         keystoneBtn.classList.toggle('active', state.filters.keystone);
+        keystoneBtn.setAttribute('aria-checked', state.filters.keystone ? 'true' : 'false');
+        announceToScreenReader(state.filters.keystone ? 'Kansas City Keystone species filter activated.' : 'Keystone species filter deactivated.', true);
         applyFilters();
       });
 
@@ -9384,12 +9538,15 @@
           const targetId = hdr.getAttribute('data-target');
           const content = document.getElementById(targetId);
           const icon = hdr.querySelector('i');
-          if (content.style.display === 'none') {
+          const isCurrentlyHidden = content.style.display === 'none';
+          if (isCurrentlyHidden) {
             content.style.display = 'flex';
             if (icon) icon.setAttribute('data-lucide', 'chevron-down');
+            hdr.setAttribute('aria-expanded', 'true');
           } else {
             content.style.display = 'none';
             if (icon) icon.setAttribute('data-lucide', 'chevron-right');
+            hdr.setAttribute('aria-expanded', 'false');
           }
           if (window.lucide) lucide.createIcons();
         });
