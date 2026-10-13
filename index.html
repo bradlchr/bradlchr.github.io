@@ -121,6 +121,8 @@
       font-size: 16px;
       --text-scale: 1;
       --ui-scale: 1;
+      max-width: 100%;
+      overflow-x: clip;
     }
     html[data-text-scale="standard"] {
       font-size: 16px;
@@ -158,7 +160,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
+      overflow-x: clip;
+      max-width: 100%;
       transition: background-color 0.25s ease, color 0.25s ease, font-size 0.15s ease;
     }
 
@@ -189,11 +192,14 @@
       border-bottom: 1px solid var(--border-subtle);
       min-height: calc(68px * var(--ui-scale));
       height: auto;
+      width: 100%;
+      max-width: 100%;
       box-sizing: border-box;
       display: flex;
       align-items: center;
       padding: max(10px, env(safe-area-inset-top, 10px)) max(20px, env(safe-area-inset-right, 20px)) 10px max(20px, env(safe-area-inset-left, 20px));
       gap: calc(14px * var(--ui-scale));
+      overflow-x: clip;
     }
 
     .header-brand {
@@ -203,7 +209,16 @@
       text-decoration: none;
       color: inherit;
       min-width: 0;
-      flex-shrink: 0;
+      flex: 0 1 auto;
+      overflow: hidden;
+    }
+
+    .brand-title-full {
+      display: inline;
+    }
+
+    .brand-title-short {
+      display: none;
     }
 
     .brand-logo {
@@ -1982,36 +1997,154 @@
       }
       .mobile-catalog-bar {
         display: flex !important;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 8px;
       }
-      header {
-        min-height: calc(62px * var(--ui-scale));
-        height: auto;
-        padding: max(10px, env(safe-area-inset-top, 10px)) max(14px, env(safe-area-inset-right, 14px)) 10px max(14px, env(safe-area-inset-left, 14px));
-        gap: calc(8px * var(--ui-scale));
+      .catalog-mode-switcher.mobile-switcher {
+        width: 100%;
         box-sizing: border-box;
       }
+      .catalog-mode-switcher.mobile-switcher .catalog-mode-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: calc(12px * var(--text-scale));
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        justify-content: center;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      header {
+        width: 100%;
+        max-width: 100%;
+        min-height: calc(56px * var(--ui-scale));
+        height: auto;
+        padding: max(8px, env(safe-area-inset-top, 8px)) max(10px, env(safe-area-inset-right, 10px)) 8px max(10px, env(safe-area-inset-left, 10px));
+        gap: calc(6px * var(--ui-scale));
+        box-sizing: border-box;
+        overflow-x: clip;
+      }
+      .header-brand {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        gap: calc(8px * var(--ui-scale));
+      }
       .brand-logo {
-        width: calc(34px * var(--ui-scale));
-        height: calc(34px * var(--ui-scale));
-        font-size: calc(18px * var(--ui-scale));
+        width: calc(30px * var(--ui-scale));
+        height: calc(30px * var(--ui-scale));
+        min-width: calc(30px * var(--ui-scale));
+        font-size: calc(16px * var(--ui-scale));
+        border-radius: var(--radius-sm);
+        flex-shrink: 0;
+      }
+      .brand-text {
+        min-width: 0;
+        overflow: hidden;
+        flex: 1 1 auto;
+      }
+      .brand-title-full {
+        display: none !important;
+      }
+      .brand-title-short {
+        display: inline !important;
       }
       .brand-text h1 {
         font-size: calc(15px * var(--text-scale));
-        line-height: 1.25;
+        line-height: 1.2;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .brand-text p {
-        font-size: calc(10px * var(--text-scale));
-        line-height: 1.3;
-      }
-      .header-actions {
-        gap: calc(6px * var(--ui-scale));
-      }
-
-      .btn-text-long {
         display: none !important;
       }
-      .btn-text-short {
-        display: inline !important;
+
+      /* Mobile Header Toolbar Actions */
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: calc(4px * var(--ui-scale));
+        flex-shrink: 0;
+        margin-left: auto;
+      }
+
+      /* Unified compact touch buttons for mobile header */
+      .header-actions .btn-icon,
+      .header-actions #themeToggleBtn,
+      .header-actions #textSizeToggleBtn,
+      .header-actions #syncModalBtn,
+      .header-actions #headerSignInBtn,
+      .header-actions #userProfileBtn {
+        width: calc(34px * var(--ui-scale)) !important;
+        height: calc(34px * var(--ui-scale)) !important;
+        min-width: calc(34px * var(--ui-scale)) !important;
+        min-height: calc(34px * var(--ui-scale)) !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        border-radius: var(--radius-md) !important;
+        box-sizing: border-box !important;
+      }
+
+      .header-actions #themeToggleBtn svg,
+      .header-actions #syncModalBtn svg,
+      .header-actions #headerSignInBtn svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
+
+      /* Hide text labels on mobile header buttons */
+      .btn-text-long,
+      .btn-text-short,
+      .user-profile-name,
+      .header-actions #userProfileBtn .role-badge,
+      .header-actions #userProfileBtn .profile-header-role-badge {
+        display: none !important;
+      }
+
+      /* Moniker avatar circle inside profile button on mobile */
+      .header-actions #userProfileBtn img,
+      .header-actions #userProfileBtn .user-avatar-initials {
+        width: calc(26px * var(--ui-scale)) !important;
+        height: calc(26px * var(--ui-scale)) !important;
+        font-size: calc(11px * var(--ui-scale)) !important;
+      }
+
+      /* Report Drawer button on mobile */
+      .header-actions #reportDrawerBtn {
+        height: calc(34px * var(--ui-scale)) !important;
+        min-height: calc(34px * var(--ui-scale)) !important;
+        min-width: calc(34px * var(--ui-scale)) !important;
+        padding: 0 calc(8px * var(--ui-scale)) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+        border-radius: var(--radius-md) !important;
+        box-sizing: border-box !important;
+      }
+
+      .header-actions #reportDrawerBtn svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
+
+      .header-actions #reportDrawerBtn .badge-count {
+        font-size: calc(10px * var(--text-scale)) !important;
+        padding: 1px 5px !important;
+        min-width: 16px !important;
+        height: 16px !important;
+        line-height: 14px !important;
       }
 
       /* Prevent mobile Safari auto-zoom on input focus while respecting text-scale */
@@ -2022,6 +2155,9 @@
       .controls-bar {
         padding: 10px 14px;
         gap: 10px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
       .controls-actions {
         width: 100%;
@@ -2039,6 +2175,7 @@
       }
       .sort-control select {
         width: 100%;
+        max-width: 100%;
       }
 
       /* Staging drawer full-width on mobile with dvh and safe-area */
@@ -2073,51 +2210,71 @@
       .app-layout {
         padding: 10px 10px;
         gap: 12px;
-      }
-      .brand-text p {
-        display: none;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
       .brand-text h1 {
         font-size: calc(14px * var(--text-scale));
         line-height: 1.25;
       }
-      .btn-text-short {
-        display: none !important;
-      }
-      .user-profile-name {
-        display: none !important;
-      }
-      .btn-report {
-        padding: calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale));
-      }
-      .btn-google {
-        padding: calc(7px * var(--ui-scale)) calc(10px * var(--ui-scale));
-      }
-
       .controls-actions {
         grid-template-columns: 1fr;
       }
-
       .results-count {
-        font-size: calc(13px * var(--text-scale));
+        font-size: calc(12px * var(--text-scale));
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-
       .card-media {
         height: 190px;
       }
-
       .specs-grid {
         grid-template-columns: 1fr;
       }
     }
 
+    /* Small Mobile & Ultra-Compact Viewports (<= 360px) */
     @media (max-width: 360px) {
-      .brand-text h1 {
-        font-size: calc(13px * var(--text-scale));
-        line-height: 1.25;
+      header {
+        padding-left: max(6px, env(safe-area-inset-left, 6px)) !important;
+        padding-right: max(6px, env(safe-area-inset-right, 6px)) !important;
+        gap: 4px !important;
       }
-      .btn {
-        padding: calc(6px * var(--ui-scale)) calc(8px * var(--ui-scale));
+      .header-brand {
+        gap: 6px !important;
+      }
+      .brand-logo {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        font-size: 15px !important;
+      }
+      .brand-text h1 {
+        font-size: calc(13px * var(--text-scale)) !important;
+      }
+      .header-actions {
+        gap: 3px !important;
+      }
+      .header-actions .btn-icon,
+      .header-actions #themeToggleBtn,
+      .header-actions #textSizeToggleBtn,
+      .header-actions #headerSignInBtn,
+      .header-actions #userProfileBtn {
+        width: 31px !important;
+        height: 31px !important;
+        min-width: 31px !important;
+        min-height: 31px !important;
+      }
+      .header-actions #reportDrawerBtn {
+        height: 31px !important;
+        min-height: 31px !important;
+        padding: 0 5px !important;
+      }
+      /* On ultra-narrow screens (<= 360px), hide sync button from top toolbar (accessible via Advisor Profile) */
+      #syncModalBtn {
+        display: none !important;
       }
     }
   </style>
@@ -2127,9 +2284,12 @@
   <!-- Header -->
   <header>
     <div class="header-brand">
-      <div class="brand-logo">🌱</div>
+      <div class="brand-logo" title="Deep Roots Kansas City">🌱</div>
       <div class="brand-text">
-        <h1>Deep Roots Nature Advisors</h1>
+        <h1 title="Deep Roots Nature Advisors">
+          <span class="brand-title-full">Deep Roots Nature Advisors</span>
+          <span class="brand-title-short">Deep Roots</span>
+        </h1>
         <p>Kansas City Native Plant Database</p>
       </div>
     </div>
@@ -2161,7 +2321,7 @@
 
       <!-- Advisor Auth Container -->
       <div id="authContainer">
-        <button id="headerSignInBtn" class="btn btn-secondary" style="font-weight:700;">
+        <button id="headerSignInBtn" class="btn btn-secondary" style="font-weight:700;" title="Advisor Sign In" aria-label="Advisor Sign In">
           <i data-lucide="user-check"></i>
           <span class="btn-text-long">Advisor Sign In</span>
           <span class="btn-text-short">Sign In</span>
@@ -2915,6 +3075,10 @@
         <button id="openUserConsultationsBtn" class="btn btn-secondary" style="width:100%;">
           <i data-lucide="folder-kanban"></i>
           <span>My Consultations (<span id="profileConsultationsCount">0</span>)</span>
+        </button>
+        <button id="profileOpenSyncBtn" class="btn btn-secondary" style="width:100%;">
+          <i data-lucide="cloud-cog"></i>
+          <span>Shared Database &amp; Sync Status</span>
         </button>
         <button id="openEditSelfBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--primary);border-color:var(--primary-border);">
           <i data-lucide="user-cog"></i>
@@ -6684,14 +6848,14 @@
         const firstName = u.name.split(' ')[0];
         const isAdmin = u.isAdmin;
         container.innerHTML = `
-          <button id="userProfileBtn" class="btn btn-secondary" style="padding:4px 10px;gap:8px;" title="View Advisor Profile">
+          <button id="userProfileBtn" class="btn btn-secondary user-profile-header-btn" style="padding:4px 10px;gap:8px;" title="View Advisor Profile (${escapeHtml(u.name)})">
             ${u.photoURL ? `<img src="${u.photoURL}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : `
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">
+              <div class="user-avatar-initials" style="width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">
                 ${getUserInitials(u)}
               </div>
             `}
             <span class="user-profile-name" style="font-size:12px;font-weight:700;">${firstName}</span>
-            ${isAdmin ? `<span class="role-badge admin" style="font-size:10px;padding:1px 6px;">Admin</span>` : ''}
+            ${isAdmin ? `<span class="role-badge admin profile-header-role-badge" style="font-size:10px;padding:1px 6px;">Admin</span>` : ''}
           </button>
         `;
         document.getElementById('userProfileBtn').addEventListener('click', openUserProfileModal);
@@ -9437,6 +9601,13 @@
       document.getElementById('openUserConsultationsBtn')?.addEventListener('click', () => {
         document.getElementById('userProfileModal')?.close();
         openConsultationsManagerModal();
+      });
+
+      // Profile Database Sync Button
+      document.getElementById('profileOpenSyncBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        document.getElementById('syncModal')?.showModal();
+        renderSyncModal();
       });
 
       document.getElementById('duplicateConsultationBtn')?.addEventListener('click', () => {
