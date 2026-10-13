@@ -8,6 +8,7 @@ Available across platforms:
 - 📱 **Native Android & ChromeOS Application**: Pre-compiled [`DeepRootsAdvisor-debug.apk`](./DeepRootsAdvisor-debug.apk) (20 MB), built with Kotlin, Jetpack Compose, and Material 3 Adaptive WindowSizeClass.
 - 📄 **Official Word Report Generator**: Integrates the official Deep Roots Word template ([`report_template.docx`](./report_template.docx)) to output genuine, formatted `.docx` consultation reports.
 - 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Step-by-step field guide for searching plants, configuring garden zones, and exporting reports.
+- ♿ **ADA & WCAG 2.1 AA Compliance Documentation**: Detailed standards mapping, assistive technology testing, and implementation guide at [**`ADA_COMPLIANCE.md`**](./ADA_COMPLIANCE.md).
 
 Nature Advisors use the **Deep Roots Database** in the office and out in the field to research native species, evaluate site conditions, curate plant palettes into personalized client reports, and synchronize botanical records in real time via Cloud Firestore.
 
@@ -131,11 +132,23 @@ Replaces third-party Google Sign-In with an integrated, standalone Nature Adviso
 
 ---
 
+### 10. ADA Title III & WCAG 2.1 Level AA Accessibility
+- **Skip Navigation**: Accessible bypass link (`#skip-to-content`) allowing screen reader and keyboard users to bypass header chrome directly to the botanical catalog.
+- **Dynamic Text Scaling**: Native font scaling preference (`100%`, `115%`, `130%`, `145%`) with fluid rem layouts, persisted across browser sessions.
+- **High-Contrast Focus System**: High-visibility `:focus-visible` styling (`3px solid #15803d` with `3px` offset) across all interactive cards, filters, buttons, and inputs.
+- **Live Screen Reader Announcements**: Accessible live region (`#a11yAnnouncer` with `aria-live="polite"`) delivering real-time status updates on catalog filtering, staging events, and modal dialogs.
+- **Accessible Modal Dialogs**: Full keyboard focus trapping, Escape key dismissals, backdrop inerting, and automatic focus restoration to triggering elements.
+- **Motion & Contrast**: Full support for `prefers-reduced-motion: reduce` and verified contrast meeting or exceeding WCAG AA 4.5:1 standards.
+- Detailed implementation breakdown and assistive technology testing report: [**`ADA_COMPLIANCE.md`**](./ADA_COMPLIANCE.md).
+
+---
+
 ## 📂 Project Directory Structure
 
 ```
 Deep Roots Database/
 ├── index.html                                  # Standalone Single-File Web Application
+├── ADA_COMPLIANCE.md                           # ADA Title III & WCAG 2.1 AA Compliance Documentation
 ├── report_template.docx                        # Official Deep Roots Word Document Template (1.4 MB)
 ├── DeepRootsAdvisor-debug.apk                  # Pre-compiled Android Debug APK (20 MB)
 ├── firestore.rules                             # Hardened Cloud Firestore Security Rules
