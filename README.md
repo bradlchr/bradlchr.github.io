@@ -9,6 +9,7 @@ Available across platforms:
 - 📄 **Official Word Report Generator**: Integrates the official Deep Roots Word template ([`report_template.docx`](./report_template.docx)) to output genuine, formatted `.docx` consultation reports.
 - 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Step-by-step field guide for searching plants, configuring garden zones, and exporting reports.
 - ♿ **ADA & WCAG 2.1 AA Compliance Documentation**: Detailed standards mapping, assistive technology testing, and implementation guide at [**`ADA_COMPLIANCE.md`**](./ADA_COMPLIANCE.md).
+- 📊 **Program Manager Presentation**: Executive briefing deck at [**`PRESENTATION.md`**](./PRESENTATION.md) and interactive browser slide deck at [**`presentation.html`**](./presentation.html).
 
 Nature Advisors use the **Deep Roots Database** in the office and out in the field to research native species, evaluate site conditions, curate plant palettes into personalized client reports, and synchronize botanical records in real time via Cloud Firestore.
 
@@ -148,6 +149,8 @@ Replaces third-party Google Sign-In with an integrated, standalone Nature Adviso
 ```
 Deep Roots Database/
 ├── index.html                                  # Standalone Single-File Web Application
+├── presentation.html                           # Interactive Web Presentation Deck
+├── PRESENTATION.md                             # Program Manager Executive Presentation Briefing
 ├── ADA_COMPLIANCE.md                           # ADA Title III & WCAG 2.1 AA Compliance Documentation
 ├── report_template.docx                        # Official Deep Roots Word Document Template (1.4 MB)
 ├── DeepRootsAdvisor-debug.apk                  # Pre-compiled Android Debug APK (20 MB)

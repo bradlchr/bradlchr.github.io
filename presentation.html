@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Roots Nature Advisors — Web Platform Executive Presentation</title>
+  <style>
+    :root {
+      --primary: #15803d;
+      --primary-dark: #166534;
+      --primary-light: #dcfce7;
+      --accent: #ca8a04;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --bg-canvas: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --focus-ring: #15803d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Top Controls Bar */
+    header.deck-bar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 1.05rem;
+    }
+
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button.btn {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+
+    button.btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    button.btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary-dark);
+    }
+
+    button.btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .slide-badge {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      padding: 0 0.5rem;
+    }
+
+    /* Main Presentation Container */
+    main.deck-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .slide-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+      width: 100%;
+      max-width: 1050px;
+      min-height: 560px;
+      padding: 2.5rem 3rem;
+      display: none;
+      flex-direction: column;
+      animation: fadeIn 0.25s ease-out;
+      position: relative;
+    }
+
+    .slide-card.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-header {
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .slide-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .slide-category {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: #fefce8;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid #fef08a;
+    }
+
+    .slide-content {
+      flex: 1;
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text-main);
+    }
+
+    .slide-content h3 {
+      font-size: 1.25rem;
+      color: #1e293b;
+      margin: 1.25rem 0 0.5rem 0;
+    }
+
+    .slide-content ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .slide-content li {
+      margin-bottom: 0.5rem;
+    }
+
+    .callout-box {
+      background: #f0fdf4;
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      color: #14532d;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .metric-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .metric-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.925rem;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border);
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    /* Speaker Notes Box */
+    .speaker-notes {
+      margin-top: 1.5rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      color: #78350f;
+      display: none;
+    }
+
+    .speaker-notes.visible {
+      display: block;
+    }
+
+    .speaker-notes-title {
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Footer Nav */
+    footer.deck-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .slide-card {
+        padding: 1.5rem;
+        min-height: auto;
+      }
+      .slide-title {
+        font-size: 1.35rem;
+      }
+      .deck-bar {
+        padding: 0.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Controls Bar -->
+  <header class="deck-bar">
+    <div class="brand">
+      <span>🌿</span>
+      <span>Deep Roots Nature Advisors</span>
+    </div>
+    <div class="deck-controls">
+      <button class="btn" id="btnNotes" title="Toggle Speaker Notes (Shortcut: N)">
+        <span>🗣️</span> Notes
+      </button>
+      <button class="btn" id="btnPrev" title="Previous Slide (Shortcut: ←)">
+        <span>◀</span> Prev
+      </button>
+      <span class="slide-badge" id="slideIndicator">1 / 14</span>
+      <button class="btn btn-primary" id="btnNext" title="Next Slide (Shortcut: →)">
+        Next <span>▶</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Slide Viewport -->
+  <main class="deck-viewport">
+
+    <!-- Slide 1 -->
+    <div class="slide-card active" data-slide="1">
+      <div class="slide-header">
+        <h1 class="slide-title">Web Platform Executive Overview</h1>
+        <span class="slide-category">Executive Briefing</span>
+      </div>
+      <div class="slide-content">
+        <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 1.25rem;">
+          Empowering Heartland Ecological Restoration: Features, Field Workflows, Automated Outputs, &amp; Architecture
+        </p>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-val">185</div>
+            <div class="metric-label">KC Native Species</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">&lt; 5 min</div>
+            <div class="metric-label">Consultation Report Prep</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">100%</div>
+            <div class="metric-label">ADA / WCAG AA Compliant</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">$0.00</div>
+            <div class="metric-label">Recurring Infrastructure</div>
+          </div>
+        </div>
+        <div class="callout-box">
+          <strong>Mission Goal:</strong> Accelerate regional biodiversity by providing volunteer Nature Advisors with a rapid, accurate, mobile-first web companion that turns on-site observations into official, branded client consultation reports.
+        </div>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes (What to say)</div>
+        Good morning. Today I'm presenting the web version of the Deep Roots Nature Advisors Database. Our mission is to educate homeowners and restore biodiversity across Greater Kansas City. Historically, our advisors spent 2 to 3 hours after every home consultation wrestling with Word documents and manual plant lists. We built this platform to eliminate that friction completely—turning field notes into official, polished reports in under 5 minutes.
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide-card" data-slide="2">
+      <div class="slide-header">
+        <h1 class="slide-title">Solving Core Advisor Pain Points</h1>
+        <span class="slide-category">Strategic Value</span>
+      </div>
+      <div class="slide-content">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Operational Task</th>
+              <th>Legacy Manual Method</th>
+              <th>Deep Roots Web Platform</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Field Species Lookup</strong></td>
+              <td>Heavy books, unvetted websites, fragmented PDF lists</td>
+              <td>Instant search across 185 KC natives with sun/soil/height filters</td>
+            </tr>
+            <tr>
+              <td><strong>Word Report Formatting</strong></td>
+              <td>2–3 hrs manually deleting red text instructions; formatting breaks</td>
+              <td>Automated reverse-offset XML engine exports clean .docx in 3 seconds</td>
+            </tr>
+            <tr>
+              <td><strong>Invasive Plant Directives</strong></td>
+              <td>Advisors struggle with template "Case A vs Case B" logic</td>
+              <td>Automated branching: Clean lawn congratulation vs. invasive action plan</td>
+            </tr>
+            <tr>
+              <td><strong>Field Ergonomics</strong></td>
+              <td>Pinching and zooming unreadable text in sunlight</td>
+              <td>Per-user dynamic text scaling (100%–145%) and responsive toolbar</td>
+            </tr>
+            <tr>
+              <td><strong>Program Visibility</strong></td>
+              <td>No central database of advisor recommendations</td>
+              <td>Cloud Firestore sync with author attribution and consultation tracking</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        When evaluating where advisors spend their time, the property walkthrough takes 60 minutes, but the administrative aftermath took hours. This table shows our direct impact: we've taken the tedious, error-prone manual document editing and automated it into a streamlined digital workflow.
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide-card" data-slide="3">
+      <div class="slide-header">
+        <h1 class="slide-title">Botanical Intelligence: 185 Curated Natives</h1>
+        <span class="slide-category">Core Features</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Authoritative Regional Taxonomy:</strong> Wildflowers, grasses, sedges, shrubs, trees, vines, and ferns verified for Missouri and Kansas eco-types.</li>
+          <li><strong>⭐ Deep Roots Sweet 16 &amp; 🌿 KC Keystone Species:</strong> Instant one-tap filters for high-impact pollinator species and vital caterpillar host trees (e.g. <em>Quercus</em>, <em>Asclepias</em>, <em>Solidago</em>).</li>
+          <li><strong>Dynamic Bloom Color Mesh Gradients:</strong> Luminous glassmorphism cards adapt to genuine floral colors (11 color profiles) for rapid field identification.</li>
+          <li><strong>Name Display Flexibility:</strong> Instant toggle between <em>Common Name First</em> and <em>Scientific Name First</em> to tailor communication for client preferences.</li>
+          <li><strong>Curious by Nature Sociability:</strong> Identifies matrix groundcovers, moderate spreaders, and solitary clumping species.</li>
+        </ul>
+        <div class="callout-box">
+          <strong>Advisor 3-Line Descriptions:</strong> Every plant features concise, advisor-crafted commentary summarizing landscape value, ecological role, and planting tips.
+        </div>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        Our plant database is curated specifically for Greater Kansas City. With one tap, an advisor can filter for the Deep Roots Sweet 16 or KC Keystones. Notice our visual design: each card renders a frosted glass gradient matching the bloom colors, making it intuitive to browse outdoors on a tablet.
+      </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide-card" data-slide="4">
+      <div class="slide-header">
+        <h1 class="slide-title">Invasive Species Guide &amp; Contractor Directory</h1>
+        <span class="slide-category">Core Features</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Dedicated Switcher:</strong> Instantly flip between <em>🌿 Native Plants (185)</em> and <em>⚠️ Invasive Species (10)</em>.</li>
+          <li><strong>Top 10 KC Threats:</strong> Bush Honeysuckle, Japanese Honeysuckle, Wintercreeper, English Ivy, Callery/Bradford Pear, Multiflora Rose, Garlic Mustard, Tree of Heaven, Autumn Olive, and Privet.</li>
+          <li><strong>MDC Eradication Protocols:</strong> Missouri Department of Conservation cut-stump, basal bark, and foliar spray treatment guidance directly embedded.</li>
+          <li><strong>Staging Problem Plants:</strong> Add observed invasives to the consultation draft with custom property notes (e.g. <em>"Dense honeysuckle along east fence line"</em>).</li>
+          <li><strong>Vetted Contractor Modal:</strong> In-app directory of 10 certified regional habitat restoration and invasive removal contractors with direct phone and email links.</li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        Invasive plants are the single greatest threat to new native landscapes. If a client doesn't eradicate bush honeysuckle or wintercreeper, their new native planting will fail. Our app gives advisors exact identification cues, lets them stage invasives with property notes, and connects homeowners to vetted local contractors directly from the report.
+      </div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide-card" data-slide="5">
+      <div class="slide-header">
+        <h1 class="slide-title">Accessibility: ADA Title III &amp; WCAG 2.1 AA</h1>
+        <span class="slide-category">Ergonomics &amp; Inclusivity</span>
+      </div>
+      <div class="slide-content">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-val">100%–145%</div>
+            <div class="metric-label">Dynamic Text Sizing</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">3px Ring</div>
+            <div class="metric-label">High-Contrast Focus</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">aria-live</div>
+            <div class="metric-label">Auditory Screen Reader</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">&ge; 4.5:1</div>
+            <div class="metric-label">Color Contrast Ratio</div>
+          </div>
+        </div>
+        <ul>
+          <li><strong>Dynamic Typography Scaling:</strong> Advisors can select <em>Standard (100%)</em>, <em>Medium (115%)</em>, <em>Large (130%)</em>, or <em>Extra Large (145%)</em>. Rem-based layout scales gracefully without horizontal overflow.</li>
+          <li><strong>Keyboard &amp; Assistive Tech Navigation:</strong> Skip-to-content bypass link, modal focus trapping with backdrop inerting, and automatic focus restoration.</li>
+          <li><strong>Live Screen Reader Region:</strong> Dedicated <code>#a11yAnnouncer</code> alerts TalkBack and VoiceOver users whenever filters, search queries, or staged items update.</li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        Accessibility is essential to Deep Roots' values. Our advisors work in high-glare outdoor environments and span a wide demographic range. We engineered dynamic text scaling with four distinct size tiers that persist across sessions, paired with strict WCAG 2.1 AA keyboard and screen reader compliance.
+      </div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide-card" data-slide="6">
+      <div class="slide-header">
+        <h1 class="slide-title">Advisor Field Consultation Workflow</h1>
+        <span class="slide-category">Field Operations</span>
+      </div>
+      <div class="slide-content">
+        <div style="background:#f1f5f9; padding:1.25rem; border-radius:10px; margin-bottom:1rem; font-family:monospace; font-size:0.9rem;">
+          [1. Sign In] &rarr; [2. Create Garden Areas: "Front Porch", "Back Shade"]<br/>
+          &darr;<br/>
+          [3. Filter &amp; Stage Natives into Areas] &rarr; [4. Flag Observed Invasives]<br/>
+          &darr;<br/>
+          [5. Toggle Wildlife &amp; Stormwater Modules] &rarr; [6. Download Word Report (.docx)]
+        </div>
+        <ul>
+          <li><strong>Step 1: Sign In:</strong> Advisor authenticates using their canonical username (e.g. <code>chris.bradley</code>).</li>
+          <li><strong>Step 2: Area Mapping:</strong> Advisor defines custom planting zones during property walkthrough.</li>
+          <li><strong>Step 3: Staging Plants:</strong> 1-click staging of species into specific areas with personalized density notes.</li>
+          <li><strong>Step 4: Invasive Staging:</strong> Flag problem species with custom removal guidance.</li>
+          <li><strong>Step 5: Municipal Stewardship:</strong> Checkboxes for <em>Contain the Rain</em> (Johnson Co.), <em>Unified Gov</em> (Wyandotte Co.), or wildlife nest boxes.</li>
+          <li><strong>Step 6: One-Click Export:</strong> Download official <code>.docx</code> ready for immediate delivery.</li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        This is the actual 6-step flow an advisor follows. As they walk the property, they map out zones on their tablet, pick native species suited for each zone's light and soil conditions, flag any honeysuckle, and click download. The report is compiled and ready before they even leave the client's driveway.
+      </div>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide-card" data-slide="7">
+      <div class="slide-header">
+        <h1 class="slide-title">Botanical Stewardship &amp; Author Attribution</h1>
+        <span class="slide-category">Data Governance</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Live In-App Botanical Editor:</strong> Authorized advisors can refine descriptions, bloom seasons, bloom colors, mature heights, and photo citations.</li>
+          <li><strong>Transparent Author Attribution:</strong> Every edit logs the advisor's full name, email, and timestamp (e.g. <em>"Last edited by: Chris Bradley (chris.bradley@deeproots.org) on Oct 12, 2026"</em>).</li>
+          <li><strong>Centralized Cloud Firestore Sync:</strong> Updates propagate immediately across all advisor devices and offline caches.</li>
+          <li><strong>Multi-Consultation Switcher:</strong> Advisors can maintain, rename, and switch between separate client consultations without cross-contamination.</li>
+        </ul>
+        <div class="callout-box">
+          <strong>Community Stewardship:</strong> Ensures our botanical database grows richer and more refined every season, while maintaining complete historical accountability.
+        </div>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        The plant database isn't static—it's maintained by our botanical community. If an advisor observes a bloom time adjustment or writes a better description, they can edit it in the app. Full attribution protects data integrity: every change records who made it and when.
+      </div>
+    </div>
+
+    <!-- Slide 8 -->
+    <div class="slide-card" data-slide="8">
+      <div class="slide-header">
+        <h1 class="slide-title">Official Word Report Output Engine</h1>
+        <span class="slide-category">Automated Output</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Direct Master Template Splicing:</strong> Ingests the official 1.4 MB Deep Roots template (<code>report_template.docx</code>) using client-side JSZip.</li>
+          <li><strong>OpenXML Reverse-Offset Splicing:</strong> Excises paragraphs and tables from highest byte offset to lowest offset, ensuring 100% XML integrity with zero document corruption.</li>
+          <li><strong>Complete Directive Compliance:</strong>
+            <ul>
+              <li><strong>Zero Red Text:</strong> All instructional paragraphs meant for advisors are automatically deleted.</li>
+              <li><strong>Invasive Branching:</strong> Outputs <em>Case A</em> (congratulations message) if invasive-free; or <em>Case B</em> (itemized table + site notes) if invasives were found.</li>
+              <li><strong>Modular Sections:</strong> Selectively includes bird baths, bee houses, or county stormwater cost-share programs based on advisor toggles.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        This is our most significant technical achievement. Other apps generate plain PDFs or markdown. Our engine takes our official Deep Roots Word template and splices client data directly into the OpenXML structure in under 3 seconds. It eliminates human error—ensuring red advisor notes never appear in a client's final document.
+      </div>
+    </div>
+
+    <!-- Slide 9 -->
+    <div class="slide-card" data-slide="9">
+      <div class="slide-header">
+        <h1 class="slide-title">Visual Plant Cards &amp; Instant Summaries</h1>
+        <span class="slide-category">Digital Outputs</span>
+      </div>
+      <div class="slide-content">
+        <div class="callout-box" style="background:#ffffff; border:1px solid #cbd5e1; border-left:4px solid var(--accent); box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+          <div style="font-weight:700; font-size:1.1rem; color:var(--primary-dark);">🌿 Butterfly Milkweed (<em>Asclepias tuberosa</em>) <span style="font-size:0.8rem; background:#dcfce7; padding:2px 8px; border-radius:12px; color:#166534;">⭐ Sweet 16</span></div>
+          <div style="font-size:0.85rem; color:#64748b; margin:4px 0 8px 0;">Sun: Full Sun | Moisture: Dry, Medium-Dry | Height: 1–3 ft | Bloom: Summer (Orange)</div>
+          <p style="font-size:0.95rem; line-height:1.5;">"Brilliant fiery orange flower clusters. Irreplaceable host plant for Monarch caterpillars; exceptional nectar source for native bees. Taproot provides extreme drought resilience."</p>
+        </div>
+        <ul>
+          <li><strong>One-Tap Clipboard Copy:</strong> Advisors can copy concise 3-line descriptions directly to clipboard for quick client email answers.</li>
+          <li><strong>Markdown Summary Export:</strong> One-click export of complete consultation notes in GitHub-flavored Markdown for digital client portals or quick email recaps.</li>
+          <li><strong>High-Resolution Detail Modal:</strong> Provides instant links to Missouri Botanical Garden (MoBot) and Grow Native! profile pages.</li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        Beyond Word reports, advisors frequently need to answer quick client questions via email. With 'Copy Summary', they can grab vetted text for any plant with one click. They can also copy the entire consultation in formatted markdown.
+      </div>
+    </div>
+
+    <!-- Slide 10 -->
+    <div class="slide-card" data-slide="10">
+      <div class="slide-header">
+        <h1 class="slide-title">High-Level Technical Architecture</h1>
+        <span class="slide-category">Engineering</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Client-Side Serverless Zero-Build:</strong> Standalone web application delivered via GitHub Pages CDN. Zero server dependencies, no node build steps, instant page loads.</li>
+          <li><strong>Cloud Firestore Database:</strong> Real-time persistence for the 185 botanical catalog, user accounts, and consultation drafts.</li>
+          <li><strong>Client-Side JSZip Engine:</strong> Handles all Word OpenXML file extraction, paragraph slicing, and binary packing directly in browser memory.</li>
+          <li><strong>LocalStorage Offline Resilience:</strong> Caches all plant records and consultation drafts locally so advisors never lose work when cellular coverage drops.</li>
+        </ul>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-val">0 ms</div>
+            <div class="metric-label">Server Queue Latency</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">100%</div>
+            <div class="metric-label">Client-Side Privacy</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val">Offline</div>
+            <div class="metric-label">Field Capable</div>
+          </div>
+        </div>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        From an engineering perspective, this architecture is robust and elegant. Because all document generation happens client-side in the browser, there are no server queues or processing costs. If an advisor is on a rural property without internet, the app runs smoothly from offline storage.
+      </div>
+    </div>
+
+    <!-- Slide 11 -->
+    <div class="slide-card" data-slide="11">
+      <div class="slide-header">
+        <h1 class="slide-title">Security &amp; Identity Governance</h1>
+        <span class="slide-category">Security</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Standalone Native Identity System:</strong> Replaced fragile third-party OAuth popups with an integrated Nature Advisor authentication system.</li>
+          <li><strong>PBKDF2 Cryptographic Security:</strong> Passwords protected using PBKDF2 with SHA-256 (10,000 iterations + unique salt per user).</li>
+          <li><strong>Canonical Username Schema:</strong> Enforces <code>&lt;first&gt;.&lt;last&gt;</code> naming with automatic collision handling (e.g. <code>chris.bradley</code>).</li>
+          <li><strong>Two-Tier Role-Based Access Control (RBAC):</strong>
+            <ul>
+              <li><code>user</code> (Nature Advisor): Stage consultations, edit plants, export reports.</li>
+              <li><code>admin</code> (Program Manager): Provision new advisors, assign roles, reset credentials.</li>
+            </ul>
+          </li>
+          <li><strong>Hardened Cloud Firestore Security Rules:</strong> Zero-trust schema validation; users can only access their own consultation reports.</li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        We have implemented bank-grade password security using PBKDF2 with 10,000 hashing rounds. Our Cloud Firestore security rules ensure that public visitors have read-only access, advisors can only modify their own consultation reports, and only you as Program Manager have admin rights to provision accounts.
+      </div>
+    </div>
+
+    <!-- Slide 12 -->
+    <div class="slide-card" data-slide="12">
+      <div class="slide-header">
+        <h1 class="slide-title">Operations, Maintenance &amp; Zero Cost</h1>
+        <span class="slide-category">Operations</span>
+      </div>
+      <div class="slide-content">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Provider</th>
+              <th>Operating Cost</th>
+              <th>Maintenance Burden</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Web Hosting &amp; CDN</strong></td>
+              <td>GitHub Pages (SSL)</td>
+              <td>$0.00 / month</td>
+              <td>Zero (Auto-deployed from git)</td>
+            </tr>
+            <tr>
+              <td><strong>Database &amp; Sync</strong></td>
+              <td>Cloud Firestore (Spark)</td>
+              <td>$0.00 / month</td>
+              <td>Zero (Fully managed serverless)</td>
+            </tr>
+            <tr>
+              <td><strong>Report Engine</strong></td>
+              <td>Client Browser (JSZip)</td>
+              <td>$0.00 / month</td>
+              <td>Zero server compute</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul>
+          <li><strong>Advisor Onboarding:</strong> Program Manager provisions new advisors in under 20 seconds via in-app Admin modal.</li>
+          <li><strong>Template Updates:</strong> If Deep Roots updates its Word document design, simply replace <code>report_template.docx</code> and run our sync script.</li>
+          <li><strong>Zero Infrastructure Maintenance:</strong> No server patching, no database tuning, no security certificates to renew.</li>
+        </ul>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        This slide should make every leadership team happy. The recurring cost to Deep Roots is exactly zero dollars. It operates entirely on Google's free cloud database tier and GitHub's enterprise CDN. Onboarding a new advisor takes 20 seconds in your admin dashboard.
+      </div>
+    </div>
+
+    <!-- Slide 13 -->
+    <div class="slide-card" data-slide="13">
+      <div class="slide-header">
+        <h1 class="slide-title">Rollout Roadmap &amp; Advisor Training</h1>
+        <span class="slide-category">Next Steps</span>
+      </div>
+      <div class="slide-content">
+        <ul>
+          <li><strong>Phase 1: Leadership Sign-Off &amp; Admin Setup (Week 1)</strong>
+            <ul>
+              <li>Provision Program Manager admin credentials.</li>
+              <li>Final review of Word report template text and branding.</li>
+            </ul>
+          </li>
+          <li><strong>Phase 2: Senior Advisor Field Pilot (Weeks 2–3)</strong>
+            <ul>
+              <li>5 experienced advisors pilot the web app on 10 live site consultations.</li>
+              <li>Collect feedback on mobile usability and custom area naming.</li>
+            </ul>
+          </li>
+          <li><strong>Phase 3: Program-Wide Workshop &amp; Launch (Week 4)</strong>
+            <ul>
+              <li>30-minute virtual demonstration during monthly advisor meeting.</li>
+              <li>Distribute the step-by-step <a href="./USER_GUIDE.md" target="_blank"><strong>Web User Guide</strong></a>.</li>
+            </ul>
+          </li>
+        </ul>
+        <div class="callout-box">
+          <strong>Deliverables Ready Today:</strong> Full documentation published at <a href="./USER_GUIDE.md" target="_blank"><code>USER_GUIDE.md</code></a> and accessibility audit at <a href="./ADA_COMPLIANCE.md" target="_blank"><code>ADA_COMPLIANCE.md</code></a>.
+        </div>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        Here is our rollout plan. We begin by setting up your administrative login. Next, five senior advisors will pilot the app during ten live visits. Finally, we host a 30-minute workshop with our full advisor team. Everything is documented and ready for deployment.
+      </div>
+    </div>
+
+    <!-- Slide 14 -->
+    <div class="slide-card" data-slide="14">
+      <div class="slide-header">
+        <h1 class="slide-title">Leadership Q&amp;A &amp; Discussion</h1>
+        <span class="slide-category">Q &amp; A</span>
+      </div>
+      <div class="slide-content">
+        <h3>Anticipated Leadership Questions</h3>
+        <ul>
+          <li><strong>What if an advisor is on a rural property with zero cellular signal?</strong><br/>
+          <em>Offline caching allows them to search plants, stage areas, and draft notes without internet. Edits sync back automatically once connection is restored.</em></li>
+          <li><strong>Can clients or external visitors change our botanical data?</strong><br/>
+          <em>No. Public visitors are locked in Read-Only Guest Mode. Only authenticated advisors can stage or edit, and only admins can provision accounts.</em></li>
+          <li><strong>Do advisors need an iPhone or Android?</strong><br/>
+          <em>Neither is required! The web app runs in any modern browser on smartphones, tablets, Chromebooks, Macs, and PCs.</em></li>
+        </ul>
+        <div class="callout-box" style="text-align:center; padding:1.5rem; margin-top:1.5rem;">
+          <h4 style="color:var(--primary-dark); font-size:1.15rem; margin-bottom:0.5rem;">Ready to See a Live Demonstration?</h4>
+          <p>Let's run a test consultation and generate an official Word report in real time.</p>
+        </div>
+      </div>
+      <div class="speaker-notes">
+        <div class="speaker-notes-title">🗣️ Speaker Notes</div>
+        Thank you for your time. This platform was built to support your team and advance Deep Roots' mission across our region. I would love to answer any questions you have, or give you a live demonstration of creating an official report right now.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Deck Footer -->
+  <footer class="deck-footer">
+    <div>Deep Roots Nature Advisors — Executive Briefing</div>
+    <div>Shortcuts: <strong>←</strong> Prev | <strong>→</strong> Next | <strong>N</strong> Notes | <strong>F</strong> Fullscreen</div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 14;
+    const slides = document.querySelectorAll('.slide-card');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const notesBtn = document.getElementById('btnNotes');
+    let showNotes = false;
+
+    function showSlide(index) {
+      if (index < 1) index = 1;
+      if (index > totalSlides) index = totalSlides;
+      currentSlide = index;
+
+      slides.forEach((slide, idx) => {
+        if (idx + 1 === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      slideIndicator.textContent = `${currentSlide} / ${totalSlides}`;
+      document.getElementById('btnPrev').disabled = (currentSlide === 1);
+      document.getElementById('btnNext').disabled = (currentSlide === totalSlides);
+    }
+
+    document.getElementById('btnPrev').addEventListener('click', () => showSlide(currentSlide - 1));
+    document.getElementById('btnNext').addEventListener('click', () => showSlide(currentSlide + 1));
+
+    notesBtn.addEventListener('click', () => {
+      showNotes = !showNotes;
+      document.querySelectorAll('.speaker-notes').forEach(el => {
+        el.classList.toggle('visible', showNotes);
+      });
+      notesBtn.classList.toggle('btn-primary', showNotes);
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        showSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        showSlide(currentSlide - 1);
+      } else if (e.key === 'n' || e.key === 'N') {
+        notesBtn.click();
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    });
+
+    // Initial setup
+    showSlide(1);
+  </script>
+</body>
+</html>
