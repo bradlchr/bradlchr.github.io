@@ -1,0 +1,645 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: plants
+// Document ID: alphanumeric string or slug (e.g., 'plant-915b80758fa4', 'asclepias-tuberosa',
+//              or sync engine fallback entries '_user_{username}', '_report_{username}_{reportId}')
+// Fields:
+//   - id: string (optional/required, <= 128 chars)
+//   - scientific_name: string (required, 1-150 chars) - Botanical binomial name
+//   - common_names: list of strings (optional, <= 25 items, non-empty, <= 150 chars each)
+//   - native_environment: string (optional, <= 100 chars) - e.g., 'Forest', 'Cliff/Glade', 'Prairie', 'Savannah/Woodland', 'Stream Edge/Wetland'
+//   - plant_type: string or list of strings (optional, <= 100 chars or <= 15 items) - e.g., 'Wildflower', 'Tree', 'Shrub'
+//   - architectural_layer: string or list of strings (optional, <= 100 chars or <= 15 items) - Matrix layer
+//   - mature_height: map (optional) - Map containing:
+//       * min_ft: number (required, >= 0, <= 500)
+//       * max_ft: number (required, >= min_ft, <= 500)
+//       * display: string (required, <= 50 chars)
+//   - mature_height_min: number (optional, >= 0, <= 500)
+//   - mature_height_max: number (optional, >= 0, <= 500)
+//   - height_display: string (optional, <= 50 chars)
+//   - bloom_color: list of strings (optional, <= 25 items)
+//   - bloom_period: list of strings (optional, <= 25 items)
+//   - soil_requirements: list of strings (optional, <= 25 items)
+//   - moisture_requirements: list of strings (optional, <= 25 items)
+//   - light_requirements: list of strings (optional, <= 25 items)
+//   - wildlife_ecosystem_benefits: list of strings (optional, <= 35 items)
+//   - sociability: string (optional, <= 100 chars)
+//   - advisor_description: string (optional, <= 5000 chars) - Curated summary for consultations
+//   - human_health_use: string (optional, <= 5000 chars)
+//   - plant_url: string (optional, <= 1000 chars)
+//   - is_sweet16: bool (optional)
+//   - is_kc_keystone: bool (optional)
+//   - special_tags: list of strings (optional, <= 25 items) - e.g., ['Sweet 16', 'KC Keystone']
+//   - images: list of maps (optional, <= 30 items) - Citation & attribution objects:
+//       * url: string (optional, <= 1000 chars)
+//       * attribution_name: string (optional, <= 200 chars)
+//       * caption: string (optional, <= 500 chars)
+//       * license: string (optional, <= 100 chars)
+//       * attribution_url: string (optional, <= 1000 chars)
+//       * thumbnail: string (optional, <= 1000 chars)
+//   - sources: list of maps (optional, <= 30 items) - Citation objects:
+//       * source_name: string (optional, <= 200 chars)
+//       * source_url: string (optional, <= 1000 chars)
+//       * notes: string (optional, <= 1000 chars)
+//       * organization: string (optional, <= 200 chars)
+//       * title: string (optional, <= 500 chars)
+//       * url: string (optional, <= 1000 chars)
+//   - locked_by_user_id: string (optional, <= 128 chars) - Record editing lock lease
+//   - locked_by_user_name: string (optional, <= 100 chars)
+//   - locked_by_user_email: string (optional, <= 150 chars)
+//   - locked_at: number or timestamp (optional)
+//   - lock_expires_at: number or timestamp (optional)
+//   - last_edited_by_user_id: string (optional, <= 128 chars) - Author attribution metadata
+//   - last_edited_by_user_name: string (optional, <= 100 chars) - Author attribution metadata
+//   - last_edited_by_user_email: string (optional, <= 150 chars) - Author attribution metadata
+//   - metadata: map (optional) - Audit & sync stamp (created_by, updated_by, created_at, updated_at, shared_public)
+//   - updated_at_ms: number (optional)
+//   - raw_desc: string (optional, <= 5000 chars)
+//
+// Collection: users
+// Document ID: username (e.g., 'chris.bradley')
+// Fields:
+//   - id: string (required, 1-128 chars, immutable)
+//   - username: string (optional, 1-64 chars, immutable, matches document ID)
+//   - first_name: string (optional, <= 100 chars)
+//   - last_name: string (optional, <= 100 chars)
+//   - name: string (optional, <= 150 chars)
+//   - email: string (required, <= 150 chars, valid email format)
+//   - phone_number: string (optional, <= 30 chars)
+//   - advisor_type: string (optional, <= 100 chars) - e.g., 'Advisor in Training', 'Staff Advisor'
+//   - role: string (required, enum: 'admin', 'user', 'advisor')
+//   - password_hash: string (optional, <= 128 chars) - SHA-256 salted hash
+//   - salt: string (optional, <= 64 chars)
+//   - is_temporary_password: bool (optional)
+//   - avatar_url: string (optional, <= 1000 chars)
+//   - created_at: number or timestamp (optional, immutable)
+//   - updated_at: number or timestamp (optional)
+//
+// Subcollection: users/{username}/reports/{reportId} & Collection: reports/{reportId}
+// Document ID: reportId (e.g., 'report-9f82d1c0')
+// Fields:
+//   - id: string (optional, <= 128 chars, immutable)
+//   - username: string (optional, <= 64 chars)
+//   - advisor_id: string (optional, <= 128 chars)
+//   - advisor_name: string (optional, <= 100 chars)
+//   - advisor_email: string (optional, <= 150 chars)
+//   - client_name: string (required, 1-150 chars)
+//   - client_address: string (optional, <= 250 chars)
+//   - project_name: string (optional, <= 200 chars)
+//   - consultation_date: string (optional, <= 100 chars)
+//   - site_summary: string (optional, <= 10000 chars)
+//   - summary_notes: string (optional, <= 10000 chars)
+//   - drive_doc_url: string (optional, <= 1000 chars)
+//   - last_modified: number or timestamp (optional)
+//   - is_drive_synced: bool (optional)
+//   - staged_recommendations: list of maps (optional, <= 200 items)
+//   - staged_plants: list (optional, <= 200 items)
+//   - created_at: number or timestamp (optional, immutable)
+//   - updated_at: number or timestamp (optional)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Global Helper Functions
+    // ===============================================================
+
+    // Check if the user is authenticated with Firebase Auth
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if the authenticated user matches the specified ID
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user has an authorized Deep Roots institutional email
+    function isDeepRootsEmail() {
+      return isAuthenticated() &&
+        request.auth.token.email != null &&
+        request.auth.token.email.matches('^[a-zA-Z0-9._%+-]+@deeproots\\.org$');
+    }
+
+    // Check whether the user has a profile document in Firestore
+    function hasUserDoc() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // Fetch the user's profile document data
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Check if the user holds Administrator privileges via token claims or user document
+    function isAdmin() {
+      return isAuthenticated() && (
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        ('admin' in request.auth.token && request.auth.token.admin == true) ||
+        (hasUserDoc() && ('role' in getUserDoc()) && getUserDoc().role == 'admin')
+      );
+    }
+
+    // Check if the user is an authorized Advisor or Administrator
+    function isAdvisor() {
+      return isAuthenticated() && (
+        isAdmin() ||
+        isDeepRootsEmail() ||
+        ('role' in request.auth.token && request.auth.token.role == 'advisor') ||
+        ('advisor' in request.auth.token && request.auth.token.advisor == true) ||
+        (hasUserDoc() && ('role' in getUserDoc()) && getUserDoc().role in ['advisor', 'admin'])
+      );
+    }
+
+    // Verify immutable fields remain untouched on update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Email format validation (standard RFC 5322 compatible)
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Safe timestamp or epoch number validator
+    function isValidTimestampOrNumber(val) {
+      return val is timestamp || val is number || (val is string && val.size() <= 40);
+    }
+
+    // String list validator with bounded count and item length
+    function isValidStringList(list, maxSize, maxItemSize) {
+      return list is list &&
+        list.size() <= maxSize &&
+        (list.size() == 0 || (list[0] is string && list[0].size() <= maxItemSize));
+    }
+
+    // ===============================================================
+    // Domain Validator: Plants
+    // ===============================================================
+
+    function isValidMatureHeight(height) {
+      return height is map &&
+        height.keys().hasAll(['min_ft', 'max_ft', 'display']) &&
+        height.keys().hasOnly(['min_ft', 'max_ft', 'display']) &&
+        height.min_ft is number &&
+        height.min_ft >= 0 &&
+        height.min_ft <= 500 &&
+        height.max_ft is number &&
+        height.max_ft >= height.min_ft &&
+        height.max_ft <= 500 &&
+        height.display is string &&
+        height.display.size() <= 50;
+    }
+
+    function isValidImageObject(img) {
+      return img is map &&
+        img.keys().hasOnly(['url', 'attribution_name', 'caption', 'license', 'attribution_url', 'thumbnail']) &&
+        (!('url' in img) || (img.url is string && img.url.size() <= 1000)) &&
+        (!('attribution_name' in img) || (img.attribution_name is string && img.attribution_name.size() <= 200)) &&
+        (!('caption' in img) || (img.caption is string && img.caption.size() <= 500)) &&
+        (!('license' in img) || (img.license is string && img.license.size() <= 100)) &&
+        (!('attribution_url' in img) || (img.attribution_url is string && img.attribution_url.size() <= 1000)) &&
+        (!('thumbnail' in img) || (img.thumbnail is string && img.thumbnail.size() <= 1000));
+    }
+
+    function isValidImagesList(images) {
+      return images is list &&
+        images.size() <= 30 &&
+        (images.size() == 0 || isValidImageObject(images[0]));
+    }
+
+    function isValidCitationObject(src) {
+      return src is map &&
+        src.keys().hasOnly(['source_name', 'source_url', 'notes', 'organization', 'title', 'url']) &&
+        (!('source_name' in src) || (src.source_name is string && src.source_name.size() <= 200)) &&
+        (!('source_url' in src) || (src.source_url is string && src.source_url.size() <= 1000)) &&
+        (!('notes' in src) || (src.notes is string && src.notes.size() <= 1000)) &&
+        (!('organization' in src) || (src.organization is string && src.organization.size() <= 200)) &&
+        (!('title' in src) || (src.title is string && src.title.size() <= 500)) &&
+        (!('url' in src) || (src.url is string && src.url.size() <= 1000));
+    }
+
+    function isValidSourcesList(sources) {
+      return sources is list &&
+        sources.size() <= 30 &&
+        (sources.size() == 0 || isValidCitationObject(sources[0]));
+    }
+
+    function isValidCommonNames(names) {
+      return names is list &&
+        names.size() <= 25 &&
+        (names.size() == 0 || (names[0] is string && names[0].size() <= 150));
+    }
+
+    function isValidPlantType(pt) {
+      return (pt is string && pt.size() <= 100) ||
+             (pt is list && pt.size() <= 15 && (pt.size() == 0 || (pt[0] is string && pt[0].size() <= 100)));
+    }
+
+    function isValidArchLayer(al) {
+      return (al is string && al.size() <= 100) ||
+             (al is list && al.size() <= 15 && (al.size() == 0 || (al[0] is string && al[0].size() <= 100)));
+    }
+
+    function isValidPlantMetadata(meta) {
+      return meta is map &&
+        meta.keys().hasOnly(['created_by', 'updated_by', 'created_at', 'updated_at', 'shared_public']) &&
+        (!('created_by' in meta) || (meta.created_by is string && meta.created_by.size() <= 128)) &&
+        (!('updated_by' in meta) || (meta.updated_by is string && meta.updated_by.size() <= 128)) &&
+        (!('created_at' in meta) || isValidTimestampOrNumber(meta.created_at)) &&
+        (!('updated_at' in meta) || isValidTimestampOrNumber(meta.updated_at)) &&
+        (!('shared_public' in meta) || meta.shared_public is bool);
+    }
+
+    function isValidPlant(data) {
+      return data.keys().hasAll(['scientific_name']) &&
+        data.keys().hasOnly([
+          'id',
+          'scientific_name',
+          'common_names',
+          'native_environment',
+          'plant_type',
+          'architectural_layer',
+          'mature_height',
+          'mature_height_min',
+          'mature_height_max',
+          'height_display',
+          'bloom_color',
+          'bloom_period',
+          'soil_requirements',
+          'moisture_requirements',
+          'light_requirements',
+          'wildlife_ecosystem_benefits',
+          'sociability',
+          'advisor_description',
+          'human_health_use',
+          'plant_url',
+          'is_sweet16',
+          'is_kc_keystone',
+          'special_tags',
+          'images',
+          'sources',
+          'locked_by_user_id',
+          'locked_by_user_name',
+          'locked_by_user_email',
+          'locked_at',
+          'lock_expires_at',
+          'last_edited_by_user_id',
+          'last_edited_by_user_name',
+          'last_edited_by_user_email',
+          'metadata',
+          'updated_at_ms',
+          'raw_desc'
+        ]) &&
+        data.scientific_name is string &&
+        data.scientific_name.size() > 0 &&
+        data.scientific_name.size() <= 150 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('common_names' in data) || isValidCommonNames(data.common_names)) &&
+        (!('native_environment' in data) || (data.native_environment is string && data.native_environment.size() <= 100)) &&
+        (!('plant_type' in data) || isValidPlantType(data.plant_type)) &&
+        (!('architectural_layer' in data) || isValidArchLayer(data.architectural_layer)) &&
+        (!('mature_height' in data) || isValidMatureHeight(data.mature_height)) &&
+        (!('mature_height_min' in data) || (data.mature_height_min is number && data.mature_height_min >= 0 && data.mature_height_min <= 500)) &&
+        (!('mature_height_max' in data) || (data.mature_height_max is number && data.mature_height_max >= 0 && data.mature_height_max <= 500)) &&
+        (!('height_display' in data) || (data.height_display is string && data.height_display.size() <= 50)) &&
+        (!('bloom_color' in data) || isValidStringList(data.bloom_color, 25, 100)) &&
+        (!('bloom_period' in data) || isValidStringList(data.bloom_period, 25, 100)) &&
+        (!('soil_requirements' in data) || isValidStringList(data.soil_requirements, 25, 100)) &&
+        (!('moisture_requirements' in data) || isValidStringList(data.moisture_requirements, 25, 100)) &&
+        (!('light_requirements' in data) || isValidStringList(data.light_requirements, 25, 100)) &&
+        (!('wildlife_ecosystem_benefits' in data) || isValidStringList(data.wildlife_ecosystem_benefits, 35, 150)) &&
+        (!('sociability' in data) || (data.sociability is string && data.sociability.size() <= 100)) &&
+        (!('advisor_description' in data) || (data.advisor_description is string && data.advisor_description.size() <= 5000)) &&
+        (!('human_health_use' in data) || (data.human_health_use is string && data.human_health_use.size() <= 5000)) &&
+        (!('plant_url' in data) || (data.plant_url is string && data.plant_url.size() <= 1000)) &&
+        (!('is_sweet16' in data) || data.is_sweet16 is bool) &&
+        (!('is_kc_keystone' in data) || data.is_kc_keystone is bool) &&
+        (!('special_tags' in data) || isValidStringList(data.special_tags, 25, 100)) &&
+        (!('images' in data) || isValidImagesList(data.images)) &&
+        (!('sources' in data) || isValidSourcesList(data.sources)) &&
+        (!('locked_by_user_id' in data) || (data.locked_by_user_id is string && data.locked_by_user_id.size() <= 128)) &&
+        (!('locked_by_user_name' in data) || (data.locked_by_user_name is string && data.locked_by_user_name.size() <= 100)) &&
+        (!('locked_by_user_email' in data) || (data.locked_by_user_email is string && data.locked_by_user_email.size() <= 150)) &&
+        (!('locked_at' in data) || isValidTimestampOrNumber(data.locked_at)) &&
+        (!('lock_expires_at' in data) || isValidTimestampOrNumber(data.lock_expires_at)) &&
+        (!('last_edited_by_user_id' in data) || (data.last_edited_by_user_id is string && data.last_edited_by_user_id.size() <= 128)) &&
+        (!('last_edited_by_user_name' in data) || (data.last_edited_by_user_name is string && data.last_edited_by_user_name.size() <= 100)) &&
+        (!('last_edited_by_user_email' in data) || (data.last_edited_by_user_email is string && data.last_edited_by_user_email.size() <= 150)) &&
+        (!('metadata' in data) || isValidPlantMetadata(data.metadata)) &&
+        (!('updated_at_ms' in data) || (data.updated_at_ms is number)) &&
+        (!('raw_desc' in data) || (data.raw_desc is string && data.raw_desc.size() <= 5000));
+    }
+
+    // Fallback sync document identifiers for mobile client compatibility
+    function isFallbackUser(plantId) {
+      return plantId.matches('^_user_.*');
+    }
+
+    function isFallbackReport(plantId) {
+      return plantId.matches('^_report_.*');
+    }
+
+    function isFallbackApproval(plantId) {
+      return plantId.matches('^_approval_.*');
+    }
+
+    function isFallbackDoc(plantId) {
+      return isFallbackUser(plantId) || isFallbackReport(plantId) || isFallbackApproval(plantId);
+    }
+
+    function isValidPlantDocCreate(plantId) {
+      let data = request.resource.data;
+      return isFallbackUser(plantId)
+        ? isValidUser(data)
+        : (isFallbackReport(plantId)
+            ? isValidReport(data)
+            : (isFallbackApproval(plantId)
+                ? isValidApproval(data)
+                : (isValidPlant(data) && (!('id' in data) || data.id == plantId))));
+    }
+
+    function isValidPlantDocUpdate(plantId) {
+      let data = request.resource.data;
+      return isFallbackUser(plantId)
+        ? (isValidUser(data) && areImmutableFieldsUnchanged(['id', 'username']))
+        : (isFallbackReport(plantId)
+            ? (isValidReport(data) && areImmutableFieldsUnchanged(['id']))
+            : (isFallbackApproval(plantId)
+                ? (isValidApproval(data) && areImmutableFieldsUnchanged(['id']))
+                : (isValidPlant(data) && areImmutableFieldsUnchanged(['id']))));
+    }
+
+    // ===============================================================
+    // Domain Validator: Users & Roles
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'email', 'role']) &&
+        data.keys().hasOnly([
+          'id',
+          'username',
+          'first_name',
+          'last_name',
+          'name',
+          'email',
+          'phone_number',
+          'advisor_type',
+          'role',
+          'password_hash',
+          'salt',
+          'is_temporary_password',
+          'avatar_url',
+          'created_at',
+          'updated_at'
+        ]) &&
+        data.id is string &&
+        data.id.size() > 0 &&
+        data.id.size() <= 128 &&
+        data.email is string &&
+        data.email.size() <= 150 &&
+        (data.email.size() == 0 || isValidEmail(data.email)) &&
+        data.role is string &&
+        data.role in ['admin', 'user', 'advisor'] &&
+        (!('username' in data) || (data.username is string && data.username.size() > 0 && data.username.size() <= 64)) &&
+        (!('first_name' in data) || (data.first_name is string && data.first_name.size() <= 100)) &&
+        (!('last_name' in data) || (data.last_name is string && data.last_name.size() <= 100)) &&
+        (!('name' in data) || (data.name is string && data.name.size() <= 150)) &&
+        (!('phone_number' in data) || (data.phone_number is string && data.phone_number.size() <= 30)) &&
+        (!('advisor_type' in data) || (data.advisor_type is string && data.advisor_type.size() <= 100)) &&
+        (!('password_hash' in data) || (data.password_hash is string && data.password_hash.size() <= 128)) &&
+        (!('salt' in data) || (data.salt is string && data.salt.size() <= 64)) &&
+        (!('is_temporary_password' in data) || data.is_temporary_password is bool) &&
+        (!('avatar_url' in data) || (data.avatar_url is string && data.avatar_url.size() <= 1000)) &&
+        (!('created_at' in data) || isValidTimestampOrNumber(data.created_at)) &&
+        (!('updated_at' in data) || isValidTimestampOrNumber(data.updated_at));
+    }
+
+    function isValidUserCreate(username) {
+      let data = request.resource.data;
+      return isValidUser(data) &&
+        (!('username' in data) || data.username == username);
+    }
+
+    function isValidUserUpdate(username) {
+      let data = request.resource.data;
+      return isValidUser(data) &&
+        areImmutableFieldsUnchanged(['id', 'username']);
+    }
+
+    // ===============================================================
+    // Domain Validator: Consultation Reports
+    // ===============================================================
+
+    function isValidStagedItem(item) {
+      return item is map &&
+        (!('plant_id' in item) || (item.plant_id is string && item.plant_id.size() <= 128)) &&
+        (!('notes' in item) || (item.notes is string && item.notes.size() <= 2000)) &&
+        (!('recommended_count' in item) || (item.recommended_count is number && item.recommended_count >= 0 && item.recommended_count <= 10000)) &&
+        (!('target_area' in item) || (item.target_area is string && item.target_area.size() <= 150)) &&
+        (!('plant_common' in item) || (item.plant_common is string && item.plant_common.size() <= 150)) &&
+        (!('plant_scientific' in item) || (item.plant_scientific is string && item.plant_scientific.size() <= 150));
+    }
+
+    function isValidStagedRecommendations(list) {
+      return list is list &&
+        list.size() <= 200 &&
+        (list.size() == 0 || isValidStagedItem(list[0]));
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll(['client_name']) &&
+        data.keys().hasOnly([
+          'id',
+          'username',
+          'advisor_id',
+          'advisor_name',
+          'advisor_email',
+          'client_name',
+          'client_address',
+          'project_name',
+          'consultation_date',
+          'site_summary',
+          'summary_notes',
+          'drive_doc_url',
+          'last_modified',
+          'is_drive_synced',
+          'staged_recommendations',
+          'staged_plants',
+          'created_at',
+          'updated_at'
+        ]) &&
+        data.client_name is string &&
+        data.client_name.size() > 0 &&
+        data.client_name.size() <= 150 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('username' in data) || (data.username is string && data.username.size() <= 64)) &&
+        (!('advisor_id' in data) || (data.advisor_id is string && data.advisor_id.size() <= 128)) &&
+        (!('advisor_name' in data) || (data.advisor_name is string && data.advisor_name.size() <= 100)) &&
+        (!('advisor_email' in data) || (data.advisor_email is string && data.advisor_email.size() <= 150)) &&
+        (!('client_address' in data) || (data.client_address is string && data.client_address.size() <= 250)) &&
+        (!('project_name' in data) || (data.project_name is string && data.project_name.size() <= 200)) &&
+        (!('consultation_date' in data) || (data.consultation_date is string && data.consultation_date.size() <= 100)) &&
+        (!('site_summary' in data) || (data.site_summary is string && data.site_summary.size() <= 10000)) &&
+        (!('summary_notes' in data) || (data.summary_notes is string && data.summary_notes.size() <= 10000)) &&
+        (!('drive_doc_url' in data) || (data.drive_doc_url is string && data.drive_doc_url.size() <= 1000)) &&
+        (!('last_modified' in data) || isValidTimestampOrNumber(data.last_modified)) &&
+        (!('is_drive_synced' in data) || data.is_drive_synced is bool) &&
+        (!('staged_recommendations' in data) || isValidStagedRecommendations(data.staged_recommendations)) &&
+        (!('staged_plants' in data) || (data.staged_plants is list && data.staged_plants.size() <= 200)) &&
+        (!('created_at' in data) || isValidTimestampOrNumber(data.created_at)) &&
+        (!('updated_at' in data) || isValidTimestampOrNumber(data.updated_at));
+    }
+
+    function isValidReportCreate(reportId) {
+      let data = request.resource.data;
+      return isValidReport(data) &&
+        (!('id' in data) || data.id == reportId);
+    }
+
+    function isValidReportUpdate(reportId) {
+      let data = request.resource.data;
+      return isValidReport(data) &&
+        areImmutableFieldsUnchanged(['id']);
+    }
+
+    function isValidUserReportCreate(username, reportId) {
+      let data = request.resource.data;
+      return isValidReport(data) &&
+        (!('id' in data) || data.id == reportId) &&
+        (!('username' in data) || data.username == username);
+    }
+
+    function isValidUserReportUpdate(username, reportId) {
+      let data = request.resource.data;
+      return isValidReport(data) &&
+        areImmutableFieldsUnchanged(['id']) &&
+        (!('username' in data) || data.username == username);
+    }
+
+    // ===============================================================
+    // Domain Validator: Plant Approval Requests
+    // ===============================================================
+
+    function isValidApproval(data) {
+      return data is map &&
+        data.keys().hasAll(['id', 'status', 'type', 'scientific_name']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.status is string && data.status in ['pending', 'approved', 'denied'] &&
+        data.type is string && data.type in ['edit', 'add', 'new_plant'] &&
+        data.scientific_name is string && data.scientific_name.size() <= 150 &&
+        (!('common_name' in data) || (data.common_name is string && data.common_name.size() <= 150)) &&
+        (!('plant_id' in data) || (data.plant_id is string && data.plant_id.size() <= 128)) &&
+        (!('submitted_by_id' in data) || (data.submitted_by_id is string && data.submitted_by_id.size() <= 128)) &&
+        (!('submitted_by_name' in data) || (data.submitted_by_name is string && data.submitted_by_name.size() <= 150)) &&
+        (!('submitted_by_email' in data) || (data.submitted_by_email is string && data.submitted_by_email.size() <= 150)) &&
+        (!('submitted_at' in data) || isValidTimestampOrNumber(data.submitted_at)) &&
+        (!('reviewed_by_id' in data) || data.reviewed_by_id == null || (data.reviewed_by_id is string && data.reviewed_by_id.size() <= 128)) &&
+        (!('reviewed_by_name' in data) || data.reviewed_by_name == null || (data.reviewed_by_name is string && data.reviewed_by_name.size() <= 150)) &&
+        (!('reviewed_at' in data) || data.reviewed_at == null || isValidTimestampOrNumber(data.reviewed_at)) &&
+        (!('raw_json' in data) || (data.raw_json is string && data.raw_json.size() <= 50000));
+    }
+
+    function isValidApprovalCreate(approvalId) {
+      let data = request.resource.data;
+      return isValidApproval(data) &&
+        (!('id' in data) || data.id == approvalId);
+    }
+
+    function isValidApprovalUpdate(approvalId) {
+      let data = request.resource.data;
+      return isValidApproval(data) &&
+        areImmutableFieldsUnchanged(['id']);
+    }
+
+    // ===============================================================
+    // Collection Security Rules
+    // ===============================================================
+
+    // Default Deny: All access to unregistered paths is forbidden
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Plants Collection (Shared Public Repository & Fallback Sync)
+    match /plants/{plantId} {
+      // Read access: Shared amongst all advisors, clients, and community members
+      allow read: if true;
+
+      // Write access: Validated plant species updates and sync engine fallback docs
+      allow create: if isValidPlantDocCreate(plantId);
+      allow update: if isValidPlantDocUpdate(plantId);
+
+      // Delete access: Allowed for sync engine fallback docs, or authorized administrators/advisors
+      allow delete: if isFallbackDoc(plantId) || isAdvisor();
+    }
+
+    // 2. User Accounts & Provisioning Collection
+    match /users/{username} {
+      // Read access: Allowed for client authentication, user profile lookup, and admin roster
+      allow read: if true;
+
+      // Create access: User registration and administrator provisioning
+      allow create: if isValidUserCreate(username);
+
+      // Update access: Account details, password updates, and role management
+      allow update: if isValidUserUpdate(username);
+
+      // Delete access: Restricted to administrators
+      allow delete: if isAdmin();
+
+      // Reports subcollection under user: /users/{username}/reports/{reportId}
+      match /reports/{reportId} {
+        // Read access: Consultation reports associated with the user account
+        allow read: if true;
+
+        // Create access: Save consultation reports
+        allow create: if isValidUserReportCreate(username, reportId);
+
+        // Update access: Modify consultation reports with strict immutability checks
+        allow update: if isValidUserReportUpdate(username, reportId);
+
+        // Delete access: Remove consultation reports
+        allow delete: if true;
+      }
+    }
+
+    // 3. Top-level Consultation Reports Collection
+    match /reports/{reportId} {
+      // Read access: Consultation reports
+      allow read: if true;
+
+      // Create access: Save consultation reports
+      allow create: if isValidReportCreate(reportId);
+
+      // Update access: Modify consultation reports with strict immutability checks
+      allow update: if isValidReportUpdate(reportId);
+
+      // Delete access: Delete consultation reports
+      allow delete: if true;
+    }
+
+    // 4. Plant Approval Inbox Collection
+    match /plant_approvals/{approvalId} {
+      // Read access: Allowed for advisors and administrators to inspect inbox and badges
+      allow read: if true;
+
+      // Create access: Submit proposed edits or new plant species
+      allow create: if isValidApprovalCreate(approvalId);
+
+      // Update access: Administrator reviews, approves, or denies changes
+      allow update: if isValidApprovalUpdate(approvalId);
+
+      // Delete access: Allowed to clean up archived proposals
+      allow delete: if true;
+    }
+  }
+}

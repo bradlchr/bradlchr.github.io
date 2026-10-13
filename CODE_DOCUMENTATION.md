@@ -89,7 +89,8 @@ The application enforces a 3-tier authorization model:
 | - All Guest capabilities                                                          |
 | - Full consultation staging drawer & custom garden zones (planting areas)         |
 | - Generate and download official Word consultation reports (.docx)                |
-| - Edit botanical species records (syncs to Cloud Firestore with attribution)      |
+| - Propose botanical record edits (submitted to Admin Approval Inbox)              |
+| - Propose new native species additions (submitted to Admin Approval Inbox)        |
 | - Pull fresh data from master database in Database Sync modal                     |
 +-----------------------------------------------------------------------------------+
                                          │  Admin Role Assigned
@@ -97,6 +98,8 @@ The application enforces a 3-tier authorization model:
 +-----------------------------------------------------------------------------------+
 | PROGRAM ADMINISTRATOR (role: 'admin')                                             |
 | - All Nature Advisor capabilities                                                 |
+| - Plant Approval Inbox: Review, approve, or deny proposed edits & new species     |
+| - Direct master catalog editing and instant plant additions without gating        |
 | - Central Consultation Reports Repository (inspect any advisor's reports)         |
 | - Instant on-demand Word (.docx) regeneration for any historical report           |
 | - Delete consultation reports across all Cloud Firestore paths                    |
@@ -136,13 +139,117 @@ All cloud operations target project `deep-roots-nature-advisors`:
 - **`/reports/{reportId}`**: Top-level consultation repository.
   - Fields: `id`, `client_name`, `client_address`, `consultation_date`, `advisor_name`, `username`, `garden_areas`, `staged_recommendations`, `staged_invasives`, `report_options`, `last_modified`.
 - **`/users/{username}/reports/{reportId}`**: User-scoped consultation subcollection.
+- **`/plant_approvals/{approvalId}`**: Dedicated collection for pending and historical plant approval requests (edits and new species additions).
+- **`/plants/_approval_{approvalId}`**: Fallback cloud sync path for plant approval requests.
 - **`/plants/_report_{username}_{reportId}`**: Fallback consultation storage path.
 
 ---
 
-## 📚 6. Exhaustive Function Reference (118 Functions)
+## 🌸 6. Missouri Botanical Garden PlantFinder & Image Engine
+
+The native plant catalog integrates high-resolution botanical photography sourced directly from the **Missouri Botanical Garden PlantFinder** (MOBOT), providing authentic identification imagery for 179 Kansas City native species:
+
+### Key Image Engine Features:
+1. **Authentic Taxonomy Mapping**: 179 regional species are mapped to official MOBOT Taxon IDs and Kemper Center codes using Wikidata Property `P6034`.
+2. **High-Resolution Multi-Image Galleries**: Over 1,231 specimen photos are indexed across flower close-ups, whole-plant growth habits, foliage detail, fall color, and winter architecture.
+3. **Mandatory Attribution & Linkbacks**: Every single photograph displays the required credit: `"Courtesy Missouri Botanical Garden PlantFinder"` and provides a direct hyperlink back to the plant's dedicated information page on `missouribotanicalgarden.org`.
+4. **Fullscreen Botanical Lightbox**: Native plants feature an interactive modal lightbox supporting high-resolution image rendering (`large960`), slide navigation, keyboard shortcuts (Left/Right arrows, Escape), and specimen labels.
+5. **English Ivy (*Hedera helix*) Correction**: Corrected previous misidentified ground ivy imagery with verified Bugwood / Invasive.org specimens showing juvenile lobed leaves, adult flowering stems, tree-girdling vines, and ecological infestations.
+
+---
+
+## ⚖️ 7. Two-Tier Database Change Approval Workflow
+
+To safeguard the integrity of the master botanical database, the system enforces a strict two-tier approval workflow for all catalog modifications:
+
+```
++-----------------------------------------------------------------------+
+| NATURE ADVISOR PROPOSES CHANGE                                        |
+| 1. Advisor edits an existing plant record OR adds a new plant record. |
+| 2. Changes are packaged into an Approval Proposal object.             |
+| 3. Proposal is stored locally & synced to Firestore:                  |
+|    - /plant_approvals/{approvalId}                                    |
+|    - /plants/_approval_{approvalId} (fallback)                        |
+| 4. Plant displays "Pending Review" badge in catalog grid & modal.     |
++-----------------------------------------------------------------------+
+                                    │
+                                    ▼
++-----------------------------------------------------------------------+
+| ADMINISTRATOR REVIEW & DECISION                                       |
+| 1. Admin opens "Approval Inbox" tab in Administration Console.        |
+| 2. Admin inspects side-by-side field diffs (Old vs New values).       |
+| 3. Action options:                                                    |
+|    • APPROVE: Changes applied to master catalog, saved to custom      |
+|      plants cache, and patched directly to master Firestore /plants/. |
+|    • DENY: Changes rejected, reviewer audit notes recorded.           |
+| 4. Status synchronized across all connected client devices.           |
++-----------------------------------------------------------------------+
+```
+
+---
+
+## 📚 8. Exhaustive Function Reference (129 Functions)
 
 Below is the complete reference of all 118 functions declared in `index.html`, organized by functional subsystem:
+
+### Module 10: Missouri Botanical Garden Gallery & Approval Workflow (11 Functions)
+
+#### `renderPlantGallery(plant)`
+- **Async**: No
+- **Parameters**: `plant` (Object)
+- **Description**: Renders the multi-image botanical photo gallery into the plant detail modal. Displays specimen cards, photo count badge, mandatory credit "Courtesy Missouri Botanical Garden PlantFinder", and direct linkbacks to each species' MOBOT profile.
+
+#### `openPlantLightbox(plant, initialIdx = 0)`
+- **Async**: No
+- **Parameters**: `plant` (Object), `initialIdx` (Number, default `0`)
+- **Description**: Opens a high-resolution, accessible fullscreen modal lightbox displaying authentic MOBOT photography with previous/next slide navigation, keyboard arrow support, credit banner, and direct links to the official PlantFinder page.
+
+#### `openAddPlantModal()`
+- **Async**: No
+- **Parameters**: None
+- **Description**: Opens the Kansas City Native Plant contribution modal. Dynamically adjusts guidance notices and submit button labels depending on whether the user is an Administrator (direct addition) or an Advisor (submission for approval).
+
+#### `renderAdminApprovals(filterTerm = '')`
+- **Async**: No
+- **Parameters**: `filterTerm` (String, optional)
+- **Description**: Renders all pending, approved, and denied plant change requests in the Administrator Approval Inbox. Generates side-by-side field diffs for edits and full specification checklists for new plant additions.
+
+#### `approvePlantChange(approvalId)`
+- **Async**: Yes
+- **Parameters**: `approvalId` (String)
+- **Description**: Administrator action to approve a pending change request. Automatically updates the plant in the active catalog, persists edits to local storage, syncs to master Cloud Firestore `/plants/`, marks approval status as approved, and refreshes the catalog grid.
+
+#### `denyPlantChange(approvalId)`
+- **Async**: Yes
+- **Parameters**: `approvalId` (String)
+- **Description**: Administrator action to deny a proposed edit or new plant contribution with confirmation, marking the approval request as denied and archiving it in Firestore.
+
+#### `syncPlantToFirestore(plant)`
+- **Async**: Yes
+- **Parameters**: `plant` (Object)
+- **Description**: Formats and serializes a native plant record into a Firestore document structure and issues an HTTP PATCH request to update the master record at `/plants/{plantId}`.
+
+#### `savePlantApprovalToFirestore(approval)`
+- **Async**: Yes
+- **Parameters**: `approval` (Object)
+- **Description**: Dual-writes a plant approval request to the primary collection `/plant_approvals/{id}` and fallback sync document `/plants/_approval_{id}`.
+
+#### `fetchPlantApprovalsFromFirestore()`
+- **Async**: Yes
+- **Parameters**: None
+- **Description**: Scans Firestore `/plant_approvals` and fallback `plants/` collections for approval requests, deduplicates them, updates the local cache, and refreshes approval badges.
+
+#### `deletePlantApprovalFromFirestore(approvalId)`
+- **Async**: Yes
+- **Parameters**: `approvalId` (String)
+- **Description**: Permanently purges a plant approval document from both primary and fallback collections in Cloud Firestore.
+
+#### `updateApprovalBadges()`
+- **Async**: No
+- **Parameters**: None
+- **Description**: Calculates the number of pending plant approval requests in `state.plantApprovals` and updates the numeric count badges on the Administrator Approval tab and User Profile drawer.
+
+---
 
 ### Module 1: Core & Utilities (4 Functions)
 
