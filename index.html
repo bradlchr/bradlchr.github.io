@@ -1838,6 +1838,34 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+    .admin-report-card {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .admin-report-card:hover {
+      border-color: var(--primary-border);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+    .admin-report-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     .req-list {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -3151,6 +3179,10 @@
           <i data-lucide="user-cog"></i>
           <span>Edit Advisor Details</span>
         </button>
+        <button id="openAdminReportsBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--primary);border-color:var(--primary-border);">
+          <i data-lucide="folder-git-2"></i>
+          <span>Consultation Reports Repository (<span id="profileReportsRepoCount">0</span>)</span>
+        </button>
         <button id="openAdminConsoleBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--accent-gold);border-color:var(--accent-gold-border);">
           <i data-lucide="shield"></i>
           <span>Advisor Administration Console</span>
@@ -3216,7 +3248,7 @@
   </dialog>
 
   <!-- Advisor Administration Console Modal (Admin Only) -->
-  <dialog id="adminManagementModal" style="max-width:680px;width:95%;" aria-modal="true" aria-labelledby="adminManagementTitle">
+  <dialog id="adminManagementModal" style="max-width:860px;width:95%;" aria-modal="true" aria-labelledby="adminManagementTitle">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:10px;">
         <i data-lucide="shield" style="color:var(--accent-gold);width:24px;height:24px;"></i>
@@ -3239,6 +3271,10 @@
         <button type="button" class="dialog-tab" id="adminProvisionTabBtn">
           <i data-lucide="user-plus" style="width:14px;height:14px;"></i>
           <span>Provision New Advisor</span>
+        </button>
+        <button type="button" class="dialog-tab" id="adminReportsTabBtn">
+          <i data-lucide="folder-git-2" style="width:14px;height:14px;"></i>
+          <span>Consultation Repository (<span id="adminReportsTabBadge">0</span>)</span>
         </button>
       </div>
 
@@ -3325,6 +3361,85 @@
         </form>
       </div>
 
+      <!-- Tab 3: Consultation Repository Panel (All Advisors) -->
+      <div id="adminReportsPanel" style="display:none;">
+        <!-- Search, Filter & Action Bar -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;">
+          <div style="position:relative;flex:1;min-width:220px;">
+            <input type="text" id="adminReportsSearchInput" placeholder="Search by client, advisor, address, plant, notes..." style="width:100%;padding:8px 12px 8px 34px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:13px;" aria-label="Search all consultation reports across all advisors">
+            <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);"></i>
+          </div>
+          <select id="adminReportsAdvisorFilter" style="padding:8px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:12px;font-weight:600;" aria-label="Filter reports by advisor">
+            <option value="">All Advisors</option>
+          </select>
+          <select id="adminReportsSortSelect" style="padding:8px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:12px;" aria-label="Sort consultation reports">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="client">Client Name A–Z</option>
+            <option value="plants">Most Staged Plants</option>
+          </select>
+          <button type="button" id="adminReportsRefreshBtn" class="btn btn-secondary" style="font-size:12px;padding:8px 12px;" title="Refresh Reports from Cloud">
+            <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <!-- Summary Stats Bar -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-bottom:14px;">
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 12px;text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--primary);" id="adminStatTotalReports">0</div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Total Reports</div>
+          </div>
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 12px;text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--accent-gold);" id="adminStatTotalAdvisors">0</div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Active Advisors</div>
+          </div>
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 12px;text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--primary-dark);" id="adminStatTotalPlants">0</div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Plants Staged</div>
+          </div>
+        </div>
+
+        <!-- Reports Cards List -->
+        <div id="adminReportsList" style="display:flex;flex-direction:column;gap:12px;max-height:480px;overflow-y:auto;padding-right:4px;">
+          <!-- Dynamically populated with all consultation report cards -->
+        </div>
+      </div>
+
+    </div>
+  </dialog>
+
+  <!-- Admin Consultation Report Detail & Inspection Dialog -->
+  <dialog id="adminReportDetailModal" style="max-width:760px;width:95%;" aria-modal="true" aria-labelledby="adminDetailClientTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="file-text" style="color:var(--primary);width:22px;height:22px;"></i>
+        <div>
+          <h3 id="adminDetailClientTitle" style="font-size:17px;font-weight:800;margin:0;">Consultation Details</h3>
+          <p id="adminDetailAdvisorMeta" style="font-size:11px;color:var(--text-muted);margin:0;">Advisor Consultation Report</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('adminReportDetailModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="padding:16px 20px;max-height:600px;overflow-y:auto;">
+      <div id="adminDetailContent">
+        <!-- Rendered with full breakdown: site info, areas, plants, invasives, options -->
+      </div>
+    </div>
+    <div class="dialog-footer" style="padding:12px 20px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg-base);">
+      <button type="button" id="adminDetailLoadToEditorBtn" class="btn btn-secondary" style="font-size:12px;">
+        <i data-lucide="folder-input"></i>
+        <span>Load into Workspace</span>
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="document.getElementById('adminReportDetailModal').close()" class="btn btn-secondary" style="font-size:12px;">Close</button>
+        <button type="button" id="adminDetailRegenerateDocxBtn" class="btn btn-primary" style="font-size:12px;font-weight:700;">
+          <i data-lucide="file-down"></i>
+          <span>Regenerate Word Report (.docx)</span>
+        </button>
+      </div>
     </div>
   </dialog>
 
@@ -3437,6 +3552,14 @@
       </button>
     </div>
     <div class="dialog-body" style="padding:16px 20px;">
+      <div id="adminConsultationsRepoNotice" style="display:none;margin-bottom:12px;padding:10px 14px;background:var(--primary-light);border:1px solid var(--primary-border);border-radius:var(--radius-md);align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--primary-dark);font-weight:600;">
+          👑 <strong>Administrator Mode:</strong> You have access to all advisor consultation reports across the organization.
+        </span>
+        <button type="button" id="consultationsOpenAdminRepoBtn" class="btn btn-primary" style="font-size:11px;padding:5px 12px;white-space:nowrap;font-weight:700;">
+          <span>Open Full Repository &rarr;</span>
+        </button>
+      </div>
       <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
         <div style="position:relative;flex:1;min-width:200px;">
           <input type="text" id="consultationSearchInput" placeholder="Search consultations by client, location, date..." style="width:100%;padding:9px 12px 9px 34px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-size:13px;box-sizing:border-box;" aria-label="Search consultations by client name, project address, or date">
@@ -5252,6 +5375,32 @@
         ? parsedAreas
         : ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
 
+      // Parse staged invasives if present
+      const stagedInvs = [];
+      const invVals = f.staged_invasives?.arrayValue?.values || [];
+      for (const item of invVals) {
+        const inf = item.mapValue?.fields || {};
+        stagedInvs.push({
+          id: inf.id?.stringValue || '',
+          name: inf.name?.stringValue || '',
+          scientific: inf.scientific?.stringValue || '',
+          location_notes: inf.location_notes?.stringValue || inf.notes?.stringValue || '',
+          status: inf.status?.stringValue || 'Confirmed on site'
+        });
+      }
+
+      // Parse report options if present
+      const reportOptions = {};
+      const rof = f.report_options?.mapValue?.fields || {};
+      if (rof.invasive_present !== undefined) reportOptions.invasivePresent = rof.invasive_present.booleanValue;
+      if (rof.bird_nest_box !== undefined) reportOptions.birdNestBox = rof.bird_nest_box.booleanValue;
+      if (rof.bird_bath !== undefined) reportOptions.birdBath = rof.bird_bath.booleanValue;
+      if (rof.bat_box !== undefined) reportOptions.batBox = rof.bat_box.booleanValue;
+      if (rof.bee_habitat !== undefined) reportOptions.beeHabitat = rof.bee_habitat.booleanValue;
+      if (rof.johnson_county !== undefined) reportOptions.johnsonCounty = rof.johnson_county.booleanValue;
+      if (rof.wyandotte_county !== undefined) reportOptions.wyandotteCounty = rof.wyandotte_county.booleanValue;
+      if (rof.rainwater_harvesting !== undefined) reportOptions.rainwaterHarvesting = rof.rainwater_harvesting.booleanValue;
+
       return {
         id: rawId,
         username: uName,
@@ -5262,6 +5411,17 @@
         advisorNotes,
         gardenAreas,
         stagedPlants: staged,
+        stagedInvasives: stagedInvs,
+        reportOptions: Object.keys(reportOptions).length > 0 ? reportOptions : {
+          invasivePresent: stagedInvs.length > 0,
+          birdNestBox: true,
+          birdBath: true,
+          batBox: false,
+          beeHabitat: true,
+          johnsonCounty: false,
+          wyandotteCounty: false,
+          rainwaterHarvesting: true
+        },
         createdAt: lastModified,
         lastModified
       };
@@ -6500,6 +6660,10 @@
     function openConsultationsManagerModal() {
       const modal = document.getElementById('consultationsModal');
       if (!modal) return;
+      const adminNotice = document.getElementById('adminConsultationsRepoNotice');
+      if (adminNotice) {
+        adminNotice.style.display = (state.currentUser && state.currentUser.isAdmin) ? 'flex' : 'none';
+      }
       const searchInput = document.getElementById('consultationSearchInput');
       if (searchInput) searchInput.value = '';
       renderConsultationsModalList('');
@@ -6571,29 +6735,64 @@
                 }
               }))
             }
+          },
+          staged_invasives: {
+            arrayValue: {
+              values: (state.stagedInvasives || []).map(inv => ({
+                mapValue: {
+                  fields: {
+                    id: { stringValue: inv.id || '' },
+                    name: { stringValue: inv.name || '' },
+                    scientific: { stringValue: inv.scientific || '' },
+                    location_notes: { stringValue: inv.location_notes || '' },
+                    status: { stringValue: inv.status || 'Confirmed on site' }
+                  }
+                }
+              }))
+            }
+          },
+          report_options: {
+            mapValue: {
+              fields: {
+                invasive_present: { booleanValue: Boolean(state.reportOptions.invasivePresent) },
+                bird_nest_box: { booleanValue: state.reportOptions.birdNestBox !== false },
+                bird_bath: { booleanValue: state.reportOptions.birdBath !== false },
+                bat_box: { booleanValue: state.reportOptions.batBox === true },
+                bee_habitat: { booleanValue: state.reportOptions.beeHabitat !== false },
+                johnson_county: { booleanValue: state.reportOptions.johnsonCounty === true },
+                wyandotte_county: { booleanValue: state.reportOptions.wyandotteCounty === true },
+                rainwater_harvesting: { booleanValue: state.reportOptions.rainwaterHarvesting !== false }
+              }
+            }
           }
         }
       };
 
       try {
         showToast("Saving report to advisor cloud profile...", "info");
-        // Save to user reports subcollection
+        // 1. Save to user reports subcollection
         const stdUrl = `${getFirestoreBaseUrl()}/users/${username}/reports/${reportId}`;
-        const res = await fetch(stdUrl, {
+        fetch(stdUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reportPayload)
+        }).catch(() => {});
+
+        // 2. Save to top-level reports collection
+        const topUrl = `${getFirestoreBaseUrl()}/reports/${reportId}`;
+        fetch(topUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reportPayload)
+        }).catch(() => {});
+
+        // 3. Save to /plants fallback collection
+        const fbUrl = `${getFirestoreBaseUrl()}/plants/_report_${username}_${reportId}`;
+        await fetch(fbUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reportPayload)
         });
-
-        if (!res.ok) {
-          // Fallback to /plants/_report_${username}_${reportId}
-          const fbUrl = `${getFirestoreBaseUrl()}/plants/_report_${username}_${reportId}`;
-          await fetch(fbUrl, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportPayload)
-          });
-        }
 
         persistConsultations();
         renderConsultationSwitcher();
@@ -7037,6 +7236,14 @@
         editSelfBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
       }
 
+      const adminReportsBtn = document.getElementById('openAdminReportsBtn');
+      if (adminReportsBtn) {
+        adminReportsBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
+        if (u.isAdmin) {
+          fetchAllAdvisorReports().then(reps => updateAdminReportsBadge(reps.length)).catch(() => {});
+        }
+      }
+
       const adminBtn = document.getElementById('openAdminConsoleBtn');
       if (adminBtn) {
         adminBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
@@ -7096,7 +7303,489 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function openAdminConsoleModal() {
+    function updateAdminReportsBadge(count) {
+      const b1 = document.getElementById('adminReportsTabBadge');
+      if (b1) b1.textContent = count;
+      const b2 = document.getElementById('profileReportsRepoCount');
+      if (b2) b2.textContent = count;
+    }
+
+    async function fetchAllAdvisorReports() {
+      const allReports = [];
+      const seenIds = new Set();
+
+      function addReport(r) {
+        if (!r || !r.id) return;
+        if (!seenIds.has(r.id)) {
+          seenIds.add(r.id);
+          allReports.push(r);
+        } else {
+          const existingIdx = allReports.findIndex(item => item.id === r.id);
+          if (existingIdx >= 0 && (r.lastModified || 0) > (allReports[existingIdx].lastModified || 0)) {
+            allReports[existingIdx] = r;
+          }
+        }
+      }
+
+      // 1. Scan LocalStorage for all consultations cached on this device across any advisor
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('dr_reports_')) {
+            const u = key.replace('dr_reports_', '');
+            try {
+              const list = JSON.parse(localStorage.getItem(key) || '[]');
+              if (Array.isArray(list)) {
+                list.forEach(c => {
+                  if (c && c.id) {
+                    if (!c.username) c.username = u;
+                    addReport(c);
+                  }
+                });
+              }
+            } catch (err) {}
+          }
+        }
+      } catch (err) {
+        console.warn('Local storage scan notice:', err);
+      }
+
+      // Also include active consultations in state
+      if (state.consultations && Array.isArray(state.consultations)) {
+        state.consultations.forEach(c => addReport(c));
+      }
+
+      // 2. Fetch from Cloud Firestore fallback collection: /plants looking for all _report_ documents
+      try {
+        const url = `${getFirestoreBaseUrl()}/plants?pageSize=300`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const docId = doc.name ? doc.name.split('/').pop() : '';
+            if (docId.startsWith('_report_')) {
+              const parts = docId.split('_');
+              const authorUser = parts[2] || '';
+              const r = parseFirestoreReportDoc(doc, authorUser);
+              if (r) addReport(r);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Firestore plants fallback scan notice:', err);
+      }
+
+      // 3. Fetch from top-level /reports collection
+      try {
+        const url = `${getFirestoreBaseUrl()}/reports?pageSize=100`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const r = parseFirestoreReportDoc(doc);
+            if (r) addReport(r);
+          }
+        }
+      } catch (err) {}
+
+      // 4. Fetch from /users/{username}/reports for every known advisor in the roster
+      try {
+        const users = loadUsersCache();
+        const fetchPromises = users.map(async (u) => {
+          if (!u.username || u.username === 'guest') return;
+          try {
+            const uUrl = `${getFirestoreBaseUrl()}/users/${u.username}/reports?pageSize=100`;
+            const res = await fetch(uUrl);
+            if (res.ok) {
+              const data = await res.json();
+              for (const doc of data.documents || []) {
+                const r = parseFirestoreReportDoc(doc, u.username);
+                if (r) addReport(r);
+              }
+            }
+          } catch (e) {}
+        });
+        await Promise.allSettled(fetchPromises);
+      } catch (err) {
+        console.warn('Firestore user reports fetch notice:', err);
+      }
+
+      allReports.sort((a, b) => (b.lastModified || b.createdAt || 0) - (a.lastModified || a.createdAt || 0));
+      state.allAdvisorReports = allReports;
+      updateAdminReportsBadge(allReports.length);
+      return allReports;
+    }
+
+    function renderAdminReportsRepository(searchQuery = '', advisorFilter = '', sortOrder = 'newest') {
+      const listEl = document.getElementById('adminReportsList');
+      if (!listEl) return;
+
+      const reports = state.allAdvisorReports || [];
+      const q = (searchQuery || '').toLowerCase().trim();
+      const advFilter = (advisorFilter || '').toLowerCase().trim();
+
+      // Populate advisor filter dropdown
+      const advisorFilterSelect = document.getElementById('adminReportsAdvisorFilter');
+      if (advisorFilterSelect) {
+        const advisorMap = new Map();
+        reports.forEach(r => {
+          const u = r.username || 'unknown';
+          const name = r.advisorName || u;
+          advisorMap.set(u, { username: u, name: name });
+        });
+        const currentVal = advisorFilterSelect.value;
+        advisorFilterSelect.innerHTML = '<option value="">All Advisors</option>';
+        Array.from(advisorMap.values()).sort((a, b) => a.name.localeCompare(b.name)).forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.username;
+          opt.textContent = `${item.name} (@${item.username})`;
+          advisorFilterSelect.appendChild(opt);
+        });
+        if (currentVal) advisorFilterSelect.value = currentVal;
+      }
+
+      // Filter reports
+      let filtered = reports.filter(r => {
+        if (advFilter && (r.username || '').toLowerCase() !== advFilter) {
+          return false;
+        }
+        if (!q) return true;
+        const cName = (r.clientName || '').toLowerCase();
+        const aName = (r.advisorName || '').toLowerCase();
+        const uName = (r.username || '').toLowerCase();
+        const addr = (r.clientAddress || '').toLowerCase();
+        const notes = (r.advisorNotes || '').toLowerCase();
+        const plantNames = (r.stagedPlants || []).map(p => `${p.common_name} ${p.scientific_name}`).join(' ').toLowerCase();
+        const invNames = (r.stagedInvasives || []).map(p => `${p.name} ${p.scientific}`).join(' ').toLowerCase();
+
+        return cName.includes(q) || aName.includes(q) || uName.includes(q) || addr.includes(q) || notes.includes(q) || plantNames.includes(q) || invNames.includes(q);
+      });
+
+      // Sort reports
+      filtered.sort((a, b) => {
+        if (sortOrder === 'oldest') {
+          return (a.lastModified || a.createdAt || 0) - (b.lastModified || b.createdAt || 0);
+        } else if (sortOrder === 'client') {
+          return (a.clientName || '').localeCompare(b.clientName || '');
+        } else if (sortOrder === 'plants') {
+          return ((b.stagedPlants || []).length) - ((a.stagedPlants || []).length);
+        }
+        return (b.lastModified || b.createdAt || 0) - (a.lastModified || a.createdAt || 0);
+      });
+
+      // Update summary stat counters
+      const statTotal = document.getElementById('adminStatTotalReports');
+      if (statTotal) statTotal.textContent = reports.length;
+
+      const uniqueAdvisors = new Set(reports.map(r => r.username || r.advisorName).filter(Boolean));
+      const statAdvisors = document.getElementById('adminStatTotalAdvisors');
+      if (statAdvisors) statAdvisors.textContent = uniqueAdvisors.size;
+
+      const totalPlantsStaged = reports.reduce((sum, r) => sum + (r.stagedPlants || []).length, 0);
+      const statPlants = document.getElementById('adminStatTotalPlants');
+      if (statPlants) statPlants.textContent = totalPlantsStaged;
+
+      updateAdminReportsBadge(reports.length);
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align:center;padding:40px 10px;color:var(--text-muted);font-size:13px;background:var(--bg-base);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);">
+            <i data-lucide="folder-search" style="width:36px;height:36px;opacity:0.4;margin:0 auto 10px;display:block;"></i>
+            No consultation reports found matching your criteria.<br>
+            <span style="font-size:11px;">Try adjusting your search terms or clicking <strong>Refresh</strong> to sync with cloud.</span>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      listEl.innerHTML = '';
+      filtered.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'admin-report-card';
+        card.dataset.reportId = r.id;
+
+        const nativeCount = (r.stagedPlants || []).length;
+        const invCount = (r.stagedInvasives || []).length;
+        const areasCount = (r.gardenAreas || []).length;
+        const clientDisplay = r.clientName || 'Untitled Client Consultation';
+        const advisorDisplay = r.advisorName || (r.username ? `@${r.username}` : 'Nature Advisor');
+        const dateDisplay = r.consultationDate || (r.lastModified ? new Date(r.lastModified).toLocaleDateString() : 'No date set');
+        const timeAgo = r.lastModified ? formatTimeAgo(r.lastModified) : '';
+
+        const topPlants = (r.stagedPlants || []).slice(0, 4);
+        const remainingCount = nativeCount - topPlants.length;
+        const plantPillsHtml = topPlants.map(p => `
+          <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;background:var(--primary-light);color:var(--primary-dark);font-size:11px;font-weight:600;white-space:nowrap;">
+            🌱 ${escapeHtml(p.common_name || p.scientific_name)} ${p.quantity > 1 ? `(x${p.quantity})` : ''}
+          </span>
+        `).join('');
+
+        const invPillsHtml = (r.stagedInvasives || []).slice(0, 3).map(inv => `
+          <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;background:#fee2e2;color:#991b1b;font-size:11px;font-weight:700;white-space:nowrap;">
+            ⚠️ ${escapeHtml(inv.name || inv.scientific)}
+          </span>
+        `).join('');
+
+        card.innerHTML = `
+          <div class="admin-report-card-header">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h4 style="font-size:15px;font-weight:800;color:var(--text-main);margin:0;">${escapeHtml(clientDisplay)}</h4>
+                <span style="font-size:11px;padding:2px 8px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:12px;font-weight:700;color:var(--text-secondary);">
+                  👤 ${escapeHtml(advisorDisplay)} ${r.username ? `<span style="opacity:0.75;font-family:monospace;">(@${r.username})</span>` : ''}
+                </span>
+                ${timeAgo ? `<span style="font-size:10px;color:var(--text-muted);"><i data-lucide="clock" style="width:11px;height:11px;vertical-align:-1px;"></i> ${timeAgo}</span>` : ''}
+              </div>
+              <div style="display:flex;gap:12px;margin-top:5px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">
+                <span><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:-1px;"></i> ${escapeHtml(dateDisplay)}</span>
+                ${r.clientAddress ? `<span><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i> ${escapeHtml(r.clientAddress)}</span>` : ''}
+                <span><i data-lucide="layers" style="width:12px;height:12px;vertical-align:-1px;"></i> ${areasCount} Areas</span>
+                <span style="font-weight:700;color:var(--primary);"><i data-lucide="sprout" style="width:12px;height:12px;vertical-align:-1px;"></i> ${nativeCount} Natives</span>
+                ${invCount > 0 ? `<span style="font-weight:700;color:var(--danger);"><i data-lucide="alert-triangle" style="width:12px;height:12px;vertical-align:-1px;"></i> ${invCount} Invasives</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;">
+              <button type="button" class="btn btn-primary btn-sm repo-regen-docx-btn" style="padding:6px 12px;font-size:12px;font-weight:700;" title="Regenerate and download official Word document (.docx)">
+                <i data-lucide="file-down" style="width:13px;height:13px;"></i>
+                <span>Regenerate .docx</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-view-details-btn" style="padding:6px 10px;font-size:12px;" title="View consultation details">
+                <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                <span>View</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-copy-summary-btn" style="padding:6px 10px;font-size:12px;" title="Copy summary text">
+                <i data-lucide="copy" style="width:13px;height:13px;"></i>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-load-workspace-btn" style="padding:6px 10px;font-size:12px;" title="Load into your active consultation workspace">
+                <i data-lucide="folder-input" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;">
+            ${plantPillsHtml}
+            ${remainingCount > 0 ? `<span style="font-size:10px;color:var(--text-muted);font-weight:700;">+${remainingCount} more</span>` : ''}
+            ${invPillsHtml}
+          </div>
+
+          ${r.advisorNotes ? `
+            <div style="font-size:12px;color:var(--text-secondary);background:var(--bg-surface);padding:8px 10px;border-radius:var(--radius-sm);border-left:3px solid var(--primary-border);margin-top:2px;line-height:1.4;max-height:48px;overflow:hidden;text-overflow:ellipsis;">
+              "${escapeHtml(r.advisorNotes.length > 140 ? r.advisorNotes.slice(0, 140) + '...' : r.advisorNotes)}"
+            </div>
+          ` : ''}
+        `;
+
+        // Event listeners
+        const regenBtn = card.querySelector('.repo-regen-docx-btn');
+        regenBtn.addEventListener('click', async () => {
+          const original = regenBtn.innerHTML;
+          regenBtn.disabled = true;
+          regenBtn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width:13px;height:13px;"></i> <span>Generating...</span>`;
+          if (window.lucide) lucide.createIcons();
+          try {
+            await downloadDocxReport(r);
+          } catch (err) {
+            showToast(`Error: ${err.message}`, 'danger');
+          } finally {
+            regenBtn.disabled = false;
+            regenBtn.innerHTML = original;
+            if (window.lucide) lucide.createIcons();
+          }
+        });
+
+        card.querySelector('.repo-view-details-btn').addEventListener('click', () => {
+          openAdminReportDetailModal(r);
+        });
+
+        card.querySelector('.repo-copy-summary-btn').addEventListener('click', () => {
+          const summary = `Deep Roots Consultation Report: ${clientDisplay}\nNature Advisor: ${advisorDisplay}\nDate: ${dateDisplay}\nAddress: ${r.clientAddress || 'N/A'}\n\nStaged Plants (${nativeCount}):\n` +
+            (r.stagedPlants || []).map(p => `• ${p.quantity}x ${p.common_name} (${p.scientific_name}) - ${p.target_area || 'Garden'}`).join('\n') +
+            (invCount > 0 ? `\n\nInvasive Species (${invCount}):\n` + (r.stagedInvasives || []).map(inv => `• ${inv.name} (${inv.scientific}) - ${inv.location_notes || 'Observed'}`).join('\n') : '');
+          navigator.clipboard.writeText(summary).then(() => {
+            showToast(`Copied consultation summary for "${clientDisplay}" to clipboard!`, 'success');
+          });
+        });
+
+        card.querySelector('.repo-load-workspace-btn').addEventListener('click', () => {
+          loadReportIntoWorkspace(r);
+        });
+
+        listEl.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openAdminReportDetailModal(report) {
+      if (!report) return;
+      state.currentViewingReport = report;
+      const modal = document.getElementById('adminReportDetailModal');
+      if (!modal) return;
+
+      const titleEl = document.getElementById('adminDetailClientTitle');
+      const metaEl = document.getElementById('adminDetailAdvisorMeta');
+      const contentEl = document.getElementById('adminDetailContent');
+
+      if (titleEl) titleEl.textContent = report.clientName || 'Untitled Client Consultation';
+      if (metaEl) {
+        metaEl.textContent = `Consultation with ${report.advisorName || report.username || 'Advisor'} (${report.consultationDate || 'No date set'}) • @${report.username || 'unknown'}`;
+      }
+
+      const areas = (report.gardenAreas && report.gardenAreas.length > 0)
+        ? report.gardenAreas
+        : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'];
+
+      const areaGroups = {};
+      areas.forEach(a => { areaGroups[a] = []; });
+      (report.stagedPlants || []).forEach(p => {
+        let area = p.target_area || p.targetArea;
+        if (!area || !areaGroups[area]) {
+          const m = areas.find(a => a.toLowerCase().trim() === (area || '').toLowerCase().trim());
+          if (m) area = m;
+          else area = areas[0];
+        }
+        areaGroups[area].push(p);
+      });
+
+      let areasHtml = '';
+      areas.forEach((areaName) => {
+        const plantsInArea = areaGroups[areaName] || [];
+        areasHtml += `
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border-subtle);padding-bottom:6px;">
+              <strong style="color:var(--primary-dark);font-size:14px;">🌿 ${escapeHtml(areaName)}</strong>
+              <span style="font-size:11px;font-weight:700;color:var(--text-muted);">${plantsInArea.length} species staged</span>
+            </div>
+            ${plantsInArea.length === 0 ? `
+              <div style="font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 0;">No native species staged for this area.</div>
+            ` : `
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                ${plantsInArea.map(p => `
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06);font-size:12px;">
+                    <div>
+                      <div><strong style="color:var(--text-main);">${escapeHtml(p.common_name || p.scientific_name)}</strong> <em style="color:var(--text-muted);font-family:var(--font-serif);">${escapeHtml(p.scientific_name || '')}</em></div>
+                      <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
+                        ${p.height ? `Height: ${escapeHtml(p.height)} | ` : ''}
+                        ${p.sun ? `Sun: ${escapeHtml(p.sun)} | ` : ''}
+                        ${p.moisture ? `Moisture: ${escapeHtml(p.moisture)}` : ''}
+                      </div>
+                      ${p.custom_notes ? `<div style="font-size:11px;color:var(--primary);margin-top:3px;background:rgba(45,90,39,0.06);padding:3px 8px;border-radius:4px;"><strong>Advisor Note:</strong> ${escapeHtml(p.custom_notes)}</div>` : ''}
+                    </div>
+                    <div style="font-weight:800;color:var(--primary);font-size:13px;white-space:nowrap;padding:2px 8px;background:var(--primary-light);border-radius:12px;">
+                      x${p.quantity || 1}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      });
+
+      const invasives = report.stagedInvasives || [];
+      let invasivesHtml = '';
+      if (invasives.length > 0) {
+        invasivesHtml = `
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius-md);padding:12px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #fecaca;padding-bottom:6px;">
+              <strong style="color:#991b1b;font-size:14px;">⚠️ Non-Native Invasive Species Observed (${invasives.length})</strong>
+              <span style="font-size:11px;font-weight:700;color:#b91c1c;">Case B Directives</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${invasives.map(inv => `
+                <div style="font-size:12px;padding:6px 0;border-bottom:1px dashed rgba(239,68,68,0.2);">
+                  <strong style="color:#7f1d1d;">${escapeHtml(inv.name)}</strong> <em style="color:#b91c1c;">(${escapeHtml(inv.scientific)})</em>
+                  ${inv.location_notes ? `<div style="font-size:11px;color:#991b1b;margin-top:2px;"><strong>Site &amp; Eradication Notes:</strong> ${escapeHtml(inv.location_notes)}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        invasivesHtml = `
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;font-size:12px;color:#166534;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="check-circle" style="width:16px;height:16px;flex-shrink:0;"></i>
+            <span><strong>Invasive-Free Landscape (Case A):</strong> No non-native invasive plant species were flagged during this consultation.</span>
+          </div>
+        `;
+      }
+
+      const opts = report.reportOptions || {};
+      const stewardshipBadges = [
+        opts.birdNestBox !== false ? '🐦 Bird Nest Boxes' : null,
+        opts.birdBath !== false ? '💧 Bird Baths' : null,
+        opts.batBox === true ? '🦇 Bat Box' : null,
+        opts.beeHabitat !== false ? '🐝 Native Bee Habitat' : null,
+        opts.johnsonCounty === true ? '🌧️ Contain The Rain (Johnson Co.)' : null,
+        opts.wyandotteCounty === true ? '🏛️ Unified Gov (Wyandotte Co.)' : null,
+        opts.rainwaterHarvesting !== false ? '🪣 Rainwater Harvesting' : null
+      ].filter(Boolean);
+
+      contentEl.innerHTML = `
+        <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+            <div><strong>Client Name:</strong> ${escapeHtml(report.clientName || 'N/A')}</div>
+            <div><strong>Consultation Date:</strong> ${escapeHtml(report.consultationDate || 'N/A')}</div>
+            <div><strong>Property Address:</strong> ${escapeHtml(report.clientAddress || 'None provided')}</div>
+            <div><strong>Nature Advisor:</strong> ${escapeHtml(report.advisorName || report.username || 'N/A')} (@${escapeHtml(report.username || '')})</div>
+          </div>
+          ${report.advisorNotes ? `
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-secondary);">
+              <strong>Introductory / Site Summary Notes:</strong>
+              <div style="margin-top:4px;white-space:pre-wrap;background:var(--bg-surface);padding:8px 10px;border-radius:4px;">${escapeHtml(report.advisorNotes)}</div>
+            </div>
+          ` : ''}
+        </div>
+
+        ${invasivesHtml}
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Enabled Stewardship &amp; Stormwater Modules</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${stewardshipBadges.map(b => `<span style="font-size:11px;padding:3px 9px;border-radius:12px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);font-weight:600;">${b}</span>`).join('')}
+          </div>
+        </div>
+
+        <div style="font-size:13px;font-weight:800;color:var(--text-main);margin-bottom:8px;">Garden Planting Areas &amp; Species Palette</div>
+        ${areasHtml}
+      `;
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function loadReportIntoWorkspace(report) {
+      if (!report) return;
+      if (state.stagedPlants.length > 0) {
+        if (!confirm(`Switch your active consultation workspace to "${report.clientName || 'this report'}"? Any unsaved changes in your current draft will be preserved.`)) {
+          return;
+        }
+      }
+
+      const existingIdx = state.consultations.findIndex(c => c.id === report.id);
+      if (existingIdx >= 0) {
+        state.consultations[existingIdx] = JSON.parse(JSON.stringify(report));
+      } else {
+        state.consultations.unshift(JSON.parse(JSON.stringify(report)));
+      }
+
+      persistConsultations();
+      switchActiveConsultation(report.id);
+      renderConsultationSwitcher();
+      updateConsultationCounts();
+
+      document.getElementById('adminReportDetailModal')?.close();
+      document.getElementById('adminManagementModal')?.close();
+      document.getElementById('consultationsModal')?.close();
+      document.getElementById('stagingDrawer')?.classList.add('open');
+      document.getElementById('drawerOverlay')?.classList.add('open');
+
+      showToast(`Loaded "${report.clientName || 'consultation'}" into workspace!`, 'success');
+      announceToScreenReader(`Consultation report for ${report.clientName} loaded into staging workspace.`);
+    }
+
+    function openAdminConsoleModal(initialTab = 'roster') {
       if (!state.currentUser || !state.currentUser.isAdmin) {
         showToast("Administrator privileges required.", "danger");
         return;
@@ -7104,9 +7793,7 @@
       const modal = document.getElementById('adminManagementModal');
       if (!modal) return;
 
-      // Reset to Roster tab
-      switchAdminTab('roster');
-      renderAdminRoster();
+      switchAdminTab(initialTab);
       modal.showModal();
       if (window.lucide) lucide.createIcons();
     }
@@ -7114,21 +7801,41 @@
     function switchAdminTab(tab) {
       const rosterTabBtn = document.getElementById('adminRosterTabBtn');
       const provisionTabBtn = document.getElementById('adminProvisionTabBtn');
+      const reportsTabBtn = document.getElementById('adminReportsTabBtn');
       const rosterPanel = document.getElementById('adminRosterPanel');
       const provisionPanel = document.getElementById('adminProvisionPanel');
+      const reportsPanel = document.getElementById('adminReportsPanel');
 
       if (tab === 'roster') {
         rosterTabBtn.classList.add('active');
         provisionTabBtn.classList.remove('active');
+        reportsTabBtn?.classList.remove('active');
         rosterPanel.style.display = 'block';
         provisionPanel.style.display = 'none';
+        if (reportsPanel) reportsPanel.style.display = 'none';
         renderAdminRoster(document.getElementById('adminRosterSearchInput')?.value || '');
-      } else {
+      } else if (tab === 'provision') {
         provisionTabBtn.classList.add('active');
         rosterTabBtn.classList.remove('active');
+        reportsTabBtn?.classList.remove('active');
         rosterPanel.style.display = 'none';
         provisionPanel.style.display = 'block';
+        if (reportsPanel) reportsPanel.style.display = 'none';
         updateCanonicalPreview();
+      } else if (tab === 'reports') {
+        reportsTabBtn?.classList.add('active');
+        rosterTabBtn.classList.remove('active');
+        provisionTabBtn.classList.remove('active');
+        rosterPanel.style.display = 'none';
+        provisionPanel.style.display = 'none';
+        if (reportsPanel) reportsPanel.style.display = 'block';
+        fetchAllAdvisorReports().then(() => {
+          renderAdminReportsRepository(
+            document.getElementById('adminReportsSearchInput')?.value || '',
+            document.getElementById('adminReportsAdvisorFilter')?.value || '',
+            document.getElementById('adminReportsSortSelect')?.value || 'newest'
+          );
+        });
       }
       if (window.lucide) lucide.createIcons();
     }
@@ -8467,8 +9174,14 @@
       return html;
     }
 
-    async function downloadDocxReport() {
-      const meta = state.clientMeta || {};
+    async function downloadDocxReport(customReport = null) {
+      const meta = customReport ? {
+        name: customReport.clientName || customReport.client_name || 'Client Consultation',
+        address: customReport.clientAddress || customReport.client_address || '',
+        date: customReport.consultationDate || customReport.consultation_date || '',
+        advisor: customReport.advisorName || customReport.advisor_name || customReport.username || (state.currentUser ? state.currentUser.name : 'Deep Roots Nature Advisor'),
+        notes: customReport.advisorNotes || customReport.advisor_notes || customReport.site_summary || ''
+      } : (state.clientMeta || {});
       const clientName = meta.name || 'Client Consultation';
       const clientFirstName = (clientName.trim().split(/[\s,]+/)[0] || clientName).trim();
 
@@ -8505,7 +9218,7 @@
       const currentUser = state.currentUser;
       const advisorName = meta.advisor || (currentUser ? currentUser.name : 'Deep Roots Nature Advisor');
 
-      showToast('Generating official Word document (.docx)...');
+      showToast(`Generating official Word document (.docx) for ${clientName}...`);
 
       function escapeXml(text) {
         if (!text) return '';
@@ -8637,10 +9350,10 @@
           }
 
           // Group staged plants strictly by configured garden areas
-          const stagedList = state.stagedPlants || [];
-          const definedAreas = (state.gardenAreas && state.gardenAreas.length > 0)
-            ? state.gardenAreas
-            : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'];
+          const stagedList = customReport ? (customReport.stagedPlants || customReport.staged_plants || []) : (state.stagedPlants || []);
+          const definedAreas = customReport
+            ? ((customReport.gardenAreas && customReport.gardenAreas.length > 0) ? customReport.gardenAreas : (customReport.garden_areas && customReport.garden_areas.length > 0) ? customReport.garden_areas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'])
+            : ((state.gardenAreas && state.gardenAreas.length > 0) ? state.gardenAreas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden']);
 
           function formatAreaHeadingLabel(idx, rawName) {
             const trimmed = (rawName || '').trim();
@@ -8876,27 +9589,31 @@
 
           const removals = [];
 
-          // Read live checkbox states directly from DOM
+          const reportOpts = customReport ? (customReport.reportOptions || customReport.report_options || {}) : (state.reportOptions || {});
+          // Read live checkbox states directly from DOM if not a custom report
           const readCheck = (id, fallback) => {
+            if (customReport) return fallback;
             const el = document.getElementById(id);
             return el ? el.checked : fallback;
           };
 
           const opts = {
-            invasivePresent: readCheck('toggleInvasivePresent', Boolean(state.reportOptions.invasivePresent)),
-            birdNestBox: readCheck('toggleBirdNestBox', state.reportOptions.birdNestBox !== false),
-            birdBath: readCheck('toggleBirdBath', state.reportOptions.birdBath !== false),
-            batBox: readCheck('toggleBatBox', state.reportOptions.batBox === true),
-            beeHabitat: readCheck('toggleBeeHabitat', state.reportOptions.beeHabitat !== false),
-            johnsonCounty: readCheck('toggleJohnsonCounty', state.reportOptions.johnsonCounty === true),
-            wyandotteCounty: readCheck('toggleWyandotteCounty', state.reportOptions.wyandotteCounty === true),
-            rainwaterHarvesting: readCheck('toggleRainwaterHarvesting', state.reportOptions.rainwaterHarvesting !== false)
+            invasivePresent: readCheck('toggleInvasivePresent', Boolean(reportOpts.invasivePresent)),
+            birdNestBox: readCheck('toggleBirdNestBox', reportOpts.birdNestBox !== false),
+            birdBath: readCheck('toggleBirdBath', reportOpts.birdBath !== false),
+            batBox: readCheck('toggleBatBox', reportOpts.batBox === true),
+            beeHabitat: readCheck('toggleBeeHabitat', reportOpts.beeHabitat !== false),
+            johnsonCounty: readCheck('toggleJohnsonCounty', reportOpts.johnsonCounty === true),
+            wyandotteCounty: readCheck('toggleWyandotteCounty', reportOpts.wyandotteCounty === true),
+            rainwaterHarvesting: readCheck('toggleRainwaterHarvesting', reportOpts.rainwaterHarvesting !== false)
           };
 
-          state.reportOptions = { ...state.reportOptions, ...opts };
-          persistReportOptions();
+          if (!customReport) {
+            state.reportOptions = { ...state.reportOptions, ...opts };
+            persistReportOptions();
+          }
 
-          const stagedInvs = state.stagedInvasives || [];
+          const stagedInvs = customReport ? (customReport.stagedInvasives || customReport.staged_invasives || []) : (state.stagedInvasives || []);
           const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
 
           // 1. Invasives Section
@@ -10008,9 +10725,91 @@
       // Admin Management Tabs & Actions
       document.getElementById('adminRosterTabBtn')?.addEventListener('click', () => switchAdminTab('roster'));
       document.getElementById('adminProvisionTabBtn')?.addEventListener('click', () => switchAdminTab('provision'));
+      document.getElementById('adminReportsTabBtn')?.addEventListener('click', () => switchAdminTab('reports'));
 
       document.getElementById('adminRosterSearchInput')?.addEventListener('input', (e) => {
         renderAdminRoster(e.target.value);
+      });
+
+      // Admin Consultation Repository Search & Filters
+      document.getElementById('adminReportsSearchInput')?.addEventListener('input', (e) => {
+        renderAdminReportsRepository(
+          e.target.value,
+          document.getElementById('adminReportsAdvisorFilter')?.value || '',
+          document.getElementById('adminReportsSortSelect')?.value || 'newest'
+        );
+      });
+
+      document.getElementById('adminReportsAdvisorFilter')?.addEventListener('change', (e) => {
+        renderAdminReportsRepository(
+          document.getElementById('adminReportsSearchInput')?.value || '',
+          e.target.value,
+          document.getElementById('adminReportsSortSelect')?.value || 'newest'
+        );
+      });
+
+      document.getElementById('adminReportsSortSelect')?.addEventListener('change', (e) => {
+        renderAdminReportsRepository(
+          document.getElementById('adminReportsSearchInput')?.value || '',
+          document.getElementById('adminReportsAdvisorFilter')?.value || '',
+          e.target.value
+        );
+      });
+
+      // Admin Repository Refresh Button
+      document.getElementById('adminReportsRefreshBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('adminReportsRefreshBtn');
+        const icon = btn?.querySelector('i');
+        if (icon) icon.classList.add('spin');
+        try {
+          await fetchAllAdvisorReports();
+          renderAdminReportsRepository(
+            document.getElementById('adminReportsSearchInput')?.value || '',
+            document.getElementById('adminReportsAdvisorFilter')?.value || '',
+            document.getElementById('adminReportsSortSelect')?.value || 'newest'
+          );
+          showToast('Consultation repository refreshed from cloud!', 'success');
+        } catch (err) {
+          showToast(`Refresh error: ${err.message}`, 'danger');
+        } finally {
+          if (icon) icon.classList.remove('spin');
+        }
+      });
+
+      // Quick Access to Admin Repository from User Profile & Consultations Modal
+      document.getElementById('openAdminReportsBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openAdminConsoleModal('reports');
+      });
+
+      document.getElementById('consultationsOpenAdminRepoBtn')?.addEventListener('click', () => {
+        document.getElementById('consultationsModal')?.close();
+        openAdminConsoleModal('reports');
+      });
+
+      // Admin Report Inspection Modal Actions
+      document.getElementById('adminDetailRegenerateDocxBtn')?.addEventListener('click', async () => {
+        if (!state.currentViewingReport) return;
+        const btn = document.getElementById('adminDetailRegenerateDocxBtn');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="spin"></i> <span>Regenerating...</span>`;
+        if (window.lucide) lucide.createIcons();
+        try {
+          await downloadDocxReport(state.currentViewingReport);
+        } catch (err) {
+          showToast(`Error: ${err.message}`, 'danger');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+
+      document.getElementById('adminDetailLoadToEditorBtn')?.addEventListener('click', () => {
+        if (state.currentViewingReport) {
+          loadReportIntoWorkspace(state.currentViewingReport);
+        }
       });
 
       // Live Canonical Username Preview in Provision Form
