@@ -189,11 +189,53 @@ Advisors can update species records to reflect regional field observations:
 
 ## 👥 9. Program Administrator Functions
 
-Advisors with the `admin` role can manage the advisor roster:
-1. Click your name / avatar in the top right and select **Admin Panel**.
-2. **Provision New Advisors**:
-   - Enter First and Last Name (generates canonical `<first>.<last>` username).
-   - Select Advisor Type: `Advisor in Training`, `Advisor`, `Senior Advisor`, or `Program Manager`.
-   - Issue a temporary password.
-3. **First-Login Security**:
-   - When a newly provisioned advisor signs in for the first time, the app automatically prompts them to set a permanent, strong password before accessing the system.
+Advisors with the `admin` role possess organization-wide management tools accessible via the avatar menu (**Admin Console**) and the Database Sync dialog:
+
+### 9.1 Provisioning & Managing Nature Advisors
+1. Open your profile menu in the top right and select **Admin Console** (or open the **Advisor Roster** tab).
+2. **Search Roster**: Filter advisors by name, email, phone, or username.
+3. **Provision New Advisors**:
+   - Enter First Name and Last Name (the system automatically generates the canonical `<first>.<last>` username).
+   - Enter Email, Phone, and select Advisor Type (`Advisor in Training`, `Advisor`, `Senior Advisor`, or `Program Manager`).
+   - Assign System Role (`user` for Nature Advisors, `admin` for Program Administrators).
+   - Click **Provision Advisor & Generate Temp Password**.
+4. **First-Login Security**:
+   - When a newly provisioned advisor signs in for the first time, the application automatically forces them to set a permanent, strong password (minimum 8 characters, uppercase, lowercase, numbers) before accessing staging features.
+
+### 9.2 Central Consultation Reports Repository
+Advisors with the `admin` role can oversee all consultations conducted across the region:
+1. Open the **Admin Console** and select the **Consultation Repository** tab.
+2. **Search & Filter**: Search by client name, advisor name/username, property address, plant species, or notes. Use the advisor dropdown to isolate reports by specific team members.
+3. **Inspect & View**: Click **View** on any report card to review full site strategy, garden planting zones, staged native palettes, and invasive species observations.
+4. **Re-generate Word Document (`.docx`)**: Click **Regenerate .docx** directly from the report card or inspection modal to generate and download an official formatted Word document.
+5. **Load into Workspace**: Click **Load into Workspace** to clone or edit the report in your active staging drawer.
+6. **Administrative Report Deletion**:
+   - Click the red trash icon on any report card or **Delete Report** in the inspection modal.
+   - Prompts for confirmation with the client name and author.
+   - Permanently deletes the report from Cloud Firestore across all document paths (`/reports`, `/plants/_report_*`, and `/users/{username}/reports`), purging local caches and updating repository counters.
+
+### 9.3 Master Catalog Governance (Database Sync Dialog)
+To protect data integrity, destructive master database operations in the **Shared Master Database** dialog (`#syncModal`) are strictly limited to Program Administrators:
+- **Pull Fresh Data from Master Database**: Available to all signed-in advisors to pull latest updates.
+- **Upload Master Plant Catalog to Firestore** *(Admin Only)*: Batches all 185 baseline species definitions to the remote Firestore master catalog.
+- **Reset Local Edits to Clean Master Catalog** *(Admin Only)*: Clears local customizations and restores the pristine default botanical catalog.
+- **Import Plants JSON (Android Backup)** *(Admin Only)*: Imports JSON backup files from native Android app backups.
+
+---
+
+## 🔒 10. Access Permissions Summary
+
+| Feature / Action | Guest (Public) | Nature Advisor (`user`) | Program Administrator (`admin`) |
+| :--- | :---: | :---: | :---: |
+| **Browse 185 Native Species & 10 Invasives** | ✅ | ✅ | ✅ |
+| **Search, Filter & Sort Botanical Records** | ✅ | ✅ | ✅ |
+| **View Plant Details & Grow Native! Profiles** | ✅ | ✅ | ✅ |
+| **View Vetted Invasive Removal Contractors** | ✅ | ✅ | ✅ |
+| **Consultation Staging Drawer & Garden Areas** | ❌ (Hidden) | ✅ | ✅ |
+| **Add Native / Invasive Species to Report** | ❌ (Hidden) | ✅ | ✅ |
+| **Generate & Download Word Reports (.docx)** | ❌ | ✅ | ✅ |
+| **Edit Plant Details (Syncs to Firestore)** | ❌ | ✅ | ✅ |
+| **View Central Reports Repository** | ❌ | ❌ | ✅ |
+| **Delete Other Advisors' Reports** | ❌ | ❌ | ✅ |
+| **Provision & Manage Advisor Roster** | ❌ | ❌ | ✅ |
+| **Upload / Reset / Import Master Catalog** | ❌ | ❌ | ✅ |

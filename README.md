@@ -32,10 +32,15 @@ Nature Advisors use the **Deep Roots Database** in the office and out in the fie
 
 ### 2. Native Advisor Authentication & Role-Based Access Control (RBAC)
 Replaces third-party Google Sign-In with an integrated, standalone Nature Advisor identity system:
-- **Read-Only Guest Mode**: Public visitors and unauthenticated users can freely search, filter, and inspect all 185 plant records.
-- **Two User Roles**:
-  - **`user` (Nature Advisor)**: Full editing privileges, plant staging, multi-consultation management, client report creation, and botanical updates.
-  - **`admin` (Program Administrator)**: All user privileges plus provisioning new Nature Advisors, assigning roles, and issuing temporary password resets.
+- **Read-Only Guest Mode**: Public visitors and unauthenticated users can freely search, filter, and inspect all 185 plant records. To prevent confusion, the report staging drawer and staging buttons are hidden for guests, presenting a clean botanical catalog.
+- **Three Access Tiers**:
+  - **Guests (Unauthenticated)**: Read-only botanical discovery and detail views. No staging or catalog modification capabilities.
+  - **Nature Advisors (`user`)**: Full plant staging, multi-consultation management, client report creation, and collaborative botanical editing (edits synchronize directly to Cloud Firestore with author attribution). In the Database Sync dialog, advisors can pull fresh data without risk of overwriting the master catalog.
+  - **Program Administrators (`admin`)**: All advisor privileges plus:
+    - Provisioning new Nature Advisors and issuing temporary credentials.
+    - **Central Consultation Reports Repository**: View, search, filter, and re-generate Word reports for any advisor across the organization.
+    - **Report Deletion**: Delete reports authored by any user from Cloud Firestore across all collection paths.
+    - **Master Catalog Governance**: Exclusive permissions to upload the master catalog to Firestore, reset local edits to pristine defaults, and import JSON backups.
 - **Advisor Types**:
   - `Advisor in Training`
   - `Advisor`
@@ -94,7 +99,14 @@ Replaces third-party Google Sign-In with an integrated, standalone Nature Adviso
 - **Custom Garden Areas (Planting Zones)**:
   - Dynamically define and rename property zones (e.g., *Area 1: Front Porch*, *Area 2: Front Sidewalk/Mailbox*, *Area 3: Backyard Shade Garden*, or custom additions).
   - Staged plants are assigned to specific areas, which propagate directly into the report Table of Contents and formatted area recommendation blocks.
-- **Per-User Cloud Firestore Sync**: Reports are saved against the authenticated advisor's account in Cloud Firestore under `/users/{username}/reports/{reportId}`.
+- **Per-User Cloud Firestore Sync**: Reports are saved against the authenticated advisor's account in Cloud Firestore under `/users/{username}/reports/{reportId}` as well as the central `/reports/{reportId}` collection.
+- **Central Consultation Reports Repository (Admin Tab)**:
+  - Accessible to Program Administrators via the Admin Console (**Repository** tab).
+  - **Cross-Advisor Discovery**: Aggregates all reports across Kansas City with live search by client name, advisor, address, or plant species.
+  - **Live Filter & Sort**: Filter by specific advisor and sort by Newest, Oldest, Client A–Z, or Most Staged Plants.
+  - **Instant `.docx` Re-generation**: Re-generate and download official Word documents on demand for any historical consultation report.
+  - **Inspection & Workspace Loading**: Inspect garden zones, staged palettes, and notes, or load any report directly into the active editing workspace.
+  - **Administrative Report Deletion**: Permanently delete obsolete or test reports from Cloud Firestore across all document paths.
 - **Alternative Export Formats**: Formatted Markdown clipboard export (`Copy Markdown`) and standalone HTML reports.
 
 ---
