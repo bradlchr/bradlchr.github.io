@@ -325,49 +325,35 @@
       line-height: 1.3;
     }
 
-    .header-stats {
-      display: flex;
-      align-items: center;
-      gap: calc(8px * var(--ui-scale));
-      margin-left: 20px;
-    }
-
-    .stat-pill {
+    /* Botanical Details button for guest catalog browsing */
+    .btn-card-detail {
       font-size: calc(12px * var(--text-scale));
-      font-weight: 600;
-      padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
-      border-radius: var(--radius-full);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-weight: 700;
+      padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
+      color: var(--primary);
+      border-radius: var(--radius-md);
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
     }
-
-    .stat-pill strong {
-      color: var(--text-main);
-      font-weight: 800;
-    }
-
-    .stat-pill.db-status {
+    .btn-card-detail:hover {
       background: var(--primary-light);
       border-color: var(--primary-border);
-      color: var(--primary);
+      color: var(--primary-dark);
     }
 
-    .stat-pill.sweet16 {
-      background: var(--accent-gold-bg);
-      border-color: var(--accent-gold-border);
-      color: var(--accent-gold);
+    /* Guest Access Protections: Staging Drawer is exclusively for Nature Advisors */
+    #reportDrawerBtn.hidden,
+    body:not(.advisor-authenticated) #reportDrawerBtn,
+    body:not(.advisor-authenticated) #stagingDrawer,
+    body:not(.advisor-authenticated) #drawerOverlay {
+      display: none !important;
     }
 
-    .stat-pill.keystone {
-      background: var(--accent-keystone-bg);
-      border-color: var(--border-strong);
-      color: var(--accent-keystone);
-    }
 
     .header-actions {
       margin-left: auto;
@@ -2000,9 +1986,6 @@
         padding: 14px 16px;
         gap: 14px;
       }
-      .header-stats {
-        display: none;
-      }
       .sidebar-overlay {
         display: block;
       }
@@ -2215,7 +2198,7 @@
         min-height: calc(34px * var(--ui-scale)) !important;
         min-width: calc(34px * var(--ui-scale)) !important;
         padding: 0 calc(8px * var(--ui-scale)) !important;
-        display: inline-flex !important;
+        display: inline-flex;
         align-items: center !important;
         justify-content: center !important;
         gap: 4px !important;
@@ -2389,20 +2372,6 @@
       </div>
     </div>
 
-    <div class="header-stats">
-      <div class="stat-pill db-status" id="dbStatusPill" title="Click to view shared database sync status">
-        <i data-lucide="database" style="width:14px;height:14px;"></i>
-        <span>Shared DB:</span>
-        <strong id="statDbCount">184 Species</strong>
-      </div>
-      <div class="stat-pill sweet16" id="statSweet16Pill">
-        ⭐ Sweet 16: <strong id="statSweet16Count">16</strong>
-      </div>
-      <div class="stat-pill keystone" id="statKeystonePill">
-        🌿 KC Keystones: <strong id="statKeystoneCount">25</strong>
-      </div>
-    </div>
-
     <div class="header-actions">
       <!-- Theme Toggle -->
       <button id="themeToggleBtn" class="btn btn-icon" title="Toggle Dark/Light Mode" aria-label="Switch to dark mode">
@@ -2428,8 +2397,6 @@
         <i data-lucide="cloud-cog"></i>
       </button>
 
-      <!-- Consultation Report Drawer Toggle -->
-      
       <!-- Catalog Mode Switcher (Native vs Invasive) -->
       <div class="catalog-mode-switcher" id="catalogModeSwitcher" title="Switch between Native Plant Palette and Invasive Species Field Guide">
         <button type="button" id="catalogNativeBtn" class="catalog-mode-btn active" onclick="setCatalogMode('native')">
@@ -2442,7 +2409,8 @@
         </button>
       </div>
 
-        <button id="reportDrawerBtn" class="btn btn-report" aria-label="View staged plant consultation report" aria-expanded="false" aria-controls="stagingDrawer">
+      <!-- Consultation Report Drawer Toggle (Advisors only) -->
+      <button id="reportDrawerBtn" class="btn btn-report hidden" aria-label="View staged plant consultation report" aria-expanded="false" aria-controls="stagingDrawer" style="display:none;">
         <i data-lucide="clipboard-list"></i>
         <span class="btn-text-long">Report Staging</span>
         <span class="btn-text-short">Report</span>
@@ -5877,10 +5845,12 @@
                 <i data-lucide="shield-alert" style="width:12px;height:12px;"></i>
                 <span>Control</span>
               </a>
+              ${state.currentUser ? `
               <button class="btn btn-primary btn-sm add-invasive-btn" style="flex:1.4;background:${isStaged ? '#15803d' : '#b91c1c'};border-color:${isStaged ? '#15803d' : '#b91c1c'};font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:4px;">
                 <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width:13px;height:13px;"></i>
                 <span>${isStaged ? 'In Report' : 'Add to Report'}</span>
               </button>
+              ` : ''}
             </div>
           </div>
         `;
@@ -6032,12 +6002,14 @@
             </button>
           </div>
         </div>
-        <div class="dialog-footer" style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated);">
+        <div class="dialog-footer" style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: ${state.currentUser ? 'space-between' : 'flex-end'}; align-items: center; background: var(--bg-surface-elevated);">
           <button type="button" class="btn btn-secondary" id="modalCloseFooterBtn">Close</button>
+          ${state.currentUser ? `
           <button type="button" class="btn btn-primary" id="modalToggleStagedBtn" style="background:${isStaged ? '#15803d' : '#b91c1c'}; border-color:${isStaged ? '#15803d' : '#b91c1c'}; display: inline-flex; align-items: center; gap: 6px;">
             <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width: 14px; height: 14px;"></i>
             <span>${isStaged ? 'Staged in Report' : 'Add to Report'}</span>
           </button>
+          ` : ''}
         </div>
       `;
 
@@ -7146,19 +7118,25 @@
     }
 
     function updateHeaderInfo() {
-      document.getElementById('statDbCount').textContent = `${state.allPlants.length} Species`;
-      document.getElementById('statSweet16Count').textContent = state.allPlants.filter(isSweet16).length;
-      document.getElementById('statKeystoneCount').textContent = state.allPlants.filter(isKcKeystone).length;
-      document.getElementById('dbCountTxt').textContent = `${state.allPlants.length} Species`;
-      document.getElementById('dbLastSyncTxt').textContent = state.lastSyncTime;
+      const dbCountTxt = document.getElementById('dbCountTxt');
+      if (dbCountTxt) dbCountTxt.textContent = `${state.allPlants.length} Species`;
+      const dbLastSyncTxt = document.getElementById('dbLastSyncTxt');
+      if (dbLastSyncTxt) dbLastSyncTxt.textContent = state.lastSyncTime;
       renderAuthUser();
     }
 
     // Render Auth in Header
     function renderAuthUser() {
       const container = document.getElementById('authContainer');
+      const reportDrawerBtn = document.getElementById('reportDrawerBtn');
       const u = state.currentUser;
       if (u && u.name) {
+        document.body.classList.add('advisor-authenticated');
+        document.body.classList.remove('advisor-guest');
+        if (reportDrawerBtn) {
+          reportDrawerBtn.classList.remove('hidden');
+          reportDrawerBtn.style.display = 'inline-flex';
+        }
         const firstName = u.name.split(' ')[0];
         const isAdmin = u.isAdmin;
         container.innerHTML = `
@@ -7182,6 +7160,18 @@
           localStorage.setItem('dr_client_meta', JSON.stringify(state.clientMeta));
         }
       } else {
+        document.body.classList.remove('advisor-authenticated');
+        document.body.classList.add('advisor-guest');
+        if (reportDrawerBtn) {
+          reportDrawerBtn.classList.add('hidden');
+          reportDrawerBtn.style.display = 'none';
+        }
+        // Ensure staging drawer is closed for guests
+        const drawer = document.getElementById('stagingDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        if (drawer) drawer.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+
         container.innerHTML = `
           <button id="headerSignInBtn" class="btn btn-secondary" style="font-weight:700;">
             <i data-lucide="user-check"></i>
@@ -8437,12 +8427,19 @@
           <div class="card-footer">
             <button class="btn-copy-desc" title="Copy Advisor Description" aria-label="Copy description for ${escapeHtml(commonName)}">
               <i data-lucide="copy" style="width:13px;height:13px;"></i>
-              <span>Copy</span>
+              <span>${state.currentUser ? 'Copy' : 'Copy Description'}</span>
             </button>
-            <button class="btn-add-report ${!state.currentUser ? '' : (isStaged ? 'staged' : '')}" aria-label="${!state.currentUser ? 'Sign in as advisor to add ' + escapeHtml(commonName) + ' to report' : (isStaged ? 'Remove ' + escapeHtml(commonName) + ' from report' : 'Add ' + escapeHtml(commonName) + ' to consultation report')}">
-              <i data-lucide="${!state.currentUser ? 'lock' : (isStaged ? 'check' : 'plus')}" style="width:14px;height:14px;"></i>
-              <span>${!state.currentUser ? 'Sign In to Stage' : (isStaged ? 'In Report' : 'Add to Report')}</span>
+            ${state.currentUser ? `
+            <button class="btn-add-report ${isStaged ? 'staged' : ''}" aria-label="${isStaged ? 'Remove ' + escapeHtml(commonName) + ' from report' : 'Add ' + escapeHtml(commonName) + ' to consultation report'}">
+              <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width:14px;height:14px;"></i>
+              <span>${isStaged ? 'In Report' : 'Add to Report'}</span>
             </button>
+            ` : `
+            <button class="btn-card-detail" aria-label="View botanical details for ${escapeHtml(commonName)}">
+              <i data-lucide="info" style="width:13px;height:13px;"></i>
+              <span>Details</span>
+            </button>
+            `}
           </div>
         </div>
       `;
@@ -8466,15 +8463,25 @@
       });
 
       const addBtn = card.querySelector('.btn-add-report');
-      addBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!state.currentUser) {
-          showToast("Please sign in as an advisor to stage plants for reports.", "warning");
-          openLoginModal();
-          return;
-        }
-        toggleStagedPlant(plant);
-      });
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!state.currentUser) {
+            showToast("Please sign in as an advisor to stage plants for reports.", "warning");
+            openLoginModal();
+            return;
+          }
+          toggleStagedPlant(plant);
+        });
+      }
+
+      const detailBtn = card.querySelector('.btn-card-detail');
+      if (detailBtn) {
+        detailBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPlantDetail(plant);
+        });
+      }
 
       return card;
     }
@@ -8718,20 +8725,21 @@
       const editBtn = document.getElementById('modalEditBtn');
       if (editBtn) editBtn.style.display = state.currentUser ? 'inline-flex' : 'none';
 
-      // Add to report button in modal
-      const isSignedOut = !state.currentUser;
-      const isStaged = !isSignedOut && state.stagedPlants.some(p => p.id === plant.id || p.scientific_name === plant.scientific_name);
+      // Add to report button in modal (Advisors only)
       const addBtn = document.getElementById('modalAddToReportBtn');
-      addBtn.innerHTML = `<i data-lucide="${isSignedOut ? 'lock' : (isStaged ? 'check' : 'plus')}"></i><span>${isSignedOut ? 'Sign In to Stage' : (isStaged ? 'In Report' : 'Add to Report')}</span>`;
-      addBtn.onclick = () => {
+      if (addBtn) {
         if (!state.currentUser) {
-          showToast("Please sign in as an advisor to stage plants for reports.", "warning");
-          openLoginModal();
-          return;
+          addBtn.style.display = 'none';
+        } else {
+          const isStaged = state.stagedPlants.some(p => p.id === plant.id || p.scientific_name === plant.scientific_name);
+          addBtn.style.display = 'inline-flex';
+          addBtn.innerHTML = `<i data-lucide="${isStaged ? 'check' : 'plus'}"></i><span>${isStaged ? 'In Report' : 'Add to Report'}</span>`;
+          addBtn.onclick = () => {
+            toggleStagedPlant(plant);
+            openPlantDetail(plant);
+          };
         }
-        toggleStagedPlant(plant);
-        openPlantDetail(plant);
-      };
+      }
 
       if (editBtn) {
         editBtn.onclick = () => {
@@ -10121,6 +10129,11 @@
       const overlay = document.getElementById('drawerOverlay');
       const reportDrawerBtn = document.getElementById('reportDrawerBtn');
       const openDrawer = () => {
+        if (!state.currentUser) {
+          showToast("Consultation report staging is reserved for Nature Advisors. Please sign in to access reports.", "warning");
+          openLoginModal();
+          return;
+        }
         drawer.classList.add('open');
         overlay.classList.add('open');
         if (reportDrawerBtn) reportDrawerBtn.setAttribute('aria-expanded', 'true');
@@ -10137,8 +10150,8 @@
         }
       };
 
-      document.getElementById('reportDrawerBtn').addEventListener('click', openDrawer);
-      document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
+      document.getElementById('reportDrawerBtn')?.addEventListener('click', openDrawer);
+      document.getElementById('closeDrawerBtn')?.addEventListener('click', closeDrawer);
       overlay.addEventListener('click', closeDrawer);
 
       // Mobile Filter Sidebar Drawer
@@ -10499,11 +10512,8 @@
       });
 
       // Sync Modal Controls
-      document.getElementById('syncModalBtn').addEventListener('click', () => {
-        document.getElementById('syncModal').showModal();
-      });
-      document.getElementById('dbStatusPill').addEventListener('click', () => {
-        document.getElementById('syncModal').showModal();
+      document.getElementById('syncModalBtn')?.addEventListener('click', () => {
+        document.getElementById('syncModal')?.showModal();
       });
 
       document.getElementById('refreshFromDbBtn').addEventListener('click', async () => {
