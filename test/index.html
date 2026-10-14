@@ -2805,7 +2805,7 @@
 
       <!-- Consultation Report Drawer Toggle (Advisors only) -->
             <!-- Garden Area Planner & Recommendation Suite Trigger (All users except guest) -->
-      <button id="gardenPlannerHeaderBtn" class="btn btn-planner" aria-label="Garden Area Planner & Ecological Plant Recommendations" title="Garden Area Planner & Plant Recommendations">
+      <button id="gardenPlannerHeaderBtn" type="button" class="btn btn-planner" onclick="openGardenPlanner()" aria-label="Garden Area Planner & Ecological Plant Recommendations" title="Garden Area Planner & Plant Recommendations">
         <i data-lucide="layout-grid"></i>
         <span class="btn-text-long">Garden Planner</span>
         <span class="btn-text-short">Planner</span>
@@ -3240,7 +3240,7 @@
               Garden Areas (<span id="gardenAreasCountBadge">3</span>)
             </span>
           </div>
-          <button type="button" id="openPlannerFromStagingBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:3px;margin-right:6px;" title="Open Garden Area Planner and get plant recommendations for this property">
+          <button type="button" id="openPlannerFromStagingBtn" onclick="closeDrawer(); openGardenPlanner();" class="btn-text-action" style="font-size:11px;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:3px;margin-right:6px;" title="Open Garden Area Planner and get plant recommendations for this property">
             <i data-lucide="sparkles" style="width:12px;height:12px;"></i>
             <span>Recommend Plants</span>
           </button>
@@ -13463,38 +13463,60 @@
     };
 
     function openGardenPlanner(targetAreaIdx = null) {
-      // Access Control: Anyone except guest
-      const u = state.currentUser;
-      const isGuest = !u || !u.name || (u.username === 'guest');
-      if (isGuest) {
-        openPlannerGuestGatewayModal();
-        return;
-      }
+      try {
+        // Access Control: Anyone except guest
+        const u = state.currentUser;
+        const isGuest = !u || !u.name || (u.username === 'guest');
+        if (isGuest) {
+          openPlannerGuestGatewayModal();
+          return;
+        }
 
-      initGardenAreaProfiles();
+        initGardenAreaProfiles();
 
-      if (targetAreaIdx !== null && targetAreaIdx >= 0 && targetAreaIdx < state.gardenAreas.length) {
-        state.activePlannerAreaIdx = targetAreaIdx;
-      } else if (state.activePlannerAreaIdx >= state.gardenAreas.length) {
-        state.activePlannerAreaIdx = 0;
-      }
+        if (targetAreaIdx !== null && targetAreaIdx >= 0 && targetAreaIdx < state.gardenAreas.length) {
+          state.activePlannerAreaIdx = targetAreaIdx;
+        } else if (state.activePlannerAreaIdx >= state.gardenAreas.length) {
+          state.activePlannerAreaIdx = 0;
+        }
 
-      renderGardenPlannerUI();
+        renderGardenPlannerUI();
 
-      const modal = document.getElementById('gardenPlannerModal');
-      if (modal) {
-        modal.showModal();
-        if (window.lucide) lucide.createIcons();
+        const modal = document.getElementById('gardenPlannerModal');
+        if (modal) {
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          if (window.lucide) lucide.createIcons();
+        }
+      } catch (err) {
+        console.error("Error opening garden planner:", err);
+        showToast("Error opening Garden Planner: " + err.message, "danger");
       }
     }
+    window.openGardenPlanner = openGardenPlanner;
 
     function openPlannerGuestGatewayModal() {
-      const modal = document.getElementById('plannerGuestModal');
-      if (modal) {
-        modal.showModal();
-        if (window.lucide) lucide.createIcons();
+      try {
+        const modal = document.getElementById('plannerGuestModal');
+        if (modal) {
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          if (window.lucide) lucide.createIcons();
+        } else {
+          openLoginModal();
+        }
+      } catch (err) {
+        console.error("Error opening guest gateway modal:", err);
+        openLoginModal();
       }
     }
+    window.openPlannerGuestGatewayModal = openPlannerGuestGatewayModal;
 
     function initGardenAreaProfiles() {
       if (!state.gardenAreas || state.gardenAreas.length === 0) {
@@ -14426,7 +14448,7 @@
     }
 
     // App Initialization
-    window.addEventListener('DOMContentLoaded', () => {
+    function initializeApplication() {
       try { loadMasterPlants(); } catch(e) { console.error('loadMasterPlants error:', e); }
       try { setupEventListeners(); } catch(e) { console.error('setupEventListeners error:', e); }
       try { initAdvisorAuth(); } catch(e) { console.error('initAdvisorAuth error:', e); }
@@ -14437,7 +14459,13 @@
       if (window.lucide) {
         try { lucide.createIcons(); } catch(e) {}
       }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initializeApplication);
+    } else {
+      initializeApplication();
+    }
   </script>
 </body>
 </html>
