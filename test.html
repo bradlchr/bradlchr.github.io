@@ -2108,7 +2108,7 @@
     }
     .planner-layout {
       display: grid;
-      grid-template-columns: minmax(300px, 21rem) minmax(0, 1fr);
+      grid-template-columns: minmax(260px, 18.5rem) minmax(0, 1fr);
       grid-template-rows: 100%;
       flex: 1 1 0%;
       min-height: 0;
@@ -2125,8 +2125,8 @@
       -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      padding: 16px;
+      gap: 14px;
+      padding: 14px 16px;
     }
     .planner-content {
       display: flex;
@@ -2137,13 +2137,13 @@
       background: var(--bg-base);
     }
     .planner-content-header {
-      padding: 12px 18px;
+      padding: 12px 20px;
       border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-surface);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
@@ -2292,7 +2292,7 @@
 
     .planner-area-card {
       width: 100%;
-      padding: 9px 11px;
+      padding: 10px 12px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-subtle);
       background: var(--bg-base);
@@ -2309,6 +2309,7 @@
     .planner-area-card:hover {
       border-color: var(--primary-border);
       background: var(--bg-surface-elevated);
+      transform: translateY(-1px);
     }
     .planner-area-card:focus-visible {
       outline: 3px solid var(--primary);
@@ -2317,36 +2318,39 @@
     .planner-area-card.active {
       background: var(--primary-light);
       border-color: var(--primary);
+      border-left: 3.5px solid var(--primary);
       box-shadow: 0 2px 8px rgba(35, 92, 54, 0.12);
     }
     [data-theme="dark"] .planner-area-card.active {
       background: rgba(35, 92, 54, 0.25);
       border-color: #059669;
+      border-left: 3.5px solid #059669;
     }
 
     .planner-layer-box {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
       touch-action: pan-y;
     }
     .planner-layer-header {
-      padding: 10px 14px;
+      padding: 12px 16px;
       background: var(--bg-surface-elevated);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .planner-layer-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
-      gap: 12px;
-      padding: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: 14px;
+      padding: 16px;
       touch-action: pan-y;
     }
     .planner-plant-card {
@@ -2358,21 +2362,41 @@
       flex-direction: column;
       justify-content: space-between;
       gap: 10px;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: all 0.18s ease;
       min-width: 0;
       touch-action: pan-y;
     }
     .planner-plant-card:hover {
       border-color: var(--primary-border);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+      transform: translateY(-1px);
     }
     .planner-plant-card.is-staged {
       border-color: var(--primary);
       background: var(--primary-light);
+      box-shadow: 0 2px 8px rgba(35, 92, 54, 0.12);
     }
     [data-theme="dark"] .planner-plant-card.is-staged {
-      background: rgba(35, 92, 54, 0.2);
+      background: rgba(35, 92, 54, 0.22);
       border-color: #059669;
+    }
+    .planner-match-pill {
+      position: absolute;
+      bottom: 3px;
+      right: 3px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--primary);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+    }
+    [data-theme="dark"] .planner-match-pill {
+      background: rgba(15, 23, 18, 0.92);
+      color: #6ee7b7;
+      border-color: rgba(255, 255, 255, 0.18);
     }
 
     /* Scaling adaptations for large text sizes */
@@ -3919,14 +3943,14 @@
               <h3 id="gardenPlannerTitle" style="font-size:1.15rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.02em;">
                 Garden Planner
               </h3>
-              <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 2.8: Guided Workflow-Based Garden Planner">v2.8</span>
+              <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 2.9: Streamlined & Intuitive Garden Planner">v2.9</span>
               <span id="plannerConsultationBadge" class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:0.75rem;font-weight:700;">
                 <i data-lucide="folder-kanban" style="width:11px;height:11px;vertical-align:-1px;"></i>
                 <span id="plannerActiveConsultationName">Active Consultation</span>
               </span>
             </div>
             <p style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
-              Define property planting zones by sun, soil, bloom preferences, and structural layers to generate ecological native plant selections.
+              Tailored ecological plant recommendations organized by property zone and structural planting matrix.
             </p>
           </div>
         </div>
@@ -4019,156 +4043,36 @@
         <div class="planner-sidebar" id="plannerSidebarPane" tabindex="-1">
           
           <!-- Area Selector Section -->
-          <div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">
-                Garden Areas (<span id="plannerAreasCount">3</span>)
-              </span>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button type="button" id="plannerRestartWizardBtn" class="btn-text-action" style="font-size:0.75rem;color:var(--text-muted);display:none;" title="Restart Guided Area Setup Workflow">↺ Guided Setup</button>
-                <button type="button" id="plannerAddAreaBtn" class="btn-text-action" style="font-size:0.8rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px;min-height:32px;" title="Add new planting area" aria-label="Add new garden area">
+          <div style="display:flex;flex-direction:column;gap:12px;flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <div>
+                <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;">
+                  Garden Areas
+                </span>
+                <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;">
+                  <span id="plannerAreasCount">3</span> zones configured
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button type="button" id="plannerRestartWizardBtn" class="btn btn-ghost btn-xs" style="font-size:0.75rem;color:var(--text-muted);display:none;padding:3px 7px;" title="Restart Guided Area Setup Workflow">↺ Setup</button>
+                <button type="button" id="plannerAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px;min-height:30px;padding:3px 9px;" title="Add new planting area" aria-label="Add new garden area">
                   <i data-lucide="plus" style="width:13px;height:13px;"></i>
                   <span>+ Add Area</span>
                 </button>
               </div>
             </div>
-            <div id="plannerAreasRoster" style="display:flex;flex-direction:column;gap:6px;" role="group" aria-label="Garden Areas List">
+            <div id="plannerAreasRoster" style="display:flex;flex-direction:column;gap:8px;" role="group" aria-label="Garden Areas List">
               <!-- Dynamically populated area cards -->
             </div>
           </div>
 
-          <div style="height:1px;background:var(--border-subtle);"></div>
-
-          <!-- Active Area Conditions Configuration -->
-          <div id="plannerConditionsPanel" style="display:flex;flex-direction:column;gap:14px;">
-            <!-- Area Name & Controls -->
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="plannerAreaNameInput" style="font-size:0.82rem;font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                <span>Area Name</span>
-                <span id="plannerAreaDeleteBtnWrap"></span>
-              </label>
-              <input type="text" id="plannerAreaNameInput" placeholder="e.g. Area 1: Front Porch & Walkway" style="font-size:0.85rem;min-height:38px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);">
+          <!-- Helpful Bottom Tip Card -->
+          <div style="margin-top:auto;padding:12px 14px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);font-size:0.78rem;color:var(--text-muted);line-height:1.45;">
+            <div style="display:flex;align-items:center;gap:6px;font-weight:700;color:var(--text-main);margin-bottom:4px;">
+              <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--primary);"></i>
+              <span>Zone Recommendations</span>
             </div>
-
-            <!-- Sunlight Condition -->
-            <div>
-              <label id="plannerSunlightLabel" style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
-                <i data-lucide="sun" style="width:13px;height:13px;color:#d97706;vertical-align:-1px;"></i>
-                Sunlight Exposure
-              </label>
-              <div class="planner-chips-grid" id="plannerSunChips" role="group" aria-labelledby="plannerSunlightLabel">
-                <button type="button" class="planner-chip active" data-sun="Full Sun" aria-pressed="true">☀️ Full Sun (6+ hrs)</button>
-                <button type="button" class="planner-chip" data-sun="Part Sun / Part Shade" aria-pressed="false">⛅ Part Sun / Shade</button>
-                <button type="button" class="planner-chip" data-sun="Full Shade" aria-pressed="false">🌲 Full Shade (&lt;3 hrs)</button>
-                <button type="button" class="planner-chip" data-sun="Any" aria-pressed="false">🔄 Any Sunlight</button>
-              </div>
-            </div>
-
-            <!-- Soil Moisture Condition -->
-            <div>
-              <label id="plannerMoistureLabel" style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
-                <i data-lucide="droplets" style="width:13px;height:13px;color:#0284c7;vertical-align:-1px;"></i>
-                Soil Moisture &amp; Drainage
-              </label>
-              <div class="planner-chips-grid" id="plannerMoistureChips" role="group" aria-labelledby="plannerMoistureLabel">
-                <button type="button" class="planner-chip" data-moist="Dry" aria-pressed="false">🏜️ Dry (Xeric / Fast)</button>
-                <button type="button" class="planner-chip active" data-moist="Medium" aria-pressed="true">💧 Medium (Mesic / Avg)</button>
-                <button type="button" class="planner-chip" data-moist="Wet" aria-pressed="false">🌊 Wet (Rain Garden / Moist)</button>
-                <button type="button" class="planner-chip" data-moist="Any" aria-pressed="false">🔄 Any Moisture</button>
-              </div>
-            </div>
-
-            <!-- Soil Texture Condition -->
-            <div>
-              <label for="plannerSoilTextureSelect" style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
-                <i data-lucide="layers" style="width:13px;height:13px;color:#b45309;vertical-align:-1px;"></i>
-                Soil Texture
-              </label>
-              <select id="plannerSoilTextureSelect" style="width:100%;font-size:0.85rem;min-height:38px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);" aria-label="Soil Texture and Drainage">
-                <option value="Any">Any / Typical Garden Soil</option>
-                <option value="Clay">Heavy Clay (Slow drainage)</option>
-                <option value="Loam">Rich Loam (Fertile &amp; Organic)</option>
-                <option value="Sandy">Sandy / Gravelly (Fast draining)</option>
-                <option value="Rocky">Rocky / Limestone Glade</option>
-              </select>
-            </div>
-
-            <!-- Desired Maintenance Level -->
-            <div>
-              <label id="plannerMaintLabel" style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
-                <i data-lucide="wrench" style="width:13px;height:13px;color:var(--primary);vertical-align:-1px;"></i>
-                Maintenance Level Desired
-              </label>
-              <div class="planner-chips-grid" id="plannerMaintChips" role="group" aria-labelledby="plannerMaintLabel">
-                <button type="button" class="planner-chip active" data-maint="Low" aria-pressed="true">🟢 Low (Tough &amp; Self-reliant)</button>
-                <button type="button" class="planner-chip" data-maint="Medium" aria-pressed="false">🟡 Medium (Occasional care)</button>
-                <button type="button" class="planner-chip" data-maint="Any" aria-pressed="false">🔄 Any Maintenance</button>
-              </div>
-            </div>
-
-            <!-- Bloom Color Preference -->
-            <div>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <label id="plannerColorLabel" style="font-size:0.82rem;font-weight:700;margin:0;color:var(--text-main);">
-                  <i data-lucide="palette" style="width:13px;height:13px;color:#ec4899;vertical-align:-1px;"></i>
-                  Bloom Color Preferences
-                </label>
-                <button type="button" id="plannerAnyColorBtn" style="background:transparent;border:none;color:var(--primary);font-size:0.78rem;cursor:pointer;font-weight:700;min-height:28px;" aria-label="Reset bloom colors to any">Reset to Any</button>
-              </div>
-              <div class="planner-color-chips" id="plannerColorChips" role="group" aria-labelledby="plannerColorLabel">
-                <button type="button" class="planner-color-chip active" data-color="Any" aria-pressed="true">Any Color</button>
-                <button type="button" class="planner-color-chip" data-color="Yellow" aria-pressed="false"><span class="color-dot" style="background:#eab308;"></span>Yellow</button>
-                <button type="button" class="planner-color-chip" data-color="Purple" aria-pressed="false"><span class="color-dot" style="background:#a855f7;"></span>Purple / Blue</button>
-                <button type="button" class="planner-color-chip" data-color="White" aria-pressed="false"><span class="color-dot" style="background:#ffffff;border:1px solid #cbd5e1;"></span>White</button>
-                <button type="button" class="planner-color-chip" data-color="Pink" aria-pressed="false"><span class="color-dot" style="background:#ec4899;"></span>Pink</button>
-                <button type="button" class="planner-color-chip" data-color="Red" aria-pressed="false"><span class="color-dot" style="background:#ef4444;"></span>Red</button>
-                <button type="button" class="planner-color-chip" data-color="Orange" aria-pressed="false"><span class="color-dot" style="background:#f97316;"></span>Orange</button>
-              </div>
-            </div>
-
-            <!-- Structural Layers Needed (Ecological Matrix) -->
-            <div>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <label id="plannerLayersLabel" style="font-size:0.82rem;font-weight:700;margin:0;color:var(--text-main);">
-                  <i data-lucide="layers" style="width:13px;height:13px;color:var(--primary);vertical-align:-1px;"></i>
-                  Structural Layers Needed
-                </label>
-                <button type="button" id="plannerSelectAllLayersBtn" style="background:transparent;border:none;color:var(--primary);font-size:0.78rem;cursor:pointer;font-weight:700;min-height:28px;" aria-label="Select all structural matrix layers">All Layers</button>
-              </div>
-              <div class="planner-layer-checkboxes" id="plannerLayerCheckboxes" role="group" aria-labelledby="plannerLayersLabel">
-                <label class="planner-checkbox-label">
-                  <input type="checkbox" data-layer="Groundcover" checked>
-                  <span><strong>Groundcover / Living Matrix</strong> (Sedges, creeping forbs &lt;1.5 ft)</span>
-                </label>
-                <label class="planner-checkbox-label">
-                  <input type="checkbox" data-layer="Seasonal/Herbaceous Layer" checked>
-                  <span><strong>Seasonal &amp; Mid-Layer Blooms</strong> (Flowers 1.5–3.5 ft)</span>
-                </label>
-                <label class="planner-checkbox-label">
-                  <input type="checkbox" data-layer="Structural Layer" checked>
-                  <span><strong>Structural Perennials &amp; Grasses</strong> (Backbone 3–6 ft)</span>
-                </label>
-                <label class="planner-checkbox-label">
-                  <input type="checkbox" data-layer="Understory">
-                  <span><strong>Understory Trees &amp; Large Shrubs</strong> (Mid-story &lt;25 ft)</span>
-                </label>
-                <label class="planner-checkbox-label">
-                  <input type="checkbox" data-layer="Canopy">
-                  <span><strong>Canopy / Shade Trees</strong> (Overstory trees &gt;25 ft)</span>
-                </label>
-                <label class="planner-checkbox-label">
-                  <input type="checkbox" data-layer="Vine">
-                  <span><strong>Native Climbers &amp; Vines</strong> (Vertical trellis &amp; wall habitat)</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Area Notes -->
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="plannerAreaNotesInput" style="font-size:0.82rem;font-weight:700;margin-bottom:4px;display:block;">Area Notes &amp; Ecological Strategy</label>
-              <textarea id="plannerAreaNotesInput" rows="2" placeholder="e.g. Near street, receives roof runoff, needs winter interest..." style="font-size:0.85rem;min-height:48px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);line-height:1.4;"></textarea>
-            </div>
-
+            <span>Select any zone above to view tailored native recommendations. Tap <strong>Edit</strong> on a zone to adjust sun, moisture, and layer criteria.</span>
           </div>
 
         </div>
@@ -14765,25 +14669,29 @@
         }
 
         card.innerHTML = `
-          <div class="planner-area-card-main" style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer;">
-            <i data-lucide="${stepIcon}" style="width:14px;height:14px;color:${isActive ? 'var(--primary)' : 'var(--text-muted)'};flex-shrink:0;"></i>
+          <div class="planner-area-card-main" style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer;">
+            <div style="width:28px;height:28px;border-radius:var(--radius-sm);background:${isActive ? 'var(--primary)' : 'var(--bg-surface-elevated)'};color:${isActive ? '#fff' : 'var(--text-muted)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="${stepIcon}" style="width:14px;height:14px;"></i>
+            </div>
             <div style="min-width:0;">
-              <div style="font-size:0.88rem;font-weight:${isActive ? '800' : '600'};color:var(--text-main);overflow-wrap:break-word;line-height:1.25;">
+              <div style="font-size:0.86rem;font-weight:${isActive ? '800' : '600'};color:var(--text-main);overflow-wrap:break-word;line-height:1.25;">
                 ${escapeHtml(areaName)}
               </div>
-              <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-top:2px;">
+              <div style="font-size:0.74rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-top:2px;flex-wrap:wrap;">
                 <span>${escapeHtml(prof.sunlight || 'Sun')}</span> &bull; <span>${escapeHtml(prof.moisture || 'Moist')}</span>
               </div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-            <button type="button" class="btn btn-secondary btn-xs planner-area-edit-btn" data-idx="${idx}" style="font-size:0.72rem;min-height:26px;padding:2px 7px;font-weight:700;display:inline-flex;align-items:center;gap:3px;" title="Edit conditions for ${escapeHtml(areaName)}" aria-label="Edit conditions for ${escapeHtml(areaName)}">
-              <i data-lucide="sliders-horizontal" style="width:11px;height:11px;"></i>
+            <button type="button" class="btn btn-secondary btn-xs planner-area-edit-btn" data-idx="${idx}" style="font-size:0.74rem;min-height:28px;padding:3px 8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Edit conditions for ${escapeHtml(areaName)}" aria-label="Edit conditions for ${escapeHtml(areaName)}">
+              <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
               <span>Edit</span>
             </button>
-            <span class="badge" style="background:${isActive ? 'var(--primary)' : 'var(--border-subtle)'};color:${isActive ? '#fff' : 'var(--text-secondary)'};font-size:0.75rem;font-weight:700;padding:2px 7px;border-radius:10px;">
-              ${plantCount}
-            </span>
+            ${plantCount > 0 ? `
+              <span class="badge" style="background:${isActive ? 'var(--primary)' : 'var(--primary-light)'};color:${isActive ? '#fff' : 'var(--primary)'};font-size:0.74rem;font-weight:800;padding:2px 7px;border-radius:12px;" title="${plantCount} plants staged in consultation">
+                ${plantCount}
+              </span>
+            ` : ''}
           </div>
         `;
 
@@ -14830,170 +14738,10 @@
 
     function renderPlannerConditionsForm(profile) {
       if (!profile) return;
-
-      // Area Name Input
+      // All conditions are managed via Area Conditions Modal or Setup Wizard.
+      // Guarded against legacy callers if sidebar inputs are absent.
       const nameInput = document.getElementById('plannerAreaNameInput');
-      if (nameInput) {
-        nameInput.value = profile.name;
-        nameInput.onchange = (e) => {
-          const newName = (e.target.value || '').trim() || `Area ${state.activePlannerAreaIdx + 1}`;
-          const oldName = profile.name;
-          if (newName !== oldName) {
-            profile.name = newName;
-            state.gardenAreas[state.activePlannerAreaIdx] = newName;
-            (state.stagedPlants || []).forEach(p => {
-              if (p.target_area === oldName) p.target_area = newName;
-            });
-            saveStaging();
-            persistGardenAreas();
-            persistGardenAreaProfiles();
-            renderGardenAreasManager();
-            renderGardenPlannerUI();
-          }
-        };
-      }
-
-      // Delete Area Button
-      const deleteWrap = document.getElementById('plannerAreaDeleteBtnWrap');
-      if (deleteWrap) {
-        if (state.gardenAreas.length > 1) {
-          deleteWrap.innerHTML = `
-            <button type="button" class="btn-text-action" style="color:var(--danger);font-size:11px;font-weight:700;" title="Delete this garden area">
-              Delete Area
-            </button>
-          `;
-          deleteWrap.querySelector('button')?.addEventListener('click', () => {
-            const removingName = profile.name;
-            if (confirm(`Remove "${removingName}"? Staged plants will be reassigned to the first remaining area.`)) {
-              state.gardenAreas.splice(state.activePlannerAreaIdx, 1);
-              state.gardenAreaProfiles = state.gardenAreaProfiles.filter(p => p.name !== removingName);
-              const fallbackArea = state.gardenAreas[0];
-              (state.stagedPlants || []).forEach(p => {
-                if (p.target_area === removingName) p.target_area = fallbackArea;
-              });
-              state.activePlannerAreaIdx = 0;
-              saveStaging();
-              persistGardenAreas();
-              persistGardenAreaProfiles();
-              renderGardenAreasManager();
-              renderGardenPlannerUI();
-            }
-          });
-        } else {
-          deleteWrap.innerHTML = '';
-        }
-      }
-
-      // Sunlight Chips
-      const sunChips = document.querySelectorAll('#plannerSunChips .planner-chip');
-      sunChips.forEach(chip => {
-        const val = chip.getAttribute('data-sun');
-        const isActive = profile.sunlight === val;
-        chip.classList.toggle('active', isActive);
-        chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        chip.onclick = () => {
-          profile.sunlight = val;
-          persistGardenAreaProfiles();
-          renderPlannerConditionsForm(profile);
-          renderAreaRecommendations();
-        };
-      });
-
-      // Moisture Chips
-      const moistChips = document.querySelectorAll('#plannerMoistureChips .planner-chip');
-      moistChips.forEach(chip => {
-        const val = chip.getAttribute('data-moist');
-        const isActive = profile.moisture === val;
-        chip.classList.toggle('active', isActive);
-        chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        chip.onclick = () => {
-          profile.moisture = val;
-          persistGardenAreaProfiles();
-          renderPlannerConditionsForm(profile);
-          renderAreaRecommendations();
-        };
-      });
-
-      // Soil Texture Select
-      const textureSelect = document.getElementById('plannerSoilTextureSelect');
-      if (textureSelect) {
-        textureSelect.value = profile.soilTexture || 'Any';
-        textureSelect.onchange = (e) => {
-          profile.soilTexture = e.target.value;
-          persistGardenAreaProfiles();
-          renderAreaRecommendations();
-        };
-      }
-
-      // Maintenance Chips
-      const maintChips = document.querySelectorAll('#plannerMaintChips .planner-chip');
-      maintChips.forEach(chip => {
-        const val = chip.getAttribute('data-maint');
-        const isActive = profile.maintenance === val;
-        chip.classList.toggle('active', isActive);
-        chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        chip.onclick = () => {
-          profile.maintenance = val;
-          persistGardenAreaProfiles();
-          renderPlannerConditionsForm(profile);
-          renderAreaRecommendations();
-        };
-      });
-
-      // Bloom Color Chips
-      const colorChips = document.querySelectorAll('#plannerColorChips .planner-color-chip');
-      const curColors = profile.bloomColors || ['Any'];
-      colorChips.forEach(chip => {
-        const val = chip.getAttribute('data-color');
-        const isActive = curColors.includes(val);
-        chip.classList.toggle('active', isActive);
-        chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        chip.onclick = () => {
-          if (val === 'Any') {
-            profile.bloomColors = ['Any'];
-          } else {
-            let next = curColors.filter(c => c !== 'Any');
-            if (next.includes(val)) {
-              next = next.filter(c => c !== val);
-            } else {
-              next.push(val);
-            }
-            profile.bloomColors = next.length > 0 ? next : ['Any'];
-          }
-          persistGardenAreaProfiles();
-          renderPlannerConditionsForm(profile);
-          renderAreaRecommendations();
-        };
-      });
-
-      // Structural Layer Checkboxes
-      const layerBoxes = document.querySelectorAll('#plannerLayerCheckboxes input[type="checkbox"]');
-      const curLayers = profile.structuralLayers || ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
-      layerBoxes.forEach(box => {
-        const lKey = box.getAttribute('data-layer');
-        box.checked = curLayers.includes(lKey);
-        box.onchange = (e) => {
-          if (e.target.checked) {
-            if (!curLayers.includes(lKey)) curLayers.push(lKey);
-          } else {
-            const idx = curLayers.indexOf(lKey);
-            if (idx >= 0) curLayers.splice(idx, 1);
-          }
-          profile.structuralLayers = curLayers;
-          persistGardenAreaProfiles();
-          renderAreaRecommendations();
-        };
-      });
-
-      // Area Notes
-      const notesInput = document.getElementById('plannerAreaNotesInput');
-      if (notesInput) {
-        notesInput.value = profile.notes || '';
-        notesInput.onchange = (e) => {
-          profile.notes = e.target.value;
-          persistGardenAreaProfiles();
-        };
-      }
+      if (nameInput) nameInput.value = profile.name || '';
     }
 
     // Calculate Ecological Native Recommendations
@@ -15213,14 +14961,21 @@
       const criteriaPills = document.getElementById('plannerCriteriaPills');
       if (criteriaPills) {
         const layersCount = (profile.structuralLayers || []).length;
-        const colorTxt = (profile.bloomColors || ['Any']).join(', ');
         criteriaPills.innerHTML = `
-          <span class="badge" style="background:rgba(217,119,6,0.12);color:#b45309;font-size:0.75rem;">☀️ ${escapeHtml(profile.sunlight || 'Any Sun')}</span>
-          <span class="badge" style="background:rgba(2,132,199,0.12);color:#0284c7;font-size:0.75rem;">💧 ${escapeHtml(profile.moisture || 'Any Moisture')}</span>
-          <span class="badge" style="background:rgba(35,92,54,0.12);color:var(--primary);font-size:0.75rem;">🟢 ${escapeHtml(profile.maintenance || 'Any')} Maint</span>
-          <span class="badge" style="background:rgba(236,72,153,0.12);color:#db2777;font-size:0.75rem;">🌸 ${escapeHtml(colorTxt)}</span>
-          <span class="badge" style="background:var(--border-subtle);color:var(--text-secondary);font-size:0.75rem;">🌿 ${layersCount} Layer${layersCount === 1 ? '' : 's'}</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-secondary);">
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">☀️ ${escapeHtml(profile.sunlight || 'Any Sun')}</span>
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">💧 ${escapeHtml(profile.moisture || 'Any Moisture')}</span>
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">🟢 ${escapeHtml(profile.maintenance || 'Any')} Maint</span>
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">🌿 ${layersCount} Layer${layersCount === 1 ? '' : 's'}</span>
+            <button type="button" id="plannerHeaderEditBtn" class="btn btn-secondary btn-xs" style="font-size:0.74rem;min-height:26px;padding:2px 8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Edit conditions for this zone" aria-label="Edit conditions for ${escapeHtml(profile.name)}">
+              <i data-lucide="sliders-horizontal" style="width:11px;height:11px;"></i>
+              <span>Edit Conditions</span>
+            </button>
+          </div>
         `;
+        criteriaPills.querySelector('#plannerHeaderEditBtn')?.addEventListener('click', () => {
+          openAreaConditionsModal(state.activePlannerAreaIdx);
+        });
       }
 
       // Workflow Banner (review_areas vs completed)
@@ -15230,37 +14985,23 @@
         if (wf.status === 'review_areas') {
           bannerWrap.style.display = 'block';
           bannerWrap.innerHTML = `
-            <div style="background:linear-gradient(135deg, rgba(35,92,54,0.12), rgba(5,150,105,0.08));border:1px solid rgba(35,92,54,0.25);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="background:linear-gradient(135deg, rgba(35,92,54,0.08), rgba(5,150,105,0.04));border:1px solid rgba(35,92,54,0.2);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:10px;min-width:0;">
                 <span class="badge" style="background:var(--primary);color:#fff;font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;flex-shrink:0;">
-                  Area Step ${wf.currentStepAreaIdx + 1} of ${state.gardenAreas.length}
+                  Step ${wf.currentStepAreaIdx + 1} of ${state.gardenAreas.length}
                 </span>
-                <div style="min-width:0;">
-                  <div style="font-size:0.92rem;font-weight:800;color:var(--text-main);">
-                    Step-by-Step Review: ${escapeHtml(profile.name)}
-                  </div>
-                  <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;">
-                    <span>☀️ ${escapeHtml(profile.sunlight || 'Any Sun')}</span> &bull;
-                    <span>💧 ${escapeHtml(profile.moisture || 'Any Moisture')}</span> &bull;
-                    <span>Showing top 6 recommended native plants per layer</span>
-                  </div>
+                <div style="font-size:0.86rem;color:var(--text-main);font-weight:700;">
+                  Reviewing Recommendations: <span style="color:var(--primary);">${escapeHtml(profile.name)}</span>
                 </div>
               </div>
               <div style="display:flex;align-items:center;gap:8px;">
-                <button type="button" class="btn btn-secondary btn-sm" id="plannerReviewEditBtn" style="font-size:0.78rem;min-height:32px;display:inline-flex;align-items:center;gap:5px;font-weight:700;">
-                  <i data-lucide="sliders-horizontal" style="width:13px;height:13px;"></i>
-                  <span>Edit Conditions</span>
-                </button>
-                <button type="button" class="btn btn-ghost btn-sm" id="plannerReviewBackToSetupBtn" style="font-size:0.78rem;min-height:32px;color:var(--text-muted);" title="Return to Area Setup Wizard">
-                  <i data-lucide="undo-2" style="width:13px;height:13px;"></i>
+                <button type="button" class="btn btn-ghost btn-xs" id="plannerReviewBackToSetupBtn" style="font-size:0.75rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;" title="Return to Area Setup Wizard">
+                  <i data-lucide="undo-2" style="width:12px;height:12px;"></i>
                   <span>Back to Setup</span>
                 </button>
               </div>
             </div>
           `;
-          bannerWrap.querySelector('#plannerReviewEditBtn')?.addEventListener('click', () => {
-            openAreaConditionsModal(state.activePlannerAreaIdx);
-          });
           bannerWrap.querySelector('#plannerReviewBackToSetupBtn')?.addEventListener('click', () => {
             wf.status = 'setup_areas';
             persistPlannerWorkflowState(wf);
@@ -15396,23 +15137,21 @@
       // Header match badge
       if (matchBadge) {
         if (currentSelection === 'all') {
-          matchBadge.textContent = `${totalRecommendedCount} Recommended Species (Top 6 / Layer)`;
+          matchBadge.textContent = `${totalRecommendedCount} Species (Top 6 / Layer)`;
         } else {
           const currentCount = Math.min((grouped[currentSelection] || []).length, 6);
           const meta = PLANNER_LAYER_METADATA[currentSelection] || {};
-          matchBadge.textContent = `${currentCount} Recommended in ${meta.title || currentSelection} (${totalRecommendedCount} Total across layers)`;
+          matchBadge.textContent = `${currentCount} Species in ${meta.title?.split('/')[0]?.trim() || currentSelection}`;
         }
       }
 
       // Add Top button text
       if (addAllBtnText) {
         if (currentSelection === 'all') {
-          addAllBtnText.textContent = 'Add Top Recommended to Report';
+          addAllBtnText.textContent = 'Add Top 6 / Layer to Report';
         } else {
           const currentCount = Math.min((grouped[currentSelection] || []).length, 6);
-          const meta = PLANNER_LAYER_METADATA[currentSelection] || {};
-          const shortTitle = (meta.title || currentSelection).split('/')[0].split('&')[0].trim();
-          addAllBtnText.textContent = `Add Top ${currentCount} ${shortTitle} to Report`;
+          addAllBtnText.textContent = `Add Top ${currentCount} to Report`;
         }
       }
 
@@ -15440,24 +15179,24 @@
         layerBox.innerHTML = `
           <div class="planner-layer-header">
             <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-              <div style="width:34px;height:34px;border-radius:var(--radius-sm);background:${meta.badgeBg};color:${meta.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i data-lucide="${meta.icon}" style="width:18px;height:18px;"></i>
+              <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:${meta.badgeBg};color:${meta.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i data-lucide="${meta.icon}" style="width:16px;height:16px;"></i>
               </div>
               <div style="min-width:0;">
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span style="font-size:0.95rem;font-weight:800;color:var(--text-main);">${escapeHtml(meta.title)}</span>
-                  <span class="badge" style="background:${meta.badgeBg};color:${meta.color};font-size:0.75rem;font-weight:700;">
-                    Top ${items.length} species
+                  <span style="font-size:0.92rem;font-weight:800;color:var(--text-main);">${escapeHtml(meta.title)}</span>
+                  <span class="badge" style="background:${meta.badgeBg};color:${meta.color};font-size:0.72rem;font-weight:700;">
+                    Top ${items.length}
                   </span>
                 </div>
-                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;line-height:1.35;">
-                  ${escapeHtml(meta.desc)}
+                <div style="font-size:0.76rem;color:var(--text-muted);margin-top:1px;">
+                  ${escapeHtml(meta.subtitle || meta.desc)}
                 </div>
               </div>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm planner-batch-layer-btn" data-layer="${layerKey}" style="font-size:0.8rem;min-height:34px;padding:6px 12px;font-weight:700;" aria-label="Add top ${items.length} recommended ${escapeHtml(meta.title)} to consultation">
-              <i data-lucide="plus" style="width:13px;height:13px;"></i>
-              <span>Add Top ${items.length} ${escapeHtml(meta.title.split('/')[0].trim())}</span>
+            <button type="button" class="btn btn-secondary btn-sm planner-batch-layer-btn" data-layer="${layerKey}" style="font-size:0.78rem;min-height:32px;padding:4px 11px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" aria-label="Add top ${items.length} recommended to report">
+              <i data-lucide="plus" style="width:12px;height:12px;"></i>
+              <span>+ Add Layer (${items.length})</span>
             </button>
           </div>
           <div class="planner-layer-cards-grid" id="plannerGrid_${layerKey.replace(/[^a-zA-Z0-9_-]/g, '_')}">
@@ -15651,50 +15390,71 @@
       const card = document.createElement('div');
       card.className = `planner-plant-card ${isStagedInArea ? 'is-staged' : ''}`;
 
-      const topReasons = rec.reasons.slice(0, 3);
+      // Pick high-value highlights (Keystone, Sweet 16, Soil texture, Drought, Rain garden, Shade)
+      const priorityHighlights = (rec.reasons || []).filter(r => 
+        r.includes('Keystone') || 
+        r.includes('Sweet 16') || 
+        r.includes('Thrives in') || 
+        r.includes('Rain Garden') || 
+        r.includes('Drought Hardy') ||
+        r.includes('Shade Adapted')
+      );
+      const fallbackHighlights = (rec.reasons || []).filter(r => !priorityHighlights.includes(r));
+      const displayHighlights = [...priorityHighlights, ...fallbackHighlights].slice(0, 2);
 
       card.innerHTML = `
         <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:4.25rem;height:4.25rem;min-width:4.25rem;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:#030a06;position:relative;">
+          <div style="width:4.25rem;height:4.25rem;min-width:4.25rem;border-radius:var(--radius-md);overflow:hidden;flex-shrink:0;background:#030a06;position:relative;">
             <img src="${thumbUrl}" alt="${escapeHtml(commonName)}" style="width:100%;height:100%;object-fit:cover;" onerror="if(this.src.includes('images/plants/') && !this.src.startsWith('images/plants/')){ this.src='images/plants/' + this.src.split('images/plants/')[1]; } else { this.onerror=null; this.src='${imgUrl}'; }">
-            <span class="badge" style="position:absolute;top:3px;left:3px;background:rgba(12,30,19,0.92);color:#a7f3d0;border:1px solid rgba(255,255,255,0.25);font-size:0.7rem;font-weight:800;padding:2px 5px;border-radius:3px;" aria-label="${rec.matchPct} percent ecological match">
+            <span class="planner-match-pill" aria-label="${rec.matchPct} percent ecological match">
               ${rec.matchPct}%
             </span>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
-              <h5 style="font-size:0.95rem;font-weight:800;margin:0;color:var(--text-main);line-height:1.3;overflow-wrap:break-word;">
-                ${escapeHtml(commonName)}
-              </h5>
-            </div>
-            <div style="font-size:0.8rem;font-style:italic;color:var(--text-muted);overflow-wrap:break-word;line-height:1.25;margin-top:2px;">
+            <h5 style="font-size:0.92rem;font-weight:800;margin:0;color:var(--text-main);line-height:1.25;overflow-wrap:break-word;">
+              ${escapeHtml(commonName)}
+            </h5>
+            <div style="font-size:0.78rem;font-style:italic;color:var(--text-muted);overflow-wrap:break-word;line-height:1.2;margin-top:2px;">
               ${escapeHtml(sciName)}
             </div>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
-              ${topReasons.map(r => `<span class="badge" style="font-size:0.72rem;padding:2px 6px;background:var(--bg-surface-elevated);color:var(--text-secondary);border:1px solid var(--border-subtle);">${escapeHtml(r)}</span>`).join('')}
-            </div>
+            ${displayHighlights.length > 0 ? `
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+                ${displayHighlights.map(r => {
+                  let badgeStyle = 'background:var(--bg-surface-elevated);color:var(--text-secondary);border:1px solid var(--border-subtle);';
+                  if (r.includes('Keystone')) {
+                    badgeStyle = 'background:rgba(217,119,6,0.12);color:#b45309;border:1px solid rgba(217,119,6,0.3);font-weight:700;';
+                  } else if (r.includes('Sweet 16')) {
+                    badgeStyle = 'background:rgba(35,92,54,0.12);color:var(--primary);border:1px solid rgba(35,92,54,0.3);font-weight:700;';
+                  }
+                  return `<span class="badge" style="font-size:0.7rem;padding:1px 6px;border-radius:10px;${badgeStyle}">${escapeHtml(r)}</span>`;
+                }).join('')}
+              </div>
+            ` : ''}
           </div>
         </div>
 
-        <div style="font-size:0.78rem;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;border-top:1px dashed var(--border-subtle);padding-top:6px;margin-top:4px;">
-          <span>Height: <strong>${escapeHtml(getPlantHeight(plant) || 'Var')}</strong></span>
-          <span>Bloom: <strong>${escapeHtml(plant.bloom_period || 'Seasonal')}</strong></span>
-          <button type="button" class="btn-text-action btn-inspect-plant" style="font-size:0.78rem;color:var(--primary);font-weight:700;min-height:28px;" aria-label="View botanical details for ${escapeHtml(commonName)}">Details &rarr;</button>
+        <div style="font-size:0.76rem;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border-subtle);padding-top:7px;margin-top:2px;">
+          <span style="display:inline-flex;align-items:center;gap:5px;">
+            <span>📏 ${escapeHtml(getPlantHeight(plant) || 'Var')}</span>
+            <span style="color:var(--text-muted);">&bull;</span>
+            <span>🌸 ${escapeHtml(plant.bloom_period || 'Seasonal')}</span>
+          </span>
+          <button type="button" class="btn-text-action btn-inspect-plant" style="font-size:0.76rem;color:var(--primary);font-weight:700;min-height:24px;padding:0 2px;" aria-label="View botanical details for ${escapeHtml(commonName)}">Details &rarr;</button>
         </div>
 
-        <div style="display:flex;gap:6px;align-items:center;margin-top:4px;">
+        <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
           ${isStagedInArea ? `
-            <button type="button" class="btn btn-sm btn-primary planner-toggle-btn" style="flex:1;font-size:0.82rem;min-height:38px;padding:8px 10px;gap:6px;background:#059669;border-color:#059669;" title="In Consultation for this area. Click to increase quantity." aria-label="In report for ${escapeHtml(profile.name)}: ${quantity}. Click to increase quantity.">
-              <i data-lucide="check" style="width:14px;height:14px;"></i>
+            <button type="button" class="btn btn-sm btn-primary planner-toggle-btn" style="flex:1;font-size:0.8rem;min-height:34px;padding:6px 10px;gap:5px;background:var(--primary);border-color:var(--primary);" title="In Consultation for this area. Click to increase quantity." aria-label="In report for ${escapeHtml(profile.name)}: ${quantity}. Click to increase quantity.">
+              <i data-lucide="check" style="width:13px;height:13px;"></i>
               <span>In Report (${quantity}x)</span>
             </button>
-            <button type="button" class="btn-icon planner-remove-btn" title="Remove from this area" aria-label="Remove ${escapeHtml(commonName)} from ${escapeHtml(profile.name)}" style="color:var(--danger);min-width:38px;min-height:38px;padding:8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-base);">
-              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            <button type="button" class="btn-icon planner-remove-btn" title="Remove from this area" aria-label="Remove ${escapeHtml(commonName)} from ${escapeHtml(profile.name)}" style="color:var(--danger);min-width:34px;min-height:34px;padding:6px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-base);">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
             </button>
           ` : `
-            <button type="button" class="btn btn-sm btn-secondary planner-toggle-btn" style="flex:1;font-size:0.82rem;min-height:38px;padding:8px 12px;gap:6px;font-weight:700;" aria-label="Add ${escapeHtml(commonName)} to consultation for ${escapeHtml(profile.name)}">
-              <i data-lucide="plus" style="width:14px;height:14px;"></i>
-              <span>Add to Consultation</span>
+            <button type="button" class="btn btn-sm btn-secondary planner-toggle-btn" style="flex:1;font-size:0.8rem;min-height:34px;padding:6px 12px;gap:5px;font-weight:700;" aria-label="Add ${escapeHtml(commonName)} to consultation for ${escapeHtml(profile.name)}">
+              <i data-lucide="plus" style="width:13px;height:13px;"></i>
+              <span>+ Add to Report</span>
             </button>
           `}
         </div>
