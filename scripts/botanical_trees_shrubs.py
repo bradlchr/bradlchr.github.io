@@ -5,7 +5,7 @@ Botanical profiles for Deep Roots Native Catalog.
 
 BOTANICAL_TREES_SHRUBS = {
     "Quercus bicolor": {
-        "summary": "A stately canopy oak (50–70 ft) featuring two-toned lustrous emerald foliage with downy silver undersides and golden-bronze fall color, exceptionally adaptable to heavy clay and periodic standing water. Functions as an indispensable keystone anchor in rain gardens, bioswales, and open woodland matrices.",
+        "summary": "A deciduous canopy tree (50–70 ft) featuring obovate, shallowly lobed leaves with dark green upper surfaces, downy white undersides, and yellow-to-bronze autumn color. Develops a broad, rounded crown adapted to poorly drained heavy clay, bottomland floodplains, bioswales, and open upland sites.",
         "maint_level": "Low",
         "spring_care": "Prune branches only during dormant season (before April 1) to prevent fungal Oak Wilt transmission.",
         "summer_care": "Provide deep watering every 2–3 weeks during the first two summers until established.",
@@ -17,7 +17,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Quercus texana": {
-        "summary": "A fast-growing red oak relative (40–60 ft) with glossy, deeply lobed dark green leaves that blaze brilliant scarlet late into November. Well-suited for street lawns, urban yards, and prairie transition groves with heavy clay or alkaline soils.",
+        "summary": "A deciduous red oak (40–60 ft) with deeply lobed, lustrous dark green foliage that turns bright red late in autumn. Maintains a pyramidal juvenile form maturing into an open rounded canopy, adapted to alkaline soils, heavy clay, and urban landscape conditions.",
         "maint_level": "Low",
         "spring_care": "Perform any structural pruning in late winter (January–February) while fully dormant to prevent beetle transmission of oak wilt.",
         "summer_care": "Provide supplemental deep watering during severe drought in first 2 years of establishment.",
@@ -29,7 +29,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Cercis canadensis": {
-        "summary": "An iconic understory tree (20–30 ft) bursting in early spring with magenta pea blossoms along bare branches, followed by heart-shaped leaves that turn canary yellow in autumn. Ideal as a patio specimen, woodland border accent, or lawn corner feature.",
+        "summary": "A deciduous understory tree (20–30 ft) with cordate leaves, bearing clusters of pea-like magenta-pink flowers in early spring along bare branches before leaf emergence. Develops an ascending vase-shaped crown that grows in moist, well-drained soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune out dead, crossing, or diseased twigs immediately after spring flowering completes to maintain an open vase structure.",
         "summer_care": "Water moderately during extended summer droughts to prevent leaf scorch and verticillium stress.",
@@ -41,7 +41,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
     },
     "Asimina triloba": {
-        "summary": "A tropical-foliaged understory tree (15–25 ft) with lush 12-inch leaves turning butter-yellow in fall and maroon spring flowers producing heavy, custard-like edible native fruits. Thrives in shaded riparian buffers, woodland margins, and edible native groves.",
+        "summary": "A deciduous small tree or large multi-stemmed shrub (15–25 ft) with large obovate leaves (up to 12 in) that turn yellow in autumn, bearing nodding maroon flowers in spring followed by oblong edible berries. Spreads slowly by root suckers to form colonial thickets in moist, rich bottomland soils and woodland understories.",
         "maint_level": "Medium",
         "spring_care": "Prune unwanted root suckers in early spring to maintain a single-stemmed tree form rather than a colonial thicket.",
         "summer_care": "Maintain consistent soil moisture during midsummer fruit swell.",
@@ -53,7 +53,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Department of Conservation](https://mdc.mo.gov/discover-nature/field-guide), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/)"
     },
     "Amelanchier arborea": {
-        "summary": "A refined 4-season small tree (15–25 ft) opening early spring with pendulous clouds of pure white blossoms, followed by sweet blueberry-like Juneberries and fiery orange-scarlet fall foliage. An outstanding specimen for woodland edges, foundation plantings, and bird sanctuaries.",
+        "summary": "A deciduous small tree (15–25 ft) with finely toothed ovate leaves, producing drooping clusters of 5-petaled white flowers in early spring followed by small edible purplish-black pomes in June. Grows as a single-trunk tree or clump in well-drained acidic to neutral loams in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune dead or crossing branches in late winter while dormant to shape canopy.",
         "summer_care": "Water during extended summer droughts to support fruit development and foliage health.",
@@ -65,7 +65,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
     },
     "Amelanchier canadensis": {
-        "summary": "A multi-stemmed upright shrub or small tree (10–20 ft) bearing dense white floral clusters in April, succulent edible purple berries in early summer, and glowing orange-gold fall foliage. Excellent for rain garden edges, wet meadow borders, and wildlife hedgerows.",
+        "summary": "An upright, multi-stemmed deciduous shrub or small tree (10–20 ft) bearing dense erect racemes of white flowers in spring, edible dark purple fruit in early summer, and orange-red autumn foliage. Forms multi-stemmed colonies adapted to wet meadows, bog margins, and moist borders.",
         "maint_level": "Low",
         "spring_care": "Thin out crowded central stems or suckers in late winter if an open multi-stemmed vase form is preferred.",
         "summer_care": "Maintain adequate soil moisture during dry spells in sunny locations.",
@@ -77,7 +77,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Prunus virginiana": {
-        "summary": "A versatile native chokecherry (20–30 ft) erupting in late spring with 3–6 inch cylindrical racemes of fragrant white flowers, yielding heavy clusters of tart purple-black cherries. An indispensable keystone species for naturalized borders, windbreaks, and bird gardens.",
+        "summary": "A deciduous large shrub or small tree (20–30 ft) bearing cylindrical 3–6 inch racemes of fragrant white flowers in late spring, producing clusters of astringent purple-black drupes in late summer. Spreads by root suckers to form dense thickets in moist, fertile soils along woodland edges, riparian buffers, and fence rows.",
         "maint_level": "Low",
         "spring_care": "Prune out dead wood and remove unmanaged root suckers in late winter while dormant.",
         "summer_care": "Water moderately during first 2 years; exceptional drought tolerance once rooted.",
@@ -89,7 +89,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Prunus americana": {
-        "summary": "A charismatic native wild plum (15–25 ft) smothered in April with fragrant snowy-white blossoms before leaves appear, producing delicious sweet-tart yellow-to-red plums in August. Forms protective wildlife thickets ideal for woodland edges, hedgerows, and edible native gardens.",
+        "summary": "A deciduous spiny understory tree (15–25 ft) producing dense umbels of white flowers in April before leaves emerge, followed by globose red-to-yellow plums in late summer. Develops colonial thickets via root suckers in well-drained loams in full sun to partial shade.",
         "maint_level": "Medium",
         "spring_care": "Prune root suckers in early spring if a single-trunk tree shape is desired instead of a colonial thicket.",
         "summer_care": "Provide supplemental deep watering during prolonged summer droughts to swell fruit.",
@@ -101,7 +101,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Cotinus obovatus": {
-        "summary": "A rare native American smoketree (20–30 ft) celebrated for the most spectacular, multi-hued orange-red-purple autumn foliage of any North American tree, crowned in early summer with smoky pinkish-purple flower plumes. Exceptional for dry, rocky limestone hillsides and sunny accent points.",
+        "summary": "A deciduous large shrub or small tree (20–30 ft) with obovate blue-green foliage turning yellow, orange, and purple in autumn, bearing airy purplish-pink fruiting panicles in summer. Tolerates dry, rocky limestone soils in full sun and develops a broad, rounded habit.",
         "maint_level": "Low",
         "spring_care": "Prune crossing branches in late winter while dormant to enhance structural branching.",
         "summer_care": None,
@@ -113,7 +113,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Liriodendron tulipifera": {
-        "summary": "A magnificent towering canopy tree (70–90 ft) featuring distinctive tulip-shaped leaves turning bright golden-yellow in fall, and cup-shaped yellow flowers with orange interior bands in May. Best reserved for expansive lawns, parks, and large native woodland canopies.",
+        "summary": "A fast-growing deciduous canopy tree (70–90 ft) featuring distinct 4-lobed leaves that turn bright golden-yellow in autumn, bearing cup-shaped yellow-green flowers with orange bands in late spring. Develops a tall, straight trunk and pyramidal crown requiring deep, moist, well-drained loams in full sun.",
         "maint_level": "Low",
         "spring_care": "Prune lower branches in late winter if clearance is needed; clear fallen branchlets.",
         "summer_care": "Water deeply during severe summer droughts to prevent premature yellow leaf shedding.",
@@ -125,7 +125,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Aesculus pavia": {
-        "summary": "A dazzling small tree or large shrub (12–20 ft) bearing erect 6–10 inch panicles of fiery red tubular flowers in April, precisely timed with the northward migration of Ruby-throated Hummingbirds. Perfect for woodland margins, foundation borders, and rain garden perimeters.",
+        "summary": "A deciduous large shrub or small tree (12–20 ft) bearing upright 6–10 inch panicles of tubular red flowers in April concurrently with leaf emergence. Develops a rounded crown in average to moist, well-drained soils in full sun to partial shade, dropping foliage early in dry late summers.",
         "maint_level": "Low",
         "spring_care": "Prune dead or broken branches in late winter before early leaf emergence.",
         "summer_care": "Water during hot summer droughts to reduce early foliage dormancy or leaf drop.",
@@ -137,7 +137,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Aesculus glabra": {
-        "summary": "A medium-sized native Ohio buckeye (30–45 ft) opening early spring with handsome 5-parted palmate leaves and creamy greenish-yellow flower panicles, producing spiny husked buckeye seeds in autumn. Ideal for native woodland understories and naturalized parkland groves.",
+        "summary": "A deciduous medium tree (20–40 ft) with palmately compound 5-foliate leaves, bearing erect 4–7 inch panicles of yellow-green flowers in spring followed by spiny, leathery husks containing smooth brown seeds. Grows in moist, fertile woodland soils along river valleys and bluffs.",
         "maint_level": "Low",
         "spring_care": "Remove crossing branches in late winter before early bud break.",
         "summer_care": "Provide afternoon shade or moist soil to minimize mid-summer leaf scorch.",
@@ -149,7 +149,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
     },
     "Hamamelis virginiana": {
-        "summary": "A fascinating native witch hazel (15–20 ft) that blooms with fragrant, ribbon-like golden-yellow flower clusters in late autumn (October–December) as its leaves turn bright butter-yellow. Excellent for shaded woodland borders, north-facing walls, and winter interest borders.",
+        "summary": "A deciduous large shrub or small tree (15–20 ft) with irregular obovate leaves, producing fragrant yellow flowers with ribbon-like petals in October and November alongside ripening woody seed capsules. Forms an open vase-shaped crown in moist, organically rich, acidic to neutral soils in partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune root suckers in late winter if a small single-trunk tree form is desired.",
         "summer_care": "Provide supplemental water during severe summer heat.",
@@ -161,7 +161,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Hamamelis vernalis": {
-        "summary": "An early-blooming native Ozark witch hazel (6–10 ft) producing highly fragrant spicy-scented, ribbon-like copper-red to yellow blossoms in mid to late winter (January–March), defying ice and snow. Thrives in stream banks, rain gardens, and foundation borders.",
+        "summary": "A multi-stemmed deciduous shrub (6–10 ft) with obovate leaves, bearing fragrant yellow to copper-red strap-petaled flowers from January to March on bare twigs. Spreads slowly by root suckers and grows along rocky gravel bars and streambanks in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune out suckers or shape branches immediately after late-winter flowering finishes.",
         "summer_care": "Maintains excellent health in both gravelly creek beds and heavy landscape clay with periodic moisture.",
@@ -173,7 +173,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Staphylea trifolia": {
-        "summary": "A graceful native bladdernut shrub or small tree (10–15 ft) bearing nodding bell-shaped white flowers in spring followed by whimsical, papery lantern-like inflated seed pods that rattle in the autumn wind. Perfect for shaded woodland understories, stream margins, and slope stabilization.",
+        "summary": "A deciduous upright understory shrub (10–15 ft) with trifoliate leaves, bearing drooping clusters of bell-shaped white flowers in spring followed by inflated, papery, 3-lobed seed capsules in autumn. Spreads by root suckers to form colonies in moist, fertile, shaded woodland ravines and valley floors.",
         "maint_level": "Low",
         "spring_care": "Prune away dead twigs or unwanted root suckers in early spring before bud break.",
         "summer_care": None,
@@ -185,7 +185,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
     },
     "Viburnum prunifolium": {
-        "summary": "A premier small tree or large shrub (15–25 ft) producing dense flat-topped cymes of creamy white spring flowers, glossy dark green foliage that turns wine-purple in fall, and edible sweet black fruit clusters. Superb as an understory accent, screening hedge, or patio tree.",
+        "summary": "A deciduous large shrub or small tree (12–20 ft) with finely serrate, lustrous dark green ovate leaves turning purple-red in autumn, bearing flat-topped cymes of white flowers in spring followed by blue-black drupes. Grows as a solitary specimen or thicket in average, well-drained soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune out dead wood and shape branches immediately after spring flowering completes.",
         "summer_care": "Water moderately during first 2 years; exceptional drought and heat tolerance once established.",
@@ -197,7 +197,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Viburnum rufidulum": {
-        "summary": "An exceptional small tree (12–20 ft) featuring extraordinarily glossy, leathery dark green leaves that ignite in deep crimson-purple fall color, with rusty-downy flower buds and sweet blue-black fruit. Highly adaptable to hot, dry, rocky limestone glades and sunny borders.",
+        "summary": "A deciduous large shrub or small tree (10–20 ft) with glossy, leathery elliptic leaves and rusty-hairy winter buds, bearing flat white cymes in spring and dark blue glaucous fruit in autumn. Highly drought-tolerant once established in rocky, well-drained upland limestone soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune lightly after spring bloom only to shape canopy or remove dead wood.",
         "summer_care": None,
@@ -209,7 +209,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Cornus alternifolia": {
-        "summary": "A magnificent pagodalike understory tree (15–25 ft) with distinctive horizontal tiering, flat cymes of fragrant cream blossoms, and red-stemmed dark blue berries accompanied by reddish-purple fall foliage. Outstanding focal tree for shaded woodland gardens and sheltered north/east exposures.",
+        "summary": "A small deciduous understory tree (15–25 ft) with horizontally tiered branching, alternate elliptic leaves, flat clusters of yellowish-white flowers in late spring, and dark blue fruit on red pedicels in late summer. Prefers cool, moist, acidic, humus-rich soils in partial shade to dappled sun.",
         "maint_level": "Low",
         "spring_care": "Prune out dead twigs in early spring; preserve the horizontal tiered scaffolding.",
         "summer_care": "Provide consistent moisture and partial shade during hot summer months to protect shallow roots.",
@@ -221,7 +221,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC](https://mdc.mo.gov)"
     },
     "Cornus florida": {
-        "summary": "Missouri's iconic state tree (15–25 ft) displaying majestic four-bracted snow-white spring blooms, tiered horizontal branches, scarlet autumn foliage, and bright red winter berries. Ideal understory specimen for dappled shade borders and acidic to neutral loamy soils.",
+        "summary": "A deciduous understory tree (15–25 ft) with spreading horizontal branches, bearing 4 large white petal-like bracts surrounding tiny green flowers in early spring, followed by bright red berries and scarlet autumn foliage. Performs best in moist, organically rich, well-drained acidic soils in partial shade.",
         "maint_level": "Medium",
         "spring_care": "Prune dead wood in late winter while dormant; avoid pruning in late spring when borer beetles are active.",
         "summer_care": "Water deeply every 10–14 days during dry summer spells to prevent anthracnose and mildew stress.",
@@ -233,7 +233,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
     },
     "Carpinus caroliniana": {
-        "summary": "A handsome, shade-tolerant understory tree (20–35 ft) with fluted, sinewy blue-gray bark resembling muscular flexed limbs, rich dark green summer foliage, and vibrant yellow-to-scarlet fall color. Excellent for heavy clay woodland gardens, rain gardens, and stream banks.",
+        "summary": "A slow-growing deciduous understory tree (20–35 ft) with smooth, fluted, sinewy blue-gray bark, ovate leaves that turn yellow-orange in autumn, and drooping hop-like fruiting catkins. Highly shade-tolerant, thriving in moist, fertile, acidic to neutral loams in woodland valleys and stream margins.",
         "maint_level": "Low",
         "spring_care": "Perform any structural pruning in late winter while dormant.",
         "summer_care": None,
@@ -245,7 +245,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Taxodium distichum": {
-        "summary": "A majestic, pyramidal deciduous conifer (50–70 ft) featuring feathery, soft fern-like needles that glow copper-bronze in autumn, fibrous reddish-brown bark, and fluted buttressed trunks. Unrivaled for bioswales, rain gardens, wet detention basins, and large lawn landscapes.",
+        "summary": "A long-lived deciduous conifer (50–70 ft) featuring feathery needle-like foliage that turns copper-bronze in autumn before shedding, fibrous reddish-brown bark, and conical form. Highly adapted to saturated soils and standing water where it produces root 'knees', but also grows vigorously in normal upland garden clay.",
         "maint_level": "Low",
         "spring_care": "Prune dead or competing central leaders in late winter before soft needle emergence.",
         "summer_care": "Provide deep watering during first 2 years; completely flood-proof and surprisingly drought-hardy once rooted.",
@@ -257,7 +257,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Cladrastis kentukea": {
-        "summary": "A premier native shade tree (30–50 ft) featuring smooth beech-like gray bark, bright green pinnate foliage turning golden-amber in autumn, and cascading 12-inch wisteria-like panicles of intensely fragrant white flowers in late spring. Outstanding lawn and shade tree specimen.",
+        "summary": "A deciduous medium tree (30–50 ft) with pinnately compound leaves, bearing pendulous 8–14 inch panicles of fragrant white pea-like flowers in late spring and smooth gray beech-like bark. Grows in fertile, well-drained soils in full sun, developing a broad, rounded canopy.",
         "maint_level": "Low",
         "spring_care": "Prune branches only in summer after full leaf emergence to prevent excessive sap bleeding.",
         "summer_care": "Deep soak every 2–3 weeks during the first two summers of establishment.",
@@ -269,7 +269,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Sambucus canadensis": {
-        "summary": "A fast-growing multi-stemmed native elderberry (8–12 ft) producing massive 10-inch flat-topped clusters of creamy white lemon-scented flowers in June, followed by heavy drooping cymes of nutrient-dense purple-black berries. Outstanding for rain gardens, bioswales, and wildlife hedgerows.",
+        "summary": "A multi-stemmed deciduous shrub (5–12 ft) with pinnately compound foliage, bearing broad flat cymes (up to 10 in) of fragrant white flowers in early summer followed by heavy clusters of dark purple-black berries in late summer. Spreads by root suckers to form loose thickets in moist to wet soils along riparian edges, ditches, and sunny margins.",
         "maint_level": "Low",
         "spring_care": "Cut back weak, dead, or 3-year-old stems to the ground in early spring (50°F+) to stimulate vigorous fruiting canes.",
         "summer_care": "Provide consistent moisture during fruit development.",
@@ -281,7 +281,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Chionanthus virginicus": {
-        "summary": "A breathtaking native fringetree (12–20 ft) cloaked in late spring with cascading, fragrant fleecy clouds of airy white ribbon-like flower panicles, followed on female plants by clusters of olive-like dark blue fruits. A magnificent specimen for borders, patios, and woodland edges.",
+        "summary": "A dioecious deciduous small tree or large shrub (12–20 ft) bearing drooping 4–8 inch panicles of fragrant white, strap-like petals in late spring before leaves fully expand, with female plants producing dark blue olive-like drupes. Grows slowly in moist, fertile, acidic soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune crossing branches immediately after spring bloom completes.",
         "summer_care": "Water during extended summer droughts; adapts readily to both moist rich soils and heavy urban clay.",
@@ -293,7 +293,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Crataegus phaenopyrum": {
-        "summary": "A sturdy, compact native Washington hawthorn (20–30 ft) featuring clusters of white spring flowers, lustrous maple-like leaves turning orange-scarlet in fall, and persistent bright red glossy berries through winter. Superb for urban street lawns, screens, and songbird nesting sites.",
+        "summary": "A deciduous thorny small tree (25–30 ft) with triangular, sharply lobed leaves that turn orange-scarlet in autumn, corymbs of white flowers in late spring, and persistent bright red pomes through winter. Adapted to poor, dry to moist soils in full sun with high urban and clay tolerance.",
         "maint_level": "Low",
         "spring_care": "Prune dead or crossing branches in late winter while dormant to maintain an open canopy.",
         "summer_care": None,
@@ -305,7 +305,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Crataegus viridis": {
-        "summary": "A tough, handsome green hawthorn (20–35 ft) with attractive smooth pale gray bark flaking to reveal orange underbark, clusters of white spring flowers, and long-lasting scarlet berries into winter. Unsurpassed resilience for urban street plantings, parking lot islands, and heavy clay soils.",
+        "summary": "A deciduous small tree (20–35 ft) featuring a rounded vase canopy with pale exfoliating bark, clusters of white flowers in spring, and bright red fruit that persists into late winter. Grows in moist, heavy bottomland clay as well as average garden loams in full sun.",
         "maint_level": "Low",
         "spring_care": "Prune out suckers and crossing branches in late winter while dormant.",
         "summer_care": "Exceptional heat, drought, and temporary standing water tolerance once rooted.",
@@ -317,7 +317,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Ilex verticillata": {
-        "summary": "An extraordinary deciduous native holly (6–10 ft) producing breathtaking masses of brilliant scarlet berries that cling tightly to bare winter branches, creating an unmatched winter spectacle. Indispensable for rain gardens, bioswales, pond margins, and shrub borders (requires a male pollinator nearby).",
+        "summary": "A dioecious multi-stemmed deciduous shrub (6–10 ft) with toothed dark green ovate leaves, producing dense clusters of bright red berry-like drupes on female plants that persist on bare branches through winter. Requires a male pollinator nearby and grows in moist, acidic to neutral soils, rain gardens, and wetland margins.",
         "maint_level": "Low",
         "spring_care": "Prune in late winter or early spring before new growth starts; avoid heavy pruning that removes flower buds.",
         "summer_care": "Provide consistent moisture during dry periods.",
@@ -329,7 +329,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Hydrangea arborescens": {
-        "summary": "A beloved native smooth hydrangea (3–5 ft) featuring huge 6–12 inch hemispherical white flower globes from June to August, lighting up dappled shade borders. Perfect for woodland margins, foundation plantings, and shaded rain gardens.",
+        "summary": "A deciduous suckering shrub (3–5 ft) producing hemispherical corymbs (2–6 in across) of creamy-white florets from June to August on new wood. Spreads gradually by subterranean stolons and grows best in moist, well-drained organic soils in dappled shade or partial sun.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to 6–12 inches above ground in early spring (at 50°F+) as flowers bloom on new season growth.",
         "summer_care": "Water moderately during hot, dry summer spells to prevent leaf wilting in sunny locations.",
@@ -341,7 +341,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Aronia melanocarpa": {
-        "summary": "A high-performance native black chokeberry (3–6 ft) bearing clusters of white apple-like spring flowers, glossy disease-free foliage turning blazing wine-red in autumn, and heavy dark purple vitamin-rich berries. Excellent for rain gardens, bioswales, and edible shrub borders.",
+        "summary": "A multi-stemmed deciduous shrub (3–6 ft) with glossy elliptic leaves that turn deep red in autumn, small white 5-petaled flowers in spring, and persistent black pomes in late summer. Forms upright suckering clumps in wet to dry soils in full sun to partial shade, suitable for rain gardens and conservation hedges.",
         "maint_level": "Low",
         "spring_care": "Prune out older weak canes in early spring to encourage vigorous new fruiting shoots.",
         "summer_care": "Adaptable to boggy wet soils as well as average garden loams in full sun to partial shade.",
@@ -353,7 +353,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Physocarpus opulifolius": {
-        "summary": "A rugged native ninebark (5–8 ft) featuring peeling, exfoliating bark, dense white to pink flower umbels in late spring, and copper-red seed capsules against rich green foliage. Superb for erosion control, bioswales, sunny screening hedges, and tough clay banks.",
+        "summary": "A multi-stemmed deciduous shrub (5–8 ft) with lobed leaves, exfoliating papery bark, dense hemispherical umbels of white to pink flowers in late spring, and reddish bladder-like seed capsules in autumn. Tolerates dry, rocky, or heavy clay soils in full sun to partial shade, forming a dense upright mound.",
         "maint_level": "Low",
         "spring_care": "Prune immediately after spring flowering completes; renewal prune by removing 1/3 of oldest stems to the base.",
         "summer_care": None,
@@ -365,7 +365,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Ribes odoratum": {
-        "summary": "A delightful native clove currant (6–8 ft) filling the early spring air with intense spicy clove fragrance from pendulous yellow trumpet blossoms, followed by edible sweet purple-black currants in July. Ideal for shrub borders, edible gardens, and pollinator hedges.",
+        "summary": "A multi-stemmed deciduous shrub (6–8 ft) with lobed leaves, bearing racemes of fragrant, tubular yellow flowers with reddish centers in spring, followed by edible black berries in summer. Spreads by root suckers and grows in average to dry soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune out 3-year-old wood immediately after spring bloom to stimulate productive young canes.",
         "summer_care": "Water moderately during fruit swell in midsummer; highly drought tolerant thereafter.",
@@ -377,7 +377,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Viburnum dentatum": {
-        "summary": "A dependable native arrowwood viburnum (6–10 ft) with lustrous sharply toothed leaves, creamy white flat-topped flower cymes in spring, and intense yellow to red-purple fall foliage loaded with blue-black berries. Outstanding for privacy hedges, rain gardens, and windbreaks.",
+        "summary": "A multi-stemmed deciduous shrub (6–10 ft) with coarsely toothed ovate leaves turning yellow to red in autumn, flat cymes of white flowers in late spring, and clusters of blue-black drupes in autumn. Adapts readily to clay soils, periodic flooding, and dry conditions in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune out oldest canes to the ground after spring flowering to maintain bushy, dense form.",
         "summer_care": None,
@@ -389,7 +389,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Viburnum lentago": {
-        "summary": "An upright, elegant native nannyberry (12–20 ft) bearing fragrant creamy white flower clusters in May, finely serrated glossy foliage turning deep burgundy in autumn, and edible sweet raisin-like dark blue fruit. Excellent for screens, naturalized woodland edges, and wildlife borders.",
+        "summary": "A deciduous large shrub or small tree (15–25 ft) with finely serrated ovate leaves turning purplish-red in autumn, flat cymes of creamy-white flowers in spring, and edible blue-black drupes. Grows as a solitary small tree or multi-stemmed thicket in moist loams to average soils in sun to shade.",
         "maint_level": "Low",
         "spring_care": "Prune suckers in early spring if training as a single-stemmed small tree; otherwise prune after bloom.",
         "summer_care": None,
@@ -401,7 +401,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Calycanthus floridus": {
-        "summary": "A unique native Carolina allspice shrub (6–9 ft) producing deeply fragrant, velvety maroon-red magnolia-like flowers in May with a fruity strawberry-banana aroma, followed by lustrous green leaves turning butter-yellow in fall. Superb for sensory gardens and shaded shrub borders.",
+        "summary": "A dense, rounded deciduous shrub (6–9 ft) with aromatic ovate leaves and solitary, fragrant reddish-maroon flowers with strap-like petals from May to July, followed by urn-shaped seed capsules. Spreads slowly by root suckers in moist, fertile, well-drained soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune immediately after flowering only if shaping or thinning is required.",
         "summer_care": None,
@@ -413,7 +413,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Cephalanthus occidentalis": {
-        "summary": "An extraordinary native buttonbush (6–12 ft) featuring fragrant, spherical pincushion-like white flower globes in midsummer that are absolute magnets for dozens of butterfly species, followed by persistent spherical seed heads. Essential for rain gardens, bioswales, and shoreline retention.",
+        "summary": "A multi-stemmed deciduous shrub (5–12 ft) with glossy whorled leaves, bearing spherical 1-inch pincushion heads of fragrant white tubular flowers from June to August followed by ball-like nutlet clusters. Thrives in saturated soils, wet retention basins, and pond edges in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut back hard to 1–2 ft in early spring (at 50°F+) if renewal is desired; blooms vigorously on new season wood.",
         "summer_care": None,
@@ -425,7 +425,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Hypericum prolificum": {
-        "summary": "A dense, well-behaved native shrubby St. John's wort (3–5 ft) covered from June to August in brilliant golden-yellow pom-pom blossoms packed with hundreds of fine stamens, above blue-green willow-like leaves. Excellent for sunny borders, curbside hellstrips, and rocky slopes.",
+        "summary": "A compact, rounded deciduous shrub (2–4 ft) with linear dark green leaves, producing abundant bright yellow 5-petaled flowers with large central tufts of stamens in midsummer, followed by conical brown seed capsules. Grows in rocky, poor, or average dry-to-medium soils in full sun to light shade.",
         "maint_level": "Low",
         "spring_care": "Prune back by one-third in early spring (at 50°F+) to promote compact mounding growth and abundant blooms.",
         "summer_care": None,
@@ -437,7 +437,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Rhus aromatica": {
-        "summary": "A low-growing, rugged native fragrant sumac (2–6 ft) forming a dense weed-suppressing thicket with aromatic trifoliate leaves that blaze in brilliant yellow, orange, and red-purple fall color. Unrivaled for slope stabilization, parking lot medians, and erosion control.",
+        "summary": "A suckering deciduous shrub (2–6 ft) with trifoliate aromatic leaves that turn orange, red, and purple in autumn, small yellow catkin-like flowers in early spring, and hairy red drupes on female plants. Forms dense low thickets that stabilize slopes and tolerate dry, rocky, alkaline, or clay soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Rejuvenation prune by shearing back hard in late winter every 3–4 years if tight groundcover form is desired.",
         "summer_care": None,
@@ -449,7 +449,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Itea virginica": {
-        "summary": "A graceful native Virginia sweetspire (3–5 ft) bearing pendulous 4–6 inch cylindrical racemes of fragrant white blooms in June, followed by breathtaking, long-lasting scarlet to wine-red autumn foliage. An outstanding choice for rain gardens, foundation beds, and mass plantings.",
+        "summary": "A deciduous suckering shrub (3–5 ft) with elliptic dark green leaves that turn deep scarlet-crimson in late autumn, bearing arching 3–6 inch cylindrical racemes of fragrant white flowers in early summer. Spreads by root suckers to form colonies in moist to wet soils in full sun to shade, suitable for rain gardens and stream borders.",
         "maint_level": "Low",
         "spring_care": "Prune out dead wood or shape immediately after spring flowering completes.",
         "summer_care": "Requires consistent moisture; excels in wet clay, bioswales, and partial shade.",
@@ -461,7 +461,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
     },
     "Baptisia australis": {
-        "summary": "A magnificent shrub-like perennial (3–4 ft) producing magnificent spikes of lupine-like indigo-blue flowers in May above blue-green clover foliage, followed by striking persistent black rattling seed pods. Forms an enduring focal anchor for sunny perennial borders and meadow gardens.",
+        "summary": "A shrub-like herbaceous perennial legume (3–4 ft) with trifoliate blue-green foliage, bearing erect 12-inch racemes of indigo-blue pea-like flowers in late spring followed by inflated, woody black seed pods in autumn. Develops a massive woody taproot that provides extreme drought tolerance in average to dry soils in full sun.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temps consistently exceed 50°F before cutting down old dead stems at the ground.",
         "summer_care": None,
@@ -473,7 +473,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Cornus amomum": {
-        "summary": "A vigorous native silky dogwood (6–10 ft) with handsome reddish-purple winter twigs, flat-topped creamy white spring flower cymes, and porcelain-blue berries in late summer. Ideal for stream bank stabilization, rain gardens, and wet wildlife screening borders.",
+        "summary": "A multi-stemmed deciduous shrub (6–10 ft) with reddish-brown twigs, flat clusters of yellowish-white flowers in late spring, and porcelain-blue fruit in late summer. Spreads by root suckers and layering to form dense thickets in moist to wet bottomlands, ditches, and rain gardens in sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut back oldest 1/3 of stems to the ground in late winter to stimulate brightly colored new branches.",
         "summer_care": "Excels in saturated, poorly drained, and periodically flooded soils in sun to partial shade.",
@@ -485,7 +485,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Lindera benzoin": {
-        "summary": "A fragrant native understory shrub (6–12 ft) smothered in early spring with airy chartreuse blossoms before foliage, followed by aromatic leaves turning bright yellow in fall and glossy scarlet berries on female shrubs. Indispensable for rain gardens and shaded woodland understories.",
+        "summary": "A dioecious deciduous understory shrub (6–12 ft) with aromatic obovate leaves that turn yellow in autumn, tiny fragrant yellow flowers opening along bare stems in March, and glossy red drupes on female plants in autumn. Grows as an open multi-stemmed shrub in moist, rich woodland soils in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Prune lightly after spring bloom only if shaping or thinning older stems is needed.",
         "summer_care": "Water during extended summer droughts if planted in partial sun to avoid leaf yellowing.",
@@ -497,7 +497,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Ceanothus americanus": {
-        "summary": "A compact, deep-rooted native shrub (2–3 ft) covered in midsummer with profuse, fluffy white flower clusters resembling clouds of lilac, followed by triangular seed capsules. Thrives on dry prairie banks, rock gardens, and curbside borders in full sun.",
+        "summary": "A compact, woody deciduous subshrub (2–3 ft) with ovate serrated leaves, producing dense, cylindrical clusters of small white flowers on long peduncles from June to July. Develops a large, deep woody red taproot that tolerates dry, rocky, and sandy soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune stems back to 6–12 inches in early spring (at 50°F+) as flowers bloom on new season growth.",
         "summer_care": None,
@@ -509,7 +509,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Callicarpa americana": {
-        "summary": "A striking native American beautyberry (4–6 ft) famous for its tight, dazzling clusters of iridescent magenta-purple berries encircling gracefully arching stems in autumn, persisting after leaf drop. Superb as an understory accent, pollinator border feature, or bird garden focal point.",
+        "summary": "A loose, open deciduous shrub (4–6 ft) with coarse, fuzzy ovate leaves, bearing tiny pinkish-white flowers in summer followed by dense, tight clusters of iridescent violet-purple drupes encircling the stems in autumn. Grows in average to moist, well-drained soils in full sun to light shade, dying back to the ground in severe winters.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to 12–18 inches in late winter (50°F+) to encourage dense new fruiting wood.",
         "summer_care": "Provide moderate moisture in full sun to part shade; highly drought-resilient once rooted.",
@@ -521,7 +521,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Corylus americana": {
-        "summary": "A multi-stemmed native American hazelnut (8–12 ft) bearing long dangling male catkins in late winter and delicious edible hazelnuts wrapped in ruffled leafy bracts in late summer, with vibrant copper-red fall foliage. Ideal for hedgerows, edible landscapes, and windbreaks.",
+        "summary": "A multi-stemmed deciduous shrub (8–12 ft) with broad ovate leaves turning copper-bronze in autumn, male catkins opening in early spring, and edible round nuts enclosed in ragged leaf-like husks in late summer. Spreads by root suckers to form dense thickets in average to moist soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Thin out oldest canes in late winter to stimulate vigorous young nut-bearing wood.",
         "summer_care": "Water moderately during first 2 years; exceptional drought tolerance and adaptability to heavy clay.",
@@ -533,7 +533,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Amorpha fruticosa": {
-        "summary": "A vigorous native false indigo bush (6–12 ft) featuring fine compound locust-like foliage and erect 6-inch spikes of deep violet-blue flowers adorned with bright gold-orange anthers in early summer. Exceptional for shoreline stabilization, bioswales, and rain gardens.",
+        "summary": "A loose, fast-growing deciduous shrub (6–12 ft) with fine pinnately compound leaves, bearing erect 3–6 inch spike-like racemes of dark violet-purple flowers with bright orange anthers in early summer. Spreads by self-seeding and suckering in moist to wet soils along streambanks and drainage ditches in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut back hard to 1–2 ft in early spring (at 50°F+) if compact mounded form is desired; blooms on new growth.",
         "summer_care": "Completely flood tolerant and drought hardy; fixes nitrogen in poor, sandy, or heavy clay soils.",
@@ -545,7 +545,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Dirca palustris": {
-        "summary": "A rare, slow-growing native leatherwood shrub (3–6 ft) featuring remarkably flexible, pliable twigs, pale yellow bell blossoms in early spring before leaves, and clean oval foliage. An exquisite, refined specimen for shaded, rich woodland gardens.",
+        "summary": "A slow-growing deciduous understory shrub (3–6 ft) with extremely pliable, leather-like branches, bearing small tubular pale yellow flowers in early spring before obovate leaves emerge. Forms an open rounded shrub in moist, rich, organic woodland soils in full to partial shade.",
         "maint_level": "Low",
         "spring_care": "Prune lightly in early spring only to remove dead wood; avoid heavy shearing.",
         "summer_care": "Requires consistent moisture and rich, humusy soil in partial to full shade.",
@@ -557,7 +557,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Actaea racemosa": {
-        "summary": "A magnificent native black cohosh (4–6 ft) sending up dramatic 2-foot wand-like spires of starry, fragrant white bottlebrush flowers in midsummer above deeply dissected fern-like foliage. A premier architectural anchor for shaded borders, rain gardens, and woodland matrices.",
+        "summary": "An upright woodland perennial (4–6 ft) with deeply dissected compound leaves, producing erect wand-like racemes (1–2 ft) of white flowers in midsummer, followed by small capsule clusters. Grows in moist, organically rich, well-drained soils in partial to full shade, forming substantial long-lived clumps.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures consistently exceed 50°F before clearing away old collapsed stems at the crown.",
         "summer_care": "Water during hot, dry summer spells to prevent foliage scorching.",
@@ -569,7 +569,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
     },
     "Lobelia cardinalis": {
-        "summary": "A breathtaking native perennial (2–4 ft) producing brilliant, electric-scarlet floral spires from July to September that are an irresistible magnet for hummingbirds. Perfect for rain gardens, bioswales, stream banks, and moist shaded perennial beds.",
+        "summary": "An upright herbaceous perennial (2–4 ft) with lanceolate leaves, producing erect terminal racemes of tubular scarlet flowers from July to September. Grows in wet to moist soils in full sun to partial shade, suited for rain gardens, bioswales, stream banks, and shaded borders.",
         "maint_level": "Medium",
         "spring_care": "Gently clear fallen leaves from around basal rosettes in spring to prevent crown smothering.",
         "summer_care": "Requires consistently moist to wet soils; do not allow root zone to dry out completely in summer.",
@@ -581,7 +581,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Aralia racemosa": {
-        "summary": "A majestic architectural native perennial (3–5 ft) forming a huge shrub-like mound of enormous compound leaves, bearing frothy greenish-white flower panicles in July followed by heavy drooping clusters of dark purple berries. Outstanding for shaded woodland understories and native accent plantings.",
+        "summary": "A stout, branched woodland perennial (3–5 ft) forming a large mound of bipinnately compound foliage, bearing spherical greenish-white umbels in midsummer followed by dark purple berry clusters in autumn. Grows in moist, humus-rich woodland soils in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Cut dead woody herbaceous stalks to the ground in spring once temperatures exceed 50°F.",
         "summer_care": None,
@@ -593,7 +593,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
     },
     "Symphiotrichum cordifolium": {
-        "summary": "A lovely native blue wood aster (2–3 ft) smothered in September and October with frothy clouds of pale blue to lavender starry blossoms above heart-shaped foliage. An essential late-season pollinator matrix plant for dry shade, woodland borders, and understory plantings.",
+        "summary": "An upright branching perennial aster (2–3 ft) with cordate basal leaves, producing abundant small composite flower heads with pale blue-to-violet ray florets and yellow centers from September to October. Grows in rich, dry to moist woodland soils, open savanna borders, and shaded slopes in partial shade.",
         "maint_level": "Low",
         "spring_care": "Wait until 50°F+ before cutting back dead winter stems to 8–18 inches above ground.",
         "summer_care": "Chelsea chop: pinch or cut stems back by 1/3 in early June to promote dense branching and prevent flopping.",
@@ -605,7 +605,7 @@ BOTANICAL_TREES_SHRUBS = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Callirhoe bushii": {
-        "summary": "A rare native Ozark poppy mallow (1–2 ft) producing an abundance of cup-shaped, brilliant magenta-purple blossoms from May through August along sprawling leafy stems. Outstanding for sunny rock gardens, borders, limestone glade restorations, and drought-hardy groundcovers.",
+        "summary": "A perennial herbaceous forb (1–2 ft) with deeply lobed palmate leaves, bearing cup-shaped magenta-pink flowers (2–2.5 in across) from June to August on sprawling, ascending stems. Develops a deep woody taproot adapted to rocky, well-drained limestone soils, glades, and sunny borders.",
         "maint_level": "Low",
         "spring_care": "Cut back dead stems to the crown in spring after sustained 50°F+ temperatures.",
         "summer_care": None,

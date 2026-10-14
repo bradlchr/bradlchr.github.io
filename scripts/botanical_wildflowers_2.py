@@ -5,7 +5,7 @@ Botanical profiles for Deep Roots Native Catalog.
 
 BOTANICAL_WILDFLOWERS_2 = {
     "Oenothera speciosa": {
-        "summary": "A vigorous native pink evening primrose (1–2 ft) producing clouds of 2-inch, fragrant saucer-shaped white blossoms that flush soft rose-pink from May through July above sprawling stems. Exceptional for erosion control, hot hellstrips, and sunny meadow borders where vigorous spreading is welcomed.",
+        "summary": "A low-growing, stoloniferous perennial (1–2 ft) with lanceolate leaves, producing abundant 4-petaled white-to-pink cup-shaped flowers (up to 3 in across) with yellow centers from May to July. Spreads rapidly by extensive creeping rhizomes and self-seeding to form dense groundcover mats in dry to moist, well-drained soils in full sun.",
         "maint_level": "Medium",
         "spring_care": "Shear back stems to 2–3 inches in early spring at 50°F+; edge bed boundaries to contain spreading rhizomes.",
         "summer_care": "Shear back by half after main spring bloom wave to stimulate fresh compact foliage.",
@@ -17,7 +17,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Eurybia divaricata": {
-        "summary": "A refined native white wood aster (1–2.5 ft) producing frothy sprays of starry white daisy blossoms with yellow-to-burgundy centers in late summer atop distinctive dark, zigzagging wiry stems. The gold standard for dry shaded borders, woodland gardens, and tree underplantings.",
+        "summary": "A loose, sprawling woodland aster (1–2 ft) with dark green, sharply toothed cordate leaves on dark wiry stems, bearing flat-topped corymbs of white ray florets with yellow-turning-red disk centers from August to October. Spreads by rhizomes and self-seeding in dry to moist woodland shade, enduring heavy tree root competition.",
         "maint_level": "Low",
         "spring_care": "Wait until sustained 50°F+ temperatures before cutting back dead winter stems to 8–18 inches.",
         "summer_care": "Chelsea chop: pinch back stems by 1/3 in early June to promote dense branching and compact form.",
@@ -29,7 +29,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Persicaria virginiana": {
-        "summary": "A handsome architectural native jumpseed (2–3 ft) featuring large, oval pointed leaves often marked with striking dark chevrons, sending up airy 2-foot wiry spires of tiny ruby-red to white florets in late summer. Ideal for woodland borders, shaded rain gardens, and naturalized matrices.",
+        "summary": "An upright perennial herb (2–3 ft) with broad ovate leaves marked with chevron variegation, producing slender, wiry racemes (up to 12 in) of tiny white flowers from July to September followed by hooked achenes. Spreads via rhizomes and self-seeding in moist, organically rich deciduous woodland soils in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Cut back old dead stalks in spring after 50°F+ temperatures.",
         "summer_care": "Provide consistent moisture and partial to full shade; highly pest-free.",
@@ -41,7 +41,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Aquilegia canadensis": {
-        "summary": "An enchanting native wild columbine (1–2 ft) producing exquisite nodding, spurred bell blossoms of fiery scarlet and canary-yellow in April and May above delicate, fern-like blue-green foliage. Essential for shaded borders, rocky slopes, and early-season hummingbird feeding stations.",
+        "summary": "A branching, fibrous-rooted perennial (1.5–2.5 ft) with fern-like compound foliage, bearing nodding bell-like flowers with red sepals, yellow petals, and upward-projecting red nectar spurs in April and May. Grows in well-drained, dry to medium rocky woodland soils, limestone slopes, and open borders in full sun to full shade, self-seeding freely.",
         "maint_level": "Low",
         "spring_care": "Clear old debris gently in spring (50°F+) as delicate ferny foliage emerges.",
         "summer_care": "Cut stems back to basal foliage after flowering if columbine leaf miners tatter leaves.",
@@ -53,7 +53,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Phlox divaricata": {
-        "summary": "A fragrant native wild blue phlox (8–14 in) forming a sprawling semi-evergreen mat topped in April and May with loose clusters of intensely fragrant, periwinkle-blue to lavender blossoms. The premier spring understory matrix plant for woodland gardens, shade borders, and path margins.",
+        "summary": "A semi-evergreen, mat-forming perennial (8–14 in) with opposite elliptic leaves, producing loose cymes of fragrant, 5-lobed pale blue to lavender flowers in April and May atop erect flowering stems. Spreads by decumbent creeping sterile stems that root at nodes in moist, organically rich, well-drained woodland loams in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Shear back lightly by 1/3 after spring flowering completes to encourage dense, fresh basal growth.",
         "summer_care": "Provide partial shade and moist, rich loamy soil; highly powdery mildew resistant in good airflow.",
@@ -65,7 +65,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Echinacea purpurea": {
-        "summary": "The iconic native purple coneflower (2–4 ft) bearing stout stems topped from June through August by large, long-lasting rose-purple daisy blossoms with prominent spiky orange-bronze central cones. Indispensable keystone anchor for sunny borders, meadow matrices, and wildlife gardens.",
+        "summary": "A stout, upright perennial composite (2–4 ft) with rough, ovate-lanceolate leaves, producing large flower heads with drooping rose-purple ray florets and prominent spiky orange-bronze central cones from June to August. Forms non-aggressive clumps with fibrous roots in average to dry, well-drained soils and clay in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures consistently exceed 50°F before cutting dead stalks to 8–18 inches.",
         "summer_care": None,
@@ -77,7 +77,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Amsonia ciliata": {
-        "summary": "A refined native fringed bluestar (2–3 ft) featuring soft, feathery needle-like foliage that creates an ethereal soft-textured mound, topped in May by starry sky-blue blossoms, turning glowing golden-amber in autumn. Exceptional for sunny borders, rock gardens, and modern matrix plantings.",
+        "summary": "A multi-stemmed perennial (1.5–2.5 ft) featuring dense, thread-like linear foliage that turns bright golden-yellow in autumn, bearing terminal cymes of pale blue starry flowers in spring. Forms a rounded clump in dry, rocky, or sandy, sharply drained soils in full sun, demonstrating high drought and heat endurance.",
         "maint_level": "Low",
         "spring_care": "Cut woody dead stems to the crown in spring after sustained 50°F+ temperatures.",
         "summer_care": None,
@@ -89,7 +89,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
     },
     "Monarda bradburiana": {
-        "summary": "A well-behaved, compact native eastern beebalm (1–2 ft) producing dense heads of white-to-pale-pink tubular blossoms delicately speckled with purple in May and June above aromatic foliage. Uniquely mildew-resistant and non-invasive, ideal for borders, rock gardens, and dry shade.",
+        "summary": "A compact, clumping perennial mint (1–2 ft) with square stems and aromatic ovate leaves that turn burgundy in autumn, producing terminal heads of two-lipped white to pale pink flowers spotted with purple in May and June. Forms well-behaved mounds in dry, rocky woods, glades, and sunny borders in full sun to partial shade, without spreading invasively.",
         "maint_level": "Low",
         "spring_care": "Cut dead stalks to the crown in early spring at 50°F+; fresh aromatic rosettes emerge early.",
         "summer_care": None,
@@ -101,7 +101,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Penstemon digitalis": {
-        "summary": "A dependable native foxglove beardtongue (2–3 ft) producing tall, sturdy spikes of pure white to pale pink tubular bell blossoms in May and June above semi-evergreen basal foliage. Outstanding for rain gardens, sunny perennial beds, bioswales, and pollinator matrices.",
+        "summary": "An upright clump-forming perennial (2–3 ft) with opposite, lustrous green lanceolate leaves, producing terminal panicles of tubular white two-lipped flowers from May to June, followed by dark purple woody seed capsules. Grows in moist to average garden soils, heavy clay, and rain garden borders in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before cutting back dead flower stalks to the basal rosette.",
         "summer_care": None,
@@ -113,7 +113,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Heuchera americana": {
-        "summary": "A refined native woodland alumroot (1–2 ft) forming compact mounds of scalloped leaves exquisitely marbled with silver, pewter, and burgundy veining, sending up airy wands of tiny greenish-white bells in June. Serves as an elegant groundcover matrix for shaded borders, rock gardens, and woodland path margins.",
+        "summary": "A semi-evergreen clump-forming perennial (1–2 ft) with rounded, palmately lobed basal leaves marked with silvery-purple marbling, producing slender scapes of tiny greenish-white bell flowers in late spring. Grows in rocky, well-drained woodland soils and crevices in partial to full shade, forming neat compact rosettes.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures consistently exceed 50°F before trimming away tattered overwintered leaves at the crown.",
         "summer_care": None,
@@ -125,7 +125,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Conoclinium coelestinum": {
-        "summary": "A dazzling native blue mistflower (1.5–3 ft) producing frothy, powder-puff clusters of vivid ageratum-like mist-blue to lavender blossoms from July through October that blanket the garden in cool blue clouds. Outstanding for rain gardens, bioswales, moist borders, and monarch waystations.",
+        "summary": "A rhizomatous perennial composite (1.5–3 ft) with triangular to ovate opposite leaves, bearing dense flat-topped clusters of fuzzy powder-blue to purple disk florets from July to October. Spreads vigorously via creeping rhizomes and self-seeding in moist to wet loams, ditches, and rain gardens in full sun to partial shade.",
         "maint_level": "Medium",
         "spring_care": "Emerges late in spring (May); cut back old stems at 50°F+ and edge boundaries if containing in formal beds.",
         "summer_care": "Provide consistent moisture; excels in wet clay soils and partial to full sun.",
@@ -137,7 +137,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Silene virginica": {
-        "summary": "A breathtaking native fire pink (1–2 ft) producing loose clusters of brilliant, fiery scarlet-red 5-petaled notched stars from May to July above sticky lanceolate foliage. An extraordinary focal accent for shaded rock gardens, open woodland slopes, and well-drained borders.",
+        "summary": "A short-lived perennial herb (1–1.5 ft) with sticky-pubescent stems and spatulate basal leaves, producing loose cymes of brilliant scarlet, 5-petaled flowers with deeply notched petals from May to July. Grows in dry, rocky, well-drained open woodland soils, bluffs, and slopes in partial shade to full sun.",
         "maint_level": "Low",
         "spring_care": "Clear debris gently in spring (50°F+) as basal rosettes awaken.",
         "summer_care": "Requires partial shade and excellent drainage; avoid heavy wet clay around the crown.",
@@ -149,7 +149,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Polygonatum biflorum": {
-        "summary": "An architectural native smooth Solomon's seal (2–3 ft) featuring gracefully arching unbranched stems clothed in ribbed green leaves, dangling pairs of creamy-white bell blossoms in May, followed by blue-black berries in autumn. Outstanding for shaded borders, woodland understories, and fern matrices.",
+        "summary": "An arching rhizomatous woodland perennial (1.5–3 ft) with alternating elliptic leaves along gracefully curving unbranched stems, bearing paired, bell-shaped greenish-white flowers dangling beneath leaf axils in May, followed by blue-black berries. Spreads slowly via thick knobby rhizomes in moist, humus-rich woodland soils in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before clearing away old dead stalks.",
         "summer_care": None,
@@ -161,7 +161,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Anemone canadensis": {
-        "summary": "A vigorous native meadow anemone (1–2 ft) forming a dense emerald carpet of deeply lobed leaves smothered in late spring with pristine, cup-shaped pure white 5-petaled blossoms with bright golden stamens. Unmatched rapid groundcover for rain gardens, retention swales, and moist sunny banks.",
+        "summary": "A vigorous rhizomatous perennial (1–2 ft) with deeply divided palmate leaves, bearing solitary 5-parted pure white flowers with yellow stamens from May to July. Spreads rapidly via creeping rhizomes to form dense groundcover mats in moist to wet soils in full sun to partial shade, suitable for large borders and wet meadows.",
         "maint_level": "Medium",
         "spring_care": "Cut back dead foliage in early spring at 50°F+; edge boundaries to contain vigorous underground rhizomes.",
         "summer_care": None,
@@ -173,7 +173,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Coreopsis lanceolata": {
-        "summary": "A dependable native lanceleaf coreopsis (1–2 ft) producing bright, sunny golden-yellow daisy blossoms with fringed petals from May through July above narrow lanceolate foliage. Essential workhorse for sunny borders, rock gardens, curbside hellstrips, and pollinator matrices.",
+        "summary": "A clump-forming perennial (1–2 ft) with lanceolate leaves primarily in a basal rosette, producing solitary yellow composite flower heads (up to 2.5 in across) on slender scapes from May to July. Grows in dry to medium, well-drained rocky or sandy soils in full sun, self-seeding readily in open gaps.",
         "maint_level": "Low",
         "spring_care": "Cut back old flowering stems in early spring at 50°F+; fresh green rosettes awaken early.",
         "summer_care": "Deadhead spent flowers in July to promote continuous blooming through late summer.",
@@ -185,7 +185,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Thalictrum thalictroides": {
-        "summary": "An enchanting native rue anemone (4–8 in) opening in early spring with delicate, multi-petaled pure white to pale pink blossoms that hover like stars above delicate, columbine-like blue-green foliage. A refined spring ephemeral for rich woodland gardens, shade borders, and rock gardens.",
+        "summary": "A delicate spring ephemeral perennial (4–8 in) with fine, divided columbine-like leaves, producing small umbels of white to pale pink flowers with numerous yellow stamens in April and May. Arises from small tuberous roots in moist, humus-rich deciduous woodland soils in partial to full shade, entering dormancy during summer.",
         "maint_level": "Low",
         "spring_care": "Clear debris lightly in early spring at 50°F+; foliage and blooms emerge together early.",
         "summer_care": "Provide partial to full shade and organic moisture; naturally goes dormant in hot dry summers.",
@@ -197,7 +197,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Gaillardia pulchella": {
-        "summary": "A vibrant native Indian blanket (1–2 ft) producing continuous masses of brilliant bicolored daisy blossoms with fiery red centers tipped in sunny yellow from May until heavy frost. Outstanding for hot, dry rock gardens, curbside hellstrips, and sunny meadow borders.",
+        "summary": "A short-lived perennial or self-seeding annual forb (1–2 ft) with hairy lanceolate leaves, bearing composite flower heads with red ray florets tipped in yellow surrounding a dark red central disk from May to September. Possesses high heat and drought tolerance in sandy, rocky, infertile, well-drained soils in full sun.",
         "maint_level": "Low",
         "spring_care": "Allow self-sown seeds to germinate in spring; thin seedlings if crowded.",
         "summer_care": None,
@@ -209,7 +209,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Antennaria parlinii": {
-        "summary": "A tough native Parlin's pussytoes (6–12 in) forming a dense, weed-suppressing groundcover carpet of broad, silvery-felted basal leaves, sending up fuzzy white-and-pink flower clusters resembling kitten paws in early spring. Ideal for dry shaded borders, rocky slopes, and poor clay soils.",
+        "summary": "A low, mat-forming stoloniferous perennial (6–12 in) with broad, basal rosettes of smooth to woolly obovate leaves, producing clusters of white fuzzy pussy-toe-like flower heads atop erect stems in spring. Spreads by above-ground stolons to form a weed-suppressing groundcover in dry shade, rocky slopes, and poor soils in partial shade to full sun.",
         "maint_level": "Low",
         "spring_care": "Rake away smothering tree leaves in early spring at 50°F+; semi-evergreen silvery mat refreshes quickly.",
         "summer_care": "Extremely drought tolerant once established in dry shade to partial sun.",
@@ -221,7 +221,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Monarda fistulosa": {
-        "summary": "An indispensable keystone native wild bergamot (2–4 ft) bearing fragrant minty foliage topped from July to September by dense mop-head clusters of lavender-pink tubular blossoms. Essential pollinator anchor for sunny meadows, rain gardens, borders, and monarch waystations.",
+        "summary": "An upright, branched perennial mint (2–4 ft) with square stems and aromatic lanceolate leaves, producing dense terminal heads of tubular, two-lipped lavender to pink flowers from July to September. Spreads by rhizomes and self-seeding in average to dry soils, prairies, and open savannas in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches.",
         "summer_care": "Chelsea chop: pinch stems back by 1/3 in early June to promote dense bushy growth and prevent lodging.",
@@ -233,7 +233,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Liatris aspera": {
-        "summary": "A showstopping native rough blazing star (2–3 ft) bearing distinctive rounded, button-like flower heads of electric magenta-purple spaced along stiff upright stalks in August and September. An unrivaled nectar magnet for sunny prairie borders, rock gardens, and monarch waystations.",
+        "summary": "An upright perennial forb (2–4 ft) with linear leaves, producing a spike of rounded, button-like purple flower heads with crinkled rounded bracts that open from top to bottom from August to October. Possesses a rounded corm adapted to dry, sandy, rocky, or shallow limestone soils in full baking sun.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
         "summer_care": "Requires full sun and lean, sharply drained soils; highly drought hardy.",
@@ -245,7 +245,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Pontederia cordata": {
-        "summary": "A majestic native pickerelweed (2–3 ft) featuring large, lustrous arrow-shaped foliage emerging from shallow water, topped from June to September by dense spikes of brilliant violet-blue blossoms with two yellow nectar spots. Essential for retention ponds, bioswales, rain gardens, and wetland margins.",
+        "summary": "An emergent aquatic perennial (2–3 ft) with glossy, lanceolate to cordate leaves, producing dense 3–6 inch spikes of small violet-blue flowers from June to September above water level. Spreads via thick creeping rhizomes in saturated mud and shallow standing water (up to 12 in deep) along pond margins and wetlands in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut back dead brown stalks in early spring at 50°F+ before new aquatic spears emerge.",
         "summer_care": "Requires shallow standing water or constantly saturated wetland soil in full sun.",
@@ -257,7 +257,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Asclepias verticillata": {
-        "summary": "An elegant native whorled milkweed (1–2.5 ft) featuring slender needle-like leaves in dense whorls along unbranched stems, topped in late summer by delicate, fragrant flat-topped umbels of snowy-white blossoms. Outstanding for dry borders, rock gardens, hellstrips, and monarch waystations.",
+        "summary": "A slender, single-stemmed perennial milkweed (1–2 ft) with dense whorls of fine, needle-like linear leaves, producing small flat-topped umbels of fragrant greenish-white flowers from July to September. Spreads slowly via rhizomes to form loose colonies in dry, rocky, poor soils, glades, and prairie roadsides in full sun.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before clearing old dead stalks (emerges late in May).",
         "summer_care": None,
@@ -269,7 +269,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Coreopsis pubescens": {
-        "summary": "A charming native star tickseed (2–3 ft) bearing downy foliage and masses of bright golden-yellow daisy blossoms with fringed petals from June to August on airy branching stems. Excellent for open woodland margins, shaded borders, and dry rocky slopes.",
+        "summary": "A robust clump-forming perennial (2–3 ft) with downy pubescent stems and ovate-lanceolate leaves, bearing abundant golden-yellow composite flower heads from June to September. Grows in rocky open woods, dry slopes, and borders in full sun to partial shade, tolerating drought and poor soils.",
         "maint_level": "Low",
         "spring_care": "Cut back dead stems to the crown in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -281,7 +281,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Ruellia humilis": {
-        "summary": "A tough, compact native wild petunia (12–18 in) producing velvety olive-green foliage smothered from June to August in charming 2-inch lavender-blue trumpet blossoms that open fresh each morning. Unsurpassed drought-hardy groundcover for rock gardens, hellstrips, and sunny borders.",
+        "summary": "A compact perennial forb (1–2 ft) with hairy olive-green ovate leaves, producing axillary funnel-shaped lavender-blue flowers (up to 2 in across) from June to August. Adapts readily to dry, rocky limestone glades, heavy clay, and drought-prone borders in full sun, self-seeding locally.",
         "maint_level": "Low",
         "spring_care": "Cut back woody dead stems to the ground in spring after 50°F+ temperatures (wakes up in May).",
         "summer_care": None,
@@ -293,7 +293,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Echinacea pallida": {
-        "summary": "An elegant native pale purple coneflower (2–3 ft) opening in May and June with dramatic, slender drooping rose-pink to white reflexed petals radiating from spiky copper-orange cones on graceful stems. A premier early-summer anchor for sunny borders, meadows, and prairie restorations.",
+        "summary": "An upright perennial composite (2–3 ft) with narrow, hairy linear leaves, producing flower heads with long, drooping, pale pinkish-purple ray florets surrounding a spiky reddish-brown cone in June and July. Possesses a deep, stout taproot adapted to dry, rocky, well-drained soils and clay in full sun.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to the crown.",
         "summer_care": None,
@@ -305,7 +305,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Helianthus occidentalis": {
-        "summary": "A refined, well-behaved native western sunflower (2–3 ft) forming neat rosettes of basal leaves that send up slender, nearly leafless wiry stems topped by brilliant golden-yellow sunflowers from July to September. Perfect non-aggressive sunflower for formal borders, rock gardens, and prairie matrices.",
+        "summary": "A rhizomatous perennial sunflower (2–3 ft) with coarse, mostly basal ovate leaves, sending up slender, nearly leafless stems topped with yellow composite flower heads in July and August. Spreads by slender rhizomes to form open colonies in dry, sandy, or rocky soils in full sun, maintaining a non-aggressive open habit.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
         "summer_care": "Requires full sun and lean, sharply drained soils; highly drought-resilient.",
@@ -317,7 +317,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Viola pedota": {
-        "summary": "An exquisite native bird's foot violet (3–6 in) featuring deeply dissected foliage resembling a bird's foot and large, pansy-like velvety blossoms with the upper two petals deep violet and the lower three pale lavender with orange beards. Ideal for baking sunny rock gardens, sand beds, and limestone glades.",
+        "summary": "A stemless perennial violet (3–6 in) with deeply dissected, bird-foot-like leaves, bearing large flat-faced flowers with velvety violet-blue upper petals and lavender lower petals in April and May. Requires sharply drained, sandy, gravelly, or rocky acidic-to-neutral soils in full sun to light shade, intolerant of soggy moisture.",
         "maint_level": "Low",
         "spring_care": "Clear debris lightly in early spring at 50°F+; requires sharp drainage and lean rocky soil.",
         "summer_care": "Requires full sun and excellent drainage; avoid rich fertilizers or heavy mulch.",
@@ -329,7 +329,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Solidago flexicaulis": {
-        "summary": "A shade-loving native zigzag goldenrod (1.5–3 ft) featuring distinctive zigzagging stems clothed in broad, sharply toothed leaves, bearing bright golden-yellow clusters of flowers in the leaf axils from August to October. Outstanding for lighting up shaded woodland understories and north foundation beds.",
+        "summary": "An erect perennial woodland goldenrod (1.5–3 ft) featuring distinct zigzagging stems and broad, coarsely toothed ovate leaves, producing small clusters of yellow florets in leaf axils and a short terminal cluster from August to October. Spreads slowly via short rhizomes in moist to average, rich woodland soils in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Wait until sustained 50°F+ temperatures before cutting back dead winter stems to 8–18 inches.",
         "summer_care": None,
@@ -341,7 +341,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Spigelia marilandica": {
-        "summary": "An extraordinary native Indian pink (1–2 ft) producing upright one-sided floral cymes of brilliant scarlet tubular flowers that flare open at the tips into 5-pointed, canary-yellow starry stars in June. The ultimate showstopping focal accent for shaded borders and woodland gardens.",
+        "summary": "An erect, clumping perennial herb (1–2 ft) with opposite ovate leaves, producing one-sided terminal cymes of tubular scarlet-red flowers that flare open at the apex into a 5-pointed yellow star in June. Grows in moist, well-drained, organically rich soils in partial shade, establishing a non-invasive long-lived clump.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before clearing away old dead stems at the crown.",
         "summer_care": "Provide partial shade and moist, rich, organic woodland loams.",
@@ -353,7 +353,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Lespedeza repens": {
-        "summary": "A non-aggressive native creeping bush clover (4–8 in tall, trailing 2 ft) forming a soft emerald mat of clover-like trifoliate leaves, bearing delicate pinkish-purple pea flowers in late summer. Exceptional drought-hardy groundcover for rocky slopes, open savannas, and sunny banks.",
+        "summary": "A low-growing, trailing perennial legume (4–8 in tall, trailing 1–2 ft) with trifoliate leaves, producing small pinkish-purple pea-like flowers in leaf axils from July to September. Develops a woody taproot that fixes nitrogen and thrives in dry, rocky, infertile soils and open woodlands in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut back dead trailing stems to the crown in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -365,7 +365,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Liatris scariosa": {
-        "summary": "A stately native savannas blazing star (2–4 ft) producing large, button-shaped flower heads of vibrant amethyst-purple on long upright spikes in August and September above lanceolate foliage. Outstanding for sunny borders, oak savanna restorations, and monarch waystations.",
+        "summary": "A stout perennial forb (2–4 ft) with lanceolate leaves, producing large, rounded button-like heads of reddish-purple florets with papery bracts along an open spike from August to October. Arises from a woody corm adapted to dry to medium rocky prairie loams, open savannas, and sunny borders in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -377,7 +377,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
     },
     "Echinacea simulata": {
-        "summary": "A rare native glade coneflower (2–3 ft) opening in May and June with slender, drooping pale pink reflexed rays radiating from spiky golden-brown central cones, producing distinctive bright yellow pollen. Ideal for dry limestone glades, rock gardens, and sunny prairie borders.",
+        "summary": "An upright perennial composite (2–3 ft) with narrow lanceolate foliage and hairy stems, bearing flower heads with drooping, slender pinkish-purple ray florets and yellow pollen around a spiky central cone in June and July. Possesses a deep taproot adapted to dry, calcareous glades, rocky hillsides, and borders in full sun.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to the crown.",
         "summer_care": None,
@@ -389,7 +389,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Scuttelaria incana": {
-        "summary": "A stately native hoary skullcap (2–3 ft) producing terminal branched racemes of vibrant violet-blue two-lipped hooded flowers from July to September above downy grayish-green leaves. Superb for open woodland margins, sunny borders, and pollinator matrices.",
+        "summary": "An upright, branched perennial mint (2–3 ft) with finely pubescent square stems and ovate leaves, producing terminal racemes of tubular, hooded violet-blue flowers from June to September. Forms non-aggressive bushy clumps in dry to moist soils, woodland borders, and prairie restorations in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -401,7 +401,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Antennaria neglecta": {
-        "summary": "A low-growing native field pussytoes (3–6 in) forming a dense creeping semi-evergreen mat of silvery-gray spoon-shaped leaves, sending up fuzzy white-and-pink flower clusters resembling kitten paws in April. Exceptional groundcover for dry sunny slopes, curbsides, and rock gardens.",
+        "summary": "A low, stoloniferous perennial groundcover (4–8 in) forming flat rosettes of narrow, 1-veined woolly spatulate leaves, producing fuzzy white flower heads on erect scapes in early spring. Spreads via above-ground stolons to colonize dry, poor, rocky or gravelly soils in full sun, withstanding severe drought.",
         "maint_level": "Low",
         "spring_care": "Rake away smothering tree leaves in early spring at 50°F+; semi-evergreen silvery mat refreshes quickly.",
         "summer_care": None,
@@ -413,7 +413,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Sagittaria latifolia": {
-        "summary": "A magnificent native broadleaf arrowhead or duck potato (2–4 ft) producing bold, architectural arrow-shaped leaves emerging from shallow water, topped by whorls of pure white 3-petaled blossoms with golden centers in summer. Essential for retention basins, bioswales, rain gardens, and wetland restorations.",
+        "summary": "A colonial emergent aquatic perennial (1.5–3 ft) with distinctive arrowhead-shaped leaves, producing whorls of 3-petaled white flowers with yellow stamens from July to September on erect scapes. Spreads by submerged creeping rhizomes and starchy overwintering tubers in saturated mud and shallow standing water in full sun.",
         "maint_level": "Low",
         "spring_care": "Clear dead aquatic debris in spring at 50°F+; starchy tubers awaken as water warms.",
         "summer_care": "Requires shallow standing water or constantly saturated wetland soil in full sun.",
@@ -425,7 +425,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Solidago drummondii": {
-        "summary": "A graceful native cliff goldenrod (1–2 ft) producing arching stems clothed in soft velvety foliage, bearing cascading one-sided wand-like plumes of golden-yellow blossoms in September and October. Superb for rock gardens, dry limestone retaining walls, and sunny slope borders.",
+        "summary": "A clump-forming cliff-dwelling goldenrod (1–2 ft) with arching, hairy stems and toothed ovate leaves, bearing loose, 1-sided terminal sprays of yellow florets from August to October. Naturally adapted to sheer vertical limestone bluffs, dry crevices, and rock gardens in full sun to light shade, with high drought endurance.",
         "maint_level": "Low",
         "spring_care": "Wait until sustained 50°F+ temperatures before cutting back dead winter stems to 8–18 inches.",
         "summer_care": None,
@@ -437,7 +437,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
     },
     "Zizia aurea": {
-        "summary": "A premier native golden alexanders (1.5–3 ft) producing flat-topped umbels of tiny, brilliant golden-yellow flowers in May and June above glossy compound foliage. An essential early-season pollinator keystone for rain gardens, sunny meadows, borders, and black swallowtail habitat.",
+        "summary": "An upright perennial herb in the carrot family (1.5–2.5 ft) with compound 2-to-3 ternately divided leaves, producing flat-topped compound umbels of tiny yellow flowers from May to June. Grows in moist to average prairie soils, open woodlands, and rain garden perimeters in full sun to partial shade, self-seeding moderately.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -449,7 +449,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Cunila origanoides": {
-        "summary": "A delightful native dittany (1–1.5 ft) forming a compact, aromatic mounded sub-shrub covered in late summer with frothy clouds of tiny lavender-pink two-lipped blossoms above mint-scented leaves. Famous for producing whimsical ribbon-like ice crystals ('frost flowers') from its stems during early winter freezes.",
+        "summary": "A compact, woody-based perennial subshrub (8–18 in) with aromatic, ovate toothed leaves, producing clusters of small, two-lipped lavender to white flowers in late summer and autumn that produce ice-ribbon frost flowers in early winter. Grows in dry, rocky, well-drained acidic soils, chert slopes, and open oak woods in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut woody dead stems to the crown in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -461,7 +461,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Rudbeckia hirta": {
-        "summary": "The cheerful native black-eyed Susan (1–3 ft) bearing bristly hairy stems topped from June through September with bright golden-yellow daisy blossoms surrounding a raised dark chocolate-brown central cone. An iconic, fast-blooming workhorse for sunny borders, meadow matrices, and pollinator gardens.",
+        "summary": "A biennial or short-lived perennial composite (1–3 ft) with coarse, bristly-hairy lanceolate leaves, producing large flower heads with golden-yellow ray florets and dark brown domed centers from June to September. Self-seeds freely to maintain populations in dry to moist, open soils, meadows, and sunny garden borders in full sun.",
         "maint_level": "Low",
         "spring_care": "Allow self-sown seedlings to establish in matrix gaps; clear dead winter stems at 50°F+.",
         "summer_care": "Deadhead spent blooms in midsummer if tidy appearance and prolonged bloom is desired.",
@@ -473,7 +473,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Phlox paniculata": {
-        "summary": "The stately native garden phlox (3–5 ft) producing massive pyramidal flower panicles of fragrant rose-pink to magenta blossoms from July through September above upright stems with lanceolate leaves. An indispensable high-summer focal anchor for borders, rain gardens, and cottage matrices.",
+        "summary": "An upright, clump-forming perennial (2–4 ft) with lanceolate leaves, producing dense pyramidal panicles of fragrant, 5-lobed rose-pink to purple flowers from July to September. Grows in moist, fertile, organically rich, well-drained loams in full sun to light shade, requiring good air circulation.",
         "maint_level": "Medium",
         "spring_care": "Wait until sustained 50°F+ temperatures before cutting dead stalks to the crown.",
         "summer_care": "Water at soil level during severe drought to prevent powdery mildew stress; provide good air circulation.",
@@ -485,7 +485,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Packera obovata": {
-        "summary": "An exceptional native roundleaf ragwort (1–2 ft) forming an evergreen emerald rosette carpet that erupts in April and May with cheerful clusters of bright golden-yellow daisy blossoms on upright stems. The ultimate living green mulch for shaded borders, woodland edges, and under trees.",
+        "summary": "A semi-evergreen, mat-forming perennial (8–14 in) with rounded, toothed basal rosettes, producing branched corymbs of bright yellow daisy-like composite flowers in April and May atop erect stems. Spreads via stolons to form groundcovers in dry to moist rocky woodland soils, slopes, and borders in partial shade to full sun.",
         "maint_level": "Low",
         "spring_care": "Rake away smothering tree leaves in early spring at 50°F+; semi-evergreen rosettes awaken quickly.",
         "summer_care": "Highly drought-tolerant once established in shade; suppresses weeds throughout summer.",
@@ -497,7 +497,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Rudbeckia missouriensis": {
-        "summary": "A rugged native Missouri coneflower (1–2 ft) producing bristly, hairy stems topped by bright golden-yellow daisy blossoms with dark brown cones from June to October, uniquely adapted to dry limestone glades. Outstanding for rock gardens, dry borders, hellstrips, and glade restorations.",
+        "summary": "A compact perennial composite (1–2 ft) with narrow, hairy, linear-lanceolate leaves, bearing bright yellow flower heads with prominent dark purplish-brown cones from July to October. Develops a woody crown adapted to shallow, rocky limestone glades and dry, sharply drained soils in full baking sun.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -509,7 +509,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Fragaria virginiana": {
-        "summary": "A delightful native wild strawberry (4–7 in) forming a lush emerald groundcover carpet via surface runners, bearing 5-petaled white flowers in spring followed by intensely sweet, aromatic miniature strawberries in June. Unsurpassed living green mulch for borders, orchards, and sunny matrices.",
+        "summary": "A low-growing, stoloniferous perennial groundcover (4–7 in) with trifoliate toothed leaves, bearing 5-petaled white flowers with yellow centers in spring, followed by small, sweet red aggregate berries in early summer. Spreads via above-ground runners to form an open groundcover in dry to moist soils in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Rake lightly in spring at 50°F+; semi-evergreen trifoliate leaves awaken early.",
         "summer_care": "Harvest sweet miniature strawberries or leave for wildlife; drought tolerant once established.",
@@ -521,7 +521,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Diarrhena obovata": {
-        "summary": "An exceptional native American beakgrain (2–3 ft) forming a dense, lush woodland carpet of arching, shiny emerald blades, sending up slender arching flower culms bearing distinctive beak-like green seed grains in late summer. Outstanding weed-suppressing matrix for dry to moist shade.",
+        "summary": "A rhizomatous perennial woodland grass (2–3 ft) forming a dense carpet of arching, shiny emerald-green linear leaves, sending up slender arching culms bearing beak-like green seed grains in late summer. Spreads via creeping rhizomes to form weed-suppressing matrix groundcovers in dry to moist woodland shade.",
         "maint_level": "Low",
         "spring_care": "Cut back old foliage to 2–3 inches in early spring at 50°F+ as new glossy shoots emerge.",
         "summer_care": None,
@@ -533,7 +533,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Pycnanthemum tenuifolium": {
-        "summary": "A phenomenal native slender mountain mint (2–3 ft) forming a bushy cloud of fine needle-like aromatic foliage topped from July to September by dense clusters of tiny white blossoms speckled with purple. The undisputed champion pollinator magnet for sunny borders, rain gardens, and meadows.",
+        "summary": "A bushy, clump-forming perennial mint (2–3 ft) with finely textured, needle-like aromatic leaves, producing dense flat-topped terminal clusters of small white flowers with purple speckles from July to September. Spreads slowly via short rhizomes in dry to moist soils and heavy clay in full sun, without invasive behavior.",
         "maint_level": "Low",
         "spring_care": "Wait until sustained 50°F+ temperatures before cutting dead stems to 8–18 inches.",
         "summer_care": None,
@@ -545,7 +545,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Iris fulva": {
-        "summary": "A rare, captivating native copper iris (2–3 ft) producing drooping, flat-topped blossoms of unique copper-red, brick-red, or terracotta hues in May and June above graceful sword-like foliage. Exceptional focal accent for rain gardens, bioswales, pond margins, and moist shaded borders.",
+        "summary": "A rhizomatous wetland perennial iris (2–3 ft) with slender, arching green leaves, producing flat, drooping copper-to-red flowers in May and June atop slender branched stems. Spreads by shallow rhizomes in moist to wet saturated soils, shallow standing water, and rain garden basins in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut away old winter foliage in early spring at 50°F+ before new sword blades emerge.",
         "summer_care": None,
@@ -557,7 +557,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Hibiscus lasiocarpos": {
-        "summary": "A magnificent native woolly rose mallow (4–6 ft) bearing massive 6–8 inch white or pale pink crepe-paper blossoms with deep crimson-red throats from July through September above velvety heart-shaped leaves. A showstopping keystone anchor for rain gardens, bioswales, pond margins, and moist borders.",
+        "summary": "A robust, multi-stemmed perennial shrub-like herb (3–6 ft) with velvety, toothed triangular-ovate leaves, producing large 5-petaled white flowers (up to 6 in across) with deep crimson centers from July to September. Possesses a deep, woody root system adapted to wet bottomlands, ditches, pond edges, and rain gardens in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut dead woody stalks back to 4–6 inches in late spring at 50°F+ (emerges late in May).",
         "summer_care": "Provide consistent moisture; excels in standing water and saturated soils in full sun.",
@@ -569,7 +569,7 @@ BOTANICAL_WILDFLOWERS_2 = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Veronicastrum viginicum": {
-        "summary": "A commanding architectural native Culver's root (3–6 ft) featuring upright stems encircled by handsome whorls of lance-shaped leaves, topped in midsummer by elegant candelabras of dense, branching white-to-pale-blue floral wands. An indispensable vertical accent for rain gardens, bioswales, and sunny borders.",
+        "summary": "An upright perennial (3–5 ft) with clean whorls of 3–7 lanceolate leaves along smooth stems, producing dense, candelabra-like terminal racemes of tiny white-to-pale-blue flowers from July to August. Possesses a deep fibrous root system adapted to moist, fertile prairie loams and rain garden perimeters in full sun to light shade.",
         "maint_level": "Low",
         "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches.",
         "summer_care": None,

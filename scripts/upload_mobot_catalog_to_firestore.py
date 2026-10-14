@@ -102,15 +102,25 @@ def upload_plant(plant):
     fields['images'] = {'arrayValue': {'values': image_maps}}
 
     body = json.dumps({'fields': fields}).encode('utf-8')
-    req = urllib.request.Request(url, data=body, method='PATCH', headers={'Content-Type': 'application/json'})
-
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            if resp.status in (200, 201):
-                return True, plant.get('scientific_name')
-            return False, f"{plant.get('scientific_name')}: Status {resp.status}"
-    except Exception as e:
-        return False, f"{plant.get('scientific_name')}: {str(e)}"
+    import time
+    for attempt in range(5):
+        try:
+            req = urllib.request.Request(url, data=body, method='PATCH', headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                if resp.status in (200, 201):
+                    return True, plant.get('scientific_name')
+                return False, f"{plant.get('scientific_name')}: Status {resp.status}"
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 4:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            return False, f"{plant.get('scientific_name')}: HTTP Error {e.code}"
+        except Exception as e:
+            if attempt < 4:
+                time.sleep(1.0)
+                continue
+            return False, f"{plant.get('scientific_name')}: {str(e)}"
+    return False, f"{plant.get('scientific_name')}: Max retries exceeded"
 
 def main():
     plants = load_plants()
@@ -119,7 +129,7 @@ def main():
     success_count = 0
     fail_count = 0
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(upload_plant, p): p for p in plants}
         for future in as_completed(futures):
             ok, msg = future.result()

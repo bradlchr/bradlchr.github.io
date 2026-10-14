@@ -5,7 +5,7 @@ Botanical profiles for Deep Roots Native Catalog.
 
 BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
     "Sporobolus heterolepis": {
-        "summary": "A premier native bunchgrass (18–24 in) forming a fine emerald fountain crowned in late summer by airy pinkish flower panicles with a hot buttered popcorn fragrance, turning glowing pumpkin-orange in fall. Acts as a well-behaved green mulch matrix for formal borders, rain garden margins, and hellstrips.",
+        "summary": "A dense perennial warm-season bunchgrass (2–3 ft) forming fine-textured mounds of arching emerald-green linear leaves that turn orange-copper in autumn, producing airy panicles with aromatic dropseed grains in late summer. Develops a fibrous, deep root network adapted to dry, rocky, well-drained soils and heavy clay in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut back dried foliage to 2–3 inches in early spring once temperatures exceed 50°F before new green shoots emerge.",
         "summer_care": None,
@@ -17,7 +17,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Schizachyrium scoparium": {
-        "summary": "An iconic prairie bunchgrass (2–3 ft) with fine blue-green foliage that transforms into a fiery blaze of copper, amber, and burgundy in autumn, adorned with silvery crystalline seed plumes. A premier vertical structural matrix for sunny borders, rock gardens, and curbside hellstrips.",
+        "summary": "A clumping perennial warm-season grass (2–3 ft) with slender blue-green basal foliage that turns reddish-bronze in autumn, producing feathery white seed heads along erect stems from August to October. Grows in well-drained, average to dry infertile soils in full sun, maintaining an upright vertical habit.",
         "maint_level": "Low",
         "spring_care": "Cut back stems to 2–3 inches in late spring (at 50°F+) as soil warms in May before new growth shoots appear.",
         "summer_care": None,
@@ -29,7 +29,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Bouteloua curtipendula": {
-        "summary": "A charismatic native bunchgrass (1.5–2.5 ft) bearing arching flower stalks adorned with oat-like spikelets that dangle gracefully along one side with vivid red-orange stamens, turning golden-tan in fall. Excellent for erosion-prone slopes, dry meadows, and low-water borders.",
+        "summary": "A rhizomatous perennial warm-season grass (1.5–2.5 ft) with narrow blue-green blades, bearing slender 1-sided racemes of pendulous purplish florets followed by oat-like seeds that dangle along one side of the stem in midsummer. Tolerates shallow rocky soils, drought, and heavy clay in full sun, forming an open sod or matrix.",
         "maint_level": "Low",
         "spring_care": "Cut back to the ground in early spring at 50°F+; rake away dead thatch.",
         "summer_care": None,
@@ -41,7 +41,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Bouteloua gracilis": {
-        "summary": "A delightful shortgrass prairie gem (9–15 in) featuring distinctive horizontal 'eyebrow' flower spikes that hover like floating combs above fine blue-gray foliage. Perfect for curbside hellstrips, green roofs, rock gardens, and low-mow lawn alternatives.",
+        "summary": "A low-growing perennial warm-season bunchgrass (8–15 in) with narrow basal foliage, producing horizontal, comb-like purplish seed heads held at right angles at the tip of slender stems in midsummer. Well-adapted to dry, sharply drained sandy or rocky soils and full sun, functioning as a drought-tolerant lawn alternative or rock garden accent.",
         "maint_level": "Low",
         "spring_care": "Mow or shear back to 2 inches in spring (50°F+) before warm-season growth initiates.",
         "summer_care": None,
@@ -53,7 +53,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Buchloe dactyloides": {
-        "summary": "The premier native shortgrass sod-former (4–8 in) forming a soft, fine-textured grayish-green turf requiring little to no mowing and zero supplemental watering once established. The ideal eco-lawn alternative for full-sun yards, parkways, and golf roughs.",
+        "summary": "A dioecious, low-growing warm-season stoloniferous turfgrass (4–8 in) forming a dense sod of fine blue-gray curly blades that turn straw-buff upon winter dormancy. Spreads via above-ground stolons in dry, heavy clay and alkaline soils in full sun, requiring minimal mowing and zero supplemental fertilization once established.",
         "maint_level": "Low",
         "spring_care": "Mow once in late spring to 2–3 inches to remove old winter dormant blades.",
         "summer_care": None,
@@ -65,7 +65,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Panicum virgatum": {
-        "summary": "A commanding prairie switchgrass (4–6 ft) forming upright blue-green columns crowned in midsummer by airy, cloud-like pinkish flower panicles, turning rich copper-gold in autumn. Unrivaled for bioswales, rain gardens, screening hedges, and erosion control.",
+        "summary": "A robust perennial warm-season sod-forming bunchgrass (3–6 ft) with upright linear leaves turning golden-yellow in autumn, producing large open pyramidal panicles in July and August with dangling purple spikelets. Possesses a deep, fibrous root system adapted to dry to wet soils, clay, and periodic flooding in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut back to 3–4 inches in late spring at 50°F+ before new shoots rise from the base.",
         "summer_care": None,
@@ -77,7 +77,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Chasmanthium latifolium": {
-        "summary": "An exquisite native northern sea oats (2–3 ft) featuring drooping, flattened oat-like seed spikelets that flutter gracefully in the slightest breeze above bamboo-like foliage, turning rich bronze in fall. Ideal for shaded borders, rain gardens, and dry-shade erosion control.",
+        "summary": "A rhizomatous perennial woodland grass (2–3 ft) with bamboo-like lanceolate leaves, bearing drooping terminal panicles of flattened, chevron-shaped spikelets that turn bronze-copper in autumn. Spreads via short rhizomes and self-seeding in moist, rich soils in partial shade to full sun, suitable for shade gardens, bioswales, and erosion control.",
         "maint_level": "Low",
         "spring_care": "Cut back to 2 inches in spring after sustained 50°F+ temperatures.",
         "summer_care": None,
@@ -89,7 +89,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Elymus hystrix": {
-        "summary": "A striking native bottlebrush grass (2–3 ft) bearing distinctive horizontal, bristly spikelets that look like spiky bottle brushes hovering above broad green blades. Thrives in dry woodland shade, oak savannas, and naturalized understory matrices.",
+        "summary": "A cool-season perennial woodland bunchgrass (2–3 ft) with arching green leaves, producing erect bristly spikelet heads resembling bottle brushes in early summer that persist into autumn. Grows as solitary tufts in dry to moist woodland shade, savanna borders, and calcareous slopes, without spreading aggressively.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the ground in early spring at 50°F+ before cool-season growth accelerates.",
         "summer_care": None,
@@ -101,7 +101,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Elymus virginicus": {
-        "summary": "A robust cool-season Virginia wild rye (2–4 ft) featuring dense, bristly, erect seed spikes resembling cultivated wheat or barley above bluish-green foliage. Superb for bioswales, rain garden perimeters, and rapid erosion control on shaded slopes.",
+        "summary": "A cool-season perennial bunchgrass (2–3 ft) with erect blue-green stems and flat blades, producing dense upright cylindrical spike heads with stiff awns from June to August. Establishes rapidly in moist to wet bottomlands, ditches, and woodland openings in full sun to partial shade, providing early season matrix cover.",
         "maint_level": "Low",
         "spring_care": "Cut back old foliage in late winter or early spring (at 50°F+) as cool-season shoots awaken.",
         "summer_care": None,
@@ -113,7 +113,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC](https://mdc.mo.gov)"
     },
     "Sorghastrum nutans": {
-        "summary": "Missouri's official state grass (4–6 ft), forming an upright blue-green clump that ignites in rich burnt-orange in autumn, topped by magnificent shimmering golden-copper flower plumes with bright yellow stamens. A cornerstone keystone for sunny prairies, meadows, and large perennial borders.",
+        "summary": "A tall perennial warm-season bunchgrass (3–6 ft) with upright blue-green foliage turning orange-bronze in autumn, producing narrow, plume-like copper-brown panicles with bright yellow stamens from August to September. Forms dense upright clumps in average to dry soils in full sun, functioning as a primary component of tallgrass prairie restorations.",
         "maint_level": "Low",
         "spring_care": "Cut back to 3 inches in late spring at 50°F+ as warm-season soil temperatures rise.",
         "summer_care": None,
@@ -125,7 +125,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Andropogon gerardii": {
-        "summary": "The undisputed king of the tallgrass prairie (5–8 ft) with silvery blue-green summer foliage that blazes in shades of bronze, copper, and ruby in autumn, topped by distinctive 3-parted 'turkey foot' flower spikes. Best suited for meadow restorations, bioswales, and expansive sunny boundaries.",
+        "summary": "A tall perennial warm-season bunchgrass (4–7 ft) with blue-green stems and basal leaves turning reddish-bronze in autumn, bearing 3-parted 'turkey-foot' digitate racemes from August to October. Possesses extensive roots extending over 10 feet deep, adapted to average to moist loams and heavy clay in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut back to 3–4 inches in late spring (at 50°F+) before vigorous warm-season growth begins.",
         "summer_care": None,
@@ -137,7 +137,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Eragrostis spectabilis": {
-        "summary": "A dazzling native purple lovegrass (1–2 ft) producing breathtaking clouds of airy reddish-purple flower panicles in late summer that envelop the ground in a vibrant pink-purple haze. Exceptional for curbside hellstrips, sandy borders, and sunny rock gardens.",
+        "summary": "A low-growing warm-season bunchgrass (1–2 ft) with coarse green blades, producing diffuse, billowing reddish-purple clouds of airy spikelets in late summer that detach and tumble like tumbleweeds to disperse seeds. Grows in dry, sandy, rocky, or gravelly soils in full sun, enduring infertile conditions and high summer heat.",
         "maint_level": "Low",
         "spring_care": "Cut back dried foliage to 2 inches in spring at 50°F+ before new growth emerges.",
         "summer_care": None,
@@ -149,7 +149,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Koeleria macrantha": {
-        "summary": "A refined cool-season prairie junegrass (1–2 ft) forming tight, dense tufts of fine blue-gray foliage topped in early summer by silvery, upright cylindrical seed plumes. Ideal for green roofs, dry prairie matrices, and formal low-water borders.",
+        "summary": "A cool-season perennial bunchgrass (1–2 ft) forming dense tufts of narrow, bluish-gray basal leaves, producing silvery-green cylindrical spike-like panicles from May to June that mature to golden-tan. Grows in well-drained, dry to medium sandy or rocky soils in full sun, with high drought tolerance.",
         "maint_level": "Low",
         "spring_care": "Clean out dead winter blades with a hand rake or shear back lightly in early spring at 50°F+.",
         "summer_care": None,
@@ -161,7 +161,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Sisyrinchium angustifolium": {
-        "summary": "A delightful native blue-eyed grass (6–12 in) with iris-like sword foliage producing starry, violet-blue flowers with bright yellow centers from May through June. Charming as an edging plant along pathways, rock gardens, and moist meadow matrices.",
+        "summary": "A small clumping perennial in the iris family (6–12 in) with narrow, sword-like linear leaves, producing 6-tepaled violet-blue flowers with yellow centers on flattened branched stems from May to June. Grows in moist, well-drained loams and sandy soils in full sun to partial shade, self-seeding moderately in border margins.",
         "maint_level": "Low",
         "spring_care": "Trim back old foliage in spring at 50°F+ before delicate flower scapes arise.",
         "summer_care": "Provide moderate moisture during severe drought to prevent early dormancy.",
@@ -173,7 +173,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Allium cernuum": {
-        "summary": "A graceful native nodding wild onion (12–18 in) bearing nodding umbels of soft lilac-pink to white bell flowers on arching scapes in midsummer above slender grass-like foliage. Exceptional for rock gardens, dry borders, hellstrips, and rain garden perimeters.",
+        "summary": "A bulbous perennial herb (1–1.5 ft) with flat linear leaves, producing nodding umbels of bell-shaped pinkish-white flowers atop bent scapes in July and August. Forms clumps in rocky, well-drained limestone soils, gravel borders, and prairie restorations in full sun to light shade.",
         "maint_level": "Low",
         "spring_care": "Clear old debris in early spring at 50°F+; new onion-scented chive blades emerge early.",
         "summer_care": None,
@@ -185,7 +185,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
     },
     "Viola sororia": {
-        "summary": "A versatile native common blue violet (4–8 in) with heart-shaped leaves and charming purple, blue, or white blossoms in April and May. An indispensable keystone groundcover matrix for shaded lawns, woodland borders, and fruit tree guilds.",
+        "summary": "A stemless rhizomatous perennial forb (4–8 in) forming low rosettes of cordate leaves, bearing 5-petaled violet-purple or white flowers with bearded lower petals in spring, followed by cleistogamous summer seed capsules. Spreads by rhizomes and self-seeding to form dense groundcovers in moist to dry shade or partial sun.",
         "maint_level": "Low",
         "spring_care": "Allow spring flowers to bloom freely; rake lightly to expose rosettes if smothered by heavy leaves.",
         "summer_care": None,
@@ -197,7 +197,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Bignonia capreolata": {
-        "summary": "A vigorous native crossvine (20–40 ft) climbing via adhesive tendril disks, smothered in May with fragrant, bicolored tangerine-orange and yellow trumpet blossoms with a sweet mocha aroma. Magnificent for brick chimneys, masonry walls, trellises, and sunny pergolas.",
+        "summary": "A vigorous, woody high-climbing vine (30–50 ft) climbing via branched tendrils with adhesive disks, bearing opposite bifoliate semi-evergreen leaves and trumpet-shaped reddish-orange flowers with yellow throats in spring. Grows in moist, organically rich, well-drained soils in full sun to partial shade, adhering to masonry, fences, and tree bark.",
         "maint_level": "Low",
         "spring_care": "Prune immediately after spring flowering only if training vines or checking runaway growth.",
         "summer_care": "Water moderately during first season; remarkably heat and drought tolerant once rooted.",
@@ -209,7 +209,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Amorpha canescens": {
-        "summary": "A magnificent deep-rooted prairie sub-shrub (2–3 ft) featuring delicate silvery-gray downy compound foliage and dense 6-inch spikes of electric violet-purple flowers dotted with bright orange-gold stamens in June. Unsurpassed for dry prairie meadows, rock gardens, and drought-hardy borders.",
+        "summary": "A deep-rooted deciduous perennial subshrub (2–3 ft) with fine, lead-gray downy pinnate leaves, producing dense 3–6 inch spike-like racemes of tiny purple flowers with bright orange stamens in June and July. Develops a woody taproot penetrating up to 15 feet, providing extreme drought endurance in dry, rocky, well-drained prairies and glades in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut back woody herbaceous stems to 4–6 inches in spring at 50°F+ as growth initiates on new wood.",
         "summer_care": None,
@@ -221,7 +221,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Carex pensylvanica": {
-        "summary": "A premier native woodland sedge (6–10 in) forming a soft, lush emerald carpet through creeping underground rhizomes in dry to moist shade. The ultimate living green mulch for underplanting native trees, spring ephemerals, and shaded borders.",
+        "summary": "A low-growing cool-season sedge (6–10 in) spreading by slender reddish subterranean rhizomes to form a loose, fine-textured turf of arching bright green blades, bearing small yellowish-brown spikes in spring. Thrives in dry, well-drained woodland loams and acidic soils beneath deciduous tree canopies in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Rake off heavy autumn leaves; shear back to 2–3 inches in early spring (50°F+) to refresh carpet before new growth.",
         "summer_care": None,
@@ -233,7 +233,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Carex albicans": {
-        "summary": "A refined native oak sedge (6–12 in) forming tidy, dense hair-like fountains of bright green narrow blades in dry, upland woodland shade and rocky slopes. Superb non-spreading green mulch matrix for shaded perennial beds and slope stabilization.",
+        "summary": "A small cool-season clumping sedge (6–10 in) forming dense tufts of fine, thread-like bright green leaves, producing whitish-green flowering spikes on slender culms in early spring. Thrives in dry, well-drained upland rocky soils, sandstone crevices, and woodland slopes in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Comb out dried winter blades by hand or trim lightly to 2 inches in spring at 50°F+.",
         "summer_care": None,
@@ -245,7 +245,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
     },
     "Carex jamesii": {
-        "summary": "A handsome clump-forming forest sedge (6–10 in) with fine grassy foliage producing distinctive early spring flowering spikes with prominent pale green bracts. Ideal for rich shaded woodland understories, calcareous slopes, and naturalized matrices.",
+        "summary": "A low, tufted cool-season perennial sedge (4–8 in) with shiny, narrow green leaves, producing small, inconspicuous flowering spikes nestled within the foliage in spring. Grows in rich, moist to dry deciduous woodland loams and shaded ravines in partial to full shade, forming non-aggressive tufted matrix colonies.",
         "maint_level": "Low",
         "spring_care": "Trim back ragged winter foliage in spring (at 50°F+) as early bloom spikes emerge.",
         "summer_care": None,
@@ -257,7 +257,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Carex brevior": {
-        "summary": "A versatile native plains oval sedge (1–2 ft) producing dense emerald tufts topped by attractive oval green-to-bronze seed heads in late spring. Thrives in full sun to partial shade in both dry clay and moist prairie bioswales.",
+        "summary": "A clumping cool-season perennial sedge (1–2 ft) with stiff, narrow blades, bearing 3–6 compact, rounded greenish-brown seed spikes atop triangular stems in late spring. Highly adaptable to dry, rocky prairie soils, heavy clay, and rain garden perimeters in full sun to light shade.",
         "maint_level": "Low",
         "spring_care": "Cut back dead foliage to 2 inches in early spring at 50°F+ before new shoots rise.",
         "summer_care": None,
@@ -269,7 +269,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Carex blanda": {
-        "summary": "A remarkably adaptable native common wood sedge (8–14 in) forming cheerful emerald clumps with broad shiny blades and abundant seed spikes, thriving in challenging dry shade and urban clay soils. Outstanding workhorse green mulch for under trees and shrubs.",
+        "summary": "A tufted cool-season perennial sedge (8–18 in) with broad, smooth green leaves and triangular culms, producing greenish-white flower spikes from April to June. Extremely adaptable to disturbed woodland soils, compacted loams, and shaded garden margins in partial shade to full sun.",
         "maint_level": "Low",
         "spring_care": "Trim away tattered leaves in spring at 50°F+; refreshes rapidly with bright green new growth.",
         "summer_care": None,
@@ -281,7 +281,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
     },
     "Carex vulpinoidea": {
-        "summary": "A dependable native fox sedge (1.5–3 ft) forming fountain-like clumps crowned in early summer with bristly, coppery-brown flowering spikes resembling the bushy tail of a fox. Exceptional for rain gardens, retention basins, bioswales, and moist sunny meadows.",
+        "summary": "A dense, clumping wetland sedge (2–3 ft) with triangular culms and grass-like foliage, producing bristly, fox-tail-like golden-brown seed spikes from late spring through summer. Thrives in saturated soils, wet meadows, retention basins, and rain gardens in full sun to light shade.",
         "maint_level": "Low",
         "spring_care": "Cut back old foliage to 3 inches in early spring at 50°F+ before new growth emerges.",
         "summer_care": "Requires consistent moisture; excels in wet clay and temporary standing water.",
@@ -293,7 +293,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Carex eburnea": {
-        "summary": "An exquisite native bristle-leaved sedge (4–8 in) forming dense, hair-fine emerald cushions like living velvet on dry, alkaline limestone outcroppings and shaded rocky borders. The premier groundcover for shaded limestone gardens and tight border edges.",
+        "summary": "A miniature clumping sedge (4–8 in) forming dense, hair-like mats of extremely fine, needle-like green leaves, bearing small whitish-tan flower spikes in spring. Adapted to dry, rocky limestone ledges, cedar glades, and shaded calcareous bluffs in full sun to dense shade.",
         "maint_level": "Low",
         "spring_care": "Comb out dried blades with fingers in early spring at 50°F+; avoid heavy mechanical shearing.",
         "summer_care": None,
@@ -305,7 +305,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Carex shortiana": {
-        "summary": "A distinctive native Short's sedge (1.5–2.5 ft) forming neat, attractive clumps bearing stout, cylindrical chocolate-brown seed spikes in May and June that stand erect above bright green foliage. Superb for rain gardens, bioswales, and wetland restoration meadows.",
+        "summary": "A cool-season clumping sedge (1.5–2.5 ft) with flat blue-green blades, bearing 3–5 dense, cylindrical, dark brown bristly seed spikes in late spring and early summer. Grows in moist to wet loams, wet prairies, ditches, and rain garden basins in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut back dried foliage to 2–3 inches in early spring at 50°F+.",
         "summer_care": None,
@@ -317,7 +317,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
     },
     "Carex grayi": {
-        "summary": "A showstopping native Gray's sedge (2–3 ft) producing large, whimsical, pale green spherical seedheads with radiating beaks resembling spiky medieval maces or geometric stars. Outstanding focal accent for rain gardens, bioswales, and pond margins.",
+        "summary": "A distinctive clumping wetland sedge (2–3 ft) with broad, pleated green blades, producing architectural, star-burst globose seed heads resembling medieval maces from June to September. Grows in wet to moist rich bottomlands, shaded swamp edges, and rain gardens in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut back dead foliage in early spring at 50°F+ before new star-headed shoots emerge.",
         "summer_care": "Enjoys consistently moist to wet soil; tolerates standing water and heavy clay.",
@@ -329,7 +329,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Carex muskingumensis": {
-        "summary": "An extraordinary native palm sedge (2–3 ft) featuring upright stems clad in whorls of pointed green leaves that closely resemble miniature palm trees, turning rich golden-yellow in fall. Exceptional for rain gardens, bioswales, and architectural massings in wet shade to sun.",
+        "summary": "A clumping wetland sedge (2–3 ft) featuring upright palm-tree-like culms lined with narrow leaves, producing drooping, pointed brown seed spikes in summer. Forms dense clumps in saturated soils, wet meadows, and rain garden bottoms in full sun to partial shade.",
         "maint_level": "Low",
         "spring_care": "Cut back old dried stems to the ground in spring after 50°F+ temperatures.",
         "summer_care": "Provide consistent moisture.",
@@ -341,7 +341,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
     },
     "Carex bushii": {
-        "summary": "A handsome native Bush's sedge (1–2 ft) with attractive tufted foliage bearing neat, cylindrical green-to-brown seed spikes in late spring. Highly valued for prairie restorations, meadow matrices, and sunny to partly shaded borders in average to moist soils.",
+        "summary": "A clumping cool-season sedge (1–2 ft) with narrow tufted foliage and triangular culms, bearing cylindrical green-to-brown seed spikes in late spring. Grows in moist to average prairies, woodland borders, and clay soils in full sun to partial shade, forming non-aggressive matrix clumps.",
         "maint_level": "Low",
         "spring_care": "Cut back dead foliage to 2 inches in early spring at 50°F+.",
         "summer_care": None,
@@ -353,7 +353,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
     },
     "Polystichum acrostichoides": {
-        "summary": "A resilient native evergreen fern (1–2 ft) producing lustrous dark green leathery fronds that persist year-round, emerging with silvery fiddleheads in spring. Unsurpassed for shaded hillsides, erosion control, woodland borders, and foundation plantings.",
+        "summary": "An evergreen woodland fern (1–2 ft) forming a vase-shaped rosette of leathery, dark green once-pinnate fronds with distinct boot-shaped pinnae, persisting through winter. Grows in well-drained, humus-rich acidic to neutral loams on shaded slopes and woodland banks in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Trim away tattered, flattened overwintered fronds in early spring after 50°F+ temperatures as silvery fiddleheads unfurl.",
         "summer_care": None,
@@ -365,7 +365,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
     },
     "Matteuccia struthiopteris": {
-        "summary": "A magnificent native ostrich fern (3–5 ft) forming stately vase-shaped crowns of huge, feathery emerald fronds reminiscent of ostrich plumes, with edible fiddleheads in spring. Unrivaled for moist shade, rain gardens, and stream margins.",
+        "summary": "A deciduous rhizomatous fern (2–4 ft) forming upright vase-shaped rosettes of feathery, bright green sterile fronds, accompanied by separate rigid, woody, dark brown fertile fronds that persist through winter. Spreads by underground stolons to form colonies in moist, fertile, organically rich soils in partial to full shade.",
         "maint_level": "Low",
         "spring_care": "Harvest tight curled fiddleheads as a spring delicacy or allow them to unfurl; clear away dead previous-year fronds at 50°F+.",
         "summer_care": "Requires consistent moisture in shade; may enter early dormancy if allowed to dry out.",
@@ -377,7 +377,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Geum triflorum": {
-        "summary": "An enchanting shortgrass prairie perennial (6–12 in) opening in spring with nodding rosy-pink cup flowers, followed by whimsical feathery, smoke-like pink seed plumes that shimmer in the sun. Ideal for sunny rock gardens, gravel borders, and curbside hellstrips.",
+        "summary": "A rhizomatous low-growing perennial (6–12 in) with pinnately divided basal leaves, producing nodding reddish-purple cup-shaped flowers in early spring followed by upright feathery, elongated fruiting styles. Forms a clumping groundcover adapted to well-drained, dry to medium soils in full sun, rock gardens, and open borders.",
         "maint_level": "Low",
         "spring_care": "Trim away any dead winter foliage in spring (50°F+) as pink nodding bells appear.",
         "summer_care": None,
@@ -389,7 +389,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Dalea purpurea": {
-        "summary": "An extraordinary native purple prairie clover (1–2 ft) featuring delicate, lacy needle-like foliage and cylindrical cones encircled by a ring of tiny electric-violet florets with bright gold anthers in midsummer. Essential for sunny meadows, dry borders, and prairie restorations.",
+        "summary": "A deep-rooted perennial legume (1–2.5 ft) with fine pinnate foliage, producing dense conical thimble-like flower heads of tiny purple florets with golden anthers from June to August. Possesses a deep taproot (extending 6+ feet) that fixes nitrogen and thrives in dry, rocky, well-drained soils and clay in full sun.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
         "summer_care": None,
@@ -401,7 +401,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Polemonium reptans": {
-        "summary": "A delightful native Jacob's ladder (8–15 in) forming lush mounds of fern-like compound leaves bearing loose clusters of bell-shaped, sky-blue blossoms with white stamens in April and May. Outstanding for shaded borders, woodland rock gardens, and underplanting shrubs.",
+        "summary": "A clumping perennial herb (8–12 in) with pinnately compound ladder-like leaves, bearing loose clusters of bell-shaped light blue to lavender flowers with white stamens in April and May. Forms neat mounded clumps in moist, humus-rich woodland soils in partial to full shade, self-seeding moderately.",
         "maint_level": "Low",
         "spring_care": "Clean away collapsed foliage in early spring at 50°F+ as sky-blue flower bells appear.",
         "summer_care": "Provide partial to full shade and moderate moisture to prevent summer dormancy.",
@@ -413,7 +413,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
     "Lonicera sempervirens": {
-        "summary": "A well-behaved, non-invasive native coral honeysuckle vine (10–15 ft) bearing trumpet-shaped, scarlet-coral blossoms with yellow throats from May to October, followed by bright red berries. Unmatched for sunny arbors, deck railings, and trellis focal points.",
+        "summary": "A twining, semi-evergreen woody vine (10–15 ft) with glaucous oval leaves, producing clusters of tubular scarlet-orange flowers with yellow throats from May to October followed by small red berries. Climbs trellises and fences in moist, well-drained loams in full sun to partial shade, without spreading invasively.",
         "maint_level": "Low",
         "spring_care": "Prune back lightly after spring flowering to shape vines; blooms on both old and new wood.",
         "summer_care": "Provide moderate moisture during extended droughts to prolong continuous bloom cycle.",
@@ -425,7 +425,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
     "Passiflora incarnata": {
-        "summary": "A vigorous, fast-growing native passionflower vine (10–25 ft) producing intricate 3-inch fringed purple-and-white exotic blossoms followed by edible, fragrant green 'maypop' fruits. Superb for sunny trellises, arbors, and chain-link fence naturalization.",
+        "summary": "A vigorous perennial herbaceous vine (15–25 ft) climbing by axillary tendrils, bearing 3-lobed leaves and complex 3-inch flowers with fringed lavender petals and purple corona filaments from July to September, followed by edible green fruit. Spreads by underground rhizomes in average to moist, well-drained soils in full sun to partial shade.",
         "maint_level": "Medium",
         "spring_care": "Emerges late in spring (May); cut dead winter vines to the ground at 50°F+ and guide vigorous new shoots onto trellis.",
         "summer_care": "Pull wandering surface root runners in midsummer if containing within designated garden beds.",
@@ -437,7 +437,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
     },
     "Clematis versicolor": {
-        "summary": "A refined, non-aggressive native leather flower vine (6–10 ft) producing exquisite nodding, bell-shaped pale pink-lavender blossoms with recurved petal tips in summer, followed by feathery, swirling silvery seed plumes. Excellent for climbing through small shrubs, obelisks, and rock gardens.",
+        "summary": "A slender, non-aggressive deciduous woody vine (6–10 ft) with pinnately compound leaves, bearing nodding, urn-shaped pale pinkish-purple flowers with flared white tips from May to July, followed by silky-tailed seed heads. Grows in dry, rocky limestone glades and open woods in full sun to partial shade, requiring well-drained soil.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to 12–18 inches in early spring (at 50°F+) as flowers bloom on current season growth.",
         "summer_care": None,
@@ -449,7 +449,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
     },
     "Tradescantia ernestiana": {
-        "summary": "A charming native spiderwort (8–15 in) forming compact clumps of arching foliage topped in April and May by triangular 3-petaled violet-blue blossoms with bright golden-yellow fuzzy stamens. Perfect for rock gardens, shaded border edges, and open woodland matrices.",
+        "summary": "A low-growing perennial herb (8–14 in) with arching linear-lanceolate leaves, bearing terminal clusters of 3-petaled violet-blue flowers with fuzzy yellow stamens from April to June. Grows in dry to moist rocky woodland bluffs and ledges in partial shade, dying back to the rootstock during severe summer heat.",
         "maint_level": "Low",
         "spring_care": "Clean away old dead foliage in early spring at 50°F+ as crisp green shoots appear.",
         "summer_care": "Cut stems back by half after spring flowering if foliage declines to stimulate fresh compact basal growth.",
