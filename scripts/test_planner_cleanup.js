@@ -49,6 +49,14 @@ assert(indexHtml.includes('.planner-area-edit-btn'), "planner-area-edit-btn exis
 console.log("\n--- Checking Header and Plant Card Improvements ---");
 assert(indexHtml.includes('id="plannerHeaderEditBtn"'), "plannerHeaderEditBtn exists in header criteria strip");
 assert(indexHtml.includes('.planner-match-pill'), "planner-match-pill CSS exists for plant cards");
-assert(indexHtml.includes('Add Top 6 / Layer to Report'), "Concise Add Top text is configured");
+assert(indexHtml.includes('Add Top Recommended to Report'), "Concise Add Top text is configured");
+
+// 5. Verify no redundant plus symbols in button spans
+console.log("\n--- Checking for No Redundant Plus Symbols in Buttons ---");
+assert(!indexHtml.includes('<span>+ Add'), "No duplicate '+ Add' text spans in buttons");
+assert(!indexHtml.includes('<span>+ '), "No duplicate '+ ' leading symbols inside text spans");
+assert(indexHtml.includes('<span>Add Area</span>'), "Clean 'Add Area' span exists");
+assert(indexHtml.includes('<span>Add Zone</span>'), "Clean 'Add Zone' span exists");
+assert(indexHtml.includes('<span>Add to Report</span>'), "Clean 'Add to Report' span exists");
 
 console.log("\n✅ ALL PLANNER CLEANUP & SIMPLIFICATION CHECKS PASSED!\n");
