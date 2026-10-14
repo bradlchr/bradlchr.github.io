@@ -49,6 +49,23 @@ def upload_plant(plant):
         plant_types = [plant_types]
     fields['plant_type'] = {'arrayValue': {'values': [{'stringValue': str(t)} for t in plant_types]}}
 
+    if plant.get('maintenance_level'):
+        fields['maintenance_level'] = {'stringValue': plant['maintenance_level']}
+
+    guide = plant.get('maintenance_guide')
+    if guide and isinstance(guide, dict):
+        g_fields = {
+            'summary': {'stringValue': guide.get('summary', '')},
+            'level': {'stringValue': guide.get('level', plant.get('maintenance_level', 'Low'))},
+            'spring': {'stringValue': guide.get('spring', '')},
+            'summer': {'stringValue': guide.get('summer', '')},
+            'fall': {'stringValue': guide.get('fall', '')},
+            'winter': {'stringValue': guide.get('winter', '')},
+            'division': {'stringValue': guide.get('division', '')},
+            'sources': {'stringValue': guide.get('sources', '')}
+        }
+        fields['maintenance_guide'] = {'mapValue': {'fields': g_fields}}
+
     for arr_field in ['soil_requirements', 'moisture_requirements', 'light_requirements', 'wildlife_ecosystem_benefits', 'bloom_color', 'bloom_period']:
         vals = plant.get(arr_field, [])
         if isinstance(vals, str):

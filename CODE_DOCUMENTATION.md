@@ -455,6 +455,27 @@ Below is the complete reference of all 118 functions declared in `index.html`, o
 - **Parameters**: None
 - **Description**: Merges local advisor plant customizations (`dr_custom_plants`) into active species records.
 
+
+### Module 4B: Botanical Maintenance Engine & Ecological Care (New)
+
+#### `getPlantMaintenanceLevel(plant)`
+- **Line**: ~7235 | **Async**: No
+- **Parameters**: `plant` (Object)
+- **Description**: Returns the scientifically grounded maintenance ranking for the species (`'Low'`, `'Medium'`, or `'High'`).
+
+#### `getPlantMaintenanceGuide(plant)`
+- **Line**: ~7240 | **Async**: No
+- **Parameters**: `plant` (Object)
+- **Description**: Returns a structured seasonal care dictionary (`summary`, `spring`, `summer`, `fall`, `winter`, `division`, `sources`) adhering to Xerces Society and Grow Native! conservation guidelines.
+
+#### Seasonal Maintenance Timings & Standards:
+- **Spring (50°F+ Cutback)**: Wait until daytime temperatures consistently exceed 50°F before cutting back dead foliage to allow cavity-nesting solitary bees and overwintering pupae to emerge. Leave 8 to 18 inches of standing stubble as active nesting tunnels.
+- **Summer Care (Chelsea Chop & Moisture)**: Taller species (*Symphyotrichum*, *Helenium*, *Monarda*) benefit from a late-May/early-June 'Chelsea chop' (pruned back by 1/3 to 1/2) to stimulate dense branching and prevent flopping. Drought resilient once established.
+- **Fall Habitat Care (Seedhead Retention)**: Stems and seedheads are retained throughout autumn without cutting down, providing crucial winter seed calories for American Goldfinches, juncos, and native songbirds.
+- **Winter Protection**: Standing silhouettes catch insulating snowdrifts and buffer crowns against Midwest freeze-thaw heaving. Preserves ground leaf litter for overwintering queen bumblebees.
+- **Division Guidelines**: Evaluates root architecture—taprooted species (*Baptisia*, *Asclepias*, *Eryngium*) are never divided, while fibrous/rhizomatous species are divided every 3–5 years in early spring.
+- **Consultation Report Inclusion**: Both the Word (.docx) report generator and consultation staging drawer inject maintenance ranking tags and seasonal instructions directly into client plant recommendations.
+
 #### `applyFilters()`
 - **Line**: 8158 | **Async**: No
 - **Parameters**: None
