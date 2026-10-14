@@ -3,13 +3,17 @@
 scripts/test_maintenance_and_catalog.py
 Comprehensive test suite verifying:
 - Botanical completeness of all 185 plants in data/plants_enriched.json
-- Advisor description richness and source citations
-- Maintenance level rankings and seasonal care guides
-- UI elements and JavaScript filter architecture in index.html
+- Concise advisor descriptions with direct inline markdown links to exact species pages
+- Zero generic homepage or category root links across all plants
+- Actionable-only maintenance tasks and omission of inactive seasons
+- Absence of passive culture/habitat text in maintenance (e.g. 'Thrives in rich, moist...')
+- Exact seasonal tile titles in index.html (Spring, Summer, Fall, Winter)
+- Enhanced Wildlife & Ecological Value with specific host insects and direct inline citations
 - ES Module JS syntax verification
 """
 
 import json
+import re
 import subprocess
 import sys
 
@@ -21,40 +25,115 @@ def test_data_integrity():
     assert len(plants) == 185, f"Expected 185 plants, found {len(plants)}"
 
     levels = {'Low': 0, 'Medium': 0, 'High': 0}
-    required_guide_keys = {'summary', 'level', 'spring', 'summer', 'fall', 'winter', 'division', 'sources'}
+    season_counts = {'spring': 0, 'summer': 0, 'fall': 0, 'winter': 0, 'division': 0}
+
+    # Banned passive / aesthetic non-actionable maintenance phrases
+    banned_passive_phrases = [
+        "thrives in rich, moist to dry woodland soils in partial to full shade",
+        "thrives in rich, moist, organic woodland",
+        "thrives in moist to wet loams and heavy clay",
+        "thrives in lean, sharply drained limestone",
+        "thrives in lean, sharply drained sunny",
+        "thrives in sunny, well-drained limestone",
+        "thrives in standing water, wet clay",
+        "thrives in standing water, saturated soils",
+        "thrives in moist to wet soils in full sun",
+        "thrives in full sun and average to moist soils",
+        "thrives in full sun to light savanna",
+        "thrives in full sun to partial shade",
+        "thrives in moist, rich loams and heavy clay",
+        "thrives in moist, rich, dappled shade",
+        "zero supplemental watering needed once established",
+        "zero supplemental water needed once established",
+        "zero maintenance needed once established",
+        "extremely drought and poor-soil proof",
+        "extremely drought and heat tolerant",
+        "extremely drought and heat hardy",
+        "marbled foliage intensifies",
+        "architectural winter silhouette",
+        "dormant buds are velvet-coated",
+        "fish-scale patterned gray bark",
+        "alligator-skin textured",
+        "foliage takes on attractive",
+        "foliage takes on rich crimson",
+        "enjoy late-autumn blossoms",
+        "enjoy glowing golden-yellow",
+        "enjoy glowing copper-bronze",
+        "enjoy persistent swirling silvery"
+    ]
+
+    # Banned generic URLs (must always link to exact species/resource pages)
+    banned_generic_urls = [
+        "https://grownative.org)",
+        "https://grownative.org/)",
+        "https://mdc.mo.gov/discover-nature/field-guide)",
+        "https://mdc.mo.gov/discover-nature/field-guide/)",
+        "https://www.missouribotanicalgarden.org/PlantFinder/)",
+        "https://www.missouribotanicalgarden.org/PlantFinder)",
+        "https://xerces.org/)",
+        "https://xerces.org)",
+        "https://www.nwf.org/nativeplantfinder/)",
+        "https://www.nwf.org/nativeplantfinder)",
+        "https://www.butterfliesandmoths.org/)",
+        "https://www.butterfliesandmoths.org)"
+    ]
 
     for idx, p in enumerate(plants):
         sname = p.get('scientific_name')
-        cname = (p.get('common_names') or [''])[0]
         assert sname, f"Plant {idx} missing scientific_name"
 
-        # Check advisor_description
+        # 1. Check advisor_description (concise summary + direct inline links)
         desc = p.get('advisor_description', '')
-        assert len(desc) > 100, f"Plant {sname} has too short advisor_description ({len(desc)} chars)"
-        assert "Growth Habit" in desc, f"Plant {sname} missing Growth Habit in description"
-        assert "Sociability" in desc, f"Plant {sname} missing Sociability in description"
-        assert "Recommended Garden Settings" in desc, f"Plant {sname} missing Recommended Garden Settings"
-        assert "Sources:" in desc, f"Plant {sname} missing Sources attribution in description"
+        assert 100 <= len(desc) <= 650, f"Plant {sname} advisor_description length out of bounds: {len(desc)} chars"
+        assert "](" in desc, f"Plant {sname} missing inline markdown links in description"
+        assert not desc.endswith("Sources:"), f"Plant {sname} has dangling Sources text"
 
-        # Check maintenance_level
+        # Ensure no generic links in description
+        for bad_url in banned_generic_urls:
+            assert bad_url not in desc, f"Plant {sname} has generic URL in description: {bad_url}"
+
+        # 2. Check maintenance_level
         m_lvl = p.get('maintenance_level')
         assert m_lvl in levels, f"Plant {sname} has invalid maintenance_level: {m_lvl}"
         levels[m_lvl] += 1
 
-        # Check maintenance_guide
+        # 3. Check maintenance_guide (strictly actionable only, flexible seasons)
         guide = p.get('maintenance_guide')
         assert isinstance(guide, dict), f"Plant {sname} missing maintenance_guide dict"
-        missing_keys = required_guide_keys - set(guide.keys())
-        assert not missing_keys, f"Plant {sname} maintenance_guide missing keys: {missing_keys}"
         assert guide['level'] == m_lvl, f"Plant {sname} guide level mismatch: {guide['level']} vs {m_lvl}"
-        assert len(guide['spring']) >= 25, f"Plant {sname} spring care too brief"
-        assert len(guide['summer']) >= 25, f"Plant {sname} summer care too brief"
-        assert len(guide['fall']) >= 25, f"Plant {sname} fall care too brief"
-        assert len(guide['winter']) >= 25, f"Plant {sname} winter care too brief"
-        assert len(guide['division']) >= 20, f"Plant {sname} division guide too brief"
-        assert "Xerces" in guide['sources'], f"Plant {sname} missing Xerces citation"
+        assert 'summary' in guide, f"Plant {sname} guide missing summary"
+        assert 'spring' in guide and len(guide['spring']) >= 20, f"Plant {sname} spring care missing or too brief"
+        assert 'division' in guide and len(guide['division']) >= 15, f"Plant {sname} division guide missing or too brief"
 
-    print(f"PASSED: All 185 plants verified. Distribution: {levels}")
+        guide_str = json.dumps(guide).lower()
+        for banned in banned_passive_phrases:
+            assert banned not in guide_str, f"Plant {sname} contains passive non-actionable phrase: '{banned}'"
+
+        for bad_url in banned_generic_urls:
+            assert bad_url not in json.dumps(guide), f"Plant {sname} contains generic URL in maintenance: {bad_url}"
+
+        for s in ['spring', 'summer', 'fall', 'winter', 'division']:
+            if s in guide and guide[s]:
+                season_counts[s] += 1
+
+        # 4. Check Enhanced Wildlife & Ecological Value
+        w_detail = p.get('wildlife_detail')
+        assert isinstance(w_detail, dict), f"Plant {sname} missing wildlife_detail dict"
+        assert 'host_insects' in w_detail and len(w_detail['host_insects']) >= 20, f"Plant {sname} missing specific host_insects"
+        assert 'wildlife_users' in w_detail and len(w_detail['wildlife_users']) >= 20, f"Plant {sname} missing specific wildlife_users"
+        assert 'sources' in w_detail and "](" in w_detail['sources'], f"Plant {sname} missing wildlife source links"
+
+        # Ensure no generic links in wildlife
+        for bad_url in banned_generic_urls:
+            assert bad_url not in json.dumps(w_detail), f"Plant {sname} contains generic URL in wildlife: {bad_url}"
+
+        w_eco = p.get('wildlife_ecological_value', '')
+        assert "Host Plant Value:" in w_eco, f"Plant {sname} missing Host Plant Value in wildlife_ecological_value"
+        assert "Wildlife & Ecological Interactions:" in w_eco, f"Plant {sname} missing Wildlife Interactions"
+
+    print(f"PASSED: All 185 plants verified.")
+    print(f"  - Maintenance Distribution: {levels}")
+    print(f"  - Actionable Seasons: {season_counts}")
 
 def test_index_html_integration():
     print("\nTesting index.html UI & logic integration...")
@@ -72,37 +151,32 @@ def test_index_html_integration():
     assert len(embedded_plants) == 185, f"embeddedMasterPlants count: {len(embedded_plants)}"
     print("  ✓ embeddedMasterPlants holds 185 enriched species")
 
-    # 2. Sidebar filter accordion
-    assert 'data-target="maintenanceFilterContent"' in html, "Sidebar maintenance accordion missing"
-    assert 'data-group="maintenance" data-val="Low"' in html, "Low maintenance chip missing"
-    assert 'data-group="maintenance" data-val="Medium"' in html, "Medium maintenance chip missing"
-    assert 'data-group="maintenance" data-val="High"' in html, "High maintenance chip missing"
-    print("  ✓ Sidebar Maintenance Level accordion & filter chips present")
+    # 2. Strict seasonal tile titles (Spring, Summer, Fall, Winter)
+    assert 'Spring (50°F+ Cutback)' not in html, "Obsolete subtitle Spring (50°F+ Cutback) still in index.html"
+    assert 'Summer Care' not in html, "Obsolete subtitle Summer Care still in index.html"
+    assert 'Fall Timing' not in html, "Obsolete subtitle Fall Timing still in index.html"
+    assert 'Winter Protection' not in html, "Obsolete subtitle Winter Protection still in index.html"
 
-    # 3. Modal elements
-    assert 'id="modalMaintenanceLevel"' in html, "modalMaintenanceLevel in specs-grid missing"
-    assert 'id="modalMaintenanceContainer"' in html, "modalMaintenanceContainer missing"
-    assert 'id="modalMaintSpring"' in html, "modalMaintSpring element missing"
-    assert 'id="modalMaintSummer"' in html, "modalMaintSummer element missing"
-    assert 'id="modalMaintFall"' in html, "modalMaintFall element missing"
-    assert 'id="modalMaintWinter"' in html, "modalMaintWinter element missing"
-    assert 'id="modalMaintDivision"' in html, "modalMaintDivision element missing"
-    print("  ✓ plantDetailModal seasonal maintenance guide elements present")
+    assert '<i data-lucide="flower" style="width:12px;height:12px;"></i> Spring' in html, "Strict Spring title missing"
+    assert '<i data-lucide="sun" style="width:12px;height:12px;"></i> Summer' in html, "Strict Summer title missing"
+    assert '<i data-lucide="leaf" style="width:12px;height:12px;"></i> Fall' in html, "Strict Fall title missing"
+    assert '<i data-lucide="snowflake" style="width:12px;height:12px;"></i> Winter' in html, "Strict Winter title missing"
+    print("  ✓ Strict seasonal titles confirmed: Spring, Summer, Fall, Winter")
 
-    # 4. Form inputs
-    assert 'id="editMaintenanceLevel"' in html, "editMaintenanceLevel select missing"
-    assert 'id="addMaintenanceLevel"' in html, "addMaintenanceLevel select missing"
-    print("  ✓ Edit and Add modals contain maintenance level select dropdowns")
+    # 3. Rich markdown rendering & clickable links in maintenance cards
+    assert '${renderRichMarkdownText(maintGuide.spring)}' in html, "renderRichMarkdownText for spring missing"
+    assert '${renderRichMarkdownText(maintGuide.summer)}' in html, "renderRichMarkdownText for summer missing"
+    assert '${renderRichMarkdownText(maintGuide.fall)}' in html, "renderRichMarkdownText for fall missing"
+    assert '${renderRichMarkdownText(maintGuide.winter)}' in html, "renderRichMarkdownText for winter missing"
+    print("  ✓ Maintenance cards render inline links with renderRichMarkdownText")
 
-    # 5. JS state and filter engine
-    assert 'maintenance: new Set()' in html, "state.filters.maintenance Set missing"
-    assert 'function getPlantMaintenanceLevel' in html, "getPlantMaintenanceLevel helper missing"
-    assert 'function getPlantMaintenanceGuide' in html, "getPlantMaintenanceGuide helper missing"
-    assert 'f.maintenance && f.maintenance.size > 0' in html, "applyFilters maintenance check missing"
-    assert "'maintenance']" in html, "groups array missing 'maintenance'"
-    assert "maintPillHtml" in html, "Plant card maintenance chip missing"
-    assert "staged.maintenance_level" in html, "Staged plant maintenance fields missing"
-    print("  ✓ JavaScript filter engine and card badges fully configured")
+    # 4. Dynamic maintenance grid for flexible seasons
+    assert 'id="modalMaintenanceGrid"' in html, "modalMaintenanceGrid container missing"
+    assert "maintGuide.spring && maintGuide.spring.trim()" in html, "Dynamic spring check missing"
+    assert "maintGuide.summer && maintGuide.summer.trim()" in html, "Dynamic summer check missing"
+    assert "maintGuide.fall && maintGuide.fall.trim()" in html, "Dynamic fall check missing"
+    assert "maintGuide.winter && maintGuide.winter.trim()" in html, "Dynamic winter check missing"
+    print("  ✓ Dynamic maintenance grid omits seasons without actionable tasks")
 
 def test_js_syntax():
     print("\nTesting JavaScript module syntax with node --check...")

@@ -57,14 +57,24 @@ def upload_plant(plant):
         g_fields = {
             'summary': {'stringValue': guide.get('summary', '')},
             'level': {'stringValue': guide.get('level', plant.get('maintenance_level', 'Low'))},
-            'spring': {'stringValue': guide.get('spring', '')},
-            'summer': {'stringValue': guide.get('summer', '')},
-            'fall': {'stringValue': guide.get('fall', '')},
-            'winter': {'stringValue': guide.get('winter', '')},
-            'division': {'stringValue': guide.get('division', '')},
             'sources': {'stringValue': guide.get('sources', '')}
         }
+        for s in ['spring', 'summer', 'fall', 'winter', 'division']:
+            if guide.get(s):
+                g_fields[s] = {'stringValue': guide[s]}
         fields['maintenance_guide'] = {'mapValue': {'fields': g_fields}}
+
+    if plant.get('wildlife_ecological_value'):
+        fields['wildlife_ecological_value'] = {'stringValue': plant['wildlife_ecological_value']}
+
+    wd = plant.get('wildlife_detail')
+    if wd and isinstance(wd, dict):
+        wd_fields = {
+            'host_insects': {'stringValue': wd.get('host_insects', '')},
+            'wildlife_users': {'stringValue': wd.get('wildlife_users', '')},
+            'sources': {'stringValue': wd.get('sources', '')}
+        }
+        fields['wildlife_detail'] = {'mapValue': {'fields': wd_fields}}
 
     for arr_field in ['soil_requirements', 'moisture_requirements', 'light_requirements', 'wildlife_ecosystem_benefits', 'bloom_color', 'bloom_period']:
         vals = plant.get(arr_field, [])

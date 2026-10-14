@@ -1,11 +1,9 @@
 """
 scripts/botanical_grasses_sedges_ferns_vines.py
-Botanical profiles for 18 Grasses, 11 Sedges, 5 Ferns, and 4 Vines (38 species total)
-in the Deep Roots Native Catalog.
+Botanical profiles for Deep Roots Native Catalog.
 """
 
 BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
-    # ==================== GRASSES (18) ====================
     "Sporobolus heterolepis": {
         "summary": "A premier native bunchgrass (18–24 in) forming a fine emerald fountain crowned in late summer by airy pinkish flower panicles with a hot buttered popcorn fragrance, turning glowing pumpkin-orange in fall. Acts as a well-behaved green mulch matrix for formal borders, rain garden margins, and hellstrips.",
         "maint_level": "Low",
@@ -222,8 +220,6 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_users": "Deep root nodules fix atmospheric nitrogen, nourishing surrounding matrix perennials and native grasses.",
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
     },
-
-    # ==================== SEDGES (11) ====================
     "Carex pensylvanica": {
         "summary": "A premier native woodland sedge (6–10 in) forming a soft, lush emerald carpet through creeping underground rhizomes in dry to moist shade. The ultimate living green mulch for underplanting native trees, spring ephemerals, and shaded borders.",
         "maint_level": "Low",
@@ -312,7 +308,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "summary": "A distinctive native Short's sedge (1.5–2.5 ft) forming neat, attractive clumps bearing stout, cylindrical chocolate-brown seed spikes in May and June that stand erect above bright green foliage. Superb for rain gardens, bioswales, and wetland restoration meadows.",
         "maint_level": "Low",
         "spring_care": "Cut back dried foliage to 2–3 inches in early spring at 50°F+.",
-        "summer_care": "Thrives in moist to wet loams and heavy clay soils in full sun to partial shade.",
+        "summer_care": None,
         "fall_care": "Leave brown seed spikes for winter wildlife seed foraging.",
         "winter_care": None,
         "division": "Divide fibrous clumps in early spring.",
@@ -336,8 +332,8 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "summary": "An extraordinary native palm sedge (2–3 ft) featuring upright stems clad in whorls of pointed green leaves that closely resemble miniature palm trees, turning rich golden-yellow in fall. Exceptional for rain gardens, bioswales, and architectural massings in wet shade to sun.",
         "maint_level": "Low",
         "spring_care": "Cut back old dried stems to the ground in spring after 50°F+ temperatures.",
-        "summer_care": "Provide consistent moisture; thrives in saturated soils and standing water.",
-        "fall_care": "Enjoy glowing golden-yellow foliage before cutting or leave for bird cover.",
+        "summer_care": "Provide consistent moisture.",
+        "fall_care": "leave for bird cover.",
         "winter_care": None,
         "division": "Divide expanding rhizomatous clumps in early spring.",
         "host_insects": "Larval host for Appalachian Brown (*Lethe appalachia*) and Duke's Skipper (*Euphyes dukesi*).",
@@ -356,8 +352,6 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_users": "Seeds feed native prairie birds; base provides shelter for beneficial insects.",
         "wildlife_sources": "[Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
     },
-
-    # ==================== FERNS & FLOWERING ASSOCIATES (5) ====================
     "Polystichum acrostichoides": {
         "summary": "A resilient native evergreen fern (1–2 ft) producing lustrous dark green leathery fronds that persist year-round, emerging with silvery fiddleheads in spring. Unsurpassed for shaded hillsides, erosion control, woodland borders, and foundation plantings.",
         "maint_level": "Low",
@@ -375,7 +369,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "maint_level": "Low",
         "spring_care": "Harvest tight curled fiddleheads as a spring delicacy or allow them to unfurl; clear away dead previous-year fronds at 50°F+.",
         "summer_care": "Requires consistent moisture in shade; may enter early dormancy if allowed to dry out.",
-        "fall_care": "Persistent dark brown woody fertile fronds remain upright all winter.",
+        "fall_care": None,
         "winter_care": None,
         "division": "Divide creeping rhizome runners in early spring while dormant.",
         "host_insects": "Larval host for Ostrich Fern Borer Moth (*Papaipema speciosissima*).",
@@ -386,7 +380,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "summary": "An enchanting shortgrass prairie perennial (6–12 in) opening in spring with nodding rosy-pink cup flowers, followed by whimsical feathery, smoke-like pink seed plumes that shimmer in the sun. Ideal for sunny rock gardens, gravel borders, and curbside hellstrips.",
         "maint_level": "Low",
         "spring_care": "Trim away any dead winter foliage in spring (50°F+) as pink nodding bells appear.",
-        "summer_care": "Requires sharp drainage and full sun; do not overwater.",
+        "summer_care": None,
         "fall_care": None,
         "winter_care": None,
         "division": "Divide creeping woody crowns every 3–4 years in early spring.",
@@ -398,7 +392,7 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "summary": "An extraordinary native purple prairie clover (1–2 ft) featuring delicate, lacy needle-like foliage and cylindrical cones encircled by a ring of tiny electric-violet florets with bright gold anthers in midsummer. Essential for sunny meadows, dry borders, and prairie restorations.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
-        "summer_care": "Zero supplemental water needed once established; deep taproot provides extreme drought endurance.",
+        "summer_care": None,
         "fall_care": "Leave decorative conical seedheads for winter bird foraging.",
         "winter_care": None,
         "division": "Deep woody taproot; do not divide. Propagate readily from scarified seed.",
@@ -418,8 +412,6 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "wildlife_users": "Soft foliage provides early spring ground cover for woodland salamanders and ground beetles.",
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
     },
-
-    # ==================== VINES (4) ====================
     "Lonicera sempervirens": {
         "summary": "A well-behaved, non-invasive native coral honeysuckle vine (10–15 ft) bearing trumpet-shaped, scarlet-coral blossoms with yellow throats from May to October, followed by bright red berries. Unmatched for sunny arbors, deck railings, and trellis focal points.",
         "maint_level": "Low",
@@ -448,8 +440,8 @@ BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
         "summary": "A refined, non-aggressive native leather flower vine (6–10 ft) producing exquisite nodding, bell-shaped pale pink-lavender blossoms with recurved petal tips in summer, followed by feathery, swirling silvery seed plumes. Excellent for climbing through small shrubs, obelisks, and rock gardens.",
         "maint_level": "Low",
         "spring_care": "Cut stems back to 12–18 inches in early spring (at 50°F+) as flowers bloom on current season growth.",
-        "summer_care": "Thrives in sunny, well-drained limestone soils with roots kept shaded by groundcovers or mulch.",
-        "fall_care": "Enjoy persistent swirling silvery seed plumes catching autumn light.",
+        "summer_care": None,
+        "fall_care": None,
         "winter_care": None,
         "division": "Do not divide. Propagate via stratified seed or layering.",
         "host_insects": "Larval host for specialist Clematis Clearwing Moth and visited by bumblebees.",
