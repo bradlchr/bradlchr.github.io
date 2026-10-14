@@ -880,6 +880,29 @@
       font-weight: 600;
       padding: 2px 8px;
       border-radius: var(--radius-sm);
+      max-width: calc(100% - 20px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      z-index: 2;
+    }
+
+    .card-photo-count-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.72);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      backdrop-filter: blur(3px);
+      z-index: 2;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     }
 
     .card-body {
@@ -7063,7 +7086,7 @@
                 <span class="badge-invasive">⚠️ High Threat</span>
                 <span class="badge-img-label" style="background:rgba(0,0,0,0.72);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;backdrop-filter:blur(4px);">${escapeHtml(images[0].label || 'Overview')}</span>
               </div>
-              <span class="badge-layer" style="background:#b91c1c;color:#fff;">${escapeHtml(plant.plant_type)}</span>
+              <span class="badge-layer" style="${images.length > 1 ? 'top:10px;right:10px;bottom:auto;' : ''}background:#b91c1c;color:#fff;">${escapeHtml(plant.plant_type)}</span>
 
               <span class="badge-img-attr" style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.72);color:rgba(255,255,255,0.9);font-size:9px;padding:2px 6px;border-radius:4px;backdrop-filter:blur(4px);max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:2;" title="Photo: ${escapeHtml(images[0].author || 'Conservation Source')} (${escapeHtml(images[0].license || 'CC')})">
                 📷 ${escapeHtml(images[0].author || 'Conservation Source')} (${escapeHtml(images[0].license || 'CC')})
@@ -9957,18 +9980,18 @@
               </div>
             `}
             ${(plant.images && plant.images.length > 1) ? `
-              <span class="card-photo-count-badge" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.72);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;display:flex;align-items:center;gap:4px;backdrop-filter:blur(3px);z-index:2;" title="${plant.images.length} botanical photos · Click card to view high-resolution gallery and verified attribution">
+              <span class="card-photo-count-badge" title="${plant.images.length} botanical photos · Click card to view high-resolution gallery and verified attribution">
                 <i data-lucide="camera" style="width:11px;height:11px;"></i>
                 <span>${plant.images.length}</span>
               </span>
             ` : ''}
-            ${(state.plantApprovals || []).some(a => a.status === 'pending' && (a.plant_id === plant.id || a.scientific_name === plant.scientific_name)) ? `
-              <span style="position:absolute;top:6px;left:6px;background:#f59e0b;color:#1e293b;font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;display:flex;align-items:center;gap:3px;box-shadow:0 2px 4px rgba(0,0,0,0.3);z-index:2;" title="Proposed edits are pending Administrator approval">
-                <i data-lucide="clock" style="width:10px;height:10px;"></i>
-                <span>Pending Review</span>
-              </span>
-            ` : ''}
             <div class="card-badges">
+              ${(state.plantApprovals || []).some(a => a.status === 'pending' && (a.plant_id === plant.id || a.scientific_name === plant.scientific_name)) ? `
+                <span class="badge" style="background:#f59e0b;color:#1e293b;font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;box-shadow:0 2px 4px rgba(0,0,0,0.3);" title="Proposed edits are pending Administrator approval">
+                  <i data-lucide="clock" style="width:10px;height:10px;"></i>
+                  <span>Pending Review</span>
+                </span>
+              ` : ''}
               ${isSweet16(plant) ? `<span class="badge-sweet16">⭐ Sweet 16</span>` : ''}
               ${isKcKeystone(plant) ? `<span class="badge-keystone">🌿 Keystone</span>` : ''}
             </div>

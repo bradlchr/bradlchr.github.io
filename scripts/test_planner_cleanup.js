@@ -59,4 +59,10 @@ assert(indexHtml.includes('<span>Add Area</span>'), "Clean 'Add Area' span exist
 assert(indexHtml.includes('<span>Add Zone</span>'), "Clean 'Add Zone' span exists");
 assert(indexHtml.includes('<span>Add to Report</span>'), "Clean 'Add to Report' span exists");
 
+// 6. Verify badge layout on plant cards (no overlap between layer pill and photo count)
+console.log("\n--- Checking Plant Card Badge Positioning (No Overlap) ---");
+assert(indexHtml.includes('.card-photo-count-badge'), "card-photo-count-badge CSS class exists");
+assert(indexHtml.includes('.badge-layer'), "badge-layer CSS class exists");
+assert(!indexHtml.includes('card-photo-count-badge" style="position:absolute;bottom:'), "photo count badge does not overlap bottom-positioned layer pill");
+
 console.log("\n✅ ALL PLANNER CLEANUP & SIMPLIFICATION CHECKS PASSED!\n");
