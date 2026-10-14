@@ -25,7 +25,7 @@ import json
 import os
 import shutil
 
-BASE_IMAGE_URL = "https://bradlchr.github.io/images/plants"
+BASE_IMAGE_URL = "https://raw.githubusercontent.com/bradlchr/bradlchr.github.io/main/images/plants"
 
 SPECIES_IMAGE_UPDATES = {
     "Carex blanda": {

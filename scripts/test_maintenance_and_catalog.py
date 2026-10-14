@@ -145,8 +145,8 @@ def test_data_integrity():
             assert "NoThumbnailLarge.jpg" not in u, f"Plant {sname} contains MOBOT placeholder image: {u}"
             assert "NoThumbnail2.jpg" not in u, f"Plant {sname} contains MOBOT placeholder image: {u}"
             assert "thumb/7/77" not in u, f"Plant {sname} contains dummy Wikimedia placeholder URL: {u}"
-            if "bradlchr.github.io/images/plants/" in u:
-                fname = u.split("bradlchr.github.io/images/plants/")[1]
+            if "images/plants/" in u:
+                fname = u.split("images/plants/")[1]
                 local_f = os.path.join("images/plants", fname)
                 assert os.path.exists(local_f), f"Plant {sname} referenced local image missing on disk: {local_f}"
                 assert os.path.getsize(local_f) > 5000, f"Plant {sname} local image too small: {local_f}"
