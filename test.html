@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#1b5e20" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#121815" media="(prefers-color-scheme: dark)">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2073,14 +2076,16 @@
     #gardenPlannerModal {
       max-width: 1280px;
       width: 96%;
-      height: min(92vh, 920px);
-      max-height: 94vh;
+      height: 90vh;
+      height: 90dvh;
+      max-height: 920px;
       border-radius: var(--radius-lg);
       padding: 0;
       overflow: hidden;
       border: 1px solid var(--border-subtle);
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
       background: var(--bg-surface);
+      touch-action: pan-y;
     }
     .planner-modal-body {
       display: flex;
@@ -2088,6 +2093,7 @@
       height: 100%;
       min-height: 0;
       overflow: hidden;
+      touch-action: pan-y;
     }
     .planner-modal-header {
       padding: 12px 18px;
@@ -2102,11 +2108,10 @@
     }
     .planner-layout {
       display: grid;
-      grid-template-columns: minmax(320px, 22rem) minmax(0, 1fr);
-      grid-template-rows: minmax(0, 1fr);
-      height: 100%;
-      min-height: 0;
+      grid-template-columns: minmax(300px, 21rem) minmax(0, 1fr);
+      grid-template-rows: 100%;
       flex: 1 1 0%;
+      min-height: 0;
       overflow: hidden;
       background: var(--bg-base);
     }
@@ -2116,7 +2121,7 @@
       height: 100%;
       min-height: 0;
       overflow-y: auto;
-      overscroll-behavior: contain;
+      touch-action: pan-y;
       -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
@@ -2128,7 +2133,6 @@
       flex-direction: column;
       height: 100%;
       min-height: 0;
-      flex: 1 1 0%;
       overflow: hidden;
       background: var(--bg-base);
     }
@@ -2146,13 +2150,11 @@
     #plannerRecommendationsList {
       flex: 1 1 0%;
       min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
+      overflow-y: auto !important;
+      touch-action: pan-y !important;
       -webkit-overflow-scrolling: touch;
       padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      display: block;
     }
     .planner-content-footer {
       padding: 10px 18px;
@@ -2328,6 +2330,7 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       margin-bottom: 16px;
+      touch-action: pan-y;
     }
     .planner-layer-header {
       padding: 10px 14px;
@@ -2344,6 +2347,7 @@
       grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
       gap: 12px;
       padding: 14px;
+      touch-action: pan-y;
     }
     .planner-plant-card {
       background: var(--bg-base);
@@ -2356,6 +2360,7 @@
       gap: 10px;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
       min-width: 0;
+      touch-action: pan-y;
     }
     .planner-plant-card:hover {
       border-color: var(--primary-border);
@@ -2382,29 +2387,63 @@
     }
 
     @media (max-width: 900px) {
-      .planner-layout {
-        grid-template-columns: 1fr !important;
-        grid-template-rows: auto 1fr !important;
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100% !important;
+      #gardenPlannerModal {
+        width: 96% !important;
+        height: 92vh !important;
+        height: 92dvh !important;
+        max-height: 92vh !important;
         overflow-y: auto !important;
+        touch-action: pan-y !important;
         -webkit-overflow-scrolling: touch;
       }
+      .planner-modal-body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+      }
+      .planner-modal-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 25 !important;
+        background: var(--bg-surface) !important;
+      }
+      .planner-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+        flex: none !important;
+      }
       .planner-sidebar {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
         border-right: none !important;
-        border-bottom: 1px solid var(--border-subtle) !important;
-        max-height: 42vh !important;
-        flex-shrink: 0 !important;
-        overflow-y: auto !important;
+        border-bottom: 2px solid var(--border-subtle) !important;
+        flex: none !important;
       }
       .planner-content {
-        flex: 1 0 auto !important;
-        min-height: 50vh !important;
+        height: auto !important;
         overflow: visible !important;
+        flex: none !important;
+      }
+      .planner-content-header {
+        position: sticky !important;
+        top: 60px !important;
+        z-index: 15 !important;
+        background: var(--bg-surface) !important;
       }
       #plannerRecommendationsList {
+        height: auto !important;
         overflow: visible !important;
+        flex: none !important;
+        padding: 14px 12px !important;
+      }
+      .planner-content-footer {
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 20 !important;
+        background: var(--bg-surface) !important;
       }
     }
 
@@ -3875,6 +3914,7 @@
               <h3 id="gardenPlannerTitle" style="font-size:1.15rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.02em;">
                 Garden Planner
               </h3>
+              <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 2.5: Touch and Wheel Scrolling Engine">v2.5</span>
               <span id="plannerConsultationBadge" class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:0.75rem;font-weight:700;">
                 <i data-lucide="folder-kanban" style="width:11px;height:11px;vertical-align:-1px;"></i>
                 <span id="plannerActiveConsultationName">Active Consultation</span>
@@ -13517,6 +13557,17 @@
         }
       });
 
+      // Ensure mouse wheel anywhere over the recommendations pane scrolls the list
+      const plannerContentEl = document.getElementById('plannerContentPane');
+      const plannerRecsEl = document.getElementById('plannerRecommendationsList');
+      if (plannerContentEl && plannerRecsEl) {
+        plannerContentEl.addEventListener('wheel', (e) => {
+          if (e.target !== plannerRecsEl && !plannerRecsEl.contains(e.target)) {
+            plannerRecsEl.scrollTop += e.deltaY;
+          }
+        }, { passive: true });
+      }
+
       // Browse Invasives Button inside Consultation Drawer
       document.getElementById('browseInvasivesBtn')?.addEventListener('click', () => {
         setCatalogMode('invasive');
@@ -13635,6 +13686,12 @@
             modal.setAttribute('open', '');
           }
           if (window.lucide) lucide.createIcons();
+
+          modal.scrollTop = 0;
+          const recList = document.getElementById('plannerRecommendationsList');
+          if (recList) recList.scrollTop = 0;
+          const sidebar = document.getElementById('plannerSidebarPane');
+          if (sidebar) sidebar.scrollTop = 0;
 
           modal.onclose = () => {
             if (state.lastActiveElement && typeof state.lastActiveElement.focus === 'function') {
