@@ -6,12 +6,12 @@ Botanical profiles for Deep Roots Native Catalog.
 BOTANICAL_WILDFLOWERS_2 = {
     "Oenothera speciosa": {
         "summary": "A low-growing, stoloniferous perennial (1–2 ft) with lanceolate leaves, producing abundant 4-petaled white-to-pink cup-shaped flowers (up to 3 in across) with yellow centers from May to July. Spreads rapidly by extensive creeping rhizomes and self-seeding to form dense groundcover mats in dry to moist, well-drained soils in full sun.",
-        "maint_level": "Medium",
-        "spring_care": "Shear back stems to 2–3 inches in early spring at 50°F+; edge bed boundaries to contain spreading rhizomes.",
-        "summer_care": "Shear back by half after main spring bloom wave to stimulate fresh compact foliage.",
+        "maint_level": "High",
+        "spring_care": "Shear back stems to 2–3 inches in early spring at 50°F+; spade edge bed boundaries deeply to sever spreading underground runners.",
+        "summer_care": "Shear back by half after main spring bloom wave to stimulate fresh compact foliage and deadhead spent seed capsules.",
         "fall_care": None,
         "winter_care": None,
-        "division": "Divide shallow spreading runners in early spring or spade edge to contain boundaries.",
+        "division": "Divide shallow spreading runners in early spring or install physical underground root barriers to contain boundaries.",
         "host_insects": "Larval host for White-lined Sphinx Moth (*Hyles lineata*) and specialist evening primrose sweat bees.",
         "wildlife_users": "Day-and-night opening flowers feed both diurnal native bees and nocturnal sphinx moths.",
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
@@ -126,12 +126,12 @@ BOTANICAL_WILDFLOWERS_2 = {
     },
     "Conoclinium coelestinum": {
         "summary": "A rhizomatous perennial composite (1.5–3 ft) with triangular to ovate opposite leaves, bearing dense flat-topped clusters of fuzzy powder-blue to purple disk florets from July to October. Spreads vigorously via creeping rhizomes and self-seeding in moist to wet loams, ditches, and rain gardens in full sun to partial shade.",
-        "maint_level": "Medium",
-        "spring_care": "Emerges late in spring (May); cut back old stems at 50°F+ and edge boundaries if containing in formal beds.",
-        "summer_care": "Provide consistent moisture; excels in wet clay soils and partial to full sun.",
+        "maint_level": "High",
+        "spring_care": "Emerges late in spring (May); cut back old stems at 50°F+ and spade bed edges deeply to sever and contain spreading rhizomes.",
+        "summer_care": "Provide consistent moisture; pull wandering surface runners to prevent crowding adjacent perennials.",
         "fall_care": None,
         "winter_care": None,
-        "division": "Divide spreading rhizomes in early spring or pull perimeter runners to maintain bed boundaries.",
+        "division": "Divide spreading rhizomes in early spring or pull perimeter runners annually to maintain strict bed boundaries.",
         "host_insects": "Larval host for Three-lined Flower Moth (*Schinia trifascia*) and visited by hundreds of migrating Monarchs.",
         "wildlife_users": "Unrivaled high-volume nectar source for migrating Monarchs, swallowtails, and native solitary bees in late fall.",
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
@@ -162,12 +162,12 @@ BOTANICAL_WILDFLOWERS_2 = {
     },
     "Anemone canadensis": {
         "summary": "A vigorous rhizomatous perennial (1–2 ft) with deeply divided palmate leaves, bearing solitary 5-parted pure white flowers with yellow stamens from May to July. Spreads rapidly via creeping rhizomes to form dense groundcover mats in moist to wet soils in full sun to partial shade, suitable for large borders and wet meadows.",
-        "maint_level": "Medium",
-        "spring_care": "Cut back dead foliage in early spring at 50°F+; edge boundaries to contain vigorous underground rhizomes.",
-        "summer_care": None,
+        "maint_level": "High",
+        "spring_care": "Cut back dead foliage in early spring at 50°F+; spade bed boundaries deeply to contain vigorous underground rhizomes.",
+        "summer_care": "Pull wandering perimeter shoots to prevent encroaching into neighboring perennial crowns.",
         "fall_care": None,
         "winter_care": None,
-        "division": "Divide spreading rhizome colonies in early spring or autumn to manage boundaries.",
+        "division": "Divide spreading rhizome colonies in early spring or autumn to manage boundaries and prevent garden displacement.",
         "host_insects": "Pollen-rich blossoms attract native sweat bees (*Lasioglossum*), mining bees, and syrphid flies.",
         "wildlife_users": "Dense rhizomatous carpet binds saturated soils against erosion and provides amphibian shelter.",
         "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
@@ -222,12 +222,12 @@ BOTANICAL_WILDFLOWERS_2 = {
     },
     "Monarda fistulosa": {
         "summary": "An upright, branched perennial mint (2–4 ft) with square stems and aromatic lanceolate leaves, producing dense terminal heads of tubular, two-lipped lavender to pink flowers from July to September. Spreads by rhizomes and self-seeding in average to dry soils, prairies, and open savannas in full sun to partial shade.",
-        "maint_level": "Low",
-        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches.",
-        "summer_care": "Chelsea chop: pinch stems back by 1/3 in early June to promote dense bushy growth and prevent lodging.",
-        "fall_care": "Leave aromatic button seedheads intact through winter to feed native songbirds.",
+        "maint_level": "High",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches; spade edges to restrict expanding colony width.",
+        "summer_care": "Chelsea chop: pinch stems back by 1/3 in early June to promote dense bushy growth, and thin dense center stems to improve air circulation.",
+        "fall_care": "Leave aromatic button seedheads intact through winter to feed native songbirds, or deadhead if limiting self-seeding is preferred.",
         "winter_care": None,
-        "division": "Divide fibrous rhizomatous clumps every 3 years in early spring to maintain center vigor.",
+        "division": "Divide fibrous rhizomatous clumps every 2–3 years in early spring to contain perimeter spread and discard woody centers.",
         "host_insects": "Larval host for Hermit Sphinx (*Lintneria eremitus*) and Gray Marvel (*Phobolosia anfracta*); magnetic nectar source for clearwing sphinx moths.",
         "wildlife_users": "High-sugar tubular flowers are heavily favored by Ruby-throated Hummingbirds and long-tongued bumblebees (*Bombus pensylvanicus*).",
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"

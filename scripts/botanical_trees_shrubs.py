@@ -90,12 +90,12 @@ BOTANICAL_TREES_SHRUBS = {
     },
     "Prunus americana": {
         "summary": "A deciduous spiny understory tree (15–25 ft) producing dense umbels of white flowers in April before leaves emerge, followed by globose red-to-yellow plums in late summer. Develops colonial thickets via root suckers in well-drained loams in full sun to partial shade.",
-        "maint_level": "Medium",
-        "spring_care": "Prune root suckers in early spring if a single-trunk tree shape is desired instead of a colonial thicket.",
-        "summer_care": "Provide supplemental deep watering during prolonged summer droughts to swell fruit.",
+        "maint_level": "High",
+        "spring_care": "Prune out root suckers deeply at the base in late winter or early spring to prevent colonial thicket expansion in garden borders.",
+        "summer_care": "Mow or spade emerging root suckers in adjacent lawn or garden beds; provide supplemental deep watering during prolonged droughts to swell fruit.",
         "fall_care": "Collect fallen plums or leave for ground-foraging wildlife.",
         "winter_care": None,
-        "division": "Excavate rooted suckers in late winter while dormant for propagation.",
+        "division": "Excavate rooted suckers in late winter while dormant for propagation or disposal.",
         "host_insects": "Host for Tiger Swallowtail (*Papilio glaucus*), Red-spotted Purple, Cecropia Moth, and specialist bees including *Andrena pruni*.",
         "wildlife_users": "Plums are eagerly sought by wild turkeys, foxes, raccoons, and songbirds; dense thorny branches provide impenetrable nesting cover.",
         "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
@@ -270,9 +270,9 @@ BOTANICAL_TREES_SHRUBS = {
     },
     "Sambucus canadensis": {
         "summary": "A multi-stemmed deciduous shrub (5–12 ft) with pinnately compound foliage, bearing broad flat cymes (up to 10 in) of fragrant white flowers in early summer followed by heavy clusters of dark purple-black berries in late summer. Spreads by root suckers to form loose thickets in moist to wet soils along riparian edges, ditches, and sunny margins.",
-        "maint_level": "Low",
+        "maint_level": "Medium",
         "spring_care": "Cut back weak, dead, or 3-year-old stems to the ground in early spring (50°F+) to stimulate vigorous fruiting canes.",
-        "summer_care": "Provide consistent moisture during fruit development.",
+        "summer_care": "Provide consistent moisture during fruit development; spade emerging unwanted suckers to maintain bounds.",
         "fall_care": "Harvest berries for culinary use or leave for songbird migration fuel.",
         "winter_care": None,
         "division": "Divide spreading root suckers in early spring or take hardwood cuttings.",

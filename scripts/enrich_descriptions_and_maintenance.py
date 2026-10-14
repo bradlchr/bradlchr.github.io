@@ -257,12 +257,12 @@ def enrich_plant_record(plant, profile):
     )
     if maint_level == 'High':
         maint_summary = (
-            f"High Maintenance. Requires active moisture management or boundary spading to manage vigorous growth. "
-            f"Adhere to seasonal timing to maximize ecological benefits while containing garden spread."
+            f"High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. "
+            f"Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials."
         )
     elif maint_level == 'Medium':
         maint_summary = (
-            f"Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) "
+            f"Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping, cane thinning, or sucker pruning) "
             f"and spring cutback timing to sustain peak vigor and compact garden form."
         )
 

@@ -1415,7 +1415,7 @@
     "isKcKeystone": false,
     "maintenance_level": "Medium",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
+      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping, cane thinning, or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
       "level": "Medium",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278870)",
       "spring": "Gently clear fallen leaves from around basal rosettes in spring to prevent crown smothering ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278870)).",
@@ -3911,15 +3911,15 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": true,
-    "maintenance_level": "Medium",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
-      "level": "Medium",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277437)",
-      "spring": "Cut back woody dead stalks to 3 inches in late spring at 50°F+ ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "spring": "Cut back woody dead stalks to 3 inches in late spring at 50°F+; spade perimeter roots to contain aggressive clonal spread ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
       "summer": "Chelsea chop: cut stems back by half in early June to promote sturdy, compact branching and prevent flopping ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277437)).",
       "fall": "Leave golden seedheads intact through winter for goldfinches and winter songbirds ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
-      "division": "Divide expanding rhizomatous clumps every 3 years in early spring to contain spread ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277437))."
+      "division": "Divide expanding rhizomatous clumps every 2–3 years in early spring and spade boundaries to contain spread ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277437))."
     },
     "wildlife_detail": {
       "host_insects": "Keystone host for Silvery Checkerspot (*Chlosyne nycteis*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Chlosyne-nycteis)), Painted Lady (*Vanessa cardui*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Vanessa-cardui)), and specialist bees (*Melissodes agilis*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Melissodes-agilis)). Specialist bees and native pollinators are supported ([Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation)).",
@@ -6946,7 +6946,7 @@
     "isKcKeystone": false,
     "maintenance_level": "Medium",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
+      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping, cane thinning, or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
       "level": "Medium",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=275970)",
       "spring": "Prune unwanted root suckers in early spring to maintain a single-stemmed tree form rather than a colonial thicket ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=275970)).",
@@ -10311,14 +10311,14 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Low",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Low Maintenance. Requires minimal care once established. Adhere to conservation cutback practices (sustained 50°F+ spring timing) to protect cavity-nesting bees and songbirds.",
-      "level": "Low",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277129)",
-      "spring": "Cut back old flowering stems in early spring at 50°F+; fresh ferny basal leaves emerge early ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "summer": "Deadhead spent flower umbels in midsummer to promote a second wave of late-summer blooms ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277129)).",
-      "division": "Divide spreading rhizome clumps every 2–3 years in early spring or autumn ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277129))."
+      "spring": "Cut back old flowering stems in early spring at 50°F+; spade perimeter to contain creeping rhizomes ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Deadhead spent flower umbels in midsummer to prevent aggressive self-seeding and promote a second wave of late-summer blooms ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277129)).",
+      "division": "Divide spreading rhizome clumps every 1–2 years in early spring or autumn to maintain garden boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277129))."
     },
     "wildlife_detail": {
       "host_insects": "Larval host for Painted Lady butterfly (*Vanessa cardui*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Vanessa-cardui)) and various geometer moths.",
@@ -11474,15 +11474,15 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Medium",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
-      "level": "Medium",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=284891)",
       "spring": "Emerges late in spring (May); cut dead winter vines to the ground at 50°F+ and guide vigorous new shoots onto trellis ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "summer": "Pull wandering surface root runners in midsummer if containing within designated garden beds ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=284891)).",
+      "summer": "Regularly pull and excavate wandering root runner suckers emerging outside designated garden boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=284891)).",
       "fall": "Harvest ripe yellow-green maypop fruits in September–October as they soften ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
-      "division": "Divide spreading root runners in early spring while dormant ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=284891))."
+      "division": "Divide spreading root runners in early spring while dormant or install root barrier collars to contain garden borders ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=284891))."
     },
     "wildlife_detail": {
       "host_insects": "Sole obligate larval host for the Gulf Fritillary (*Dione vanillae*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Dione-vanillae)) and primary host for the Variegated Fritillary (*Euptoieta claudia*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euptoieta-claudia)).",
@@ -11908,14 +11908,15 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": true,
-    "maintenance_level": "Low",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Low Maintenance. Requires minimal care once established. Adhere to conservation cutback practices (sustained 50°F+ spring timing) to protect cavity-nesting bees and songbirds.",
-      "level": "Low",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277598)",
-      "spring": "Cut back dead stems to the ground in spring after 50°F+ temperatures ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "spring": "Cut back dead stems to the ground in spring after 50°F+ temperatures; spade perimeter to contain rhizomatous expansion ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Pull wandering perimeter shoots to maintain allocated garden space ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277598)).",
       "fall": "Leave seedheads intact to feed overwintering prairie songbirds ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
-      "division": "Divide rhizome colonies every 3–4 years in early spring or spade edge to contain boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277598))."
+      "division": "Divide rhizome colonies every 2–3 years in early spring and spade edge to contain boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277598))."
     },
     "wildlife_detail": {
       "host_insects": "Larval host for Wavy-lined Emerald Moth; specialist native bees (*Melissodes coreopsis*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Melissodes-coreopsis)) feed heavily on pollen.",
@@ -14063,14 +14064,14 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Medium",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
-      "level": "Medium",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=283036)",
-      "spring": "Shear back stems to 2–3 inches in early spring at 50°F+; edge bed boundaries to contain spreading rhizomes ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "summer": "Shear back by half after main spring bloom wave to stimulate fresh compact foliage ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=283036)).",
-      "division": "Divide shallow spreading runners in early spring or spade edge to contain boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=283036))."
+      "spring": "Shear back stems to 2–3 inches in early spring at 50°F+; spade edge bed boundaries deeply to sever spreading underground runners ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Shear back by half after main spring bloom wave to stimulate fresh compact foliage and deadhead spent seed capsules ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=283036)).",
+      "division": "Divide shallow spreading runners in early spring or install physical underground root barriers to contain boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=283036))."
     },
     "wildlife_detail": {
       "host_insects": "Larval host for White-lined Sphinx Moth (*Hyles lineata*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Hyles-lineata)) and specialist evening primrose sweat bees.",
@@ -15776,15 +15777,15 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": true,
-    "maintenance_level": "Medium",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
-      "level": "Medium",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355)",
-      "spring": "Prune root suckers in early spring if a single-trunk tree shape is desired instead of a colonial thicket ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355)).",
-      "summer": "Provide supplemental deep watering during prolonged summer droughts to swell fruit ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355)).",
+      "spring": "Prune out root suckers deeply at the base in late winter or early spring to prevent colonial thicket expansion in garden borders ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355)).",
+      "summer": "Mow or spade emerging root suckers in adjacent lawn or garden beds; provide supplemental deep watering during prolonged droughts to swell fruit ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355)).",
       "fall": "Collect fallen plums or leave for ground-foraging wildlife ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
-      "division": "Excavate rooted suckers in late winter while dormant for propagation ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355))."
+      "division": "Excavate rooted suckers in late winter while dormant for propagation or disposal ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286355))."
     },
     "wildlife_detail": {
       "host_insects": "Host for Tiger Swallowtail (*Papilio glaucus*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Papilio-glaucus)), Red-spotted Purple, Cecropia Moth, and specialist bees including *Andrena pruni*. Specialist bees and native pollinators are supported ([Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation)).",
@@ -16576,14 +16577,14 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Medium",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
-      "level": "Medium",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277501)",
-      "spring": "Emerges late in spring (May); cut back old stems at 50°F+ and edge boundaries if containing in formal beds ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "summer": "Provide consistent moisture; excels in wet clay soils and partial to full sun ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277501)).",
-      "division": "Divide spreading rhizomes in early spring or pull perimeter runners to maintain bed boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277501))."
+      "spring": "Emerges late in spring (May); cut back old stems at 50°F+ and spade bed edges deeply to sever and contain spreading rhizomes ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Provide consistent moisture; pull wandering surface runners to prevent crowding adjacent perennials ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277501)).",
+      "division": "Divide spreading rhizomes in early spring or pull perimeter runners annually to maintain strict bed boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277501))."
     },
     "wildlife_detail": {
       "host_insects": "Larval host for Three-lined Flower Moth (*Schinia trifascia*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Schinia-trifascia)) and visited by hundreds of migrating Monarchs.",
@@ -17029,13 +17030,14 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Low",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Low Maintenance. Requires minimal care once established. Adhere to conservation cutback practices (sustained 50°F+ spring timing) to protect cavity-nesting bees and songbirds.",
-      "level": "Low",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285270)",
-      "spring": "Cut back to 2 inches in spring after sustained 50°F+ temperatures ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "fall": "Leave decorative seed clusters on stems for winter movement and wildlife forage ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
+      "spring": "Cut back to 2 inches in spring after sustained 50°F+ temperatures; pull dense emerging self-sown seedlings from garden mulch ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Deadhead drooping seedheads in late summer if preventing prolific self-seeding throughout garden beds is desired ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285270)).",
+      "fall": "Leave decorative seed clusters on stems for winter movement and wildlife forage only if prepared to weed spring seedlings ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
       "division": "Divide dense fibrous clumps in early spring or pull unwanted self-sown seedlings ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285270))."
     },
     "wildlife_detail": {
@@ -17182,13 +17184,14 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Medium",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
-      "level": "Medium",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286153)",
-      "spring": "Cut back dead foliage in early spring at 50°F+; edge boundaries to contain vigorous underground rhizomes ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "division": "Divide spreading rhizome colonies in early spring or autumn to manage boundaries ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286153))."
+      "spring": "Cut back dead foliage in early spring at 50°F+; spade bed boundaries deeply to contain vigorous underground rhizomes ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Pull wandering perimeter shoots to prevent encroaching into neighboring perennial crowns ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286153)).",
+      "division": "Divide spreading rhizome colonies in early spring or autumn to manage boundaries and prevent garden displacement ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=286153))."
     },
     "wildlife_detail": {
       "host_insects": "Pollen-rich blossoms attract native sweat bees (*Lasioglossum*), mining bees, and syrphid flies. Specialist bees and native pollinators are supported ([Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation)).",
@@ -17795,7 +17798,7 @@
     "isKcKeystone": false,
     "maintenance_level": "Medium",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
+      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping, cane thinning, or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
       "level": "Medium",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279338)",
       "spring": "Prune dead wood in late winter while dormant; avoid pruning in late spring when borer beetles are active ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279338)).",
@@ -18535,15 +18538,15 @@
     ],
     "is_sweet_16": true,
     "isKcKeystone": true,
-    "maintenance_level": "Low",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Low Maintenance. Requires minimal care once established. Adhere to conservation cutback practices (sustained 50°F+ spring timing) to protect cavity-nesting bees and songbirds.",
-      "level": "Low",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=281404)",
-      "spring": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "summer": "Chelsea chop: pinch stems back by 1/3 in early June to promote dense bushy growth and prevent lodging ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=281404)).",
-      "fall": "Leave aromatic button seedheads intact through winter to feed native songbirds ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
-      "division": "Divide fibrous rhizomatous clumps every 3 years in early spring to maintain center vigor ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=281404))."
+      "spring": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches; spade edges to restrict expanding colony width ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
+      "summer": "Chelsea chop: pinch stems back by 1/3 in early June to promote dense bushy growth, and thin dense center stems to improve air circulation ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=281404)).",
+      "fall": "Leave aromatic button seedheads intact through winter to feed native songbirds, or deadhead if limiting self-seeding is preferred ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
+      "division": "Divide fibrous rhizomatous clumps every 2–3 years in early spring to contain perimeter spread and discard woody centers ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=281404))."
     },
     "wildlife_detail": {
       "host_insects": "Larval host for Hermit Sphinx (*Lintneria eremitus*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Lintneria-eremitus)) and Gray Marvel (*Phobolosia anfracta*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Phobolosia-anfracta)); magnetic nectar source for clearwing sphinx moths.",
@@ -21092,14 +21095,14 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Low",
+    "maintenance_level": "High",
     "maintenance_guide": {
-      "summary": "Low Maintenance. Requires minimal care once established. Adhere to conservation cutback practices (sustained 50°F+ spring timing) to protect cavity-nesting bees and songbirds.",
-      "level": "Low",
+      "summary": "High Maintenance in garden settings. Spreads aggressively via vigorous running rhizomes, root suckers, or prolific self-seeding. Requires active seasonal management (annual boundary spading, root-barrier containment, or deadheading) to prevent overtaking beds and displacing companion perennials.",
+      "level": "High",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285874)",
       "spring": "Harvest tight curled fiddleheads as a spring delicacy or allow them to unfurl; clear away dead previous-year fronds at 50°F+ ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
-      "summer": "Requires consistent moisture in shade; may enter early dormancy if allowed to dry out ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285874)).",
-      "division": "Divide creeping rhizome runners in early spring while dormant ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285874))."
+      "summer": "Provide consistent moisture in shade; spade perimeter runners to prevent spreading colonies from crowding smaller shade companions ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285874)).",
+      "division": "Divide and sever creeping rhizome runners every 2–3 years in early spring while dormant to contain colony spread ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285874))."
     },
     "wildlife_detail": {
       "host_insects": "Larval host for Ostrich Fern Borer Moth (*Papaipema speciosissima*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Papaipema-speciosissima)).",
@@ -22217,13 +22220,13 @@
     ],
     "is_sweet_16": false,
     "isKcKeystone": false,
-    "maintenance_level": "Low",
+    "maintenance_level": "Medium",
     "maintenance_guide": {
-      "summary": "Low Maintenance. Requires minimal care once established. Adhere to conservation cutback practices (sustained 50°F+ spring timing) to protect cavity-nesting bees and songbirds.",
-      "level": "Low",
+      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping, cane thinning, or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
+      "level": "Medium",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278942)",
       "spring": "Cut back weak, dead, or 3-year-old stems to the ground in early spring (50°F+) to stimulate vigorous fruiting canes ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278942)).",
-      "summer": "Provide consistent moisture during fruit development ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278942)).",
+      "summer": "Provide consistent moisture during fruit development; spade emerging unwanted suckers to maintain bounds ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278942)).",
       "fall": "Harvest berries for culinary use or leave for songbird migration fuel ([Xerces Society: Leave the Leaves](https://xerces.org/leave-the-leaves)).",
       "division": "Divide spreading root suckers in early spring or take hardwood cuttings ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=278942))."
     },
@@ -24483,7 +24486,7 @@
     "isKcKeystone": false,
     "maintenance_level": "Medium",
     "maintenance_guide": {
-      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
+      "summary": "Medium Maintenance. Benefits from targeted mid-season care (such as Chelsea chopping, cane thinning, or sucker pruning) and spring cutback timing to sustain peak vigor and compact garden form.",
       "level": "Medium",
       "sources": "[Xerces Society for Invertebrate Conservation](https://xerces.org/publications/guidelines/nesting-overwintering-habitat), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285435)",
       "spring": "Wait until sustained 50°F+ temperatures before cutting dead stalks to the crown ([Xerces Society: Nesting Resources](https://xerces.org/publications/guidelines/nesting-overwintering-habitat)).",
