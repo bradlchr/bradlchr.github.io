@@ -26,8 +26,14 @@ Nature Advisors use the **Deep Roots Database** in the office and out in the fie
   - **⭐ Deep Roots Sweet 16**: 16 high-yield, resilient pollinator species selected for heartland landscapes.
   - **🌿 KC Keystone Species**: Vital ecological host plants (e.g., *Quercus*, *Asclepias*, *Solidago*, *Symphyotrichum*) supporting local biodiversity.
 - **Sociability Taxonomy**: *Less Social / Solitary*, *Moderate Spreading*, and *Highly Social / Matrix Groundcover*.
-- **Advisor 3-Line Descriptions**: Concise, high-impact summaries designed for quick review and direct inclusion in client reports.
-- **Botanical Photography**: Field photography verified and attributed to Grow Native!, Missouri Botanical Garden, and regional botanists.
+- **Objective Scientific Summaries & Direct Inline Citations**: 2-sentence botanical descriptions completely free of subjective puffery or promotional descriptors (eliminating terms like "exquisite" or "stately"), detailing mature dimensions, leaf form, inflorescence morphology, and soil adaptability. Every factual statement is immediately followed by a direct Markdown link to authoritative sources ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), and [Grow Native!](https://grownative.org)).
+- **3-Tier Maintenance Taxonomy & Dynamic Seasonal Care**:
+  - 🟢 **Low Maintenance (169 species / 91.4%)**: Self-sufficient native perennials, grasses, and trees requiring minimal care once established (conservation spring cutback after sustained 50°F+ temperatures).
+  - 🟡 **Medium Maintenance (5 species / 2.7%)**: Species requiring targeted mid-season cultural care (moisture oversight, disease monitoring, cane rejuvenation: *Lobelia cardinalis*, *Cornus florida*, *Phlox paniculata*, *Asimina triloba*, *Sambucus canadensis*).
+  - 🔴 **High Maintenance (11 species / 5.9%)**: **Super aggressive spreaders in garden settings** (*Conoclinium coelestinum*, *Oenothera speciosa*, *Anemone canadensis*, *Passiflora incarnata*, *Helianthus salicifolius*, *Chasmanthium latifolium*, *Achillea millefolium*, *Monarda fistulosa*, *Matteuccia struthiopteris*, *Prunus americana*, *Coreopsis palmata*). In residential borders and cultivated garden beds, these demand active seasonal containment (annual boundary spading, digging out runners, pulling aggressive self-sown seedlings, or installing physical root barriers) to prevent taking over beds and displacing companion perennials.
+  - **Strict Actionable Seasonal Tiles**: Maintenance guides strictly feature `Spring`, `Summer`, `Fall`, `Winter`, and `Division` cards, omitting inactive seasons completely.
+- **Enhanced Wildlife & Ecological Hosts**: Details specific host insect species (caterpillars, butterflies, moths, specialist bees) with direct inline links to Butterflies and Moths of North America (BAMONA) and Xerces Society, as well as specific wildlife foragers with links to Illinois Wildflowers.
+- **Missouri Botanical Garden PlantFinder Specimen Photography**: Clean, high-resolution specimen photography with verified attribution and direct links to PlantFinder records.
 
 ---
 

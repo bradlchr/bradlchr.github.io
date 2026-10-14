@@ -99,13 +99,16 @@ graph TD
 
 ### Core Botanical Catalog Capabilities
 - **185 Curated Heartland Species**: Native wildflowers, grasses, sedges, shrubs, trees, vines, and ferns verified for the Greater Kansas City ecoregion.
+- **3-Tier Maintenance Taxonomy & Spreader Management**: Scientifically classifies all 185 plants into Low (169 species / 91.4%), Medium (5 species / 2.7%), and High Maintenance (11 species / 5.9%). Super aggressive spreaders (*Conoclinium*, *Anemone*, *Oenothera*, *Passiflora*, *Helianthus salicifolius*, *Chasmanthium*, *Achillea*, *Monarda*, *Matteuccia*, *Prunus americana*, *Coreopsis palmata*) are clearly flagged as High Maintenance in garden settings, accompanied by actionable boundary spading, runner pulling, sucker excavation, and seedhead deadheading instructions.
+- **Objective Scientific Summaries & Direct Citations**: Factual, evidence-based descriptions devoid of subjective puffery, paired with direct inline links to authoritative botanical references (Missouri Botanical Garden PlantFinder, Illinois Wildflowers, Grow Native!).
+- **Dynamic Seasonal Care Omission**: Seasonal maintenance tiles dynamically omit inactive seasons and display strictly actionable tasks under standard seasonal headings (Spring, Summer, Fall, Winter, Division).
 - **Dynamic Bloom Mesh Gradients**: Each card generates a luminous background gradient reflecting the plant's authentic floral colors (Yellow, White, Purple, Pink, Blue, Orange, Red, Lavender, Cream, Brown/Tan).
 - **Curious by Nature Sociability Matrix**: Displays spreading behaviors (*Solitary / Less Social*, *Moderate Spreading*, *Highly Social / Matrix*) to help clients design self-sustaining plant communities.
 - **Sorting & Name Display Flexibility**: Advisors can toggle between **Common Name First** and **Scientific Name First** with a single click, instantly re-indexing the entire library.
 
 > **🗣️ Speaker Notes for the Program Manager:**  
-> *"Our catalog is not a generic internet scrap. It contains exactly 185 verified Heartland species vetted by our botanical partners. Each plant card features an advisor-crafted 3-line description that explains exactly why the plant belongs in a home landscape.  
-> Notice our flagship highlights: with one tap, an advisor can filter for the 'Deep Roots Sweet 16' pollinator workhorses or the 'KC Keystone Species' like native oaks and milkweeds that support 90% of our local caterpillar species. Cards also dynamically reflect bloom colors using modern glassmorphism styling, making the experience visual and engaging for both advisors and clients."*
+> *"Our catalog is not a generic internet scrape. It contains exactly 185 verified Heartland species vetted by our botanical partners. Each plant card features an advisor-crafted, objective botanical summary with direct citations to reputable conservation and botanical institutions.  
+> Notice our maintenance intelligence: we explicitly classify super aggressive spreaders as High Maintenance in residential garden settings so homeowners and advisors know exactly what requires annual boundary spading or runner containment. Furthermore, with one tap, an advisor can filter for the 'Deep Roots Sweet 16' pollinator workhorses or the 'KC Keystone Species' like native oaks and milkweeds that support 90% of our local caterpillar species. Cards also dynamically reflect bloom colors using modern glassmorphism styling, making the experience visual and engaging for both advisors and clients."*
 
 ---
 

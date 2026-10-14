@@ -456,25 +456,28 @@ Below is the complete reference of all 118 functions declared in `index.html`, o
 - **Description**: Merges local advisor plant customizations (`dr_custom_plants`) into active species records.
 
 
-### Module 4B: Botanical Maintenance Engine & Ecological Care (New)
+### Module 4B: Botanical Maintenance Engine & Ecological Care
 
 #### `getPlantMaintenanceLevel(plant)`
-- **Line**: ~7235 | **Async**: No
 - **Parameters**: `plant` (Object)
 - **Description**: Returns the scientifically grounded maintenance ranking for the species (`'Low'`, `'Medium'`, or `'High'`).
+- **Classification Criteria**:
+  - **Low Maintenance (169 species / 91.4%)**: Established native perennials, grasses, and woody plants requiring minimal human intervention beyond delayed spring conservation cutbacks.
+  - **Medium Maintenance (5 species / 2.7%)**: Species requiring targeted mid-season cultural attention (disease monitoring, consistent moisture management, or multi-stem cane rejuvenation: *Lobelia cardinalis*, *Cornus florida*, *Phlox paniculata*, *Asimina triloba*, *Sambucus canadensis*).
+  - **High Maintenance (11 species / 5.9%)**: **Super aggressive spreaders in garden settings** (*Conoclinium coelestinum*, *Oenothera speciosa*, *Anemone canadensis*, *Passiflora incarnata*, *Helianthus salicifolius*, *Chasmanthium latifolium*, *Achillea millefolium*, *Monarda fistulosa*, *Matteuccia struthiopteris*, *Prunus americana*, *Coreopsis palmata*). In residential beds and garden borders, these species demand active seasonal containment (annual boundary spading, digging out runners, pulling aggressive self-sown seedlings, or installing physical root barriers) to prevent taking over beds and displacing companion perennials.
 
 #### `getPlantMaintenanceGuide(plant)`
-- **Line**: ~7240 | **Async**: No
 - **Parameters**: `plant` (Object)
-- **Description**: Returns a structured seasonal care dictionary (`summary`, `spring`, `summer`, `fall`, `winter`, `division`, `sources`) adhering to Xerces Society and Grow Native! conservation guidelines.
+- **Description**: Returns a structured seasonal care dictionary (`summary`, `spring`, `summer`, `fall`, `winter`, `division`, `sources`) adhering to Xerces Society, Missouri Botanical Garden PlantFinder, and Grow Native! conservation guidelines.
+- **Dynamic Seasonal Omission**: Seasons with zero actionable maintenance tasks are completely omitted from the dictionary and UI cards, ensuring advisors and clients only see relevant, actionable seasonal instructions.
 
 #### Seasonal Maintenance Timings & Standards:
-- **Spring (50°F+ Cutback)**: Wait until daytime temperatures consistently exceed 50°F before cutting back dead foliage to allow cavity-nesting solitary bees and overwintering pupae to emerge. Leave 8 to 18 inches of standing stubble as active nesting tunnels.
-- **Summer Care (Chelsea Chop & Moisture)**: Taller species (*Symphyotrichum*, *Helenium*, *Monarda*) benefit from a late-May/early-June 'Chelsea chop' (pruned back by 1/3 to 1/2) to stimulate dense branching and prevent flopping. Drought resilient once established.
-- **Fall Habitat Care (Seedhead Retention)**: Stems and seedheads are retained throughout autumn without cutting down, providing crucial winter seed calories for American Goldfinches, juncos, and native songbirds.
+- **Spring (50°F+ Conservation Cutback & Boundary Spading)**: Wait until daytime temperatures consistently exceed 50°F before cutting back dead foliage to allow cavity-nesting solitary bees and overwintering pupae to emerge. Leave 8 to 18 inches of standing stubble as active nesting tunnels. For aggressive spreaders (*Conoclinium*, *Anemone*, *Oenothera*), spade bed edges deeply in spring to sever creeping rhizomes.
+- **Summer Care (Chelsea Chop, Runner Pulling & Moisture)**: Taller species (*Symphyotrichum*, *Helianthus*, *Monarda*) benefit from a late-May/early-June 'Chelsea chop' (pruned back by 1/3 to 1/2) to stimulate dense branching and prevent flopping. For aggressive spreaders, pull wandering surface runners and deadhead seedheads (*Chasmanthium*, *Achillea*) before seed drop.
+- **Fall Habitat Care (Seedhead Retention vs. Containment)**: Stems and seedheads are retained throughout autumn without cutting down, providing crucial winter seed calories for American Goldfinches, juncos, and native songbirds, unless aggressive self-seeding containment is required.
 - **Winter Protection**: Standing silhouettes catch insulating snowdrifts and buffer crowns against Midwest freeze-thaw heaving. Preserves ground leaf litter for overwintering queen bumblebees.
-- **Division Guidelines**: Evaluates root architecture—taprooted species (*Baptisia*, *Asclepias*, *Eryngium*) are never divided, while fibrous/rhizomatous species are divided every 3–5 years in early spring.
-- **Consultation Report Inclusion**: Both the Word (.docx) report generator and consultation staging drawer inject maintenance ranking tags and seasonal instructions directly into client plant recommendations.
+- **Division Guidelines**: Evaluates root architecture—taprooted species (*Baptisia*, *Asclepias*, *Eryngium*) are never divided, while fibrous/rhizomatous species are divided every 1–3 years (aggressive spreaders) or 3–5 years in early spring.
+- **Consultation Report Inclusion**: Both the Word (.docx) report generator and consultation staging drawer inject maintenance ranking tags (`Low`, `Medium`, `High`) and seasonal instructions directly into client plant recommendations.
 
 #### `applyFilters()`
 - **Line**: 8158 | **Async**: No

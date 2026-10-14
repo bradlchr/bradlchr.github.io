@@ -35,14 +35,23 @@ Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database*
 - **Flagship Badges**:
   - ⭐ **Deep Roots Sweet 16**: High-performance pollinator workhorses.
   - 🌿 **KC Keystone Species**: Heartland ecosystem powerhouses.
+- **Maintenance Level**:
+  - 🟢 **Low Maintenance (169 species)**: Self-sufficient native perennials, grasses, and trees requiring minimal care once established (conservation spring cutback after sustained 50°F+ temperatures).
+  - 🟡 **Medium Maintenance (5 species)**: Species requiring targeted mid-season cultural care (moisture management, disease monitoring, cane rejuvenation: *Lobelia cardinalis*, *Cornus florida*, *Phlox paniculata*, *Asimina triloba*, *Sambucus canadensis*).
+  - 🔴 **High Maintenance (11 species)**: **Super aggressive spreaders in garden settings** (*Conoclinium coelestinum*, *Oenothera speciosa*, *Anemone canadensis*, *Passiflora incarnata*, *Helianthus salicifolius*, *Chasmanthium latifolium*, *Achillea millefolium*, *Monarda fistulosa*, *Matteuccia struthiopteris*, *Prunus americana*, *Coreopsis palmata*). In garden borders and residential landscapes, these require active seasonal containment (annual boundary spading, pulling runners, digging out suckers, mandatory deadheading, or root barriers) to prevent taking over beds and displacing companion perennials.
 
 ### Display Preference (Common vs. Scientific Name)
 - In the top header bar (or sidebar on mobile), toggle between **Common Name First** and **Scientific Name First**.
 - Changing this setting automatically re-sorts and re-indexes the entire plant directory.
 
-### Plant Cards
+### Plant Cards & Detail Modals
 - **Dynamic Bloom Gradients**: Luminous card backgrounds dynamically match the plant’s real bloom colors.
-- **Copy Summary**: Click **Copy** to grab the concise 3-line advisor description to your clipboard.
+- **Maintenance Ranking Pill**: Displays a color-coded maintenance badge (`Low Maint` in green, `Medium Maint` in amber, `High Maint` in red).
+- **Objective Scientific Summaries**: Factual botanical form, mature dimensions, foliage morphology, growth behavior, and soil adaptability, completely free of subjective puffery, with direct inline links to authoritative sources.
+- **Actionable Seasonal Care Guides**: Interactive tiles titled strictly `Spring`, `Summer`, `Fall`, `Winter`, and `Division`. Only displays seasons with actionable care instructions, omitting inactive seasons.
+- **Enhanced Wildlife & Ecological Hosts**: Details specific host insect species (caterpillars, specialist bees) with direct links to BAMONA and Xerces Society, plus specific wildlife foragers.
+- **Missouri Botanical Garden PlantFinder Specimen Photography**: High-resolution specimen photography with verified attribution and direct links to PlantFinder records.
+- **Copy Summary**: Click **Copy** to grab the concise advisor description to your clipboard.
 - **Plant Detail Modal**: Click on any card image or title to view high-resolution photography, companion plants, Grow Native! links, and full botanical citations.
 
 ---
