@@ -14168,12 +14168,12 @@
               <span>Add All ${escapeHtml(meta.title.split('/')[0].trim())}</span>
             </button>
           </div>
-          <div class="planner-layer-cards-grid" id="plannerGrid_${layerKey}">
+          <div class="planner-layer-cards-grid" id="plannerGrid_${layerKey.replace(/[^a-zA-Z0-9_-]/g, '_')}">
             <!-- Plant Cards -->
           </div>
         `;
 
-        const grid = layerBox.querySelector(`#plannerGrid_${layerKey}`);
+        const grid = layerBox.querySelector('.planner-layer-cards-grid');
         items.forEach(rec => {
           const card = createPlannerPlantCard(rec, profile);
           grid.appendChild(card);
@@ -14446,6 +14446,11 @@
       renderAreaRecommendations();
       showToast("Conditions broadened to Any Sunlight & Any Moisture.");
     }
+    window.resetPlannerFiltersToBroad = resetPlannerFiltersToBroad;
+    window.addTopRecommendedToConsultation = addTopRecommendedToConsultation;
+    window.addAllLayerToConsultation = addAllLayerToConsultation;
+    window.addPlantToAreaConsultation = addPlantToAreaConsultation;
+    window.removePlantFromAreaConsultation = removePlantFromAreaConsultation;
 
     // App Initialization
     function initializeApplication() {
