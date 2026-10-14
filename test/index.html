@@ -3914,7 +3914,7 @@
               <h3 id="gardenPlannerTitle" style="font-size:1.15rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.02em;">
                 Garden Planner
               </h3>
-              <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 2.5: Touch and Wheel Scrolling Engine">v2.5</span>
+              <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 2.6: Top 6 species per architecture layer">v2.6</span>
               <span id="plannerConsultationBadge" class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:0.75rem;font-weight:700;">
                 <i data-lucide="folder-kanban" style="width:11px;height:11px;vertical-align:-1px;"></i>
                 <span id="plannerActiveConsultationName">Active Consultation</span>
@@ -14316,9 +14316,9 @@
       }
 
       const matchBadge = document.getElementById('plannerMatchCountBadge');
-      if (matchBadge) matchBadge.textContent = `${recommendations.length} Recommended Species`;
 
       if (recommendations.length === 0) {
+        if (matchBadge) matchBadge.textContent = '0 Recommended Species';
         listContainer.innerHTML = `
           <div style="text-align:center;padding:40px 20px;color:var(--text-muted);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);">
             <i data-lucide="sprout" style="width:36px;height:36px;color:var(--text-muted);margin-bottom:10px;"></i>
@@ -14346,11 +14346,22 @@
         grouped[lKey].push(rec);
       });
 
+      // Calculate total recommended count across active layers (capped to top 6 per layer)
+      let totalRecommendedCount = 0;
+      layerOrder.forEach(layerKey => {
+        totalRecommendedCount += Math.min((grouped[layerKey] || []).length, 6);
+      });
+
+      if (matchBadge) matchBadge.textContent = `${totalRecommendedCount} Recommended Species (Top 6 / Layer)`;
+
       listContainer.innerHTML = '';
 
       layerOrder.forEach(layerKey => {
-        const items = grouped[layerKey];
-        if (!items || items.length === 0) return;
+        const allItems = grouped[layerKey];
+        if (!allItems || allItems.length === 0) return;
+
+        // Strictly recommend top 6 species for each architecture layer
+        const items = allItems.slice(0, 6);
 
         const meta = PLANNER_LAYER_METADATA[layerKey] || {
           title: layerKey,
@@ -14374,7 +14385,7 @@
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                   <span style="font-size:0.95rem;font-weight:800;color:var(--text-main);">${escapeHtml(meta.title)}</span>
                   <span class="badge" style="background:${meta.badgeBg};color:${meta.color};font-size:0.75rem;font-weight:700;">
-                    ${items.length} species
+                    Top ${items.length} species
                   </span>
                 </div>
                 <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;line-height:1.35;">
@@ -14382,9 +14393,9 @@
                 </div>
               </div>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm planner-batch-layer-btn" data-layer="${layerKey}" style="font-size:0.8rem;min-height:34px;padding:6px 12px;font-weight:700;" aria-label="Add all recommended ${escapeHtml(meta.title)} to consultation">
+            <button type="button" class="btn btn-secondary btn-sm planner-batch-layer-btn" data-layer="${layerKey}" style="font-size:0.8rem;min-height:34px;padding:6px 12px;font-weight:700;" aria-label="Add top ${items.length} recommended ${escapeHtml(meta.title)} to consultation">
               <i data-lucide="plus" style="width:13px;height:13px;"></i>
-              <span>Add All ${escapeHtml(meta.title.split('/')[0].trim())}</span>
+              <span>Add Top ${items.length} ${escapeHtml(meta.title.split('/')[0].trim())}</span>
             </button>
           </div>
           <div class="planner-layer-cards-grid" id="plannerGrid_${layerKey.replace(/[^a-zA-Z0-9_-]/g, '_')}">
@@ -14398,7 +14409,7 @@
           grid.appendChild(card);
         });
 
-        // Batch Add for Layer
+        // Batch Add for Layer (Top 6)
         layerBox.querySelector('.planner-batch-layer-btn')?.addEventListener('click', () => {
           addAllLayerToConsultation(layerKey, profile.name);
         });
@@ -14564,7 +14575,7 @@
 
     function addAllLayerToConsultation(layerKey, areaName) {
       const profile = getActivePlannerProfile();
-      const recs = getPlantRecommendationsForArea(profile).filter(r => r.effectiveLayer === layerKey);
+      const recs = getPlantRecommendationsForArea(profile).filter(r => r.effectiveLayer === layerKey).slice(0, 6);
       let added = 0;
 
       recs.forEach(({ plant }) => {
@@ -14607,7 +14618,7 @@
         showToast(msg, 'success');
         announceToScreenReader(msg);
       } else {
-        const msg = `All recommended species in this layer are already staged for ${areaName}.`;
+        const msg = `All top 6 recommended species in this layer are already staged for ${areaName}.`;
         showToast(msg);
         announceToScreenReader(msg);
       }
