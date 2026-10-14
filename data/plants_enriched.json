@@ -195,11 +195,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Scutellaria_parvula_plant.jpg/800px-Scutellaria_parvula_plant.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Scutellaria_parvula_plant.jpg/800px-Scutellaria_parvula_plant.jpg",
-        "caption": "Small Skullcap (Scutellaria parvula) in Missouri & Kansas native cliff/glade habitat",
-        "attribution_name": "Grow Native! / Missouri Botanical Garden PlantFinder / Lady Bird Johnson Wildflower Center",
-        "license": "CC BY-SA 4.0"
+        "url": "https://bradlchr.github.io/images/plants/scutellaria_parvula.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/scutellaria_parvula.jpg",
+        "label": "Blossoms & Glade Foliage",
+        "caption": "Scutellaria parvula (Small Skullcap) tubular violet-blue flowers with white-dotted lower lips on rocky glade substrate",
+        "attribution": "Courtesy Wikimedia Commons (CC BY-SA 4.0)",
+        "source_name": "Illinois Wildflowers / Grow Native!",
+        "source_url": "https://www.illinoiswildflowers.info/glades/plants/sm_skullcap.htm"
       }
     ],
     "sources": [
@@ -234,7 +236,8 @@
       "wildlife_users": "Forms a dense miniature groundcover that prevents weed establishment and protects soil moisture ([Grow Native!](https://grownative.org/native_plants/small-skullcap/)).",
       "sources": "[Grow Native!](https://grownative.org/native_plants/small-skullcap/)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Flowers attract small native bees, sweat bees (*Lasioglossum*), and beeflies.\n\n**Wildlife & Ecological Interactions:** Forms a dense miniature groundcover that prevents weed establishment and protects soil moisture ([Grow Native!](https://grownative.org/native_plants/small-skullcap/)).\n\n**Conservation & Scientific Sources:** [Grow Native!](https://grownative.org/native_plants/small-skullcap/)"
+    "wildlife_ecological_value": "**Host Plant Value:** Flowers attract small native bees, sweat bees (*Lasioglossum*), and beeflies.\n\n**Wildlife & Ecological Interactions:** Forms a dense miniature groundcover that prevents weed establishment and protects soil moisture ([Grow Native!](https://grownative.org/native_plants/small-skullcap/)).\n\n**Conservation & Scientific Sources:** [Grow Native!](https://grownative.org/native_plants/small-skullcap/)",
+    "image_url": "https://bradlchr.github.io/images/plants/scutellaria_parvula.jpg"
   },
   {
     "id": "plant-03e357b05973",
@@ -285,12 +288,12 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "/Images/NoThumbnailLarge.jpg",
-        "thumbnail": "/Images/NoThumbnailLarge.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Carex bushii botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
+        "url": "https://bradlchr.github.io/images/plants/carex_bushii.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/carex_bushii.jpg",
+        "label": "Savannah Clump & Fruiting Spikes",
+        "caption": "Carex bushii (Bush's Sedge) slender upright stems with bristly rounded green seed spikes in upland meadow",
+        "attribution": "Courtesy Wikimedia Commons (CC BY-SA 4.0)",
+        "source_name": "Missouri Botanical Garden PlantFinder / Grow Native!",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769"
       }
     ],
@@ -327,7 +330,8 @@
       "wildlife_users": "Seeds feed native prairie birds; base provides shelter for beneficial insects ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769)).",
       "sources": "[Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for native sedge-feeding skipper butterflies.\n\n**Wildlife & Ecological Interactions:** Seeds feed native prairie birds; base provides shelter for beneficial insects ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769)).\n\n**Conservation & Scientific Sources:** [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for native sedge-feeding skipper butterflies.\n\n**Wildlife & Ecological Interactions:** Seeds feed native prairie birds; base provides shelter for beneficial insects ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769)).\n\n**Conservation & Scientific Sources:** [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279769)",
+    "image_url": "https://bradlchr.github.io/images/plants/carex_bushii.jpg"
   },
   {
     "id": "plant-04d67e4878f9",
@@ -776,11 +780,11 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "/Images/NoThumbnailLarge.jpg",
-        "thumbnail": "/Images/NoThumbnailLarge.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Buchloe dactyloides botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
+        "url": "https://bradlchr.github.io/images/plants/buchloe_dactyloides.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/buchloe_dactyloides.jpg",
+        "label": "Fine Turf & Flag-Like Seedheads",
+        "caption": "Bouteloua dactyloides / Buchloe dactyloides (Buffalo Grass) fine-textured grayish-green turf and delicate staminate flag seedheads",
+        "attribution": "Patrick Alexander / Wikimedia Commons (Public Domain)",
         "source_name": "Missouri Botanical Garden PlantFinder",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229"
       }
@@ -817,7 +821,8 @@
       "wildlife_users": "Dense sod provides safe nesting grounds for ground-nesting native bees and songbirds ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229)).",
       "sources": "[Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Green Skipper and various native grass-mining moths.\n\n**Wildlife & Ecological Interactions:** Dense sod provides safe nesting grounds for ground-nesting native bees and songbirds ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229)).\n\n**Conservation & Scientific Sources:** [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Green Skipper and various native grass-mining moths.\n\n**Wildlife & Ecological Interactions:** Dense sod provides safe nesting grounds for ground-nesting native bees and songbirds ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229)).\n\n**Conservation & Scientific Sources:** [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285229)",
+    "image_url": "https://bradlchr.github.io/images/plants/buchloe_dactyloides.jpg"
   },
   {
     "id": "plant-0848516c9661",
@@ -3397,13 +3402,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "/Images/NoThumbnailLarge.jpg",
-        "thumbnail": "/Images/NoThumbnailLarge.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Liatris mucronata botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445"
+        "url": "https://bradlchr.github.io/images/plants/liatris_mucronata.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/liatris_mucronata.jpg",
+        "label": "Magenta Spire Inflorescence",
+        "caption": "Liatris mucronata (Bottle Brush Blazing Star / Cusp Blazing Star) upright spires of fuzzy pink-purple floral disks",
+        "attribution": "Courtesy Wikimedia Commons (CC BY-SA 3.0)",
+        "source_name": "Lady Bird Johnson Wildflower Center / Grow Native!",
+        "source_url": "https://www.wildflower.org/plants/result.php?id_plant=LIPUM"
       }
     ],
     "sources": [
@@ -3440,7 +3445,8 @@
       "wildlife_users": "Fluffy seedheads feed American Goldfinches and native wintering sparrows ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Schinia-gloriosa), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Glorious Flower Moth (*Schinia gloriosa*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Schinia-gloriosa)) and magnetic nectar source for migrating Monarchs.\n\n**Wildlife & Ecological Interactions:** Fluffy seedheads feed American Goldfinches and native wintering sparrows ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Schinia-gloriosa), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Glorious Flower Moth (*Schinia gloriosa*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Schinia-gloriosa)) and magnetic nectar source for migrating Monarchs.\n\n**Wildlife & Ecological Interactions:** Fluffy seedheads feed American Goldfinches and native wintering sparrows ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Schinia-gloriosa), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=277445)",
+    "image_url": "https://bradlchr.github.io/images/plants/liatris_mucronata.jpg"
   },
   {
     "id": "plant-225002bf6fca",
@@ -3595,11 +3601,11 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "/Images/NoThumbnailLarge.jpg",
-        "thumbnail": "/Images/NoThumbnailLarge.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Symphiotrichum cordifolium botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
+        "url": "https://bradlchr.github.io/images/plants/symphyotrichum_cordifolium.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/symphyotrichum_cordifolium.jpg",
+        "label": "Autumn Floral Display",
+        "caption": "Symphyotrichum cordifolium (Heart-leaved Aster) dense clouds of pale blue-to-lavender composite blossoms and distinct heart-shaped basal foliage",
+        "attribution": "Courtesy Wikimedia Commons (CC BY-SA 4.0)",
         "source_name": "Missouri Botanical Garden PlantFinder",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338"
       }
@@ -3638,7 +3644,8 @@
       "wildlife_users": "Fluffy seed plumes provide vital winter food for American Goldfinches, Black-capped Chickadees, and Juncos ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Phyciodes-tharos), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Andrena-asteris), [Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Keystone host for Pearl Crescent (*Phyciodes tharos*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Phyciodes-tharos)) and specialist mining bees (*Andrena asteris*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Andrena-asteris)). Specialist bees and native pollinators are supported ([Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation)).\n\n**Wildlife & Ecological Interactions:** Fluffy seed plumes provide vital winter food for American Goldfinches, Black-capped Chickadees, and Juncos ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Phyciodes-tharos), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Andrena-asteris), [Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338)"
+    "wildlife_ecological_value": "**Host Plant Value:** Keystone host for Pearl Crescent (*Phyciodes tharos*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Phyciodes-tharos)) and specialist mining bees (*Andrena asteris*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Andrena-asteris)). Specialist bees and native pollinators are supported ([Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation)).\n\n**Wildlife & Ecological Interactions:** Fluffy seed plumes provide vital winter food for American Goldfinches, Black-capped Chickadees, and Juncos ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Phyciodes-tharos), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Andrena-asteris), [Xerces Society: Pollinator Conservation](https://xerces.org/pollinator-conservation), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=291338)",
+    "image_url": "https://bradlchr.github.io/images/plants/symphyotrichum_cordifolium.jpg"
   },
   {
     "id": "plant-23d4d338c847",
@@ -4231,11 +4238,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_jamesii_plant.jpg/800px-Carex_jamesii_plant.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_jamesii_plant.jpg/800px-Carex_jamesii_plant.jpg",
-        "caption": "James’ Sedge (Carex jamesii) in Missouri & Kansas native savannah/woodland habitat",
-        "attribution_name": "Grow Native! / Missouri Botanical Garden PlantFinder / Lady Bird Johnson Wildflower Center",
-        "license": "CC BY-SA 4.0"
+        "url": "https://bradlchr.github.io/images/plants/carex_jamesii.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/carex_jamesii.jpg",
+        "label": "Fine-Textured Foliage & Spikelets",
+        "caption": "Carex jamesii (James' Sedge) graceful narrow foliage and distinctive long-beaked woodland spikelets",
+        "attribution": "Courtesy Wikimedia Commons (CC BY-SA 4.0)",
+        "source_name": "Illinois Wildflowers / Grow Native!",
+        "source_url": "https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm"
       }
     ],
     "sources": [
@@ -4270,7 +4279,8 @@
       "wildlife_users": "Seeds feature fleshy appendages (elaiosomes) collected and dispersed by native ants (myrmecochory) ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm)).",
       "sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for sedge skippers and leaf-mining moths.\n\n**Wildlife & Ecological Interactions:** Seeds feature fleshy appendages (elaiosomes) collected and dispersed by native ants (myrmecochory) ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm)).\n\n**Conservation & Scientific Sources:** [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for sedge skippers and leaf-mining moths.\n\n**Wildlife & Ecological Interactions:** Seeds feature fleshy appendages (elaiosomes) collected and dispersed by native ants (myrmecochory) ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm)).\n\n**Conservation & Scientific Sources:** [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/james_sedge.htm)",
+    "image_url": "https://bradlchr.github.io/images/plants/carex_jamesii.jpg"
   },
   {
     "id": "plant-2c1197585244",
@@ -5251,11 +5261,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_brevior_plant.jpg/800px-Carex_brevior_plant.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_brevior_plant.jpg/800px-Carex_brevior_plant.jpg",
-        "caption": "Short-Beak Sedge (Carex brevior) in Missouri & Kansas native savannah/woodland habitat",
-        "attribution_name": "Grow Native! / Missouri Botanical Garden PlantFinder / Lady Bird Johnson Wildflower Center",
-        "license": "CC BY-SA 4.0"
+        "url": "https://bradlchr.github.io/images/plants/carex_brevior.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/carex_brevior.jpg",
+        "label": "Prairie Clump & Perigynia Heads",
+        "caption": "Carex brevior (Short-Beak Sedge / Plains Oval Sedge) erect tufts with rounded greenish-brown seed clusters",
+        "attribution": "USDA NRCS / Robert H. Mohlenbrock (Public Domain)",
+        "source_name": "Illinois Wildflowers / Grow Native!",
+        "source_url": "https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html"
       }
     ],
     "sources": [
@@ -5291,7 +5303,8 @@
       "wildlife_users": "Plump seed achenes are relished by American Goldfinches, Bobwhite Quail, and wetland birds ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-vestris), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-conspicua), [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Dun Skipper (*Euphyes vestris*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-vestris)) and Black Dash (*Euphyes conspicua*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-conspicua)).\n\n**Wildlife & Ecological Interactions:** Plump seed achenes are relished by American Goldfinches, Bobwhite Quail, and wetland birds ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-vestris), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-conspicua), [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Dun Skipper (*Euphyes vestris*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-vestris)) and Black Dash (*Euphyes conspicua*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-conspicua)).\n\n**Wildlife & Ecological Interactions:** Plump seed achenes are relished by American Goldfinches, Bobwhite Quail, and wetland birds ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-vestris), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-conspicua), [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/ploval_sedge.html)",
+    "image_url": "https://bradlchr.github.io/images/plants/carex_brevior.jpg"
   },
   {
     "id": "plant-391a60bc2e80",
@@ -5906,11 +5919,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_blanda_plant.jpg/800px-Carex_blanda_plant.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_blanda_plant.jpg/800px-Carex_blanda_plant.jpg",
-        "caption": "Common Woodland Sedge (Carex blanda) in Missouri & Kansas native savannah/woodland habitat",
-        "attribution_name": "Grow Native! / Missouri Botanical Garden PlantFinder / Lady Bird Johnson Wildflower Center",
-        "license": "CC BY-SA 4.0"
+        "url": "https://bradlchr.github.io/images/plants/carex_blanda.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/carex_blanda.jpg",
+        "label": "Woodland Foliage & Flowering Spikes",
+        "caption": "Carex blanda (Common Wood Sedge) graceful arching foliage and emerging flower spikes in rich woodland habitat",
+        "attribution": "Courtesy Wikimedia Commons / iNaturalist (CC BY-SA 4.0)",
+        "source_name": "Illinois Wildflowers / Grow Native!",
+        "source_url": "https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm"
       }
     ],
     "sources": [
@@ -5945,7 +5960,8 @@
       "wildlife_users": "Heavy seed yields provide valuable nutrition for wild turkeys, towhees, and woodcocks ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm)).",
       "sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Eyed Brown butterfly and specialist sedge aphids.\n\n**Wildlife & Ecological Interactions:** Heavy seed yields provide valuable nutrition for wild turkeys, towhees, and woodcocks ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm)).\n\n**Conservation & Scientific Sources:** [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Eyed Brown butterfly and specialist sedge aphids.\n\n**Wildlife & Ecological Interactions:** Heavy seed yields provide valuable nutrition for wild turkeys, towhees, and woodcocks ([Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm)).\n\n**Conservation & Scientific Sources:** [Illinois Wildflowers](https://www.illinoiswildflowers.info/grasses/plants/cm_wdsedge.htm)",
+    "image_url": "https://bradlchr.github.io/images/plants/carex_blanda.jpg"
   },
   {
     "id": "plant-3de377667870",
@@ -6147,19 +6163,19 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "/Images/NoThumbnailLarge.jpg",
-        "thumbnail": "/Images/NoThumbnailLarge.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Carex vulpinoidea botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
+        "url": "https://bradlchr.github.io/images/plants/carex_vulpinoidea.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/carex_vulpinoidea.jpg",
+        "label": "Bristly Inflorescence & Clump Habit",
+        "caption": "Carex vulpinoidea (Fox Sedge) characteristic bristly fox-tail-like seed spikes in wet meadow soil",
+        "attribution": "USDA NRCS Wetland Science Institute / Wikimedia Commons (Public Domain)",
         "source_name": "Missouri Botanical Garden PlantFinder",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746"
       },
       {
         "url": "https://images.mobot.org/PlantRecordsVol3/prod/large960/00126000/126549.JPG",
         "thumbnail": "https://images.mobot.org/PlantRecordsVol3/prod/small240/00126000/126549.JPG",
-        "label": "Carex vulpinoidea seed",
-        "caption": "Carex vulpinoidea seed",
+        "label": "Carex vulpinoidea Seed Morphology",
+        "caption": "Detailed achene and perigynium structure of Fox Sedge",
         "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
         "source_name": "Missouri Botanical Garden PlantFinder",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746"
@@ -6199,7 +6215,8 @@
       "wildlife_users": "Abundant seed production feeds Mallards, Wood Ducks, wetland sparrows, and rails ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-dion), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Poanes-massasoit), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Dion Skipper (*Euphyes dion*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-dion)), Mulberry Wing (*Poanes massasoit*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Poanes-massasoit)), and Eyed Brown.\n\n**Wildlife & Ecological Interactions:** Abundant seed production feeds Mallards, Wood Ducks, wetland sparrows, and rails ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-dion), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Poanes-massasoit), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Dion Skipper (*Euphyes dion*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-dion)), Mulberry Wing (*Poanes massasoit*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Poanes-massasoit)), and Eyed Brown.\n\n**Wildlife & Ecological Interactions:** Abundant seed production feeds Mallards, Wood Ducks, wetland sparrows, and rails ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Euphyes-dion), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Poanes-massasoit), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=279746)",
+    "image_url": "https://bradlchr.github.io/images/plants/carex_vulpinoidea.jpg"
   },
   {
     "id": "plant-406bcaa029a4",
@@ -13772,11 +13789,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_shortiana_plant.jpg/800px-Carex_shortiana_plant.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Carex_shortiana_plant.jpg/800px-Carex_shortiana_plant.jpg",
-        "caption": "Short’s Sedge (Carex shortiana) in Missouri & Kansas native stream edge/wetland habitat",
-        "attribution_name": "Grow Native! / Missouri Botanical Garden PlantFinder / Lady Bird Johnson Wildflower Center",
-        "license": "CC BY-SA 4.0"
+        "url": "https://bradlchr.github.io/images/plants/carex_shortiana.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/carex_shortiana.jpg",
+        "label": "Cylindrical Dark Spikes",
+        "caption": "Carex shortiana (Short's Sedge) robust wetland tussocks with upright dark brown to cinnamon cylindrical seed spikes",
+        "attribution": "Courtesy Copenhagen Botanical Garden / Daderot (Public Domain)",
+        "source_name": "Grow Native! / Lady Bird Johnson Wildflower Center",
+        "source_url": "https://www.wildflower.org/plants/result.php?id_plant=CASH"
       }
     ],
     "sources": [
@@ -13812,7 +13831,8 @@
       "wildlife_users": "Heavy seed clusters feed migratory waterfowl, red-winged blackbirds, and swamp sparrows ([Grow Native!](https://grownative.org/native_plants/shorts-sedge/)).",
       "sources": "[Grow Native!](https://grownative.org/native_plants/shorts-sedge/)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for native wetland skippers and sedge moths.\n\n**Wildlife & Ecological Interactions:** Heavy seed clusters feed migratory waterfowl, red-winged blackbirds, and swamp sparrows ([Grow Native!](https://grownative.org/native_plants/shorts-sedge/)).\n\n**Conservation & Scientific Sources:** [Grow Native!](https://grownative.org/native_plants/shorts-sedge/)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for native wetland skippers and sedge moths.\n\n**Wildlife & Ecological Interactions:** Heavy seed clusters feed migratory waterfowl, red-winged blackbirds, and swamp sparrows ([Grow Native!](https://grownative.org/native_plants/shorts-sedge/)).\n\n**Conservation & Scientific Sources:** [Grow Native!](https://grownative.org/native_plants/shorts-sedge/)",
+    "image_url": "https://bradlchr.github.io/images/plants/carex_shortiana.jpg"
   },
   {
     "id": "plant-933e924e5e38",
@@ -20850,76 +20870,22 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://images.mobot.org/PlantRecordsVol4/prod/large960/00154000/154897. distichum (Fall color) (5).JPG",
-        "thumbnail": "https://images.mobot.org/PlantRecordsVol4/prod/small240/00154000/154897. distichum (Fall color) (5).JPG",
-        "label": "Primary Botanical Specimen",
-        "caption": "Taxodium distichum at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
-      },
-      {
         "url": "https://images.mobot.org/PlantRecords1/prod/large960/00089000/89960.JPG",
         "thumbnail": "https://images.mobot.org/PlantRecords1/prod/small240/00089000/89960.JPG",
-        "label": "Fruit",
-        "caption": "Fruit",
+        "label": "Habit & Feathery Foliage",
+        "caption": "Taxodium distichum (Bald Cypress) pyramidal habit, buttressed trunk base, and soft feathery needle foliage",
         "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
         "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
+        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=287316"
       },
       {
-        "url": "https://images.mobot.org/PlantRecords1/prod/large960/00092000/92369.JPG",
-        "thumbnail": "https://images.mobot.org/PlantRecords1/prod/small240/00092000/92369.JPG",
-        "label": "Botanical Detail 3",
-        "caption": "Taxodium distichum foliage and cone details",
+        "url": "https://bradlchr.github.io/images/plants/taxodium_distichum.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/taxodium_distichum.jpg",
+        "label": "Autumn Copper Color",
+        "caption": "Taxodium distichum (Bald Cypress) rich russet-bronze autumn coloration before deciduous needle drop",
         "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
         "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
-      },
-      {
-        "url": "https://images.mobot.org/PlantRecords1/prod/large960/00074000/74953.JPG",
-        "thumbnail": "https://images.mobot.org/PlantRecords1/prod/small240/00074000/74953.JPG",
-        "label": "Taxodium distichum seeds",
-        "caption": "Taxodium distichum seeds",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
-      },
-      {
-        "url": "https://images.mobot.org/PlantRecords1/prod/large960/00076000/76280.jpg",
-        "thumbnail": "https://images.mobot.org/PlantRecords1/prod/small240/00076000/76280.jpg",
-        "label": "Taxodium distichum habitat",
-        "caption": "Taxodium distichum habitat",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
-      },
-      {
-        "url": "https://images.mobot.org/PlantRecordsVol5/prod/large960/00163000/163527.JPG",
-        "thumbnail": "https://images.mobot.org/PlantRecordsVol5/prod/small240/00163000/163527.JPG",
-        "label": "Fall Color",
-        "caption": "Fall Color",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
-      },
-      {
-        "url": "https://images.mobot.org/PlantRecordsVol5/prod/large960/00163000/163528.JPG",
-        "thumbnail": "https://images.mobot.org/PlantRecordsVol5/prod/small240/00163000/163528.JPG",
-        "label": "Fall Color",
-        "caption": "Fall Color",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
-      },
-      {
-        "url": "https://images.mobot.org/PlantRecordsVol5/prod/large960/00163000/163529.JPG",
-        "thumbnail": "https://images.mobot.org/PlantRecordsVol5/prod/small240/00163000/163529.JPG",
-        "label": "Fall Color",
-        "caption": "Fall Color",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
-        "source_name": "Missouri Botanical Garden PlantFinder",
-        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?kempercode=m510"
+        "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=287316"
       }
     ],
     "sources": [
@@ -20956,7 +20922,8 @@
       "wildlife_users": "Wood Ducks and migratory water birds feed on cone seeds; massive branching provides eagle and osprey nesting roosts ([Illinois Wildflowers](https://www.illinoiswildflowers.info/trees/plants/bald_cypress.htm)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Isoparce-cupressi), [Illinois Wildflowers](https://www.illinoiswildflowers.info/trees/plants/bald_cypress.htm)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Bald Cypress Sphinx Moth (*Isoparce cupressi*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Isoparce-cupressi)) and various microlepidoptera.\n\n**Wildlife & Ecological Interactions:** Wood Ducks and migratory water birds feed on cone seeds; massive branching provides eagle and osprey nesting roosts ([Illinois Wildflowers](https://www.illinoiswildflowers.info/trees/plants/bald_cypress.htm)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Isoparce-cupressi), [Illinois Wildflowers](https://www.illinoiswildflowers.info/trees/plants/bald_cypress.htm)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Bald Cypress Sphinx Moth (*Isoparce cupressi*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Isoparce-cupressi)) and various microlepidoptera.\n\n**Wildlife & Ecological Interactions:** Wood Ducks and migratory water birds feed on cone seeds; massive branching provides eagle and osprey nesting roosts ([Illinois Wildflowers](https://www.illinoiswildflowers.info/trees/plants/bald_cypress.htm)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Isoparce-cupressi), [Illinois Wildflowers](https://www.illinoiswildflowers.info/trees/plants/bald_cypress.htm)",
+    "image_url": "https://images.mobot.org/PlantRecords1/prod/large960/00089000/89960.JPG"
   },
   {
     "id": "plant-d7c8577d8f30",
@@ -21616,11 +21583,13 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Lespedeza_repens_plant.jpg/800px-Lespedeza_repens_plant.jpg",
-        "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Lespedeza_repens_plant.jpg/800px-Lespedeza_repens_plant.jpg",
-        "caption": "Creeping Lespedeza (Lespedeza repens) in Missouri & Kansas native savannah/woodland habitat",
-        "attribution_name": "Grow Native! / Missouri Botanical Garden PlantFinder / Lady Bird Johnson Wildflower Center",
-        "license": "CC BY-SA 4.0"
+        "url": "https://bradlchr.github.io/images/plants/lespedeza_repens.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/lespedeza_repens.jpg",
+        "label": "Trailing Stems & Blossoms",
+        "caption": "Lespedeza repens (Creeping Lespedeza) trailing prostrate stems with trifoliate clover-like leaves and pink-violet pea blossoms",
+        "attribution": "Courtesy Wikimedia Commons / iNaturalist (CC BY 4.0)",
+        "source_name": "Lady Bird Johnson Wildflower Center / Grow Native!",
+        "source_url": "https://www.wildflower.org/plants/result.php?id_plant=LERE2"
       }
     ],
     "sources": [
@@ -21655,7 +21624,8 @@
       "wildlife_users": "Nitrogen-fixing root system enriches surrounding soil; high-protein seeds feed Northern Bobwhite and songbirds ([Grow Native!](https://grownative.org/native_plants/creeping-lespedeza/)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Cupido-comyntas), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Zerene-cesonia), [Grow Native!](https://grownative.org/native_plants/creeping-lespedeza/)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Eastern Tailed-Blue (*Cupido comyntas*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Cupido-comyntas)) and Southern Dogface (*Zerene cesonia*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Zerene-cesonia)).\n\n**Wildlife & Ecological Interactions:** Nitrogen-fixing root system enriches surrounding soil; high-protein seeds feed Northern Bobwhite and songbirds ([Grow Native!](https://grownative.org/native_plants/creeping-lespedeza/)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Cupido-comyntas), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Zerene-cesonia), [Grow Native!](https://grownative.org/native_plants/creeping-lespedeza/)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Eastern Tailed-Blue (*Cupido comyntas*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Cupido-comyntas)) and Southern Dogface (*Zerene cesonia*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Zerene-cesonia)).\n\n**Wildlife & Ecological Interactions:** Nitrogen-fixing root system enriches surrounding soil; high-protein seeds feed Northern Bobwhite and songbirds ([Grow Native!](https://grownative.org/native_plants/creeping-lespedeza/)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Cupido-comyntas), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Zerene-cesonia), [Grow Native!](https://grownative.org/native_plants/creeping-lespedeza/)",
+    "image_url": "https://bradlchr.github.io/images/plants/lespedeza_repens.jpg"
   },
   {
     "id": "plant-db1d21741a1b",
@@ -24302,11 +24272,11 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "/Images/NoThumbnailLarge.jpg",
-        "thumbnail": "/Images/NoThumbnailLarge.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Elymus virginicus botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
+        "url": "https://bradlchr.github.io/images/plants/elymus_virginicus.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/elymus_virginicus.jpg",
+        "label": "Bristly Awned Seedheads",
+        "caption": "Elymus virginicus (Virginia Wild Rye) dense upright bristly seed spikes with prominent wheat-like awns in riverbank border",
+        "attribution": "Courtesy Wikimedia Commons / Stefan.lefnaer (CC BY-SA 4.0)",
         "source_name": "Missouri Botanical Garden PlantFinder",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239"
       }
@@ -24344,7 +24314,8 @@
       "wildlife_users": "Seed spikes provide heavy calorie yields for wetland waterfowl, songbirds, and small mammals ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239)).",
       "sources": "[Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for various leaf-mining microlepidoptera and native grass skippers.\n\n**Wildlife & Ecological Interactions:** Seed spikes provide heavy calorie yields for wetland waterfowl, songbirds, and small mammals ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239)).\n\n**Conservation & Scientific Sources:** [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for various leaf-mining microlepidoptera and native grass skippers.\n\n**Wildlife & Ecological Interactions:** Seed spikes provide heavy calorie yields for wetland waterfowl, songbirds, and small mammals ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239)).\n\n**Conservation & Scientific Sources:** [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285239)",
+    "image_url": "https://bradlchr.github.io/images/plants/elymus_virginicus.jpg"
   },
   {
     "id": "plant-f55f2621934d",
@@ -25587,11 +25558,11 @@
     "is_kc_keystone": false,
     "images": [
       {
-        "url": "Images/NoThumbnail2.jpg",
-        "thumbnail": "Images/NoThumbnail2.jpg",
-        "label": "Primary Botanical Specimen",
-        "caption": "Andropogon gerardii botanical specimen at Missouri Botanical Garden",
-        "attribution": "Courtesy Missouri Botanical Garden PlantFinder",
+        "url": "https://bradlchr.github.io/images/plants/andropogon_gerardii.jpg",
+        "thumbnail": "https://bradlchr.github.io/images/plants/andropogon_gerardii.jpg",
+        "label": "Turkey-Foot Inflorescence",
+        "caption": "Andropogon gerardii (Big Bluestem) iconic three-parted turkey-foot seed heads in tallgrass prairie setting",
+        "attribution": "Matt Lavin / Wikimedia Commons (CC BY-SA 2.0)",
         "source_name": "Missouri Botanical Garden PlantFinder",
         "source_url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262"
       }
@@ -25629,7 +25600,8 @@
       "wildlife_users": "High-carbohydrate seeds sustain winter sparrows, finches, and wild turkeys; dense stalks create crucial winter shelter ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262)).",
       "sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Problema-byssus), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262)"
     },
-    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Delaware Skipper, Byssus Skipper (*Problema byssus*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Problema-byssus)), and Arogos Skipper.\n\n**Wildlife & Ecological Interactions:** High-carbohydrate seeds sustain winter sparrows, finches, and wild turkeys; dense stalks create crucial winter shelter ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Problema-byssus), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262)"
+    "wildlife_ecological_value": "**Host Plant Value:** Larval host for Delaware Skipper, Byssus Skipper (*Problema byssus*) ([Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Problema-byssus)), and Arogos Skipper.\n\n**Wildlife & Ecological Interactions:** High-carbohydrate seeds sustain winter sparrows, finches, and wild turkeys; dense stalks create crucial winter shelter ([Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262)).\n\n**Conservation & Scientific Sources:** [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/species/Problema-byssus), [Missouri Botanical Garden PlantFinder](https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285262)",
+    "image_url": "https://bradlchr.github.io/images/plants/andropogon_gerardii.jpg"
   },
   {
     "id": "plant-fd50a2b7b13a",

@@ -13,6 +13,7 @@ Comprehensive test suite verifying:
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -130,6 +131,25 @@ def test_data_integrity():
         w_eco = p.get('wildlife_ecological_value', '')
         assert "Host Plant Value:" in w_eco, f"Plant {sname} missing Host Plant Value in wildlife_ecological_value"
         assert "Wildlife & Ecological Interactions:" in w_eco, f"Plant {sname} missing Wildlife Interactions"
+
+        # 5. Check Botanical Photography & Images (No default fallbacks or dummy placeholders)
+        images = p.get('images')
+        assert isinstance(images, list) and len(images) > 0, f"Plant {sname} has no images configured"
+        primary_img = images[0]
+        assert isinstance(primary_img, dict), f"Plant {sname} primary image is not a dict"
+        img_url = primary_img.get('url', '')
+        assert img_url and img_url.startswith('http'), f"Plant {sname} primary image URL is empty or not HTTP: {img_url}"
+
+        for img in images:
+            u = img.get('url', '')
+            assert "NoThumbnailLarge.jpg" not in u, f"Plant {sname} contains MOBOT placeholder image: {u}"
+            assert "NoThumbnail2.jpg" not in u, f"Plant {sname} contains MOBOT placeholder image: {u}"
+            assert "thumb/7/77" not in u, f"Plant {sname} contains dummy Wikimedia placeholder URL: {u}"
+            if "bradlchr.github.io/images/plants/" in u:
+                fname = u.split("bradlchr.github.io/images/plants/")[1]
+                local_f = os.path.join("images/plants", fname)
+                assert os.path.exists(local_f), f"Plant {sname} referenced local image missing on disk: {local_f}"
+                assert os.path.getsize(local_f) > 5000, f"Plant {sname} local image too small: {local_f}"
 
     print(f"PASSED: All 185 plants verified.")
     print(f"  - Maintenance Distribution: {levels}")
