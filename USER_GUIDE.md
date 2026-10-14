@@ -188,7 +188,23 @@ Select which habitat structures to include in the client deliverable:
 
 ---
 
-## ✏️ 8. Editing Botanical Records (Advisors)
+## 👤 8. Nature Advisor Profile Hub & Workspace Tools
+
+Clicking your avatar badge in the top-right header opens the redesigned **Advisor Profile Hub**, organized into clean, visual sections:
+
+- **Advisor Details & Contact Card**: View your assigned advisor tier, email, and phone number, with an inline **Edit** button for rapid profile updates.
+- **Display & Text Size Preferences**: Select your interface and typography scale (`100%`, `110%`, `125%`, or `140%`) with automatic persistence across devices.
+- **2-Column Action Tiles Grid**:
+  - 📁 **Consultations**: Access your consultations manager with live count badges.
+  - ☁️ **Cloud Sync**: Check shared Firestore database status, sync logs, and cloud backups.
+  - ➕ **Contribute**: Submit new native plant species to the catalog.
+  - 📖 **Code Manual**: Launch the interactive architecture and code manual (`docs.html`).
+- **Administrator Operations Card** *(Privileged)*: High-priority admin tools (**Plant Approval Inbox**, **Consultation Reports Repository**, and **Advisor Administration Console**) are grouped in a dedicated amber management card that automatically hides for standard advisors.
+- **Account Actions Footer**: Clean, compact side-by-side **Password** change and **Sign Out** controls.
+
+---
+
+## ✏️ 9. Editing Botanical Records (Advisors)
 
 Advisors can update species records to reflect regional field observations:
 1. Sign in to your advisor account.
@@ -198,11 +214,11 @@ Advisors can update species records to reflect regional field observations:
 
 ---
 
-## 👥 9. Program Administrator Functions
+## 👥 10. Program Administrator Functions
 
 Advisors with the `admin` role possess organization-wide management tools accessible via the avatar menu (**Admin Console**) and the Database Sync dialog:
 
-### 9.1 Provisioning & Managing Nature Advisors
+### 10.1 Provisioning & Managing Nature Advisors
 1. Open your profile menu in the top right and select **Admin Console** (or open the **Advisor Roster** tab).
 2. **Search Roster**: Filter advisors by name, email, phone, or username.
 3. **Provision New Advisors**:
@@ -213,7 +229,7 @@ Advisors with the `admin` role possess organization-wide management tools access
 4. **First-Login Security**:
    - When a newly provisioned advisor signs in for the first time, the application automatically forces them to set a permanent, strong password (minimum 8 characters, uppercase, lowercase, numbers) before accessing staging features.
 
-### 9.2 Central Consultation Reports Repository
+### 10.2 Central Consultation Reports Repository
 Advisors with the `admin` role can oversee all consultations conducted across the region:
 1. Open the **Admin Console** and select the **Consultation Repository** tab.
 2. **Search & Filter**: Search by client name, advisor name/username, property address, plant species, or notes. Use the advisor dropdown to isolate reports by specific team members.

@@ -877,9 +877,9 @@ Below is the complete reference of all 118 functions declared in `index.html`, o
 - **Description**: Opens the Nature Advisor sign-in dialog.
 
 #### `openUserProfileModal()`
-- **Line**: 7253 | **Async**: No
+- **Line**: 7821 | **Async**: No
 - **Parameters**: None
-- **Description**: Opens the Nature Advisor profile modal showing user metadata, role badge, and quick management links.
+- **Description**: Opens the redesigned Nature Advisor profile modal featuring a 2-column action grid for core workflows, display text scaling controls, inline profile details editing, conditionally isolated privileged administrator operations card (`#profileAdminSection`), and compact footer actions.
 
 #### `openChangePasswordModal(isFirstLogin = false)`
 - **Line**: 7301 | **Async**: No

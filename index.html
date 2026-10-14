@@ -1787,6 +1787,178 @@
       background: rgba(35, 92, 54, 0.08);
       flex-shrink: 0;
     }
+
+    /* User Profile Hub & Action Tile Styles */
+    .profile-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .profile-action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .profile-action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .profile-tile-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .profile-tile-btn:hover,
+    .profile-tile-btn:focus-visible {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .profile-tile-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .profile-tile-btn:hover .profile-tile-icon {
+      transform: scale(1.05);
+    }
+
+    .profile-tile-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .profile-tile-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .profile-tile-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-admin-card {
+      background: rgba(217, 119, 6, 0.04);
+      border: 1px solid rgba(217, 119, 6, 0.22);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    [data-theme="dark"] .profile-admin-card {
+      background: rgba(217, 119, 6, 0.08);
+      border-color: rgba(217, 119, 6, 0.3);
+    }
+
+    .profile-admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .profile-admin-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #b45309;
+    }
+
+    [data-theme="dark"] .profile-admin-title {
+      color: var(--accent-gold);
+    }
+
+    .profile-admin-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .profile-admin-item-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: left;
+      font-size: 12.5px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .profile-admin-item-btn:hover,
+    .profile-admin-item-btn:focus-visible {
+      background: rgba(217, 119, 6, 0.08);
+      border-color: #d97706;
+      transform: translateX(2px);
+    }
+
+    [data-theme="dark"] .profile-admin-item-btn {
+      background: var(--bg-surface-elevated);
+      border-color: rgba(217, 119, 6, 0.25);
+    }
+
+    [data-theme="dark"] .profile-admin-item-btn:hover,
+    [data-theme="dark"] .profile-admin-item-btn:focus-visible {
+      background: rgba(217, 119, 6, 0.15);
+      border-color: var(--accent-gold);
+    }
+
     .dialog-tabs {
       display: flex;
       gap: 8px;
@@ -3081,7 +3253,7 @@
   </dialog>
 
   <!-- User Profile & Administration Modal -->
-  <dialog id="userProfileModal" aria-modal="true" aria-labelledby="userProfileTitle">
+  <dialog id="userProfileModal" aria-modal="true" aria-labelledby="userProfileTitle" style="max-width:540px;width:calc(100% - 24px);">
     <div class="dialog-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <i data-lucide="user" style="color:var(--primary);width:20px;height:20px;"></i>
@@ -3092,18 +3264,26 @@
       </button>
     </div>
     <div class="dialog-body" style="text-align:center;">
-      <div id="profileAvatarContainer" style="margin:0 auto 12px;width:64px;height:64px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:2px solid var(--primary-border);">CB</div>
-      <h4 id="profileNameTxt" style="font-size:18px;font-weight:800;color:var(--text-main);margin:0 0 2px 0;">Chris Bradley</h4>
-      <p style="font-size:13px;color:var(--text-muted);margin:0 0 10px 0;"><span style="font-family:monospace;font-weight:700;" id="profileUsernameTxt">chris.bradley</span></p>
+      <div id="profileAvatarContainer" style="margin:0 auto 10px;width:60px;height:60px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:2px solid var(--primary-border);">CB</div>
+      <h4 id="profileNameTxt" style="font-size:17px;font-weight:800;color:var(--text-main);margin:0 0 2px 0;">Chris Bradley</h4>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 8px 0;"><span style="font-family:monospace;font-weight:700;" id="profileUsernameTxt">chris.bradley</span></p>
       
-      <div style="display:inline-flex;align-items:center;margin-bottom:16px;">
+      <div style="display:inline-flex;align-items:center;margin-bottom:14px;">
         <span id="profileRoleBadge" class="role-badge admin">
           <i data-lucide="shield" style="width:12px;height:12px;"></i>
           <span id="profileRoleTxt">Admin</span>
         </span>
       </div>
 
-      <div style="background:var(--bg-base);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;font-size:12px;color:var(--text-secondary);margin-bottom:16px;display:flex;flex-direction:column;gap:6px;">
+      <!-- Advisor Details Card with Inline Edit Button -->
+      <div style="background:var(--bg-base);padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;font-size:12px;color:var(--text-secondary);margin-bottom:14px;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-subtle);padding-bottom:6px;margin-bottom:2px;">
+          <span style="font-weight:700;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;">Advisor Details</span>
+          <button id="openEditSelfBtn" type="button" class="btn btn-secondary" style="display:none;padding:2px 8px;font-size:11px;height:24px;border-radius:var(--radius-sm);color:var(--primary);border-color:var(--primary-border);gap:4px;" title="Edit your advisor details">
+            <i data-lucide="user-cog" style="width:12px;height:12px;"></i>
+            <span>Edit</span>
+          </button>
+        </div>
         <div style="display:flex;justify-content:space-between;">
           <span>Advisor Type:</span>
           <strong id="profileAdvisorTypeTxt" style="color:var(--text-main);">Advisor in Training</strong>
@@ -3119,7 +3299,7 @@
       </div>
 
       <!-- Display & Text Size Preferences -->
-      <div style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;margin-bottom:16px;">
+      <div style="background:var(--bg-base);padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;margin-bottom:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-main);">
             <i data-lucide="type" style="width:14px;height:14px;color:var(--primary);"></i>
@@ -3128,7 +3308,7 @@
           <span id="profileTextSizeActiveLabel" style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 8px;border-radius:var(--radius-full);border:1px solid var(--primary-border);">Standard (100%)</span>
         </div>
         <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 0;line-height:1.4;">
-          Personalize the interface and font scaling for your comfort across all devices.
+          Personalize interface and font scaling for your comfort across all devices.
         </p>
         
         <div class="text-size-segmented-control" id="profileTextSizeControls" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;">
@@ -3151,45 +3331,107 @@
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="openUserConsultationsBtn" class="btn btn-secondary" style="width:100%;">
-          <i data-lucide="folder-kanban"></i>
-          <span>My Consultations (<span id="profileConsultationsCount">0</span>)</span>
+      <!-- Advisor Workspace Tools (2-Column Action Tiles Grid) -->
+      <div class="profile-section-title">
+        <i data-lucide="compass" style="width:13px;height:13px;color:var(--primary);"></i>
+        <span>Advisor Tools</span>
+      </div>
+      <div class="profile-action-grid">
+        <button id="openUserConsultationsBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(35, 92, 54, 0.1);color:var(--primary);">
+            <i data-lucide="folder-kanban" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Consultations</span>
+              <span class="badge" style="background:var(--primary);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;" id="profileConsultationsCount">0</span>
+            </div>
+            <div class="profile-tile-desc">Client plans &amp; reports</div>
+          </div>
         </button>
-        <button id="profileOpenSyncBtn" class="btn btn-secondary" style="width:100%;">
-          <i data-lucide="cloud-cog"></i>
-          <span>Shared Database &amp; Sync Status</span>
+
+        <button id="profileOpenSyncBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(2, 132, 199, 0.1);color:#0284c7;">
+            <i data-lucide="cloud-cog" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Cloud Sync</span>
+            </div>
+            <div class="profile-tile-desc">Status &amp; backups</div>
+          </div>
         </button>
-        <button id="openEditSelfBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--primary);border-color:var(--primary-border);">
-          <i data-lucide="user-cog"></i>
-          <span>Edit Advisor Details</span>
+
+        <button id="profileAddPlantBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(35, 92, 54, 0.1);color:var(--primary);">
+            <i data-lucide="plus-circle" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Contribute</span>
+            </div>
+            <div class="profile-tile-desc">Add native species</div>
+          </div>
         </button>
-        <button id="openAdminReportsBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--primary);border-color:var(--primary-border);">
-          <i data-lucide="folder-git-2"></i>
-          <span>Consultation Reports Repository (<span id="profileReportsRepoCount">0</span>)</span>
-        </button>
-        <button id="profileAddPlantBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--primary);border-color:var(--primary-border);">
-          <i data-lucide="plus-circle"></i>
-          <span>Contribute New Native Plant</span>
-        </button>
-        <button id="openAdminApprovalsBtn" class="btn btn-secondary" style="width:100%;display:none;color:#b45309;border-color:rgba(217,119,6,0.4);background:rgba(217,119,6,0.06);">
-          <i data-lucide="inbox"></i>
-          <span>Plant Approval Inbox (<span id="profileApprovalsCount">0</span>)</span>
-        </button>
-        <button id="openAdminConsoleBtn" class="btn btn-secondary" style="width:100%;display:none;color:var(--accent-gold);border-color:var(--accent-gold-border);">
-          <i data-lucide="shield"></i>
-          <span>Advisor Administration Console</span>
-        </button>
-        <a href="./docs.html" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width:100%;text-decoration:none;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;" title="Open interactive architecture and code manual">
-          <i data-lucide="book-open"></i>
-          <span>Codebase Architecture &amp; Manual</span>
+
+        <a href="./docs.html" target="_blank" rel="noopener noreferrer" class="profile-tile-btn" style="text-decoration:none;" title="Open interactive architecture and code manual">
+          <div class="profile-tile-icon" style="background:rgba(124, 58, 237, 0.1);color:#7c3aed;">
+            <i data-lucide="book-open" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Code Manual</span>
+              <i data-lucide="external-link" style="width:12px;height:12px;color:var(--text-muted);"></i>
+            </div>
+            <div class="profile-tile-desc">Docs &amp; architecture</div>
+          </div>
         </a>
-        <button id="openChangePasswordBtn" class="btn btn-secondary" style="width:100%;">
-          <i data-lucide="key-round"></i>
-          <span>Change Password</span>
+      </div>
+
+      <!-- Administrator Tools Card (Privileged, Auto-hidden for Non-Admins) -->
+      <div id="profileAdminSection" class="profile-admin-card" style="display:none;">
+        <div class="profile-admin-header">
+          <div class="profile-admin-title">
+            <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+            <span>Administrator Operations</span>
+          </div>
+          <span class="role-badge admin" style="font-size:10px;padding:1px 6px;">Privileged</span>
+        </div>
+        <div class="profile-admin-list">
+          <button id="openAdminApprovalsBtn" type="button" class="profile-admin-item-btn">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="inbox" style="width:16px;height:16px;color:#d97706;"></i>
+              <span>Plant Approval Inbox</span>
+            </div>
+            <span class="badge" style="background:#d97706;color:#fff;font-size:10.5px;padding:1px 7px;border-radius:10px;font-weight:700;" id="profileApprovalsCount">0</span>
+          </button>
+
+          <button id="openAdminReportsBtn" type="button" class="profile-admin-item-btn">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="folder-git-2" style="width:16px;height:16px;color:var(--primary);"></i>
+              <span>Consultation Reports Repository</span>
+            </div>
+            <span class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:10.5px;padding:1px 7px;border-radius:10px;font-weight:700;" id="profileReportsRepoCount">0</span>
+          </button>
+
+          <button id="openAdminConsoleBtn" type="button" class="profile-admin-item-btn">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="shield" style="width:16px;height:16px;color:var(--accent-gold);"></i>
+              <span>Advisor Administration Console</span>
+            </div>
+            <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--text-muted);"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Account Actions Footer -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;">
+        <button id="openChangePasswordBtn" type="button" class="btn btn-secondary" style="font-size:12px;padding:9px 12px;justify-content:center;">
+          <i data-lucide="key-round" style="width:14px;height:14px;"></i>
+          <span>Password</span>
         </button>
-        <button id="signOutAdvisorBtn" class="btn btn-secondary" style="width:100%;color:var(--danger);border-color:var(--danger-bg);">
-          <i data-lucide="log-out"></i>
+        <button id="signOutAdvisorBtn" type="button" class="btn btn-secondary" style="font-size:12px;padding:9px 12px;justify-content:center;color:var(--danger);border-color:rgba(220,38,38,0.3);">
+          <i data-lucide="log-out" style="width:14px;height:14px;"></i>
           <span>Sign Out</span>
         </button>
       </div>
@@ -7600,6 +7842,13 @@
       document.getElementById('profileEmailTxt').textContent = u.email || 'None';
       document.getElementById('profilePhoneTxt').textContent = u.phoneNumber || 'None';
 
+      updateConsultationCounts();
+
+      const profileAdminSection = document.getElementById('profileAdminSection');
+      if (profileAdminSection) {
+        profileAdminSection.style.display = u.isAdmin ? 'block' : 'none';
+      }
+
       const editSelfBtn = document.getElementById('openEditSelfBtn');
       if (editSelfBtn) {
         editSelfBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
@@ -7607,7 +7856,7 @@
 
       const adminReportsBtn = document.getElementById('openAdminReportsBtn');
       if (adminReportsBtn) {
-        adminReportsBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
+        adminReportsBtn.style.display = u.isAdmin ? 'flex' : 'none';
         if (u.isAdmin) {
           fetchAllAdvisorReports().then(reps => updateAdminReportsBadge(reps.length)).catch(() => {});
         }
@@ -7615,12 +7864,12 @@
 
       const profileAddPlantBtn = document.getElementById('profileAddPlantBtn');
       if (profileAddPlantBtn) {
-        profileAddPlantBtn.style.display = 'inline-flex';
+        profileAddPlantBtn.style.display = 'flex';
       }
 
       const openApprovalsBtn = document.getElementById('openAdminApprovalsBtn');
       if (openApprovalsBtn) {
-        openApprovalsBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
+        openApprovalsBtn.style.display = u.isAdmin ? 'flex' : 'none';
         if (u.isAdmin) {
           updateApprovalBadges();
         }
@@ -7628,7 +7877,7 @@
 
       const adminBtn = document.getElementById('openAdminConsoleBtn');
       if (adminBtn) {
-        adminBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
+        adminBtn.style.display = u.isAdmin ? 'flex' : 'none';
       }
 
       updateTextScaleUI(getUserTextScale());
