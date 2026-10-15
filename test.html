@@ -2476,9 +2476,15 @@
       grid-template-columns: 1fr;
     }
 
+    #gardenPlannerModal:not([open]),
+    #plannerAreaConditionsModal:not([open]),
+    #plannerGuestModal:not([open]) {
+      display: none !important;
+    }
+
     /* Mobile & Tablet Responsive Architecture (<= 900px) */
     @media (max-width: 900px) {
-      #gardenPlannerModal {
+      #gardenPlannerModal[open] {
         width: 100vw !important;
         max-width: 100vw !important;
         height: 100vh !important;
@@ -2580,7 +2586,7 @@
       }
 
       /* Phase 2 & Dashboard: Main Layout Mobile Architecture */
-      .planner-layout {
+      .planner-layout:not([style*="display: none"]):not([style*="display:none"]) {
         display: flex !important;
         flex-direction: column !important;
         flex: 1 1 0% !important;
