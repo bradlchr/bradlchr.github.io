@@ -14820,7 +14820,9 @@
       const areaTexture = (profile.soilTexture || 'Any').toLowerCase();
       const areaMaint = profile.maintenance || 'Any';
       const areaColors = (profile.bloomColors && profile.bloomColors.length > 0) ? profile.bloomColors.map(c => c.toLowerCase()) : ['any'];
-      const areaLayers = (profile.structuralLayers && profile.structuralLayers.length > 0) ? profile.structuralLayers : [];
+      const hasExplicitLayers = Array.isArray(profile.structuralLayers);
+      const areaLayers = hasExplicitLayers ? profile.structuralLayers : [];
+      if (hasExplicitLayers && areaLayers.length === 0) return [];
 
       const results = [];
 
@@ -14919,7 +14921,7 @@
           }
         }
 
-        // 3. Structural Layer Match (Max 25 pts)
+        // 3. Structural Layer Match (Max 25 pts) — strictly enforce selected areaLayers
         const plantLayer = plant.architectural_layer || getPlantLayer(plant) || 'Seasonal/Herbaceous Layer';
         const plantTypes = toList(plant.plant_type).map(t => t.toLowerCase());
 
@@ -14947,16 +14949,17 @@
         }
 
         if (areaLayers.length > 0) {
-          if (areaLayers.includes(effectiveLayer) || areaLayers.includes(plantLayer)) {
+          if (areaLayers.includes(effectiveLayer)) {
             score += 25;
             reasons.push(`🌿 ${effectiveLayer}`);
           } else {
-            score -= 25;
-            matchesCriteria = false;
+            isDisqualified = true;
           }
         } else {
           score += 15;
         }
+
+        if (isDisqualified) return;
 
         // 4. Maintenance Match (Max 15 pts)
         const plantMaint = (plant.maintenance_level || getPlantMaintenanceLevel(plant) || 'Low').toLowerCase();
@@ -15139,7 +15142,7 @@
             <i data-lucide="sprout" style="width:36px;height:36px;color:var(--text-muted);margin-bottom:10px;"></i>
             <h5 style="font-size:1rem;font-weight:700;margin:0 0 8px 0;color:var(--text-main);">No Exact Matches for this Criteria Combination</h5>
             <p style="font-size:0.85rem;max-width:440px;margin:0 auto 16px auto;line-height:1.45;">
-              Try setting Sunlight or Moisture to <em>Any</em>, or selecting additional structural layers in the left panel.
+              Try setting Sunlight or Moisture to <em>Any</em>, or selecting additional structural layers in <em>Edit Conditions</em>.
             </p>
             <button type="button" class="btn btn-secondary btn-sm" onclick="resetPlannerFiltersToBroad()" style="font-size:0.82rem;min-height:36px;padding:8px 14px;">
               Broaden Area Conditions
@@ -15150,19 +15153,21 @@
         return;
       }
 
-      // Group recommendations by Layer
+      // Group recommendations by Layer — only include layers selected in area setup
       const layerOrder = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer', 'Understory', 'Canopy', 'Vine'];
+      const selectedLayers = Array.isArray(profile.structuralLayers) ? profile.structuralLayers : layerOrder;
       const grouped = {};
       layerOrder.forEach(l => { grouped[l] = []; });
 
       recommendations.forEach(rec => {
         const lKey = rec.effectiveLayer || 'Seasonal/Herbaceous Layer';
+        if (!selectedLayers.includes(lKey)) return;
         if (!grouped[lKey]) grouped[lKey] = [];
         grouped[lKey].push(rec);
       });
 
-      // Filter to layers that have recommendations
-      const availableLayers = layerOrder.filter(l => (grouped[l] || []).length > 0);
+      // Filter to selected layers that have recommendations
+      const availableLayers = layerOrder.filter(l => selectedLayers.includes(l) && (grouped[l] || []).length > 0);
 
       // Total count across all available layers (each capped to top 6)
       let totalRecommendedCount = 0;

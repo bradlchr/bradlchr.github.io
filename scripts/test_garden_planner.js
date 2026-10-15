@@ -235,4 +235,49 @@ function testSweet16PreferenceAndMargin() {
 
 testSweet16PreferenceAndMargin();
 
+// Test Strict Selected Architectural Layers Filtering
+function testStrictSelectedLayersOnly() {
+  const selectedLayers = ["Groundcover", "Seasonal/Herbaceous Layer", "Vine"];
+  constexcludedLayers = ["Structural Layer", "Understory", "Canopy"];
+  const profile = {
+    name: "Area 2: Trellis & Border",
+    sunlight: "Full Sun",
+    moisture: "Medium",
+    maintenance: "Low",
+    bloomColors: ["Any"],
+    structuralLayers: selectedLayers
+  };
+
+  const recs = getPlantRecommendationsForArea(profile);
+  if (recs.length === 0) {
+    throw new Error("Expected recommendations for Groundcover, Seasonal/Herbaceous Layer, and Vine");
+  }
+
+  const invalidRecs = recs.filter(r => !selectedLayers.includes(r.effectiveLayer));
+  if (invalidRecs.length > 0) {
+    const leaked = [...new Set(invalidRecs.map(r => r.effectiveLayer))].join(', ');
+    throw new Error(`Found recommendations in unselected layers (${leaked}), expected ONLY ${selectedLayers.join(', ')}`);
+  }
+
+  const returnedLayers = [...new Set(recs.map(r => r.effectiveLayer))];
+  selectedLayers.forEach(layer => {
+    if (!returnedLayers.includes(layer)) {
+      throw new Error(`Expected recommendations to include selected layer "${layer}"`);
+    }
+  });
+
+  // Also verify empty structuralLayers returns empty recommendations
+  const emptyLayersRecs = getPlantRecommendationsForArea({
+    ...profile,
+    structuralLayers: []
+  });
+  if (emptyLayersRecs.length !== 0) {
+    throw new Error(`Expected 0 recommendations when structuralLayers is empty [], got ${emptyLayersRecs.length}`);
+  }
+
+  console.log("✓ Strictly excluded unselected architectural layers (Structural Layer, Understory, Canopy) when only Groundcover, Mid-Layer, and Vine are selected.");
+}
+
+testStrictSelectedLayersOnly();
+
 console.log("\nALL GARDEN PLANNER UNIT TESTS PASSED!");
