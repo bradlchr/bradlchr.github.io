@@ -2110,6 +2110,14 @@
       background: var(--bg-surface);
       touch-action: pan-y;
     }
+    #gardenPlannerModal .btn,
+    #plannerAreaConditionsModal .btn {
+      white-space: normal;
+      text-align: center;
+      line-height: 1.25;
+      height: auto;
+      max-width: 100%;
+    }
     .planner-modal-body {
       display: flex;
       flex-direction: column;
@@ -2119,15 +2127,16 @@
       touch-action: pan-y;
     }
     .planner-modal-header {
-      padding: 12px 18px;
+      padding: 0.75rem 1.125rem;
       border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-frosted);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 0.75rem;
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
     .planner-layout {
       display: grid;
@@ -2148,8 +2157,8 @@
       -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      padding: 14px 16px;
+      gap: 0.875rem;
+      padding: 0.875rem 1rem;
     }
     .planner-content {
       display: flex;
@@ -2160,13 +2169,13 @@
       background: var(--bg-base);
     }
     .planner-content-header {
-      padding: 12px 20px;
+      padding: 0.75rem 1.25rem;
       border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-surface);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 0.875rem;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
@@ -2176,29 +2185,62 @@
       overflow-y: auto !important;
       touch-action: pan-y !important;
       -webkit-overflow-scrolling: touch;
-      padding: 16px 20px;
+      padding: 1rem 1.25rem;
       display: block;
     }
     .planner-content-footer {
-      padding: 10px 18px;
+      padding: 0.625rem 1.125rem;
       background: var(--bg-surface);
       border-top: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 0.75rem;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
 
+    .planner-wizard-area-card {
+      padding: 0.625rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .planner-wizard-area-card:hover {
+      border-color: var(--primary-border);
+      background: var(--bg-surface-elevated);
+    }
+    .planner-wizard-area-card:focus-visible {
+      outline: 3px solid var(--primary);
+      outline-offset: 2px;
+    }
+    .planner-wizard-area-card.active {
+      border-color: var(--primary);
+      border-left: 3.5px solid var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 2px 8px rgba(35, 92, 54, 0.12);
+    }
+    [data-theme="dark"] .planner-wizard-area-card.active {
+      background: rgba(35, 92, 54, 0.25);
+      border-color: #059669;
+      border-left: 3.5px solid #059669;
+    }
+
     .planner-chips-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+      gap: 0.4rem;
     }
     .planner-chip {
-      min-height: 38px;
-      padding: 7px 10px;
+      min-height: 2.375rem;
+      padding: 0.45rem 0.65rem;
       font-size: 0.8rem;
       font-weight: 600;
       border-radius: var(--radius-sm);
@@ -2210,10 +2252,11 @@
       transition: all 0.15s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 0.4rem;
       user-select: none;
       line-height: 1.25;
       font-family: inherit;
+      overflow-wrap: break-word;
     }
     .planner-chip:hover {
       border-color: var(--primary-border);
@@ -2240,11 +2283,11 @@
     .planner-color-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 0.4rem;
     }
     .planner-color-chip {
-      min-height: 34px;
-      padding: 5px 11px;
+      min-height: 2.125rem;
+      padding: 0.35rem 0.7rem;
       font-size: 0.78rem;
       font-weight: 600;
       border-radius: 20px;
@@ -2254,7 +2297,7 @@
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 0.4rem;
       transition: all 0.15s ease;
       user-select: none;
       line-height: 1.2;
@@ -2280,8 +2323,8 @@
       border-color: #059669;
     }
     .color-dot {
-      width: 10px;
-      height: 10px;
+      width: 0.65rem;
+      height: 0.65rem;
       border-radius: 50%;
       display: inline-block;
       flex-shrink: 0;
@@ -2290,14 +2333,14 @@
     .planner-checkbox-label {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 0.5rem;
       font-size: 0.8rem;
       color: var(--text-main);
       cursor: pointer;
-      margin-bottom: 4px;
+      margin-bottom: 0.25rem;
       line-height: 1.35;
       user-select: none;
-      padding: 5px 6px;
+      padding: 0.35rem 0.4rem;
       border-radius: var(--radius-sm);
       transition: background 0.12s ease;
     }
@@ -2305,9 +2348,9 @@
       background: var(--bg-surface-elevated);
     }
     .planner-checkbox-label input[type="checkbox"] {
-      width: 17px;
-      height: 17px;
-      margin-top: 2px;
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-top: 0.125rem;
       accent-color: var(--primary);
       cursor: pointer;
       flex-shrink: 0;
@@ -2315,7 +2358,7 @@
 
     .planner-area-card {
       width: 100%;
-      padding: 10px 12px;
+      padding: 0.625rem 0.75rem;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-subtle);
       background: var(--bg-base);
@@ -2324,7 +2367,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.5rem;
       text-align: left;
       user-select: none;
       font-family: inherit;
@@ -2355,36 +2398,36 @@
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 1.25rem;
       box-shadow: var(--shadow-sm);
       touch-action: pan-y;
     }
     .planner-layer-header {
-      padding: 12px 16px;
+      padding: 0.75rem 1rem;
       background: var(--bg-surface-elevated);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 0.625rem;
     }
     .planner-layer-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-      gap: 14px;
-      padding: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
+      gap: 0.875rem;
+      padding: 1rem;
       touch-action: pan-y;
     }
     .planner-plant-card {
       background: var(--bg-base);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 12px;
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 10px;
+      gap: 0.625rem;
       transition: all 0.18s ease;
       min-width: 0;
       touch-action: pan-y;
@@ -2425,79 +2468,296 @@
     /* Scaling adaptations for large text sizes */
     html[data-text-scale="large"] .planner-layer-cards-grid,
     html[data-text-scale="extra-large"] .planner-layer-cards-grid {
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+      gap: 0.875rem;
     }
     html[data-text-scale="large"] .planner-chips-grid,
     html[data-text-scale="extra-large"] .planner-chips-grid {
       grid-template-columns: 1fr;
     }
 
+    /* Mobile & Tablet Responsive Architecture (<= 900px) */
     @media (max-width: 900px) {
       #gardenPlannerModal {
-        width: 96% !important;
-        height: 92vh !important;
-        height: 92dvh !important;
-        max-height: 92vh !important;
-        overflow-y: auto !important;
-        touch-action: pan-y !important;
-        -webkit-overflow-scrolling: touch;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
       }
       .planner-modal-body {
-        height: auto !important;
-        min-height: 100% !important;
-        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
       }
       .planner-modal-header {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 25 !important;
+        position: relative !important;
+        top: auto !important;
+        padding: 0.55rem 0.75rem !important;
+        gap: 0.5rem !important;
         background: var(--bg-surface) !important;
+        flex-shrink: 0 !important;
       }
+      .planner-header-subtitle,
+      .planner-version-badge {
+        display: none !important;
+      }
+
+      /* Phase 1: Setup Wizard Mobile Layout */
+      #plannerSetupWizardView {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+      }
+      .planner-wizard-banner {
+        padding: 0.65rem 0.875rem !important;
+        gap: 0.5rem !important;
+      }
+      .planner-wizard-subtitle,
+      .planner-wizard-top-cta {
+        display: none !important;
+      }
+      .planner-wizard-split {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .planner-wizard-zones-pane {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-subtle) !important;
+        padding: 0.65rem 0.875rem !important;
+        overflow: visible !important;
+        flex-shrink: 0 !important;
+        gap: 0.5rem !important;
+      }
+      #plannerWizardAreasList {
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 0.5rem !important;
+        padding-bottom: 0.25rem !important;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+      .planner-wizard-area-card {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: min(13.5rem, 72vw) !important;
+        max-width: min(17.5rem, 84vw) !important;
+        scroll-snap-align: start;
+        padding: 0.5rem 0.65rem !important;
+      }
+      #plannerWizardConditionsPane {
+        overflow: visible !important;
+        flex: 1 0 auto !important;
+        padding: 0.875rem !important;
+      }
+      .planner-wizard-footer {
+        padding: 0.6rem 0.875rem !important;
+        flex-shrink: 0 !important;
+      }
+      .planner-wizard-footer-hint {
+        display: none !important;
+      }
+      .planner-wizard-footer-cta,
+      #plannerWizardProceedBottomBtn {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+
+      /* Phase 2 & Dashboard: Main Layout Mobile Architecture */
       .planner-layout {
         display: flex !important;
         flex-direction: column !important;
-        height: auto !important;
-        overflow: visible !important;
-        flex: none !important;
-      }
-      .planner-wizard-split {
-        grid-template-columns: 1fr !important;
-        height: auto !important;
-        overflow: visible !important;
+        flex: 1 1 0% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
       }
       .planner-sidebar {
         height: auto !important;
         max-height: none !important;
         overflow: visible !important;
         border-right: none !important;
-        border-bottom: 2px solid var(--border-subtle) !important;
-        flex: none !important;
+        border-bottom: 1px solid var(--border-subtle) !important;
+        flex: 0 0 auto !important;
+        padding: 0.6rem 0.875rem !important;
+        gap: 0.5rem !important;
+      }
+      .planner-sidebar-tip {
+        display: none !important;
+      }
+      #plannerAreasRoster {
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 0.5rem !important;
+        padding-bottom: 0.25rem !important;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+      .planner-area-card {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: min(14rem, 76vw) !important;
+        max-width: min(18rem, 86vw) !important;
+        scroll-snap-align: start;
+        padding: 0.5rem 0.65rem !important;
       }
       .planner-content {
+        display: flex !important;
+        flex-direction: column !important;
         height: auto !important;
+        min-height: 0 !important;
         overflow: visible !important;
-        flex: none !important;
+        flex: 1 0 auto !important;
       }
       .planner-content-header {
-        position: sticky !important;
-        top: 60px !important;
-        z-index: 15 !important;
+        position: relative !important;
+        top: auto !important;
+        z-index: 5 !important;
+        padding: 0.75rem 0.875rem !important;
+        gap: 0.65rem !important;
         background: var(--bg-surface) !important;
       }
       #plannerRecommendationsList {
         height: auto !important;
         overflow: visible !important;
-        flex: none !important;
-        padding: 14px 12px !important;
+        flex: 1 0 auto !important;
+        padding: 0.75rem 0.75rem 1.25rem 0.75rem !important;
       }
       .planner-content-footer {
         position: sticky !important;
         bottom: 0 !important;
         z-index: 20 !important;
         background: var(--bg-surface) !important;
+        padding: 0.6rem 0.875rem !important;
+        gap: 0.5rem !important;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Area Conditions Editor Modal on Mobile */
+      #plannerAreaConditionsModal {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        margin: 0 !important;
+      }
+      .planner-conditions-dialog-box {
+        height: 100% !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
+      #plannerAreaConditionsModalBody {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        padding: 0.875rem 1rem !important;
       }
     }
+
+    /* Small Phone Refinements (<= 640px) */
+    @media (max-width: 640px) {
+      .planner-header-icon {
+        display: none !important;
+      }
+      #plannerConsultationBadge {
+        display: none !important;
+      }
+      .planner-modal-header h3 {
+        font-size: 1rem !important;
+      }
+      .planner-header-actions {
+        gap: 0.35rem !important;
+      }
+      #plannerHeaderPreliminaryBtn,
+      #plannerOpenDrawerBtn {
+        padding: 0.35rem 0.55rem !important;
+        font-size: 0.75rem !important;
+        min-height: 2rem !important;
+      }
+      .planner-controls-bar {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.5rem !important;
+      }
+      .planner-layer-select-wrap {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+      }
+      #plannerLayerSelect {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      #plannerSortBySelect,
+      #plannerAddAllToConsultationBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+      }
+      .planner-layer-cards-grid {
+        grid-template-columns: 1fr !important;
+        padding: 0.65rem !important;
+        gap: 0.65rem !important;
+      }
+      .planner-layer-header {
+        padding: 0.65rem 0.75rem !important;
+      }
+      .planner-layer-header .planner-batch-layer-btn {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+      .planner-content-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      .planner-footer-status {
+        font-size: 0.75rem !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+      .planner-footer-actions {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.4rem !important;
+      }
+      .planner-footer-actions .btn {
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+      }
+      /* Hide duplicate Preliminary Report button in bottom footer on small phones since it is always in the top modal header */
+      #plannerWfPreliminaryBtn,
+      #plannerOpenPreliminaryBtn {
+        display: none !important;
+      }
+    }
+
 
 /* Toasts */
     .toast-container {
@@ -3967,36 +4227,36 @@
     <div class="planner-modal-body">
       <!-- Modal Header -->
       <div class="planner-modal-header">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-          <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--primary-light);border:1px solid var(--primary-border);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;">
-            <i data-lucide="layout-grid" style="width:20px;height:20px;"></i>
+        <div class="planner-header-brand" style="display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;">
+          <div class="planner-header-icon" style="width:2.25rem;height:2.25rem;border-radius:var(--radius-md);background:var(--primary-light);border:1px solid var(--primary-border);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;">
+            <i data-lucide="layout-grid" style="width:1.25rem;height:1.25rem;"></i>
           </div>
           <div style="min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <h3 id="gardenPlannerTitle" style="font-size:1.15rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.02em;">
                 Garden Planner
               </h3>
-              <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 2.9: Streamlined & Intuitive Garden Planner">v2.9</span>
+              <span class="badge planner-version-badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 3.0: Mobile-Optimized Garden Planner">v3.0</span>
               <span id="plannerConsultationBadge" class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:0.75rem;font-weight:700;">
                 <i data-lucide="folder-kanban" style="width:11px;height:11px;vertical-align:-1px;"></i>
                 <span id="plannerActiveConsultationName">Active Consultation</span>
               </span>
             </div>
-            <p style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
+            <p class="planner-header-subtitle" style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
               Tailored ecological plant recommendations organized by property zone and structural planting matrix.
             </p>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;">
-          <button type="button" id="plannerHeaderPreliminaryBtn" onclick="openPreliminaryReport()" class="btn btn-primary btn-sm" title="Generate Preliminary Report (PDF / Client Takeaway)" aria-label="Generate Preliminary Report" style="font-size:0.82rem;min-height:36px;gap:5px;background:linear-gradient(135deg,#1b5e38,#276741);border-color:#155e33;color:#ffffff;font-weight:700;">
-            <i data-lucide="file-check-2" style="width:14px;height:14px;"></i>
+        <div class="planner-header-actions" style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;">
+          <button type="button" id="plannerHeaderPreliminaryBtn" onclick="openPreliminaryReport()" class="btn btn-primary btn-sm" title="Generate Preliminary Report (PDF / Client Takeaway)" aria-label="Generate Preliminary Report" style="font-size:0.82rem;min-height:2.25rem;gap:5px;background:linear-gradient(135deg,#1b5e38,#276741);border-color:#155e33;color:#ffffff;font-weight:700;">
+            <i data-lucide="file-check-2" style="width:14px;height:14px;flex-shrink:0;"></i>
             <span>Preliminary Report</span>
           </button>
-          <button type="button" id="plannerOpenDrawerBtn" class="btn btn-secondary btn-sm" title="View Staged Consultation Report" aria-label="View staged consultation report" style="font-size:0.82rem;min-height:36px;gap:5px;">
-            <i data-lucide="clipboard-list" style="width:14px;height:14px;"></i>
+          <button type="button" id="plannerOpenDrawerBtn" class="btn btn-secondary btn-sm" title="View Staged Consultation Report" aria-label="View staged consultation report" style="font-size:0.82rem;min-height:2.25rem;gap:5px;">
+            <i data-lucide="clipboard-list" style="width:14px;height:14px;flex-shrink:0;"></i>
             <span>Staging (<span id="plannerStagedCountBadge">0</span>)</span>
           </button>
-          <button type="button" onclick="document.getElementById('gardenPlannerModal').close()" class="btn-icon" aria-label="Close Garden Planner" style="min-width:38px;min-height:38px;">
+          <button type="button" onclick="document.getElementById('gardenPlannerModal').close()" class="btn-icon" aria-label="Close Garden Planner" style="min-width:2.25rem;min-height:2.25rem;">
             <i data-lucide="x"></i>
           </button>
         </div>
@@ -4006,9 +4266,9 @@
       <div id="plannerSetupWizardView" style="display:none;flex-direction:column;flex:1 1 0%;min-height:0;overflow:hidden;background:var(--bg-base);">
         
         <!-- Wizard Header Banner -->
-        <div style="padding:14px 20px;border-bottom:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex-shrink:0;">
-          <div style="min-width:0;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div class="planner-wizard-banner" style="padding:14px 20px;border-bottom:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex-shrink:0;">
+          <div style="min-width:0;flex:1 1 240px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
               <span class="badge" style="background:var(--primary-light);color:var(--primary);font-size:0.75rem;font-weight:800;border:1px solid var(--primary-border);">
                 Step 1 of 2: Area Characterization
               </span>
@@ -4016,17 +4276,17 @@
                 3 Areas Configured
               </span>
             </div>
-            <h4 style="font-size:1.1rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.01em;">
+            <h4 style="font-size:1.05rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.01em;">
               Define Property Planting Zones &amp; Conditions
             </h4>
-            <p style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
+            <p class="planner-wizard-subtitle" style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
               Add each distinct planting zone on this property and customize its sun, moisture, and layer requirements.
             </p>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <button type="button" id="plannerWizardProceedBtn" class="btn btn-primary" style="font-size:0.85rem;min-height:38px;padding:7px 16px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+          <div class="planner-wizard-top-cta" style="display:flex;align-items:center;gap:8px;">
+            <button type="button" id="plannerWizardProceedBtn" class="btn btn-primary" style="font-size:0.85rem;min-height:2.375rem;padding:7px 16px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
               <span>Proceed to Plant Recommendations</span>
-              <i data-lucide="arrow-right" style="width:15px;height:15px;"></i>
+              <i data-lucide="arrow-right" style="width:15px;height:15px;flex-shrink:0;"></i>
             </button>
           </div>
         </div>
@@ -4035,13 +4295,13 @@
         <div class="planner-wizard-split" style="display:grid;grid-template-columns:minmax(280px, 340px) minmax(0, 1fr);flex:1 1 0%;min-height:0;overflow:hidden;">
           
           <!-- Left: Area Zones List -->
-          <div style="border-right:1px solid var(--border-subtle);background:var(--bg-surface);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;touch-action:pan-y;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="planner-wizard-zones-pane" style="border-right:1px solid var(--border-subtle);background:var(--bg-surface);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;touch-action:pan-y;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
               <span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">
                 Property Planting Zones
               </span>
-              <button type="button" id="plannerWizardAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;min-height:30px;padding:4px 9px;">
-                <i data-lucide="plus" style="width:13px;height:13px;"></i>
+              <button type="button" id="plannerWizardAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;min-height:1.875rem;padding:4px 9px;">
+                <i data-lucide="plus" style="width:13px;height:13px;flex-shrink:0;"></i>
                 <span>Add Zone</span>
               </button>
             </div>
@@ -4058,15 +4318,15 @@
         </div>
 
         <!-- Wizard Sticky Bottom Action Bar -->
-        <div style="padding:10px 20px;border-top:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;flex-shrink:0;">
-          <div style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-            <i data-lucide="info" style="width:14px;height:14px;color:var(--primary);"></i>
+        <div class="planner-wizard-footer" style="padding:10px 20px;border-top:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;flex-shrink:0;">
+          <div class="planner-wizard-footer-hint" style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <i data-lucide="info" style="width:14px;height:14px;color:var(--primary);flex-shrink:0;"></i>
             <span>Recommendations are generated dynamically based on each zone's specific criteria.</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <button type="button" id="plannerWizardProceedBottomBtn" class="btn btn-primary" style="font-size:0.85rem;min-height:38px;padding:7px 16px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+          <div class="planner-wizard-footer-cta" style="display:flex;align-items:center;gap:8px;">
+            <button type="button" id="plannerWizardProceedBottomBtn" class="btn btn-primary" style="font-size:0.85rem;min-height:2.375rem;padding:7px 16px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
               <span>Proceed to Plant Recommendations</span>
-              <i data-lucide="arrow-right" style="width:15px;height:15px;"></i>
+              <i data-lucide="arrow-right" style="width:15px;height:15px;flex-shrink:0;"></i>
             </button>
           </div>
         </div>
@@ -4080,8 +4340,8 @@
         <div class="planner-sidebar" id="plannerSidebarPane" tabindex="-1">
           
           <!-- Area Selector Section -->
-          <div style="display:flex;flex-direction:column;gap:12px;flex:1;">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
               <div>
                 <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;">
                   Garden Areas
@@ -4090,10 +4350,10 @@
                   <span id="plannerAreasCount">3</span> zones configured
                 </span>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <button type="button" id="plannerRestartWizardBtn" class="btn btn-ghost btn-xs" style="font-size:0.75rem;color:var(--text-muted);display:none;padding:3px 7px;" title="Restart Guided Area Setup Workflow">↺ Setup</button>
-                <button type="button" id="plannerAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px;min-height:30px;padding:3px 9px;" title="Add new planting area" aria-label="Add new garden area">
-                  <i data-lucide="plus" style="width:13px;height:13px;"></i>
+                <button type="button" id="plannerAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px;min-height:1.875rem;padding:3px 9px;" title="Add new planting area" aria-label="Add new garden area">
+                  <i data-lucide="plus" style="width:13px;height:13px;flex-shrink:0;"></i>
                   <span>Add Area</span>
                 </button>
               </div>
@@ -4104,9 +4364,9 @@
           </div>
 
           <!-- Helpful Bottom Tip Card -->
-          <div style="margin-top:auto;padding:12px 14px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);font-size:0.78rem;color:var(--text-muted);line-height:1.45;">
+          <div class="planner-sidebar-tip" style="margin-top:auto;padding:12px 14px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);font-size:0.78rem;color:var(--text-muted);line-height:1.45;">
             <div style="display:flex;align-items:center;gap:6px;font-weight:700;color:var(--text-main);margin-bottom:4px;">
-              <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--primary);"></i>
+              <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--primary);flex-shrink:0;"></i>
               <span>Zone Recommendations</span>
             </div>
             <span>Select any zone above to view tailored native recommendations. Tap <strong>Edit</strong> on a zone to adjust sun, moisture, and layer criteria.</span>
@@ -4122,7 +4382,7 @@
 
           <!-- Recommendations Header Bar -->
           <div class="planner-content-header">
-            <div>
+            <div style="min-width:0;flex:1 1 220px;">
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                 <h4 id="plannerAreaDisplayTitle" style="font-size:1.05rem;font-weight:800;margin:0;color:var(--text-main);overflow-wrap:break-word;">
                   Area 1: Front Porch &amp; Walkway
@@ -4136,24 +4396,24 @@
               </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <label for="plannerLayerSelect" style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
+            <div class="planner-controls-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="planner-layer-select-wrap" style="display:flex;align-items:center;gap:6px;min-width:0;">
+                <label for="plannerLayerSelect" style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;">
                   <i data-lucide="layers" style="width:14px;height:14px;color:var(--primary);"></i> Layer:
                 </label>
-                <select id="plannerLayerSelect" style="font-size:0.82rem;min-height:36px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-weight:600;max-width:260px;" aria-label="Select Architecture Layer">
+                <select id="plannerLayerSelect" style="font-size:0.82rem;min-height:2.25rem;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-weight:600;max-width:260px;min-width:0;" aria-label="Select Architecture Layer">
                   <option value="all">All Architecture Layers</option>
                 </select>
               </div>
-              <select id="plannerSortBySelect" style="font-size:0.82rem;min-height:36px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);" aria-label="Sort recommendations">
+              <select id="plannerSortBySelect" style="font-size:0.82rem;min-height:2.25rem;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);min-width:0;" aria-label="Sort recommendations">
                 <option value="score">Sort: Best Match Score</option>
                 <option value="keystone">Sort: Keystone Species First</option>
                 <option value="sweet16">Sort: Sweet 16 First</option>
                 <option value="common">Sort: Common Name A-Z</option>
                 <option value="height">Sort: Height Low to High</option>
               </select>
-              <button type="button" id="plannerAddAllToConsultationBtn" class="btn btn-primary" style="font-size:0.82rem;min-height:36px;padding:7px 12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
-                <i data-lucide="plus-circle" style="width:14px;height:14px;"></i>
+              <button type="button" id="plannerAddAllToConsultationBtn" class="btn btn-primary" style="font-size:0.82rem;min-height:2.25rem;padding:7px 12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                <i data-lucide="plus-circle" style="width:14px;height:14px;flex-shrink:0;"></i>
                 <span id="plannerAddAllBtnText">Add Top Recommended to Report</span>
               </button>
             </div>
@@ -4166,13 +4426,15 @@
 
           <!-- Bottom Summary Footer Bar -->
           <div class="planner-content-footer" id="plannerContentFooter">
-            <div style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
+            <div class="planner-footer-status" style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
               <i data-lucide="clipboard-check" style="width:15px;height:15px;color:var(--primary);flex-shrink:0;"></i>
               <span>Consultation Staging: <strong id="plannerCurrentAreaStagedCount" style="color:var(--primary);">0</strong> plants assigned to this area (<span id="plannerTotalStagedCount">0</span> total staged)</span>
             </div>
-            <button type="button" id="plannerFinishAndStageBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:36px;font-weight:700;">
-              <span>Review Consultation Report Drawer &rarr;</span>
-            </button>
+            <div class="planner-footer-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" id="plannerFinishAndStageBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;">
+                <span>Review Consultation Report Drawer &rarr;</span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -4183,36 +4445,36 @@
 
   <!-- Garden Area Conditions Editor Modal -->
   <dialog id="plannerAreaConditionsModal" aria-modal="true" aria-labelledby="plannerAreaConditionsModalTitle" style="padding:0;border:none;background:transparent;max-width:640px;width:95vw;">
-    <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-xl);display:flex;flex-direction:column;max-height:90vh;">
+    <div class="planner-conditions-dialog-box" style="border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-xl);display:flex;flex-direction:column;max-height:90vh;">
       
       <!-- Modal Header -->
-      <div style="padding:14px 20px;border-bottom:1px solid var(--border-subtle);background:var(--bg-frosted);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border-subtle);background:var(--bg-frosted);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;">
         <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-          <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i data-lucide="sliders-horizontal" style="width:16px;height:16px;"></i>
+          <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="sliders-horizontal" style="width:1rem;height:1rem;"></i>
           </div>
           <h4 id="plannerAreaConditionsModalTitle" style="font-size:1rem;font-weight:800;margin:0;color:var(--text-main);overflow-wrap:break-word;">
             Edit Area Conditions
           </h4>
         </div>
-        <button type="button" onclick="document.getElementById('plannerAreaConditionsModal').close()" class="btn-icon" aria-label="Close conditions editor" style="min-width:34px;min-height:34px;">
+        <button type="button" onclick="document.getElementById('plannerAreaConditionsModal').close()" class="btn-icon" aria-label="Close conditions editor" style="min-width:2.125rem;min-height:2.125rem;">
           <i data-lucide="x"></i>
         </button>
       </div>
 
       <!-- Modal Body (Scrollable conditions form) -->
-      <div id="plannerAreaConditionsModalBody" style="padding:18px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;touch-action:pan-y;">
+      <div id="plannerAreaConditionsModalBody" style="padding:1.125rem 1.375rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.875rem;touch-action:pan-y;">
         <!-- Form inputs dynamically injected -->
       </div>
 
       <!-- Modal Footer -->
-      <div style="padding:12px 20px;border-top:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;">
+      <div style="padding:0.75rem 1.25rem;border-top:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;flex-wrap:wrap;">
         <div id="plannerAreaModalDeleteWrap"></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button type="button" onclick="document.getElementById('plannerAreaConditionsModal').close()" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:36px;padding:6px 14px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto;">
+          <button type="button" onclick="document.getElementById('plannerAreaConditionsModal').close()" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;padding:6px 14px;">
             Cancel
           </button>
-          <button type="button" id="plannerAreaModalSaveBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:36px;padding:6px 18px;font-weight:800;">
+          <button type="button" id="plannerAreaModalSaveBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:2.25rem;padding:6px 18px;font-weight:800;">
             Save &amp; Apply Changes
           </button>
         </div>
@@ -16001,6 +16263,8 @@
         renderGardenPlannerUI();
         const modal = document.getElementById('gardenPlannerModal');
         if (modal) modal.scrollTop = 0;
+        const mainLayout = document.getElementById('plannerMainLayout');
+        if (mainLayout) mainLayout.scrollTop = 0;
         const recList = document.getElementById('plannerRecommendationsList');
         if (recList) recList.scrollTop = 0;
         const areaName = state.gardenAreas[0] || 'Area 1';
@@ -16017,7 +16281,7 @@
         initGardenAreaProfiles();
         state.activePlannerAreaIdx = state.gardenAreas.length - 1;
         renderPlannerSetupWizard();
-        showToast(`Added ${newAreaName}! Customize its conditions on the right.`);
+        showToast(`Added ${newAreaName}! Customize its conditions below.`);
       });
 
       document.getElementById('plannerRestartWizardBtn')?.addEventListener('click', () => {
@@ -16041,7 +16305,8 @@
         state.activePlannerAreaIdx = state.gardenAreas.length - 1;
         renderGardenAreasManager();
         renderGardenPlannerUI();
-        showToast(`Added ${newAreaName}! Customize its conditions on the left.`);
+        openAreaConditionsModal(state.activePlannerAreaIdx);
+        showToast(`Added ${newAreaName}! Customize its conditions.`);
       });
       document.getElementById('plannerAddAllToConsultationBtn')?.addEventListener('click', () => {
         addTopRecommendedToConsultation();
@@ -16422,7 +16687,6 @@
 
         const item = document.createElement('div');
         item.className = `planner-wizard-area-card ${isActive ? 'active' : ''}`;
-        item.style.cssText = `padding:10px 12px;border-radius:var(--radius-md);border:1px solid ${isActive ? 'var(--primary)' : 'var(--border-subtle)'};background:${isActive ? 'var(--primary-light)' : 'var(--bg-base)'};cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:all 0.15s ease;`;
         item.setAttribute('role', 'button');
         item.setAttribute('tabindex', '0');
         item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
@@ -16433,12 +16697,12 @@
             <div style="font-size:0.88rem;font-weight:${isActive ? '800' : '600'};color:var(--text-main);line-height:1.25;overflow-wrap:break-word;">
               ${escapeHtml(areaName)}
             </div>
-            <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-top:2px;">
+            <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;">
               <span>☀️ ${escapeHtml(prof.sunlight || 'Sun')}</span> &bull; <span>💧 ${escapeHtml(prof.moisture || 'Moist')}</span>
             </div>
           </div>
           ${state.gardenAreas.length > 1 ? `
-            <button type="button" class="btn-icon planner-wizard-del-btn" style="color:var(--danger);min-width:28px;min-height:28px;width:28px;height:28px;padding:4px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);" title="Remove this area" aria-label="Remove ${escapeHtml(areaName)}">
+            <button type="button" class="btn-icon planner-wizard-del-btn" style="color:var(--danger);min-width:1.75rem;min-height:1.75rem;width:1.75rem;height:1.75rem;padding:4px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);flex-shrink:0;" title="Remove this area" aria-label="Remove ${escapeHtml(areaName)}">
               <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
             </button>
           ` : ''}
@@ -16478,6 +16742,11 @@
 
         areasListEl.appendChild(item);
       });
+
+      const activeWizardCard = areasListEl.querySelector('.planner-wizard-area-card.active');
+      if (activeWizardCard && typeof activeWizardCard.scrollIntoView === 'function') {
+        try { activeWizardCard.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
+      }
 
       // 2. Populate Selected Area Conditions on Right
       const profile = getActivePlannerProfile();
@@ -17148,6 +17417,11 @@
         roster.appendChild(card);
       });
 
+      const activeAreaCard = roster.querySelector('.planner-area-card.active');
+      if (activeAreaCard && typeof activeAreaCard.scrollIntoView === 'function') {
+        try { activeAreaCard.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
+      }
+
       if (window.lucide) lucide.createIcons();
     }
 
@@ -17728,11 +18002,21 @@
             </div>
           `;
 
+          const resetPlannerScrollTop = () => {
+            const modal = document.getElementById('gardenPlannerModal');
+            if (modal) modal.scrollTop = 0;
+            const mainLayout = document.getElementById('plannerMainLayout');
+            if (mainLayout) mainLayout.scrollTop = 0;
+            const recList = document.getElementById('plannerRecommendationsList');
+            if (recList) recList.scrollTop = 0;
+          };
+
           if (prevLayer) {
             navBox.querySelector('#plannerPrevLayerBtn')?.addEventListener('click', () => {
               state.activePlannerLayer = prevLayer;
               if (layerSelect) layerSelect.value = prevLayer;
               renderAreaRecommendations();
+              resetPlannerScrollTop();
             });
           }
           if (nextLayer) {
@@ -17740,12 +18024,14 @@
               state.activePlannerLayer = nextLayer;
               if (layerSelect) layerSelect.value = nextLayer;
               renderAreaRecommendations();
+              resetPlannerScrollTop();
             });
           }
           navBox.querySelector('#plannerViewAllLayersBtn')?.addEventListener('click', () => {
             state.activePlannerLayer = 'all';
             if (layerSelect) layerSelect.value = 'all';
             renderAreaRecommendations();
+            resetPlannerScrollTop();
           });
 
           listContainer.appendChild(navBox);
@@ -17768,29 +18054,29 @@
           const isLastStep = curStep >= totalAreas - 1;
 
           footerEl.innerHTML = `
-            <div style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
+            <div class="planner-footer-status" style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
               <i data-lucide="clipboard-check" style="width:15px;height:15px;color:var(--primary);flex-shrink:0;"></i>
               <span>Staged for ${escapeHtml(activeAreaName)}: <strong style="color:var(--primary);">${currentAreaStaged}</strong> (${totalStaged} total staged)</span>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <button type="button" id="plannerWfPreliminaryBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:36px;font-weight:700;color:var(--primary);border-color:var(--primary-border);display:inline-flex;align-items:center;gap:5px;">
-                <i data-lucide="file-check-2" style="width:14px;height:14px;"></i>
+            <div class="planner-footer-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" id="plannerWfPreliminaryBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;color:var(--primary);border-color:var(--primary-border);display:inline-flex;align-items:center;gap:5px;">
+                <i data-lucide="file-check-2" style="width:14px;height:14px;flex-shrink:0;"></i>
                 <span>Preliminary Report (PDF)</span>
               </button>
               ${prevAreaName ? `
-                <button type="button" id="plannerWfPrevBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:36px;display:inline-flex;align-items:center;gap:5px;">
-                  <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+                <button type="button" id="plannerWfPrevBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;display:inline-flex;align-items:center;gap:5px;">
+                  <i data-lucide="arrow-left" style="width:14px;height:14px;flex-shrink:0;"></i>
                   <span>Previous Area</span>
                 </button>
               ` : ''}
               ${!isLastStep ? `
-                <button type="button" id="plannerWfNextBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:36px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+                <button type="button" id="plannerWfNextBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
                   <span>Continue to Next Area: ${escapeHtml(nextAreaName)}</span>
-                  <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+                  <i data-lucide="arrow-right" style="width:14px;height:14px;flex-shrink:0;"></i>
                 </button>
               ` : `
-                <button type="button" id="plannerWfFinishBtn" class="btn btn-primary btn-sm" style="background:#059669;border-color:#059669;font-size:0.82rem;min-height:36px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
-                  <i data-lucide="check-circle-2" style="width:14px;height:14px;"></i>
+                <button type="button" id="plannerWfFinishBtn" class="btn btn-primary btn-sm" style="background:#059669;border-color:#059669;font-size:0.82rem;min-height:2.25rem;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+                  <i data-lucide="check-circle-2" style="width:14px;height:14px;flex-shrink:0;"></i>
                   <span>Finish Guided Setup &amp; View Dashboard</span>
                 </button>
               `}
@@ -17808,6 +18094,8 @@
             renderGardenPlannerUI();
             const modal = document.getElementById('gardenPlannerModal');
             if (modal) modal.scrollTop = 0;
+            const mainLayout = document.getElementById('plannerMainLayout');
+            if (mainLayout) mainLayout.scrollTop = 0;
             const recList = document.getElementById('plannerRecommendationsList');
             if (recList) recList.scrollTop = 0;
           });
@@ -17819,6 +18107,8 @@
             renderGardenPlannerUI();
             const modal = document.getElementById('gardenPlannerModal');
             if (modal) modal.scrollTop = 0;
+            const mainLayout = document.getElementById('plannerMainLayout');
+            if (mainLayout) mainLayout.scrollTop = 0;
             const recList = document.getElementById('plannerRecommendationsList');
             if (recList) recList.scrollTop = 0;
           });
@@ -17827,23 +18117,23 @@
             wf.status = 'completed';
             persistPlannerWorkflowState(wf);
             renderGardenPlannerUI();
-            showToast("Garden Planner setup complete! All garden areas are now accessible on the left.", "success");
+            showToast("Garden Planner setup complete! All garden areas are now accessible.", "success");
             announceToScreenReader("Garden Planner setup complete. You are now viewing the full area dashboard.");
           });
 
         } else {
           // Completed mode
           footerEl.innerHTML = `
-            <div style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
+            <div class="planner-footer-status" style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
               <i data-lucide="clipboard-check" style="width:15px;height:15px;color:var(--primary);flex-shrink:0;"></i>
               <span>Consultation Staging: <strong id="plannerCurrentAreaStagedCount" style="color:var(--primary);">${currentAreaStaged}</strong> plants assigned to this area (<span id="plannerTotalStagedCount">${totalStaged}</span> total staged)</span>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <button type="button" id="plannerOpenPreliminaryBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:36px;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
-                <i data-lucide="file-check-2" style="width:14px;height:14px;"></i>
+            <div class="planner-footer-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" id="plannerOpenPreliminaryBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                <i data-lucide="file-check-2" style="width:14px;height:14px;flex-shrink:0;"></i>
                 <span>Preliminary Report (PDF)</span>
               </button>
-              <button type="button" id="plannerFinishAndStageBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:36px;font-weight:700;">
+              <button type="button" id="plannerFinishAndStageBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;">
                 <span>Review Consultation Report Drawer &rarr;</span>
               </button>
             </div>
