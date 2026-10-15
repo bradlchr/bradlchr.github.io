@@ -14767,6 +14767,43 @@
       if (nameInput) nameInput.value = profile.name || '';
     }
 
+    // Calculate weighted match percentage with +10% margin for qualifying KC Sweet 16 species
+    const SWEET_16_MATCH_MARGIN_PCT = 10;
+
+    function getRecommendationWeightedMatchPct(rec) {
+      if (!rec) return 0;
+      const baseMatchPct = typeof rec.matchPct === 'number'
+        ? rec.matchPct
+        : Math.min(100, Math.round(((rec.score || 0) / 135) * 100));
+      const plantIsSweet16 = Boolean(rec.isSweet16 !== undefined ? rec.isSweet16 : (rec.plant && isSweet16(rec.plant)));
+      const qualifies = rec.matchesCriteria !== false;
+      return baseMatchPct + ((plantIsSweet16 && qualifies) ? SWEET_16_MATCH_MARGIN_PCT : 0);
+    }
+
+    function comparePlannerRecommendations(a, b) {
+      const aWeightedPct = getRecommendationWeightedMatchPct(a);
+      const bWeightedPct = getRecommendationWeightedMatchPct(b);
+      if (bWeightedPct !== aWeightedPct) return bWeightedPct - aWeightedPct;
+
+      const aQualifies = a.matchesCriteria !== false;
+      const bQualifies = b.matchesCriteria !== false;
+      if (aQualifies !== bQualifies) return bQualifies ? 1 : -1;
+
+      const aSweet = Boolean(a.isSweet16 !== undefined ? a.isSweet16 : (a.plant && isSweet16(a.plant))) && aQualifies;
+      const bSweet = Boolean(b.isSweet16 !== undefined ? b.isSweet16 : (b.plant && isSweet16(b.plant))) && bQualifies;
+      if (aSweet !== bSweet) return bSweet ? 1 : -1;
+
+      const aMatchPct = typeof a.matchPct === 'number' ? a.matchPct : 0;
+      const bMatchPct = typeof b.matchPct === 'number' ? b.matchPct : 0;
+      if (bMatchPct !== aMatchPct) return bMatchPct - aMatchPct;
+
+      if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+
+      const aKey = (a.plant && isKcKeystone(a.plant)) ? 1 : 0;
+      const bKey = (b.plant && isKcKeystone(b.plant)) ? 1 : 0;
+      return bKey - aKey;
+    }
+
     // Calculate Ecological Native Recommendations
     function getPlantRecommendationsForArea(profile) {
       if (!profile) return [];
@@ -14793,12 +14830,17 @@
         let score = 0;
         const reasons = [];
         let isDisqualified = false;
+        let matchesCriteria = true;
 
         // 1. Sunlight Compatibility (Max 35 pts)
         const plantSun = toList(plant.light_requirements || plant.sun_exposure).map(s => s.toLowerCase());
+        const plantDescLower = String(plant.advisor_description || '').toLowerCase();
         if (areaSun === 'Full Sun') {
-          if (plantSun.some(s => s.includes('full sun'))) {
+          if (plantSun[0] && plantSun[0].includes('full sun')) {
             score += 35;
+            reasons.push('☀️ Full Sun Match');
+          } else if (plantSun.some(s => s.includes('full sun'))) {
+            score += 30;
             reasons.push('☀️ Full Sun Match');
           } else if (plantSun.some(s => s.includes('part sun'))) {
             score += 18;
@@ -14809,7 +14851,7 @@
             score += 10;
           }
         } else if (areaSun === 'Part Sun / Part Shade' || areaSun === 'Part Sun' || areaSun === 'Part Shade') {
-          if (plantSun.some(s => s.includes('part'))) {
+          if (plantSun.some(s => s.includes('part')) || plantDescLower.includes('part shade') || plantDescLower.includes('partial shade') || plantDescLower.includes('part sun')) {
             score += 35;
             reasons.push('⛅ Part Sun/Shade Optimal');
           } else if (plantSun.some(s => s.includes('full sun') || s.includes('shade'))) {
@@ -14844,11 +14886,14 @@
             isDisqualified = true;
           }
         } else if (areaMoist === 'Medium') {
-          if (plantMoist.some(m => m.includes('medium'))) {
+          if (plantMoist.some(m => m === 'medium' || m === 'moist' || m === 'average')) {
             score += 30;
             reasons.push('💧 Mesic / Average Soil');
-          } else if (plantMoist.some(m => m.includes('dry') || m.includes('wet'))) {
+          } else if (plantMoist.some(m => m.includes('medium'))) {
             score += 18;
+            reasons.push('💧 Mesic / Average Soil');
+          } else if (plantMoist.some(m => m.includes('dry') || m.includes('wet'))) {
+            score += 15;
           }
         } else if (areaMoist === 'Wet') {
           if (plantMoist.some(m => m.includes('wet'))) {
@@ -14883,14 +14928,14 @@
           const maxH = parseFloat(plant.mature_height_max) || 0;
           effectiveLayer = maxH > 25 ? 'Canopy' : 'Understory';
         } else if (plantTypes.includes('shrub')) {
-          effectiveLayer = 'Understory';
+          effectiveLayer = (plantLayer === 'Structural Layer' || plantLayer === 'Groundcover') ? plantLayer : 'Understory';
         } else if (plantTypes.includes('sedge') || (plantTypes.includes('grass') && (parseFloat(plant.mature_height_max) || 0) < 2.5)) {
           effectiveLayer = 'Groundcover';
         } else if (plantTypes.includes('grass') && (parseFloat(plant.mature_height_max) || 0) >= 2.5) {
           effectiveLayer = 'Structural Layer';
         } else if (plantTypes.includes('wildflower')) {
           const maxH = parseFloat(plant.mature_height_max) || 0;
-          if (maxH < 1.5 || String(plant.growth_habit || '').toLowerCase().includes('groundcover')) {
+          if (plantLayer === 'Groundcover' || maxH < 1.5 || String(plant.growth_habit || '').toLowerCase().includes('groundcover')) {
             effectiveLayer = 'Groundcover';
           } else if (maxH >= 3.5) {
             effectiveLayer = 'Structural Layer';
@@ -14907,6 +14952,7 @@
             reasons.push(`🌿 ${effectiveLayer}`);
           } else {
             score -= 25;
+            matchesCriteria = false;
           }
         } else {
           score += 15;
@@ -14922,6 +14968,7 @@
             score += 5;
           } else {
             score -= 15;
+            matchesCriteria = false;
           }
         } else if (areaMaint === 'Medium') {
           if (plantMaint.includes('low') || plantMaint.includes('medium')) {
@@ -14946,29 +14993,37 @@
           reasons.push('🌸 Color Match');
         } else {
           score += 4;
+          matchesCriteria = false;
         }
 
         // 6. Ecological Superchargers (Bonus 0 - 20 pts)
-        if (isKcKeystone(plant)) {
-          score += 10;
-          reasons.push('⭐ Keystone Species');
-        }
-        if (isSweet16(plant)) {
-          score += 8;
+        const plantIsSweet16 = isSweet16(plant);
+        if (plantIsSweet16) {
+          score += 12;
           reasons.push('🏆 Sweet 16');
+        }
+        if (isKcKeystone(plant)) {
+          score += 8;
+          reasons.push('⭐ Keystone Species');
         }
 
         if (score >= 50) {
+          const matchPct = Math.min(100, Math.round((score / 135) * 100));
+          const weightedMatchPct = matchPct + ((plantIsSweet16 && matchesCriteria) ? SWEET_16_MATCH_MARGIN_PCT : 0);
           results.push({
             plant,
             score,
-            matchPct: Math.min(100, Math.round((score / 135) * 100)),
+            matchPct,
+            weightedMatchPct,
+            isSweet16: plantIsSweet16,
+            matchesCriteria,
             reasons: Array.from(new Set(reasons)),
             effectiveLayer: effectiveLayer || 'Seasonal/Herbaceous Layer'
           });
         }
       });
 
+      results.sort(comparePlannerRecommendations);
       return results;
     }
 
@@ -15042,18 +15097,18 @@
       // Sort
       const sortBy = document.getElementById('plannerSortBySelect')?.value || 'score';
       if (sortBy === 'score') {
-        recommendations.sort((a, b) => b.score - a.score);
+        recommendations.sort(comparePlannerRecommendations);
       } else if (sortBy === 'keystone') {
         recommendations.sort((a, b) => {
           const aKey = isKcKeystone(a.plant) ? 1 : 0;
           const bKey = isKcKeystone(b.plant) ? 1 : 0;
-          return (bKey - aKey) || (b.score - a.score);
+          return (bKey - aKey) || comparePlannerRecommendations(a, b);
         });
       } else if (sortBy === 'sweet16') {
         recommendations.sort((a, b) => {
           const aSw = isSweet16(a.plant) ? 1 : 0;
           const bSw = isSweet16(b.plant) ? 1 : 0;
-          return (bSw - aSw) || (b.score - a.score);
+          return (bSw - aSw) || comparePlannerRecommendations(a, b);
         });
       } else if (sortBy === 'common') {
         recommendations.sort((a, b) => {
@@ -15697,6 +15752,9 @@
     window.addAllLayerToConsultation = addAllLayerToConsultation;
     window.addPlantToAreaConsultation = addPlantToAreaConsultation;
     window.removePlantFromAreaConsultation = removePlantFromAreaConsultation;
+    window.getPlantRecommendationsForArea = getPlantRecommendationsForArea;
+    window.comparePlannerRecommendations = comparePlannerRecommendations;
+    window.getRecommendationWeightedMatchPct = getRecommendationWeightedMatchPct;
 
     // App Initialization
     function initializeApplication() {
