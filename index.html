@@ -5164,15 +5164,18 @@
         .replace(/'/g, '&apos;');
     }
 
-    function renderRichMarkdownText(str) {
+    function renderRichMarkdownText(str, plantRef = null) {
       if (!str) return '';
-      let s = escapeHtml(str);
+      const normalized = typeof ensureClickableSourceLinksInMarkdown === 'function'
+        ? ensureClickableSourceLinksInMarkdown(str, plantRef)
+        : String(str);
+      let s = escapeHtml(normalized);
       // Markdown bold: **text**
       s = s.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--text-main);font-weight:700;">$1</strong>');
       // Markdown italics: *text*
       s = s.replace(/(^|[^*])\*([^*]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
       // Markdown links: [text](url)
-      s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:underline;font-weight:600;">$1</a>');
+      s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color:inherit;text-decoration:underline;font-weight:600;">$1</a>');
       // Paragraph spacing
       s = s.replace(/\n\n/g, '<div style="margin-top:8px;"></div>');
       s = s.replace(/\n/g, '<br>');
@@ -8277,6 +8280,16 @@
       };
     }
 
+    function normalizePlantLookupKey(str) {
+      if (!str) return '';
+      return String(str)
+        .toLowerCase()
+        .replace(/symphiotrichum/g, 'symphyotrichum')
+        .replace(/[\u2018\u2019']/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
     function getEmbeddedMasterMap() {
       const rawEmbedded = document.getElementById('embeddedMasterPlants')?.textContent;
       const embeddedMap = new Map();
@@ -8284,8 +8297,25 @@
         try {
           const emb = JSON.parse(rawEmbedded);
           emb.forEach(p => {
-            if (p.scientific_name) embeddedMap.set(p.scientific_name.toLowerCase().trim(), p);
+            if (p.scientific_name) {
+              const sciRaw = p.scientific_name.toLowerCase().trim();
+              embeddedMap.set(sciRaw, p);
+              embeddedMap.set(normalizePlantLookupKey(sciRaw), p);
+            }
             if (p.id) embeddedMap.set(p.id, p);
+            if (Array.isArray(p.common_names)) {
+              p.common_names.forEach(cn => {
+                if (cn) {
+                  const ck = normalizePlantLookupKey(cn);
+                  if (!embeddedMap.has(ck)) embeddedMap.set(ck, p);
+                  if (ck.endsWith('s') && !embeddedMap.has(ck.slice(0, -1))) {
+                    embeddedMap.set(ck.slice(0, -1), p);
+                  } else if (!ck.endsWith('s') && !embeddedMap.has(ck + 's')) {
+                    embeddedMap.set(ck + 's', p);
+                  }
+                }
+              });
+            }
           });
         } catch (e) {}
       }
@@ -8299,7 +8329,8 @@
 
       plantList.forEach(p => {
         const sciKey = (p.scientific_name || '').toLowerCase().trim();
-        const emb = embeddedMap.get(sciKey) || (p.id ? embeddedMap.get(p.id) : null);
+        const normSci = normalizePlantLookupKey(sciKey);
+        const emb = embeddedMap.get(sciKey) || embeddedMap.get(normSci) || (p.id ? embeddedMap.get(p.id) : null);
         if (emb) {
           if (emb.advisor_description) p.advisor_description = emb.advisor_description;
           if (emb.maintenance_level) p.maintenance_level = emb.maintenance_level;
@@ -8324,9 +8355,13 @@
       const findMaster = (item) => {
         if (!item) return null;
         const sciKey = (item.scientific_name || '').toLowerCase().trim();
-        return (state.allPlants || []).find(mp => mp.id === item.id || (mp.scientific_name && mp.scientific_name.toLowerCase().trim() === sciKey))
-          || embeddedMap.get(sciKey)
-          || (item.id ? embeddedMap.get(item.id) : null);
+        const normSci = normalizePlantLookupKey(sciKey);
+        const commonKey = normalizePlantLookupKey(item.common_name || '');
+        return embeddedMap.get(sciKey)
+          || embeddedMap.get(normSci)
+          || (item.id ? embeddedMap.get(item.id) : null)
+          || (commonKey ? embeddedMap.get(commonKey) : null)
+          || (state.allPlants || []).find(mp => mp.id === item.id || (mp.scientific_name && normalizePlantLookupKey(mp.scientific_name) === normSci));
       };
 
       const syncItem = (item) => {
@@ -10136,7 +10171,7 @@
               ${maintPillHtml}
               ${bloomPillHtml}
             </div>
-            <p class="card-desc">${descStr}</p>
+            <p class="card-desc">${renderRichMarkdownText(descStr, plant)}</p>
           </div>
           <div class="card-footer">
             <button class="btn-copy-desc" title="Copy Advisor Description" aria-label="Copy description for ${escapeHtml(commonName)}">
@@ -11560,31 +11595,180 @@
       return unobserved;
     }
 
+    // Canonical botanical source URL lookup & markdown link normalizer
+    function resolveCanonicalSourceUrlForLabel(label, plantRef = null) {
+      const cleanLabel = String(label || '').trim();
+      const lower = cleanLabel.toLowerCase();
+      const master = (plantRef && plantRef.master) ? plantRef.master : plantRef;
+
+      // 1. Check plant's structured sources array first
+      if (master && Array.isArray(master.sources)) {
+        for (const s of master.sources) {
+          if (!s || !s.url) continue;
+          const sName = String(s.name || '').toLowerCase();
+          if (sName === lower || (lower.includes('missouri botanical') && sName.includes('missouri botanical')) ||
+              (lower.includes('illinois wildflowers') && sName.includes('illinois wildflowers')) ||
+              (lower.includes('lady bird') && sName.includes('lady bird')) ||
+              (lower.includes('usda') && sName.includes('usda')) ||
+              (lower.includes('grow native') && sName.includes('grow native')) ||
+              (lower.includes('flora of north america') && sName.includes('flora of north america')) ||
+              (lower.includes('missouri department of conservation') && sName.includes('missouri department of conservation'))) {
+            return s.url;
+          }
+        }
+      }
+
+      // 2. Check existing markdown links in master catalog's advisor_description
+      if (master && master.advisor_description) {
+        const mdRe = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+        let m;
+        while ((m = mdRe.exec(master.advisor_description)) !== null) {
+          if (m[1].trim().toLowerCase() === lower) {
+            return m[2].trim();
+          }
+        }
+      }
+
+      // 3. Plant-specific URLs & canonical botanical databases
+      if (lower.includes('missouri botanical') || lower.includes('plantfinder') || lower.includes('mobot')) {
+        return (master && master.plantfinder_url) || 'https://www.missouribotanicalgarden.org/plantfinder/plantfindersearch.aspx';
+      }
+      if (lower.includes('grow native')) {
+        return (master && (master.plant_url || master.url)) || 'https://grownative.org/native-plant-database/';
+      }
+      if (lower.includes('illinois wildflowers')) {
+        return 'https://www.illinoiswildflowers.info/';
+      }
+      if (lower.includes('lady bird') || lower.includes('wildflower center')) {
+        return 'https://www.wildflower.org/plants/';
+      }
+      if (lower.includes('usda')) {
+        return 'https://plants.usda.gov/';
+      }
+      if (lower.includes('flora of north america')) {
+        return 'http://floranorthamerica.org/';
+      }
+      if (lower.includes('xerces stem')) {
+        return 'https://xerces.org/publications/fact-sheets/nesting-overwintering-habitat';
+      }
+      if (lower.includes('xerces')) {
+        return 'https://xerces.org/pollinator-conservation/plant-lists';
+      }
+      if (lower.includes('national wildlife federation') || lower.includes('leave the leaves')) {
+        return 'https://www.nwf.org/Magazines/National-Wildlife/2015/OctNov/Gardening/Leave-the-Leaves';
+      }
+      if (lower.includes('butterflies and moths')) {
+        return 'https://www.butterfliesandmoths.org/';
+      }
+      if (lower.includes('missouri department of conservation') || lower.includes('mdc')) {
+        return 'https://mdc.mo.gov/discover-nature/field-guide';
+      }
+      return (master && (master.plant_url || master.plantfinder_url || master.url)) || 'https://grownative.org/native-plant-database/';
+    }
+
+    function ensureClickableSourceLinksInMarkdown(text, plantRef = null) {
+      if (!text) return '';
+      let out = String(text);
+
+      // 1. Convert any raw HTML <a href="...">Label</a> tags into Markdown [Label](url)
+      out = out.replace(/<a\b[^>]*?\bhref=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, url, inner) => {
+        const cleanInner = inner.replace(/<[^>]+>/g, '').trim() || url;
+        return `[${cleanInner}](${url.trim()})`;
+      });
+
+      // 2. Repair any broken/truncated markdown links where URL was cut off or had spaces injected
+      // e.g. "([Missouri Botanical Garden PlantFinder](https://www. missouribotanicalgarden."
+      out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]*)\s+([a-zA-Z0-9._/-]+)(?:\)|$)/g, (full, label, urlPart1, urlPart2) => {
+        const resolved = resolveCanonicalSourceUrlForLabel(label, plantRef);
+        return `[${label.trim()}](${resolved})`;
+      });
+      out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]*)$/g, (full, label) => {
+        const resolved = resolveCanonicalSourceUrlForLabel(label, plantRef);
+        return `[${label.trim()}](${resolved})`;
+      });
+
+      // 3. Convert plain parenthetical source citations into clickable markdown links if not already linked
+      const knownSourcesPattern = /\((Missouri Botanical Garden PlantFinder|Missouri Botanical Garden|Illinois Wildflowers|Grow Native!|Lady Bird Johnson Wildflower Center|USDA PLANTS Database|Missouri Department of Conservation|MDC Field Guide|Flora of North America|Xerces Society|Xerces Stem Guide|National Wildlife Federation|Butterflies and Moths of North America)\)/gi;
+      out = out.replace(knownSourcesPattern, (full, sourceName) => {
+        const url = resolveCanonicalSourceUrlForLabel(sourceName, plantRef);
+        return `([${sourceName}](${url}))`;
+      });
+
+      // 4. Convert bare URLs not already inside markdown links into clickable markdown links
+      out = out.replace(/(^|[^(\["'])(https?:\/\/[^\s)\]]+)/g, (full, prefix, rawUrl) => {
+        const cleanUrl = rawUrl.replace(/[.,;:!?]+$/, '');
+        const trailing = rawUrl.slice(cleanUrl.length);
+        let label = 'Botanical Source';
+        if (/missouribotanicalgarden\.org/i.test(cleanUrl)) label = 'Missouri Botanical Garden PlantFinder';
+        else if (/grownative\.org/i.test(cleanUrl)) label = 'Grow Native!';
+        else if (/illinoiswildflowers\.info/i.test(cleanUrl)) label = 'Illinois Wildflowers';
+        else if (/wildflower\.org/i.test(cleanUrl)) label = 'Lady Bird Johnson Wildflower Center';
+        else if (/plants\.usda\.gov/i.test(cleanUrl)) label = 'USDA PLANTS Database';
+        else if (/mdc\.mo\.gov/i.test(cleanUrl)) label = 'MDC Field Guide';
+        else if (/xerces\.org/i.test(cleanUrl)) label = 'Xerces Society';
+        else if (/nwf\.org/i.test(cleanUrl)) label = 'National Wildlife Federation';
+        else if (/floranorthamerica\.org/i.test(cleanUrl)) label = 'Flora of North America';
+        return `${prefix}[${label}](${cleanUrl})${trailing}`;
+      });
+
+      return out;
+    }
+
     // Report Plant Resolution & Concise Section Formatters
     function resolveReportPlantRecord(staged) {
       if (!staged) return {};
       const sciKey = (staged.scientific_name || '').toLowerCase().trim();
-      const masterFromState = (state.allPlants || []).find(mp =>
-        (staged.id && mp.id === staged.id) ||
-        (sciKey && (mp.scientific_name || '').toLowerCase().trim() === sciKey)
-      );
+      const normSciKey = typeof normalizePlantLookupKey === 'function' ? normalizePlantLookupKey(staged.scientific_name) : sciKey;
+      const normCommonKey = typeof normalizePlantLookupKey === 'function'
+        ? normalizePlantLookupKey(staged.common_name || (staged.common_names && staged.common_names[0]))
+        : '';
+
       const embeddedMap = typeof getEmbeddedMasterMap === 'function' ? getEmbeddedMasterMap() : null;
       const masterFromEmbedded = embeddedMap
-        ? ((staged.id && embeddedMap.get(staged.id)) || (sciKey && embeddedMap.get(sciKey)))
-        : null;
-      const master = masterFromEmbedded || masterFromState || null;
-      const customOverride = (staged.id && state.customPlants && state.customPlants[staged.id])
-        ? state.customPlants[staged.id]
+        ? ((staged.id && embeddedMap.get(staged.id))
+           || (sciKey && embeddedMap.get(sciKey))
+           || (normSciKey && embeddedMap.get(normSciKey))
+           || (normCommonKey && embeddedMap.get(normCommonKey)))
         : null;
 
-      // Always prefer the updated canonical advisor_description from the enriched catalog
-      // (unless an explicit custom override was saved in state.customPlants)
-      const canonicalDesc = (customOverride && customOverride.advisor_description)
-        || (masterFromEmbedded && masterFromEmbedded.advisor_description)
-        || (masterFromState && masterFromState.advisor_description)
-        || staged.advisor_description
-        || (master && master.description)
-        || '';
+      const masterFromState = (state.allPlants || []).find(mp => {
+        if (staged.id && mp.id === staged.id) return true;
+        const mpSci = (mp.scientific_name || '').toLowerCase().trim();
+        if (sciKey && mpSci === sciKey) return true;
+        if (normSciKey && typeof normalizePlantLookupKey === 'function' && normalizePlantLookupKey(mp.scientific_name) === normSciKey) return true;
+        if (normCommonKey && typeof normalizePlantLookupKey === 'function' && Array.isArray(mp.common_names)) {
+          if (mp.common_names.some(cn => normalizePlantLookupKey(cn) === normCommonKey)) return true;
+        }
+        return false;
+      });
+
+      const master = masterFromEmbedded || masterFromState || null;
+      const resolvedId = (master && master.id) || staged.id || '';
+      const customOverride = (resolvedId && state.customPlants && state.customPlants[resolvedId])
+        ? state.customPlants[resolvedId]
+        : ((staged.id && state.customPlants && state.customPlants[staged.id]) ? state.customPlants[staged.id] : null);
+
+      const hasMarkdownLinks = (str) => Boolean(str && /\[[^\]]+\]\(https?:\/\/[^\s)]+\)/.test(String(str)));
+      const embeddedDesc = (masterFromEmbedded && masterFromEmbedded.advisor_description) || '';
+      const stateDesc = (masterFromState && masterFromState.advisor_description) || '';
+      const customDesc = (customOverride && customOverride.advisor_description) || '';
+      const stagedDesc = staged.advisor_description || '';
+
+      // Prefer customDesc only if it preserves clickable markdown links or no canonical linked description exists
+      let rawCanonicalDesc = '';
+      if (customDesc && (hasMarkdownLinks(customDesc) || !hasMarkdownLinks(embeddedDesc))) {
+        rawCanonicalDesc = customDesc;
+      } else if (hasMarkdownLinks(embeddedDesc)) {
+        rawCanonicalDesc = embeddedDesc;
+      } else if (hasMarkdownLinks(stateDesc)) {
+        rawCanonicalDesc = stateDesc;
+      } else if (hasMarkdownLinks(stagedDesc)) {
+        rawCanonicalDesc = stagedDesc;
+      } else {
+        rawCanonicalDesc = embeddedDesc || stateDesc || stagedDesc || customDesc || (master && master.description) || '';
+      }
+
+      const canonicalDesc = ensureClickableSourceLinksInMarkdown(rawCanonicalDesc, master || staged);
 
       const commonName = staged.common_name
         || (master && master.common_names && master.common_names[0])
@@ -11595,14 +11779,14 @@
       const imageUrl = staged.image_url || (master && (master.image_url || (master.images && master.images[0] && master.images[0].url))) || '';
       const layer = (master && master.architectural_layer) || staged.layer || 'Mid-layer';
       const habitat = (master && master.native_environment) || staged.environment || 'Garden / Native Landscape';
-      const height = (master && (master.mature_height || master.height)) || staged.height || 'Variable';
+      const height = (master && (master.height_display || (master.mature_height && master.mature_height.display) || (typeof master.mature_height === 'string' ? master.mature_height : '') || master.height)) || staged.height || 'Variable';
       const sun = (master && Array.isArray(master.light_requirements) && master.light_requirements.length > 0)
         ? master.light_requirements.join(', ')
         : (staged.sun || 'Sun to Part Sun');
       const moisture = (master && Array.isArray(master.moisture_requirements) && master.moisture_requirements.length > 0)
         ? master.moisture_requirements.join(', ')
         : (staged.moisture || 'Average');
-      const sociability = (master && master.plant_sociability) || staged.sociability || '';
+      const sociability = (master && (master.sociability || master.plant_sociability)) || staged.sociability || '';
       const bloomColors = (master && (master.bloom_color || master.bloomColor)) || [];
       const bloomSeasons = (master && (master.bloom_period || master.bloom_season || master.bloomSeason)) || [];
       const maintLevel = (customOverride && customOverride.maintenance_level)
@@ -11610,16 +11794,18 @@
         || (masterFromState && masterFromState.maintenance_level)
         || staged.maintenance_level
         || 'Low';
-      const maintGuide = (customOverride && customOverride.maintenance_guide)
-        || (masterFromEmbedded && masterFromEmbedded.maintenance_guide)
-        || (masterFromState && masterFromState.maintenance_guide)
-        || staged.maintenance_guide
-        || {};
-      const wildlifeDetail = (customOverride && customOverride.wildlife_detail)
-        || (masterFromEmbedded && masterFromEmbedded.wildlife_detail)
-        || (masterFromState && masterFromState.wildlife_detail)
-        || staged.wildlife_detail
-        || null;
+      const maintGuide = (customOverride && customOverride.maintenance_guide && hasMarkdownLinks(JSON.stringify(customOverride.maintenance_guide)))
+        ? customOverride.maintenance_guide
+        : ((masterFromEmbedded && masterFromEmbedded.maintenance_guide)
+          || (masterFromState && masterFromState.maintenance_guide)
+          || staged.maintenance_guide
+          || {});
+      const wildlifeDetail = (customOverride && customOverride.wildlife_detail && hasMarkdownLinks(JSON.stringify(customOverride.wildlife_detail)))
+        ? customOverride.wildlife_detail
+        : ((masterFromEmbedded && masterFromEmbedded.wildlife_detail)
+          || (masterFromState && masterFromState.wildlife_detail)
+          || staged.wildlife_detail
+          || null);
       const wildlifeBenefits = (master && master.wildlife_ecosystem_benefits) || [];
       const isSweet16 = Boolean(
         (master && (master.kc_sweet_16 || (typeof isKcSweet16Plant === 'function' && isKcSweet16Plant(master)))) ||
@@ -11627,7 +11813,7 @@
       );
 
       return {
-        id: staged.id || (master && master.id) || '',
+        id: resolvedId,
         master,
         common_name: commonName,
         scientific_name: sciName,
@@ -11653,7 +11839,7 @@
       };
     }
 
-    // Deduplicate identical markdown link URLs within a single bullet string
+    // Deduplicate identical parenthetical markdown link URLs within a single bullet string without ever stripping links to plain text
     function deduplicateMarkdownLinksInBullet(text) {
       if (!text) return '';
       const seenUrls = new Set();
@@ -11662,7 +11848,7 @@
         const url = (pUrl || bUrl || '').trim();
         const normUrl = url.replace(/\/+$/, '').toLowerCase();
         if (seenUrls.has(normUrl)) {
-          return pLabel ? '' : bLabel;
+          return pLabel ? '' : full;
         }
         seenUrls.add(normUrl);
         return full;
@@ -11710,10 +11896,10 @@
       }
 
       if (parts.length === 0 && guide.summary) {
-        return deduplicateMarkdownLinksInBullet(guide.summary);
+        return ensureClickableSourceLinksInMarkdown(deduplicateMarkdownLinksInBullet(guide.summary), resolved.master || resolved);
       }
       const combined = parts.join(' | ');
-      return deduplicateMarkdownLinksInBullet(combined);
+      return ensureClickableSourceLinksInMarkdown(deduplicateMarkdownLinksInBullet(combined), resolved.master || resolved);
     }
 
     // Condense Wildlife & Host Value section for reports
@@ -11740,7 +11926,7 @@
         const sections = [];
         if (hostPart) sections.push(`Host: ${hostPart}`);
         if (usersPart) sections.push(`Wildlife: ${usersPart}`);
-        return deduplicateMarkdownLinksInBullet(sections.join(' | ') + '.');
+        return ensureClickableSourceLinksInMarkdown(deduplicateMarkdownLinksInBullet(sections.join(' | ') + '.'), resolved.master || resolved);
       }
       if (Array.isArray(resolved.wildlife_ecosystem_benefits) && resolved.wildlife_ecosystem_benefits.length > 0) {
         return resolved.wildlife_ecosystem_benefits.slice(0, 4).join(' · ');
@@ -11749,15 +11935,16 @@
     }
 
     // Parse inline markdown links [Label](url) and *italics* into tokens
-    function parseInlineMarkdownSegments(text) {
+    function parseInlineMarkdownSegments(text, plantRef = null) {
       if (!text) return [];
+      const normalized = ensureClickableSourceLinksInMarkdown(text, plantRef);
       const tokens = [];
       const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*([^*]+)\*/g;
       let lastIndex = 0;
       let match;
-      while ((match = regex.exec(text)) !== null) {
+      while ((match = regex.exec(normalized)) !== null) {
         if (match.index > lastIndex) {
-          tokens.push({ type: 'text', text: text.slice(lastIndex, match.index) });
+          tokens.push({ type: 'text', text: normalized.slice(lastIndex, match.index) });
         }
         if (match[1] && match[2]) {
           tokens.push({ type: 'link', text: match[1].trim(), url: match[2].trim() });
@@ -11766,8 +11953,8 @@
         }
         lastIndex = regex.lastIndex;
       }
-      if (lastIndex < text.length) {
-        tokens.push({ type: 'text', text: text.slice(lastIndex) });
+      if (lastIndex < normalized.length) {
+        tokens.push({ type: 'text', text: normalized.slice(lastIndex) });
       }
       return tokens;
     }
@@ -11799,9 +11986,9 @@
       return { citations, addCitation };
     }
 
-    function renderInlineMarkdownWithCitationsMd(text, collector) {
+    function renderInlineMarkdownWithCitationsMd(text, collector, plantRef = null) {
       if (!text) return '';
-      const segments = parseInlineMarkdownSegments(text);
+      const segments = parseInlineMarkdownSegments(text, plantRef);
       return segments.map(seg => {
         if (seg.type === 'link') {
           const num = collector ? collector.addCitation(seg.text, seg.url) : null;
@@ -11814,14 +12001,14 @@
       }).join('');
     }
 
-    function renderInlineMarkdownWithCitationsHtml(text, collector) {
+    function renderInlineMarkdownWithCitationsHtml(text, collector, plantRef = null) {
       if (!text) return '';
-      const segments = parseInlineMarkdownSegments(text);
+      const segments = parseInlineMarkdownSegments(text, plantRef);
       return segments.map(seg => {
         if (seg.type === 'link') {
           const num = collector ? collector.addCitation(seg.text, seg.url) : null;
           const sup = num ? `<sup style="font-size:0.72em;margin-left:1px;"><a href="#report-cite-${num}" style="color:#1b6535;text-decoration:none;">[${num}]</a></sup>` : '';
-          return `<a href="${escapeHtml(seg.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(seg.text)}</a>${sup}`;
+          return `<a href="${escapeHtml(seg.url)}" target="_blank" rel="noopener noreferrer" class="dr-inline-link">${escapeHtml(seg.text)}</a>${sup}`;
         }
         if (seg.type === 'italic') {
           return `<em>${escapeHtml(seg.text)}</em>`;
@@ -11886,19 +12073,19 @@
             const plantCiteNum = collector.addCitation(`${p.common_name} (${p.scientific_name})`, p.plant_url);
             md += `#### [${p.common_name}](${p.plant_url}) [${plantCiteNum}] (*${p.scientific_name}*)\n\n`;
             if (p.advisor_description) {
-              md += `${renderInlineMarkdownWithCitationsMd(p.advisor_description, collector)}\n\n`;
+              md += `${renderInlineMarkdownWithCitationsMd(p.advisor_description, collector, p)}\n\n`;
             }
             md += `* **Quantity:** ${p.quantity} | **Layer:** ${p.layer} | **Height:** ${p.height}\n`;
             md += `* **Light & Moisture:** ${p.sun} / ${p.moisture}\n`;
             const maintShort = formatConciseMaintenanceForReport(p);
             if (maintShort) {
-              md += `* **Maintenance (${p.maintenance_level}):** ${renderInlineMarkdownWithCitationsMd(maintShort, collector)}\n`;
+              md += `* **Maintenance (${p.maintenance_level}):** ${renderInlineMarkdownWithCitationsMd(maintShort, collector, p)}\n`;
             }
             const wildlifeShort = formatConciseWildlifeForReport(p);
             if (wildlifeShort) {
-              md += `* **Wildlife & Host Value:** ${renderInlineMarkdownWithCitationsMd(wildlifeShort, collector)}\n`;
+              md += `* **Wildlife & Host Value:** ${renderInlineMarkdownWithCitationsMd(wildlifeShort, collector, p)}\n`;
             }
-            if (p.custom_notes) md += `* **Advisor Recommendation:** ${renderInlineMarkdownWithCitationsMd(p.custom_notes, collector)}\n`;
+            if (p.custom_notes) md += `* **Advisor Recommendation:** ${renderInlineMarkdownWithCitationsMd(p.custom_notes, collector, p)}\n`;
             md += `\n`;
           });
         }
@@ -12080,13 +12267,13 @@
             html += `
   <div class="plant-block">
     <h4 style="margin:0 0 6pt 0;"><a href="${escapeHtml(p.plant_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.common_name)}</a><sup style="font-size:0.72em;margin-left:1px;"><a href="#report-cite-${plantCiteNum}" style="color:#1b6535;text-decoration:none;">[${plantCiteNum}]</a></sup> <em>(${escapeHtml(p.scientific_name)})</em></h4>
-    ${p.advisor_description ? `<p style="margin:4pt 0 8pt 0;">${renderInlineMarkdownWithCitationsHtml(p.advisor_description, collector)}</p>` : ''}
+    ${p.advisor_description ? `<p style="margin:4pt 0 8pt 0;">${renderInlineMarkdownWithCitationsHtml(p.advisor_description, collector, p)}</p>` : ''}
     <ul style="margin:0;padding-left:20px;">
       <li><strong>Quantity:</strong> ${p.quantity} | <strong>Layer:</strong> ${escapeHtml(p.layer)} | <strong>Height:</strong> ${escapeHtml(p.height)}</li>
       <li><strong>Sun &amp; Moisture:</strong> ${escapeHtml(p.sun)} / ${escapeHtml(p.moisture)}</li>
-      ${maintShort ? `<li><strong>Maintenance (${escapeHtml(p.maintenance_level)}):</strong> ${renderInlineMarkdownWithCitationsHtml(maintShort, collector)}</li>` : ''}
-      ${wildlifeShort ? `<li><strong>Wildlife &amp; Host Value:</strong> ${renderInlineMarkdownWithCitationsHtml(wildlifeShort, collector)}</li>` : ''}
-      ${p.custom_notes ? `<li><strong>Advisor Notes:</strong> ${renderInlineMarkdownWithCitationsHtml(p.custom_notes, collector)}</li>` : ''}
+      ${maintShort ? `<li><strong>Maintenance (${escapeHtml(p.maintenance_level)}):</strong> ${renderInlineMarkdownWithCitationsHtml(maintShort, collector, p)}</li>` : ''}
+      ${wildlifeShort ? `<li><strong>Wildlife &amp; Host Value:</strong> ${renderInlineMarkdownWithCitationsHtml(wildlifeShort, collector, p)}</li>` : ''}
+      ${p.custom_notes ? `<li><strong>Advisor Notes:</strong> ${renderInlineMarkdownWithCitationsHtml(p.custom_notes, collector, p)}</li>` : ''}
     </ul>
   </div>`;
           });
@@ -12405,17 +12592,10 @@
       // Auto-select print density so takeaway fits cleanly within <= 3 pages
       const densityClass = totalSpeciesCount > 16 ? 'density-ultra' : (totalSpeciesCount > 8 ? 'density-compact' : 'density-standard');
 
-      const formatPrelimDescriptionHtml = (descText) => {
+      const formatPrelimDescriptionHtml = (descText, plantRef = null) => {
         if (!descText) return '';
-        let trimmed = String(descText).trim();
-        const maxChars = totalSpeciesCount > 14 ? 210 : 320;
-        if (trimmed.length > maxChars) {
-          const sentences = trimmed.match(/[^.!?]+[.!?]+(?:\s*\(\[[^\]]+\]\([^)]+\)\)\.?|\s*\[[^\]]+\]\([^)]+\)\.?)?/g);
-          if (sentences && sentences.length > 0) {
-            trimmed = sentences.slice(0, totalSpeciesCount > 14 ? 1 : 2).join(' ').trim();
-          }
-        }
-        return parseInlineMarkdownSegments(trimmed).map(seg => {
+        const cleaned = ensureClickableSourceLinksInMarkdown(String(descText).trim(), plantRef);
+        return parseInlineMarkdownSegments(cleaned, plantRef).map(seg => {
           if (seg.type === 'link') {
             return `<a href="${escapeHtml(seg.url)}" target="_blank" rel="noopener noreferrer" class="dr-inline-link">${escapeHtml(seg.text)}</a>`;
           }
@@ -12426,10 +12606,10 @@
         }).join('');
       };
 
-      const extractInlineLinks = (text) => {
+      const extractInlineLinks = (text, plantRef = null) => {
         const links = [];
         const seen = new Set();
-        for (const seg of parseInlineMarkdownSegments(text || '')) {
+        for (const seg of parseInlineMarkdownSegments(text || '', plantRef)) {
           if (seg.type === 'link' && seg.url && !seen.has(seg.url)) {
             seen.add(seg.url);
             links.push({ label: seg.text, url: seg.url });
@@ -12474,9 +12654,9 @@
                   Array.isArray(p.bloomSeasons) && p.bloomSeasons.length ? p.bloomSeasons.join(', ') : ''
                 ].filter(Boolean).join(' · ');
                 const extraLinks = [
-                  ...extractInlineLinks(p.advisor_description),
-                  ...extractInlineLinks(p.wildlife_detail ? p.wildlife_detail.host_insects : '')
-                ].slice(0, 2);
+                  ...extractInlineLinks(p.advisor_description, p),
+                  ...extractInlineLinks(p.wildlife_detail ? p.wildlife_detail.host_insects : '', p)
+                ].slice(0, 3);
                 const wildlifeShort = formatConciseWildlifeForReport(p);
                 const maintShort = formatConciseMaintenanceForReport(p);
 
@@ -12507,10 +12687,10 @@
                       </div>
                     </div>
                   </div>
-                  ${p.advisor_description ? `<div class="dr-plant-desc">${formatPrelimDescriptionHtml(p.advisor_description)}</div>` : ''}
-                  ${wildlifeShort ? `<div class="dr-plant-subbullet"><strong>Wildlife:</strong> ${formatPrelimDescriptionHtml(wildlifeShort)}</div>` : ''}
-                  ${maintShort ? `<div class="dr-plant-subbullet"><strong>Care (${escapeHtml(p.maintenance_level)}):</strong> ${formatPrelimDescriptionHtml(maintShort)}</div>` : ''}
-                  ${p.custom_notes && p.custom_notes.trim() ? `<div class="dr-custom-note"><strong>Advisor Note:</strong> ${escapeHtml(p.custom_notes.trim())}</div>` : ''}
+                  ${p.advisor_description ? `<div class="dr-plant-desc">${formatPrelimDescriptionHtml(p.advisor_description, p)}</div>` : ''}
+                  ${wildlifeShort ? `<div class="dr-plant-subbullet"><strong>Wildlife:</strong> ${formatPrelimDescriptionHtml(wildlifeShort, p)}</div>` : ''}
+                  ${maintShort ? `<div class="dr-plant-subbullet"><strong>Care (${escapeHtml(p.maintenance_level)}):</strong> ${formatPrelimDescriptionHtml(maintShort, p)}</div>` : ''}
+                  ${p.custom_notes && p.custom_notes.trim() ? `<div class="dr-custom-note"><strong>Advisor Note:</strong> ${formatPrelimDescriptionHtml(p.custom_notes.trim(), p)}</div>` : ''}
                   <div class="dr-card-links">
                     <a href="${escapeHtml(p.plant_url)}" target="_blank" rel="noopener noreferrer" class="dr-resource-btn">Grow Native! Plant Profile ↗</a>
                     ${extraLinks.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="dr-sub-link">${escapeHtml(l.label)} ↗</a>`).join('')}
@@ -12553,6 +12733,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base target="_blank">
   <title>Preliminary Consultation Takeaway – ${escapeHtml(meta.name)}</title>
   <style>
     @page {
@@ -12945,7 +13126,7 @@
     .density-ultra .dr-plant-thumb { width: 26px; height: 26px; }
     .density-ultra .dr-plant-card { padding: 3px 5px; gap: 1.5px; }
     .density-ultra .dr-plant-desc { font-size: 7.8pt; line-height: 1.2; }
-    .density-ultra .dr-plant-subbullet { display: none; }
+    .density-ultra .dr-plant-subbullet { font-size: 7.4pt; line-height: 1.18; }
     @media (max-width: 640px) {
       .dr-plant-grid { grid-template-columns: 1fr !important; }
     }
@@ -13102,8 +13283,8 @@
       return lines;
     }
 
-    function wrapPdfRichMarkdownTokens(markdownText, maxWidthPt, fontSize, baseFontKey = 'F1', italicFontKey = 'F3', boldFontKey = 'F2') {
-      const segs = parseInlineMarkdownSegments(markdownText || '');
+    function wrapPdfRichMarkdownTokens(markdownText, maxWidthPt, fontSize, baseFontKey = 'F1', italicFontKey = 'F3', boldFontKey = 'F2', plantRef = null) {
+      const segs = parseInlineMarkdownSegments(markdownText || '', plantRef);
       const wordTokens = [];
       for (const seg of segs) {
         const clean = sanitizePdfWinAnsiText(seg.text);
@@ -13112,11 +13293,19 @@
         for (let i = 0; i < parts.length; i++) {
           const word = parts[i];
           if (!word) continue;
+          const isPunctOnly = /^[).,:;!?]+$/.test(word);
+          const isOpenParenOnly = /^[(]+$/.test(word);
+          if (isPunctOnly && wordTokens.length > 0 && !wordTokens[wordTokens.length - 1].isLink) {
+            wordTokens[wordTokens.length - 1].word += word;
+            continue;
+          }
           wordTokens.push({
             word,
             fontKey: seg.type === 'italic' ? italicFontKey : (seg.type === 'bold' ? boldFontKey : baseFontKey),
             isLink: seg.type === 'link',
-            url: seg.type === 'link' ? seg.url : null
+            url: seg.type === 'link' ? seg.url : null,
+            noSpaceBefore: isPunctOnly,
+            noSpaceAfter: isOpenParenOnly
           });
         }
       }
@@ -13126,8 +13315,10 @@
       const spaceW = fontSize * 0.27;
       for (const tok of wordTokens) {
         const w = estimatePdfTextWidth(tok.word, fontSize, true, tok.fontKey === boldFontKey);
-        const addW = curLine.length > 0 ? spaceW + w : w;
-        if (curWidth + addW > maxWidthPt && curLine.length > 0) {
+        const prevTok = curLine.length > 0 ? curLine[curLine.length - 1] : null;
+        const needsSpace = prevTok && !prevTok.noSpaceAfter && !tok.noSpaceBefore;
+        const addW = curLine.length > 0 ? (needsSpace ? spaceW + w : w) : w;
+        if (curWidth + addW > maxWidthPt && curLine.length > 0 && !tok.noSpaceBefore) {
           lines.push(curLine);
           curLine = [tok];
           curWidth = w;
@@ -13169,16 +13360,15 @@
 
       const isCompact = totalSpeciesCount > 8;
       const isUltra = totalSpeciesCount > 16;
-      const bodyFontSz = isUltra ? 7.4 : (isCompact ? 8.0 : 8.5);
-      const bodyLineH = isUltra ? 9.4 : (isCompact ? 10.2 : 11.0);
-      const maxDescLines = isUltra ? 2 : (isCompact ? 3 : 4);
+      const bodyFontSz = isUltra ? 7.4 : (isCompact ? 7.9 : 8.3);
+      const bodyLineH = isUltra ? 9.2 : (isCompact ? 9.9 : 10.6);
 
       const pages = [];
       let curPage = null;
       let cursorY = TOP_Y;
 
       const startNewPage = () => {
-        if (pages.length >= 3) {
+        if (pages.length >= 24) {
           return false;
         }
         curPage = { ops: [], links: [] };
@@ -13229,18 +13419,44 @@
       const pdfRichLine = (tokens, startX, yBaseline, size) => {
         let x = startX;
         const spaceW = estimatePdfTextWidth(' ', size, true, false);
+        let activeLinkSpan = null;
+        const flushLinkSpan = () => {
+          if (activeLinkSpan) {
+            pdfLine(activeLinkSpan.x1, yBaseline - 1.5, activeLinkSpan.x2, yBaseline - 1.5, 0.067, 0.333, 0.800, 0.55);
+            curPage.links.push({
+              x1: activeLinkSpan.x1,
+              y1: yBaseline - 2,
+              x2: activeLinkSpan.x2,
+              y2: yBaseline + size,
+              url: activeLinkSpan.url
+            });
+            activeLinkSpan = null;
+          }
+        };
         for (let i = 0; i < tokens.length; i++) {
           const tok = tokens[i];
-          const isLink = tok.isLink && tok.url;
+          const prevTok = i > 0 ? tokens[i - 1] : null;
+          if (prevTok && !prevTok.noSpaceAfter && !tok.noSpaceBefore) {
+            x += spaceW;
+          }
+          const isLink = Boolean(tok.isLink && tok.url);
+          if (!isLink || (activeLinkSpan && activeLinkSpan.url !== tok.url)) {
+            flushLinkSpan();
+          }
           const r = isLink ? 0.067 : 0.08;
           const g = isLink ? 0.333 : 0.08;
           const b = isLink ? 0.800 : 0.08;
-          const w = pdfText(tok.word, x, yBaseline, tok.fontKey, size, r, g, b, {
-            underline: isLink,
-            url: isLink ? tok.url : null
-          });
-          x += w + spaceW;
+          const w = pdfText(tok.word, x, yBaseline, tok.fontKey, size, r, g, b);
+          if (isLink) {
+            if (!activeLinkSpan) {
+              activeLinkSpan = { x1: x, x2: x + w, url: tok.url };
+            } else {
+              activeLinkSpan.x2 = x + w;
+            }
+          }
+          x += w;
         }
+        flushLinkSpan();
       };
 
       startNewPage();
@@ -13339,17 +13555,17 @@
         const specLine = `Layer: ${p.layer} | Ht: ${p.height} | Sun: ${p.sun} | Moist: ${p.moisture}${bloomStr ? ' | Bloom: ' + bloomStr : ''}`;
         const specLines = wrapPdfPlainLines(specLine, colW - 12, bodyFontSz - 0.6, false, false).slice(0, 2);
 
-        const descLines = wrapPdfRichMarkdownTokens(p.advisor_description || '', colW - 12, bodyFontSz).slice(0, maxDescLines);
+        const descLines = wrapPdfRichMarkdownTokens(p.advisor_description || '', colW - 12, bodyFontSz, 'F1', 'F3', 'F2', p);
         const wildlifeShort = formatConciseWildlifeForReport(p);
-        const wildlifeLines = (!isUltra && wildlifeShort)
-          ? wrapPdfRichMarkdownTokens(`Wildlife: ${wildlifeShort}`, colW - 12, bodyFontSz - 0.4).slice(0, 2)
+        const wildlifeLines = wildlifeShort
+          ? wrapPdfRichMarkdownTokens(`Wildlife: ${wildlifeShort}`, colW - 12, bodyFontSz - 0.4, 'F1', 'F3', 'F2', p)
           : [];
         const maintShort = formatConciseMaintenanceForReport(p);
-        const maintLines = (!isUltra && maintShort)
-          ? wrapPdfRichMarkdownTokens(`Care (${p.maintenance_level}): ${maintShort}`, colW - 12, bodyFontSz - 0.4).slice(0, 2)
+        const maintLines = maintShort
+          ? wrapPdfRichMarkdownTokens(`Care (${p.maintenance_level}): ${maintShort}`, colW - 12, bodyFontSz - 0.4, 'F1', 'F3', 'F2', p)
           : [];
         const noteLines = (p.custom_notes && p.custom_notes.trim())
-          ? wrapPdfPlainLines(`Note: ${p.custom_notes.trim()}`, colW - 12, bodyFontSz - 0.4, true, false).slice(0, 1)
+          ? wrapPdfPlainLines(`Note: ${p.custom_notes.trim()}`, colW - 12, bodyFontSz - 0.4, true, false)
           : [];
 
         const totalLinesCount = specLines.length + descLines.length + wildlifeLines.length + maintLines.length + noteLines.length;
@@ -13876,9 +14092,10 @@
         }
       }
 
-      if (!templateBuffer && window.EMBEDDED_REPORT_TEMPLATE_BASE64) {
+      const embeddedB64 = window.REPORT_TEMPLATE_BASE64 || window.EMBEDDED_REPORT_TEMPLATE_BASE64;
+      if (!templateBuffer && embeddedB64) {
         try {
-          const binaryStr = atob(window.EMBEDDED_REPORT_TEMPLATE_BASE64);
+          const binaryStr = atob(embeddedB64);
           const len = binaryStr.length;
           const bytes = new Uint8Array(len);
           for (let i = 0; i < len; i++) {
@@ -14029,9 +14246,9 @@
           let tempFnCounter = 1001;
           const pendingPlantFootnotes = new Map();
 
-          function buildRichRunsXml(markdownText) {
+          function buildRichRunsXml(markdownText, plantRef = null) {
             if (!markdownText) return '';
-            const segments = parseInlineMarkdownSegments(markdownText);
+            const segments = parseInlineMarkdownSegments(markdownText, plantRef);
             let out = '';
             for (const seg of segments) {
               if (seg.type === 'link') {
@@ -14042,7 +14259,7 @@
                   label: seg.text.replace(/\.+$/, '').trim(),
                   url: seg.url
                 });
-                out += `<w:hyperlink r:id="${linkRId}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${tempFnId}"/></w:r>`;
+                out += `<w:hyperlink r:id="${linkRId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${tempFnId}"/></w:r>`;
               } else if (seg.type === 'italic') {
                 out += `<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
               } else if (seg.text) {
@@ -14113,7 +14330,7 @@
         <w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr>
         <w:t>• </w:t>
     </w:r>
-    <w:hyperlink r:id="${rId}">
+    <w:hyperlink r:id="${rId}" w:history="1">
         <w:r>
             <w:rPr>
                 <w:rStyle w:val="Hyperlink"/>
@@ -14129,7 +14346,7 @@
         <w:rPr><w:i/></w:rPr>
         <w:t xml:space="preserve"> (${escapeXml(sciName)}) – </w:t>
     </w:r>
-    ${buildRichRunsXml(desc)}
+    ${buildRichRunsXml(desc, resolved)}
 </w:p>`;
 
                 // Botanical bullet point 1: Quantity, Layer, Habitat, Height
@@ -14189,7 +14406,7 @@
     </w:pPr>
     <w:r><w:t>• </w:t></w:r>
     <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t xml:space="preserve">Maintenance (${escapeXml(reportMaintLvl)}): </w:t></w:r>
-    ${buildRichRunsXml(reportMaintSummary)}
+    ${buildRichRunsXml(reportMaintSummary, resolved)}
 </w:p>`;
 
                 // Botanical bullet point 4: Concise Wildlife & Host Insect Value (with clickable source links)
@@ -14203,7 +14420,7 @@
     </w:pPr>
     <w:r><w:t>• </w:t></w:r>
     <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t xml:space="preserve">Wildlife &amp; Host Value: </w:t></w:r>
-    ${buildRichRunsXml(wildlifeReportText)}
+    ${buildRichRunsXml(wildlifeReportText, resolved)}
 </w:p>`;
                 }
 
@@ -14217,7 +14434,7 @@
     </w:pPr>
     <w:r><w:t>• </w:t></w:r>
     <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t xml:space="preserve">Advisor Notes: </w:t></w:r>
-    ${buildRichRunsXml(resolved.custom_notes.trim())}
+    ${buildRichRunsXml(resolved.custom_notes.trim(), resolved)}
 </w:p>`;
                 }
               }
@@ -14704,14 +14921,14 @@
         let relCounter = 10;
         const collector = createCitationCollector(formatReportAccessedDate(meta.date));
 
-        const buildMiniRuns = (text) => {
+        const buildMiniRuns = (text, plantRef = null) => {
           if (!text) return '';
-          return parseInlineMarkdownSegments(text).map(seg => {
+          return parseInlineMarkdownSegments(text, plantRef).map(seg => {
             if (seg.type === 'link') {
               const rId = `rId${relCounter++}`;
               miniRelsBody += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(seg.url)}" TargetMode="External"/>`;
               const citeNum = collector.addCitation(seg.text, seg.url);
-              return `<w:hyperlink r:id="${rId}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>${citeNum}</w:t></w:r>`;
+              return `<w:hyperlink r:id="${rId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>${citeNum}</w:t></w:r>`;
             }
             if (seg.type === 'italic') {
               return `<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
@@ -14740,19 +14957,19 @@
           miniRelsBody += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(p.plant_url)}" TargetMode="External"/>`;
           const mainCite = collector.addCitation(`${p.common_name} (${p.scientific_name})`, p.plant_url);
 
-          miniBody += `<w:p><w:pPr><w:spacing w:before="140" w:after="40"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t>• </w:t></w:r><w:hyperlink r:id="${rId}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1B6535"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(p.common_name)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>${mainCite}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(p.scientific_name)}) – </w:t></w:r>${buildMiniRuns(p.advisor_description)}</w:p>`;
+          miniBody += `<w:p><w:pPr><w:spacing w:before="140" w:after="40"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t>• </w:t></w:r><w:hyperlink r:id="${rId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1B6535"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(p.common_name)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>${mainCite}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(p.scientific_name)}) – </w:t></w:r>${buildMiniRuns(p.advisor_description, p)}</w:p>`;
           miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:t>• Quantity: ${p.quantity} | Layer: ${escapeXml(p.layer)} | Height: ${escapeXml(p.height)}</w:t></w:r></w:p>`;
           miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:t>• Sun/Moisture: ${escapeXml(p.sun)} / ${escapeXml(p.moisture)}</w:t></w:r></w:p>`;
           const maintShort = formatConciseMaintenanceForReport(p);
           if (maintShort) {
-            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">• Maintenance (${escapeXml(p.maintenance_level)}): </w:t></w:r>${buildMiniRuns(maintShort)}</w:p>`;
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">• Maintenance (${escapeXml(p.maintenance_level)}): </w:t></w:r>${buildMiniRuns(maintShort, p)}</w:p>`;
           }
           const wildlifeShort = formatConciseWildlifeForReport(p);
           if (wildlifeShort) {
-            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">• Wildlife &amp; Host Value: </w:t></w:r>${buildMiniRuns(wildlifeShort)}</w:p>`;
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">• Wildlife &amp; Host Value: </w:t></w:r>${buildMiniRuns(wildlifeShort, p)}</w:p>`;
           }
           if (p.custom_notes) {
-            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t xml:space="preserve">• Advisor Notes: </w:t></w:r>${buildMiniRuns(p.custom_notes)}</w:p>`;
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t xml:space="preserve">• Advisor Notes: </w:t></w:r>${buildMiniRuns(p.custom_notes, p)}</w:p>`;
           }
         });
 
