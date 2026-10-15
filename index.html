@@ -12654,11 +12654,8 @@
                   Array.isArray(p.bloomSeasons) && p.bloomSeasons.length ? p.bloomSeasons.join(', ') : ''
                 ].filter(Boolean).join(' · ');
                 const extraLinks = [
-                  ...extractInlineLinks(p.advisor_description, p),
-                  ...extractInlineLinks(p.wildlife_detail ? p.wildlife_detail.host_insects : '', p)
+                  ...extractInlineLinks(p.advisor_description, p)
                 ].slice(0, 3);
-                const wildlifeShort = formatConciseWildlifeForReport(p);
-                const maintShort = formatConciseMaintenanceForReport(p);
 
                 return `
                 <article class="dr-plant-card">
@@ -12688,8 +12685,6 @@
                     </div>
                   </div>
                   ${p.advisor_description ? `<div class="dr-plant-desc">${formatPrelimDescriptionHtml(p.advisor_description, p)}</div>` : ''}
-                  ${wildlifeShort ? `<div class="dr-plant-subbullet"><strong>Wildlife:</strong> ${formatPrelimDescriptionHtml(wildlifeShort, p)}</div>` : ''}
-                  ${maintShort ? `<div class="dr-plant-subbullet"><strong>Care (${escapeHtml(p.maintenance_level)}):</strong> ${formatPrelimDescriptionHtml(maintShort, p)}</div>` : ''}
                   ${p.custom_notes && p.custom_notes.trim() ? `<div class="dr-custom-note"><strong>Advisor Note:</strong> ${formatPrelimDescriptionHtml(p.custom_notes.trim(), p)}</div>` : ''}
                   <div class="dr-card-links">
                     <a href="${escapeHtml(p.plant_url)}" target="_blank" rel="noopener noreferrer" class="dr-resource-btn">Grow Native! Plant Profile ↗</a>
@@ -13556,25 +13551,17 @@
         const specLines = wrapPdfPlainLines(specLine, colW - 12, bodyFontSz - 0.6, false, false).slice(0, 2);
 
         const descLines = wrapPdfRichMarkdownTokens(p.advisor_description || '', colW - 12, bodyFontSz, 'F1', 'F3', 'F2', p);
-        const wildlifeShort = formatConciseWildlifeForReport(p);
-        const wildlifeLines = wildlifeShort
-          ? wrapPdfRichMarkdownTokens(`Wildlife: ${wildlifeShort}`, colW - 12, bodyFontSz - 0.4, 'F1', 'F3', 'F2', p)
-          : [];
-        const maintShort = formatConciseMaintenanceForReport(p);
-        const maintLines = maintShort
-          ? wrapPdfRichMarkdownTokens(`Care (${p.maintenance_level}): ${maintShort}`, colW - 12, bodyFontSz - 0.4, 'F1', 'F3', 'F2', p)
-          : [];
         const noteLines = (p.custom_notes && p.custom_notes.trim())
           ? wrapPdfPlainLines(`Note: ${p.custom_notes.trim()}`, colW - 12, bodyFontSz - 0.4, true, false)
           : [];
 
-        const totalLinesCount = specLines.length + descLines.length + wildlifeLines.length + maintLines.length + noteLines.length;
+        const totalLinesCount = specLines.length + descLines.length + noteLines.length;
         const cardH = 26 + totalLinesCount * bodyLineH + 12;
-        return { p, specLines, descLines, wildlifeLines, maintLines, noteLines, cardH };
+        return { p, specLines, descLines, noteLines, cardH };
       };
 
       const renderCardAt = (cardSpec, x, topY, h) => {
-        const { p, specLines, descLines, wildlifeLines, maintLines, noteLines } = cardSpec;
+        const { p, specLines, descLines, noteLines } = cardSpec;
         const bottomY = topY - h;
         pdfFillRect(x, bottomY, colW, h, 0.996, 0.998, 0.992);
         pdfStrokeRect(x, bottomY, colW, h, 0.72, 0.79, 0.59, 0.65);
@@ -13617,16 +13604,6 @@
         for (const dl of descLines) {
           pdfRichLine(dl, innerX, cy, bodyFontSz);
           cy -= bodyLineH;
-        }
-
-        for (const wl of wildlifeLines) {
-          pdfRichLine(wl, innerX, cy, bodyFontSz - 0.4);
-          cy -= (bodyLineH - 0.4);
-        }
-
-        for (const ml of maintLines) {
-          pdfRichLine(ml, innerX, cy, bodyFontSz - 0.4);
-          cy -= (bodyLineH - 0.4);
         }
 
         for (const nl of noteLines) {
