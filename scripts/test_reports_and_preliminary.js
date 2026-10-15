@@ -31,22 +31,26 @@ for (const p of masterPlants) {
 assert(dupConsecutiveCount === 0, `Expected 0 duplicate consecutive citations in embeddedMasterPlants, found ${dupConsecutiveCount}`);
 console.log('✓ Test 1 Passed: embeddedMasterPlants has 0 duplicate consecutive citations across all', masterPlants.length, 'plants.');
 
-// 2. Load report_template.docx XML files
+// 2. Load report_template.docx XML and media files
 const templatePath = path.join(__dirname, '..', 'report_template.docx');
 const templateFiles = JSON.parse(execSync(`python3 -c '
-import zipfile, json
+import zipfile, json, base64
 z = zipfile.ZipFile(${JSON.stringify(templatePath)}, "r")
-out = {}
+out = {"text": {}, "binary": {}}
 for name in ["word/document.xml", "word/_rels/document.xml.rels", "word/footnotes.xml", "word/_rels/footnotes.xml.rels"]:
     if name in z.namelist():
-        out[name] = z.read(name).decode("utf-8")
+        out["text"][name] = z.read(name).decode("utf-8")
+for name in ["word/media/image1.jpg", "media/image3.jpg"]:
+    if name in z.namelist():
+        out["binary"][name] = base64.b64encode(z.read(name)).decode("ascii")
 print(json.dumps(out))
 '`, { maxBuffer: 50 * 1024 * 1024 }).toString());
 
 let capturedDocxZip = null;
 class MockJSZip {
   constructor(initialFiles = {}) {
-    this.files = { ...initialFiles };
+    this.files = { ...(initialFiles.text || initialFiles) };
+    this.binaryFiles = { ...(initialFiles.binary || {}) };
   }
   static async loadAsync() {
     return new MockJSZip(templateFiles);
@@ -55,6 +59,17 @@ class MockJSZip {
     if (content !== undefined) {
       this.files[name] = content;
       return this;
+    }
+    if (name in this.binaryFiles) {
+      const b64 = this.binaryFiles[name];
+      const buf = Buffer.from(b64, 'base64');
+      return {
+        async: async (fmt) => {
+          if (fmt === 'base64') return b64;
+          if (fmt === 'uint8array') return new Uint8Array(buf);
+          return buf;
+        }
+      };
     }
     if (!(name in this.files)) return null;
     const val = this.files[name];
@@ -144,6 +159,9 @@ eval(
   'global.buildHtmlReport = buildHtmlReport;\n' +
   'global.generatePreliminaryReportHtml = generatePreliminaryReportHtml;\n' +
   'global.openPreliminaryReport = openPreliminaryReport;\n' +
+  'global.ensureDeepRootsBrandAssets = ensureDeepRootsBrandAssets;\n' +
+  'global.generatePreliminaryReportPdfFile = generatePreliminaryReportPdfFile;\n' +
+  'global.sharePreliminaryReport = sharePreliminaryReport;\n' +
   'global.downloadDocxReport = downloadDocxReport;\n'
 );
 
@@ -263,11 +281,15 @@ const staleIndexDescription = 'STALE MASTER PLANT INDEX DESCRIPTION FROM OLD DOC
   assert(fnXml.includes('Accessed 15 Oct. 2026.'), 'word/footnotes.xml must format Accessed date matching template pattern');
   console.log(`✓ Test 5 Passed: DOCX report converts all inline source links to <w:hyperlink> + sequential footnotes 1..${docFnRefs.length} in word/footnotes.xml.`);
 
-  // Test 6: Preliminary Report (HTML / PDF Takeaway)
-  openPreliminaryReport();
+  // Test 6: Preliminary Report (Deep Roots KC Branded HTML)
+  await ensureDeepRootsBrandAssets();
+  assert(state.deepRootsBrandAssets && state.deepRootsBrandAssets.loaded, 'Deep Roots brand assets (logo + partner footer) should load from template');
+  await openPreliminaryReport();
   assert(mockElements.preliminaryReportModal.open === true, 'openPreliminaryReport should open #preliminaryReportModal');
   const prelimHtml = generatePreliminaryReportHtml(null, { standalone: true });
   assert(prelimHtml.includes('Preliminary Consultation Takeaway'), 'Preliminary report should include takeaway title');
+  assert(prelimHtml.includes('#9BBB59'), 'Preliminary report should use official Deep Roots olive-meadow #9BBB59 branding');
+  assert(prelimHtml.includes('I. NATURESCAPING'), 'Preliminary report should include Deep Roots NATURESCAPING section header');
   assert(prelimHtml.includes('Jane &amp; John Doe'), 'Preliminary report should include client name');
   assert(prelimHtml.includes('Area 1: Front Porch Sunny Border'), 'Preliminary report should include consulted area name');
   assert(prelimHtml.includes('South-facing foundation bed along front walkway.'), 'Preliminary report should include area strategy notes');
@@ -275,7 +297,30 @@ const staleIndexDescription = 'STALE MASTER PLANT INDEX DESCRIPTION FROM OLD DOC
   assert(prelimHtml.includes('Grow Native! Plant Profile ↗'), 'Preliminary report should include clickable plant profile links');
   assert(prelimHtml.includes('@page'), 'Preliminary report should include @page print rules for <= 3 page PDF output');
   assert(!prelimHtml.includes(staleIndexDescription), 'Preliminary report must use updated canonical advisor_description');
-  console.log('✓ Test 6 Passed: Preliminary Report takeaway renders consulted areas, plant cards with clickable links, and <= 3-page PDF print styling.');
+  console.log('✓ Test 6 Passed: Preliminary Report takeaway renders with Deep Roots KC branding, consulted areas, and clickable plant links.');
+
+  // Test 7: Preliminary Report PDF Conversion & Share Sheet (Send to Client)
+  let sharedPayload = null;
+  global.navigator = {
+    canShare: () => true,
+    share: async (payload) => {
+      sharedPayload = payload;
+    }
+  };
+  await sharePreliminaryReport();
+  assert(sharedPayload && Array.isArray(sharedPayload.files) && sharedPayload.files.length === 1, 'sharePreliminaryReport must pass a generated PDF file to navigator.share');
+  const sharedFile = sharedPayload.files[0];
+  assert(sharedFile.name.endsWith('.pdf'), `Shared file must be a .pdf, got ${sharedFile.name}`);
+  assert(sharedFile.type === 'application/pdf', `Shared file MIME type must be application/pdf, got ${sharedFile.type}`);
+
+  const pdfPack = generatePreliminaryReportPdfFile();
+  const pdfStr = Buffer.from(pdfPack.pdfBytes).toString('latin1');
+  assert(pdfStr.startsWith('%PDF-1.4'), 'Generated PDF must have valid %PDF-1.4 header');
+  assert(pdfStr.includes('/Subtype /Link'), 'Generated PDF must contain clickable /Subtype /Link URI annotations');
+  assert(pdfStr.includes('I. NATURESCAPING - PRELIMINARY PLANT RECOMMENDATIONS'), 'Generated PDF must contain Deep Roots section banner text');
+  fs.writeFileSync('/storage/emulated/10/Documents/Antigravity Apps/.gemini/antigravity/brain/7dcb635b-95b1-47f2-ab5a-910bb596b8d2/scratch/sample_preliminary_report.pdf', Buffer.from(pdfPack.pdfBytes));
+  console.log('✓ Test 7 Passed: Send to Client converts Preliminary Report to PDF with clickable links and opens share sheet.');
+
   console.log('\nALL REPORT & PRELIMINARY TAKEAWAY TESTS PASSED SUCCESSFULLY!');
 })().catch(err => {
   console.error('Test failed with error:', err);
