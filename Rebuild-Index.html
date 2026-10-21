@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rebuild index.html — Deep Roots Modular Builder</title>
+  <style>
+    :root {
+      --bg: #f4f7f4;
+      --surface: #ffffff;
+      --primary: #235c36;
+      --primary-dark: #184226;
+      --primary-light: #e8f3eb;
+      --text: #1c2921;
+      --muted: #5a6d60;
+      --border: #d5e0d7;
+      --success: #15803d;
+      --warn: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+    .card {
+      max-width: 780px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 18px;
+      margin-bottom: 20px;
+    }
+    .title-group h1 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .title-group p {
+      margin: 4px 0 0;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+    .status-banner {
+      padding: 16px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border: 1px solid var(--border);
+      background: #f8faf8;
+    }
+    .status-banner.success {
+      background: #ecfdf5;
+      border-color: #86efac;
+      color: #14532d;
+    }
+    .status-banner.warn {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #78350f;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    button, .btn-link {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    button.primary, .btn-link.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    button.primary:hover, .btn-link.primary:hover {
+      background: var(--primary-dark);
+    }
+    button:hover, .btn-link:hover {
+      border-color: var(--primary);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    th, td {
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: #f8faf8;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12.5px;
+    }
+    .footer-note {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="title-group">
+        <h1>⚡ Deep Roots Modular Index Builder</h1>
+        <p>Combines all 10 files in <code class="mono">code-sections/</code> into <code class="mono">index.html</code>, <code class="mono">test.html</code>, and <code class="mono">test/index.html</code></p>
+      </div>
+      <a href="./index.html" class="btn-link">🌱 Open Rebuilt App</a>
+    </div>
+
+    <div id="statusBanner" class="status-banner">
+      <div id="statusIcon">⏳</div>
+      <div id="statusText">Running automatic rebuild from <code class="mono">code-sections/</code>...</div>
+    </div>
+
+    <div class="btn-row">
+      <button id="rebuildNowBtn" class="primary" type="button">🔄 Rebuild Now</button>
+      <button id="pickFolderBtn" type="button" title="Select project folder to rebuild directly in the browser without Node.js">📂 Select Project Folder (Browser Mode)</button>
+      <label class="btn-link" style="cursor:pointer;">
+        📥 Load <code class="mono">code-sections/</code> &amp; Download
+        <input id="fallbackFolderInput" type="file" webkitdirectory multiple style="display:none;" />
+      </label>
+      <a href="./training.html" class="btn-link">🎓 Open Code Academy</a>
+    </div>
+
+    <div id="reportContainer" style="display:none;">
+      <h3 style="margin:0 0 8px;font-size:14px;color:var(--primary-dark);">Section Assembly Breakdown</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Section File</th>
+            <th>Lines</th>
+            <th>Size</th>
+          </tr>
+        </thead>
+        <tbody id="sectionsTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="footer-note">
+      <strong>Tip:</strong> While the Linux VM helper is running, simply opening or refreshing this file (or saving any file in <code class="mono">code-sections/</code>) automatically rebuilds <code class="mono">index.html</code> on disk. You can also double-click <code class="mono">Rebuild-Index.bat</code> (Windows), <code class="mono">Rebuild-Index.command</code> (Mac), or <code class="mono">Rebuild-Index.sh</code> (Linux).
+    </div>
+  </div>
+
+  <script>
+    const SECTION_FILES = [
+      "01-head-and-styles.html",
+      "02-main-layout-and-modals.html",
+      "03-embedded-plant-catalog-data.html",
+      "04-state-utilities-and-invasive-species.html",
+      "05-auth-rbac-and-text-scaling.html",
+      "06-consultations-and-invasive-ui.html",
+      "07-catalog-sync-and-admin-console.html",
+      "08-filtering-plant-cards-and-staging.html",
+      "09-reports-pdf-and-docx-generators.html",
+      "10-events-and-garden-planner.html"
+    ];
+
+    const statusBanner = document.getElementById("statusBanner");
+    const statusIcon = document.getElementById("statusIcon");
+    const statusText = document.getElementById("statusText");
+    const reportContainer = document.getElementById("reportContainer");
+    const sectionsTableBody = document.getElementById("sectionsTableBody");
+
+    function stripSectionHeader(raw) {
+      return raw.replace(/^<!--[\s\S]*?============================================================================ -->\r?\n/, "");
+    }
+
+    function setStatus(type, icon, html) {
+      statusBanner.className = "status-banner " + (type || "");
+      statusIcon.textContent = icon;
+      statusText.innerHTML = html;
+    }
+
+    function renderReport(sections, totalLines, totalBytes) {
+      reportContainer.style.display = "block";
+      sectionsTableBody.innerHTML = sections.map((s, idx) => `
+        <tr>
+          <td class="mono">${String(idx + 1).padStart(2, "0")}</td>
+          <td class="mono">${s.file}</td>
+          <td class="mono">${Number(s.lines).toLocaleString()}</td>
+          <td class="mono">${(s.bytes / 1024).toFixed(1)} KB</td>
+        </tr>
+      `).join("") + `
+        <tr style="font-weight:700;background:#f0f7f2;">
+          <td></td>
+          <td>Total Rebuilt Output (index.html)</td>
+          <td class="mono">${Number(totalLines).toLocaleString()}</td>
+          <td class="mono">${(totalBytes / 1024).toFixed(1)} KB</td>
+        </tr>
+      `;
+    }
+
+    // 1. Try instant local daemon trigger on 127.0.0.1:18514
+    async function tryLocalDaemonRebuild() {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 1800);
+        const res = await fetch("http://127.0.0.1:18514/rebuild", {
+          method: "POST",
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        if (data && data.ok) {
+          const timeStr = new Date(data.timestamp).toLocaleTimeString();
+          setStatus(
+            "success",
+            "✅",
+            `<strong>Rebuilt automatically on disk at ${timeStr}!</strong><br>` +
+            `Updated <code class="mono">${data.targets.join(", ")}</code> (${data.totalLines.toLocaleString()} lines, ${(data.totalBytes / 1024).toFixed(1)} KB in ${data.elapsedMs}ms).`
+          );
+          renderReport(data.sections, data.totalLines, data.totalBytes);
+          return true;
+        }
+      } catch (e) {
+        return false;
+      }
+      return false;
+    }
+
+    // 2. Browser File System Access API (in-place write)
+    async function rebuildWithDirectoryPicker() {
+      if (!window.showDirectoryPicker) {
+        alert("Your browser does not support direct folder writing. Please use the 'Load code-sections/ & Download' button instead.");
+        return;
+      }
+      try {
+        const dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+        // Check if user picked the root project directory or code-sections itself
+        let sectionsDirHandle = dirHandle;
+        let rootDirHandle = null;
+        try {
+          sectionsDirHandle = await dirHandle.getDirectoryHandle("code-sections");
+          rootDirHandle = dirHandle;
+        } catch (_) {
+          // User picked code-sections directly
+          sectionsDirHandle = dirHandle;
+        }
+
+        const parts = [];
+        const sectionsReport = [];
+        for (const fileName of SECTION_FILES) {
+          const fileHandle = await sectionsDirHandle.getFileHandle(fileName);
+          const file = await fileHandle.getFile();
+          const raw = await file.text();
+          const stripped = stripSectionHeader(raw);
+          parts.push(stripped);
+          sectionsReport.push({
+            file: fileName,
+            lines: stripped.split("\n").length,
+            bytes: new Blob([stripped]).size
+          });
+        }
+
+        const combined = parts.join("\n");
+        const totalLines = combined.split("\n").length;
+        const totalBytes = new Blob([combined]).size;
+
+        if (rootDirHandle) {
+          for (const targetName of ["index.html", "test.html"]) {
+            const outHandle = await rootDirHandle.getFileHandle(targetName, { create: true });
+            const writable = await outHandle.createWritable();
+            await writable.write(combined);
+            await writable.close();
+          }
+          try {
+            const testDir = await rootDirHandle.getDirectoryHandle("test");
+            const testIdxHandle = await testDir.getFileHandle("index.html", { create: true });
+            const writable = await testIdxHandle.createWritable();
+            await writable.write(combined);
+            await writable.close();
+          } catch (_) {}
+
+          setStatus(
+            "success",
+            "✅",
+            `<strong>Rebuilt directly to project folder!</strong><br>` +
+            `Wrote <code class="mono">index.html</code>, <code class="mono">test.html</code>, and <code class="mono">test/index.html</code> (${totalLines.toLocaleString()} lines).`
+          );
+        } else {
+          downloadCombinedIndex(combined);
+          setStatus(
+            "success",
+            "✅",
+            `<strong>Assembled all 10 sections (${totalLines.toLocaleString()} lines) and started download of <code class="mono">index.html</code>!</strong>`
+          );
+        }
+        renderReport(sectionsReport, totalLines, totalBytes);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setStatus("warn", "⚠️", `Could not rebuild via folder picker: ${err.message}`);
+        }
+      }
+    }
+
+    function downloadCombinedIndex(combined) {
+      const blob = new Blob([combined], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "index.html";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+
+    // 3. Universal <input type="file" webkitdirectory> fallback
+    document.getElementById("fallbackFolderInput").addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      const fileMap = new Map();
+      for (const f of files) {
+        fileMap.set(f.name, f);
+      }
+      const parts = [];
+      const sectionsReport = [];
+      for (const name of SECTION_FILES) {
+        const f = fileMap.get(name);
+        if (!f) {
+          setStatus("warn", "⚠️", `Missing <code class="mono">${name}</code> in selected folder. Please select the <code class="mono">code-sections</code> folder.`);
+          return;
+        }
+        const raw = await f.text();
+        const stripped = stripSectionHeader(raw);
+        parts.push(stripped);
+        sectionsReport.push({
+          file: name,
+          lines: stripped.split("\n").length,
+          bytes: new Blob([stripped]).size
+        });
+      }
+      const combined = parts.join("\n");
+      const totalLines = combined.split("\n").length;
+      const totalBytes = new Blob([combined]).size;
+      downloadCombinedIndex(combined);
+      setStatus(
+        "success",
+        "✅",
+        `<strong>Rebuilt <code class="mono">index.html</code> (${totalLines.toLocaleString()} lines) and downloaded!</strong>`
+      );
+      renderReport(sectionsReport, totalLines, totalBytes);
+    });
+
+    document.getElementById("rebuildNowBtn").addEventListener("click", async () => {
+      setStatus("", "⏳", "Rebuilding <code class='mono'>index.html</code>...");
+      const ok = await tryLocalDaemonRebuild();
+      if (!ok) {
+        await rebuildWithDirectoryPicker();
+      }
+    });
+
+    document.getElementById("pickFolderBtn").addEventListener("click", rebuildWithDirectoryPicker);
+
+    // Run automatically when double-clicked / opened!
+    (async () => {
+      const ok = await tryLocalDaemonRebuild();
+      if (!ok) {
+        setStatus(
+          "warn",
+          "📂",
+          `<strong>Ready to rebuild in Browser Mode:</strong> Click <strong>"Select Project Folder (Browser Mode)"</strong> below and select the <code class="mono">Native Plant Database</code> folder to overwrite <code class="mono">index.html</code> in place.`
+        );
+      }
+    })();
+  </script>
+</body>
+</html>
