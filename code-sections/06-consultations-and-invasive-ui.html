@@ -1,0 +1,1579 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/06-consultations-and-invasive-ui.html
+  Title: Section 6: Multi-Consultation Manager, Invasive Catalog UI & Cloud Report Sync
+  Source Lines in index.html: Lines 6874 – 8442 (1569 lines)
+  Overview: Creating/switching/duplicating client consultations, Invasive Species catalog mode & photo lightbox, Garden Areas manager, and syncing consultation reports to Cloud Firestore.
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+    // ==================== User Consultation Reports & Switching System ====================
+    function formatTimeAgo(timestamp) {
+      if (!timestamp) return 'recently';
+      const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+      if (diffSec < 10) return 'just now';
+      if (diffSec < 60) return `${diffSec}s ago`;
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHours = Math.floor(diffMin / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    }
+
+    function getActiveUsername() {
+      return state.currentUser ? state.currentUser.username : 'guest';
+    }
+
+    function persistConsultations() {
+      const username = getActiveUsername();
+      localStorage.setItem(`dr_reports_${username}`, JSON.stringify(state.consultations));
+      updateConsultationCounts();
+    }
+
+    function updateConsultationCounts() {
+      const count = (state.consultations || []).length;
+      const drawerBadge = document.getElementById('consultationCountBadge');
+      if (drawerBadge) drawerBadge.textContent = count;
+      const profileBadge = document.getElementById('profileConsultationsCount');
+      if (profileBadge) profileBadge.textContent = count;
+    }
+
+    function parseFirestoreReportDoc(doc, fallbackUsername = '') {
+      if (!doc || !doc.fields) return null;
+      const f = doc.fields;
+      const docName = doc.name || '';
+      const rawId = f.id?.stringValue || docName.split('/').pop().replace(/^_report_[^_]+_/, '') || `rep-${Date.now()}`;
+      
+      const clientName = f.client_name?.stringValue || f.project_name?.stringValue || 'Native Consultation';
+      const clientAddress = f.client_address?.stringValue || '';
+      const consultationDate = f.consultation_date?.stringValue || '';
+      const advisorName = f.advisor_name?.stringValue || '';
+      const advisorNotes = f.site_summary?.stringValue || '';
+      const lastModified = parseInt(f.last_modified?.integerValue || Date.now(), 10);
+      const uName = f.username?.stringValue || fallbackUsername;
+
+      const staged = [];
+      const vals = f.staged_recommendations?.arrayValue?.values || [];
+      for (const item of vals) {
+        const sf = item.mapValue?.fields || {};
+        const plantId = sf.plant_id?.stringValue || '';
+        const plantCommon = sf.plant_common?.stringValue || '';
+        const plantSci = sf.plant_scientific?.stringValue || '';
+        const qty = parseInt(sf.recommended_count?.integerValue || '1', 10);
+        const notes = sf.notes?.stringValue || '';
+        const targetArea = sf.target_area?.stringValue || sf.layer?.stringValue || 'Area 1: Front Porch';
+
+        const catalogMatch = state.allPlants.find(p => p.id === plantId || p.scientific_name === plantSci);
+
+        staged.push({
+          id: plantId || (catalogMatch ? catalogMatch.id : plantSci),
+          common_name: plantCommon || (catalogMatch ? catalogMatch.common_names?.[0] : plantSci),
+          scientific_name: plantSci || (catalogMatch ? catalogMatch.scientific_name : ''),
+          image_url: catalogMatch?.images?.[0]?.url || '',
+          plant_url: catalogMatch ? getPlantUrl(catalogMatch) : `https://grownative.org/native_plants/${(plantCommon || plantSci).toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`,
+          advisor_description: catalogMatch ? getPlantDesc(catalogMatch) : '',
+          quantity: qty,
+          custom_notes: notes,
+          sun: catalogMatch ? (catalogMatch.light_requirements || []).join(', ') : '',
+          moisture: catalogMatch ? (catalogMatch.moisture_requirements || []).join(', ') : '',
+          height: catalogMatch ? getPlantHeight(catalogMatch) : '',
+          layer: catalogMatch ? getPlantLayer(catalogMatch) : 'Landscape Bed',
+          target_area: targetArea,
+          sociability: catalogMatch ? getPlantSociability(catalogMatch) : '',
+          environment: catalogMatch?.native_environment || ''
+        });
+      }
+
+      const rawAreas = f.garden_areas?.arrayValue?.values || [];
+      const parsedAreas = rawAreas.map(v => v.stringValue).filter(Boolean);
+      const gardenAreas = parsedAreas.length > 0
+        ? parsedAreas
+        : ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+
+      // Parse staged invasives if present
+      const stagedInvs = [];
+      const invVals = f.staged_invasives?.arrayValue?.values || [];
+      for (const item of invVals) {
+        const inf = item.mapValue?.fields || {};
+        stagedInvs.push({
+          id: inf.id?.stringValue || '',
+          name: inf.name?.stringValue || '',
+          scientific: inf.scientific?.stringValue || '',
+          location_notes: inf.location_notes?.stringValue || inf.notes?.stringValue || '',
+          status: inf.status?.stringValue || 'Confirmed on site'
+        });
+      }
+
+      // Parse report options if present
+      const reportOptions = {};
+      const rof = f.report_options?.mapValue?.fields || {};
+      if (rof.invasive_present !== undefined) reportOptions.invasivePresent = rof.invasive_present.booleanValue;
+      if (rof.bird_nest_box !== undefined) reportOptions.birdNestBox = rof.bird_nest_box.booleanValue;
+      if (rof.bird_bath !== undefined) reportOptions.birdBath = rof.bird_bath.booleanValue;
+      if (rof.bat_box !== undefined) reportOptions.batBox = rof.bat_box.booleanValue;
+      if (rof.bee_habitat !== undefined) reportOptions.beeHabitat = rof.bee_habitat.booleanValue;
+      if (rof.johnson_county !== undefined) reportOptions.johnsonCounty = rof.johnson_county.booleanValue;
+      if (rof.wyandotte_county !== undefined) reportOptions.wyandotteCounty = rof.wyandotte_county.booleanValue;
+      if (rof.rainwater_harvesting !== undefined) reportOptions.rainwaterHarvesting = rof.rainwater_harvesting.booleanValue;
+
+      return {
+        id: rawId,
+        username: uName,
+        clientName,
+        clientAddress,
+        consultationDate,
+        advisorName,
+        advisorNotes,
+        gardenAreas,
+        stagedPlants: staged,
+        stagedInvasives: stagedInvs,
+        reportOptions: Object.keys(reportOptions).length > 0 ? reportOptions : {
+          invasivePresent: stagedInvs.length > 0,
+          birdNestBox: true,
+          birdBath: true,
+          batBox: false,
+          beeHabitat: true,
+          johnsonCounty: false,
+          wyandotteCounty: false,
+          rainwaterHarvesting: true
+        },
+        createdAt: lastModified,
+        lastModified
+      };
+    }
+
+    async function fetchRemoteConsultations(username) {
+      if (!username || username === 'guest') return [];
+      const reports = [];
+      const seenIds = new Set();
+
+      // Primary: /users/{username}/reports
+      try {
+        const url = `${getFirestoreBaseUrl()}/users/${username}/reports?pageSize=100`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const r = parseFirestoreReportDoc(doc, username);
+            if (r && !seenIds.has(r.id)) {
+              seenIds.add(r.id);
+              reports.push(r);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Fetch user reports notice:", e);
+      }
+
+      // Fallback: /plants collection looking for documents starting with _report_{username}_
+      try {
+        const url = `${getFirestoreBaseUrl()}/plants?pageSize=300`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const prefix = `_report_${username}_`;
+          for (const doc of data.documents || []) {
+            const docId = doc.name ? doc.name.split('/').pop() : '';
+            if (docId.startsWith(prefix)) {
+              const r = parseFirestoreReportDoc(doc, username);
+              if (r && !seenIds.has(r.id)) {
+                seenIds.add(r.id);
+                reports.push(r);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Fetch fallback reports notice:", e);
+      }
+
+      return reports;
+    }
+
+    async function initConsultations() {
+      const username = getActiveUsername();
+      let rawLocal = [];
+      try {
+        rawLocal = JSON.parse(localStorage.getItem(`dr_reports_${username}`) || '[]');
+      } catch (e) {
+        rawLocal = [];
+      }
+
+      // Filter and normalize local consultations
+      state.consultations = Array.isArray(rawLocal) ? rawLocal.filter(c => c && c.id) : [];
+
+      // If user has no consultations, check if there's any active draft to adopt
+      if (state.consultations.length === 0) {
+        const draftPlants = JSON.parse(localStorage.getItem('dr_staged_plants') || '[]');
+        const draftMeta = JSON.parse(localStorage.getItem('dr_client_meta') || '{}');
+        const hasExistingData = draftPlants.length > 0 || (draftMeta.name && draftMeta.name.trim().length > 0);
+
+        const newId = `rep-${Date.now()}`;
+        const initial = {
+          id: newId,
+          username: username,
+          clientName: draftMeta.name || (state.currentUser ? `${state.currentUser.firstName || state.currentUser.name}'s Consultation` : 'Draft Consultation'),
+          clientAddress: draftMeta.address || '',
+          consultationDate: draftMeta.date || new Date().toISOString().split('T')[0],
+          advisorName: draftMeta.advisor || (state.currentUser ? state.currentUser.name : ''),
+          advisorNotes: draftMeta.notes || '',
+          gardenAreas: ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"],
+          stagedPlants: hasExistingData ? draftPlants : [],
+          createdAt: Date.now(),
+          lastModified: Date.now()
+        };
+        state.consultations = [initial];
+        persistConsultations();
+      }
+
+      // Restore active consultation ID
+      const savedActiveId = localStorage.getItem(`dr_active_consultation_id_${username}`);
+      const activeMatch = state.consultations.find(c => c.id === savedActiveId);
+      const targetId = activeMatch ? activeMatch.id : state.consultations[0].id;
+
+      switchActiveConsultation(targetId, true);
+      renderConsultationSwitcher();
+      updateConsultationCounts();
+
+      // Asynchronously fetch from Cloud Firestore in background if logged in
+      if (state.currentUser) {
+        fetchRemoteConsultations(username).then(remoteReports => {
+          if (remoteReports && remoteReports.length > 0) {
+            let changed = false;
+            const currentMap = new Map();
+            for (const c of state.consultations) currentMap.set(c.id, c);
+
+            for (const rem of remoteReports) {
+              const loc = currentMap.get(rem.id);
+              if (!loc) {
+                currentMap.set(rem.id, rem);
+                changed = true;
+              } else if ((rem.lastModified || 0) > (loc.lastModified || 0)) {
+                currentMap.set(rem.id, rem);
+                changed = true;
+              }
+            }
+
+            if (changed) {
+              state.consultations = Array.from(currentMap.values()).sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+              persistConsultations();
+              renderConsultationSwitcher();
+              // If active consultation was updated remotely, reload its contents
+              const currentActive = state.consultations.find(c => c.id === state.activeConsultationId);
+              if (currentActive) {
+                switchActiveConsultation(currentActive.id, true);
+              }
+            }
+          }
+        }).catch(e => console.warn("Background consultation sync notice:", e));
+      }
+    }
+
+    function saveActiveConsultation(syncToCloud = false) {
+      if (!state.activeConsultationId || !state.consultations) return;
+      const idx = state.consultations.findIndex(c => c.id === state.activeConsultationId);
+      if (idx < 0) return;
+
+      const active = state.consultations[idx];
+      active.clientName = state.clientMeta.name || '';
+      active.clientAddress = state.clientMeta.address || '';
+      active.consultationDate = state.clientMeta.date || '';
+      active.advisorName = state.clientMeta.advisor || (state.currentUser ? state.currentUser.name : '');
+      active.advisorNotes = state.clientMeta.notes || '';
+      active.gardenAreas = JSON.parse(JSON.stringify(state.gardenAreas || ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"]));
+      active.stagedPlants = JSON.parse(JSON.stringify(state.stagedPlants || []));
+      active.plannerWorkflow = JSON.parse(JSON.stringify(state.plannerWorkflow || { status: 'setup_areas', currentStepAreaIdx: 0 }));
+      active.gardenAreaProfiles = JSON.parse(JSON.stringify(state.gardenAreaProfiles || []));
+      active.lastModified = Date.now();
+
+      persistConsultations();
+      updateConsultationOption(active);
+
+      if (syncToCloud && state.currentUser) {
+        saveCurrentReportToCloud();
+      }
+    }
+
+    function switchActiveConsultation(targetId, skipSaveCurrent = false) {
+      if (!skipSaveCurrent && state.activeConsultationId && state.activeConsultationId !== targetId) {
+        saveActiveConsultation(false);
+      }
+
+      let consultation = state.consultations.find(c => c.id === targetId);
+      if (!consultation) {
+        if (state.consultations.length > 0) {
+          consultation = state.consultations[0];
+          targetId = consultation.id;
+        } else {
+          createNewConsultation({ clientName: 'New Consultation' });
+          return;
+        }
+      }
+
+      state.activeConsultationId = targetId;
+      const username = getActiveUsername();
+      localStorage.setItem(`dr_active_consultation_id_${username}`, targetId);
+
+      state.clientMeta = {
+        name: consultation.clientName || '',
+        address: consultation.clientAddress || '',
+        date: consultation.consultationDate || '',
+        advisor: consultation.advisorName || (state.currentUser ? state.currentUser.name : ''),
+        notes: consultation.advisorNotes || ''
+      };
+      localStorage.setItem('dr_client_meta', JSON.stringify(state.clientMeta));
+
+      state.gardenAreas = (consultation.gardenAreas && consultation.gardenAreas.length > 0)
+        ? JSON.parse(JSON.stringify(consultation.gardenAreas))
+        : ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+      localStorage.setItem('dr_garden_areas', JSON.stringify(state.gardenAreas));
+
+      state.stagedPlants = JSON.parse(JSON.stringify(consultation.stagedPlants || []));
+      localStorage.setItem('dr_staged_plants', JSON.stringify(state.stagedPlants));
+
+      state.stagedInvasives = JSON.parse(JSON.stringify(consultation.stagedInvasives || []));
+      localStorage.setItem('dr_staged_invasives', JSON.stringify(state.stagedInvasives));
+
+      state.reportOptions = JSON.parse(JSON.stringify(consultation.reportOptions || {"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true}));
+      localStorage.setItem('dr_report_options', JSON.stringify(state.reportOptions));
+
+      if (consultation.plannerWorkflow) {
+        state.plannerWorkflow = JSON.parse(JSON.stringify(consultation.plannerWorkflow));
+      } else {
+        const hasStaged = (consultation.stagedPlants || []).length > 0;
+        state.plannerWorkflow = { status: hasStaged ? 'completed' : 'setup_areas', currentStepAreaIdx: 0 };
+      }
+      if (consultation.gardenAreaProfiles && consultation.gardenAreaProfiles.length > 0) {
+        state.gardenAreaProfiles = JSON.parse(JSON.stringify(consultation.gardenAreaProfiles));
+      }
+
+      // Update Form Inputs in Drawer
+      const nameInput = document.getElementById('clientNameInput');
+      if (nameInput) nameInput.value = state.clientMeta.name;
+      const addrInput = document.getElementById('projectAddressInput');
+      if (addrInput) addrInput.value = state.clientMeta.address;
+      const dateInput = document.getElementById('consultDateInput');
+      if (dateInput) dateInput.value = state.clientMeta.date;
+      const advInput = document.getElementById('advisorNameInput');
+      if (advInput) advInput.value = state.clientMeta.advisor;
+      const notesInput = document.getElementById('advisorNotesInput');
+      if (notesInput) notesInput.value = state.clientMeta.notes;
+
+      renderGardenAreasManager();
+      renderStagedInvasives();
+      renderStaging();
+      syncReportOptionsUI();
+      if (state.catalogMode === 'invasive') {
+        renderInvasiveGrid();
+      } else {
+        renderGrid();
+      }
+      renderConsultationSwitcher();
+
+      const modal = document.getElementById('consultationsModal');
+      if (modal && modal.open) {
+        renderConsultationsModalList(document.getElementById('consultationSearchInput')?.value || '');
+      }
+    }
+
+    function updateConsultationOption(consultation) {
+      const select = document.getElementById('consultationSelect');
+      if (!select) return;
+      const opt = select.querySelector(`option[value="${consultation.id}"]`);
+      if (opt) {
+        const name = consultation.clientName || 'Untitled Client';
+        const dateStr = consultation.consultationDate ? ` (${consultation.consultationDate})` : '';
+        const plantCount = `${(consultation.stagedPlants || []).length} plants`;
+        opt.textContent = `${name}${dateStr} · ${plantCount}`;
+      }
+    }
+
+    function createNewConsultation(options = {}) {
+      if (state.activeConsultationId) {
+        saveActiveConsultation(false);
+      }
+
+      const username = getActiveUsername();
+      const newId = `rep-${Date.now()}`;
+      const today = new Date().toISOString().split('T')[0];
+      const advisor = state.currentUser ? state.currentUser.name : '';
+
+      const defaultAreas = [
+        "Area 1: Front Porch",
+        "Area 2: Front Sidewalk/Mailbox",
+        "Area 3: Backyard Shade Garden"
+      ];
+      const newConsultation = {
+        id: newId,
+        username: username,
+        clientName: options.clientName || '',
+        clientAddress: options.clientAddress || '',
+        consultationDate: options.consultationDate || today,
+        advisorName: options.advisorName || advisor,
+        advisorNotes: options.advisorNotes || '',
+        gardenAreas: options.gardenAreas ? JSON.parse(JSON.stringify(options.gardenAreas)) : defaultAreas,
+        gardenAreaProfiles: [],
+        plannerWorkflow: { status: 'setup_areas', currentStepAreaIdx: 0 },
+        stagedPlants: [],
+        stagedInvasives: [],
+        reportOptions: {"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true},
+        createdAt: Date.now(),
+        lastModified: Date.now()
+      };
+
+      state.consultations.unshift(newConsultation);
+      persistConsultations();
+      switchActiveConsultation(newId, true);
+
+      // Open drawer and focus on client name input
+      document.getElementById('stagingDrawer')?.classList.add('open');
+      document.getElementById('drawerOverlay')?.classList.add('open');
+      const nameInput = document.getElementById('clientNameInput');
+      if (nameInput) {
+        setTimeout(() => {
+          nameInput.focus();
+          nameInput.select();
+        }, 150);
+      }
+
+      showToast("Started new consultation report.");
+    }
+
+    
+    // ==================== Garden Areas & Planting Zones Manager ====================
+    
+    // ==================== Invasive Species & Stewardship Management ====================
+    function setCatalogMode(mode) {
+      state.catalogMode = mode;
+      const nativeBtns = [document.getElementById('catalogNativeBtn'), document.getElementById('mobileCatalogNativeBtn')];
+      const invBtns = [document.getElementById('catalogInvasiveBtn'), document.getElementById('mobileCatalogInvasiveBtn')];
+      const topFilters = document.querySelector('.filter-chips-row');
+      const openSidebarBtn = document.getElementById('openSidebarBtn');
+      const sortControls = document.querySelector('.controls-actions');
+      const activeFiltersBar = document.getElementById('activeFiltersBar');
+
+      if (mode === 'invasive') {
+        nativeBtns.forEach(b => b?.classList.remove('active'));
+        invBtns.forEach(b => b?.classList.add('active', 'is-invasive'));
+        if (topFilters) topFilters.style.display = 'none';
+        if (openSidebarBtn) openSidebarBtn.style.display = 'none';
+        if (sortControls) sortControls.style.display = 'none';
+        if (activeFiltersBar) activeFiltersBar.style.display = 'none';
+        renderInvasiveGrid();
+        showToast('Viewing Kansas City High-Threat Invasive Species Guide');
+      } else {
+        invBtns.forEach(b => b?.classList.remove('active', 'is-invasive'));
+        nativeBtns.forEach(b => b?.classList.add('active'));
+        if (topFilters) topFilters.style.display = 'flex';
+        if (openSidebarBtn) openSidebarBtn.style.display = '';
+        if (sortControls) sortControls.style.display = 'flex';
+        applyFilters();
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+    window.setCatalogMode = setCatalogMode;
+
+    function renderInvasiveGrid(searchTerm) {
+      const grid = document.getElementById('plantsGrid');
+      const empty = document.getElementById('emptyState');
+      const countEl = document.getElementById('resultsCount');
+      const activeFiltersBar = document.getElementById('activeFiltersBar');
+      if (!grid) return;
+
+      if (activeFiltersBar) activeFiltersBar.style.display = 'none';
+
+      let invasives = state.invasivePlants || [];
+      const query = (searchTerm !== undefined ? searchTerm : (state.filters.search || '')).toLowerCase().trim();
+      if (query) {
+        invasives = invasives.filter(p => 
+          (p.common_name || '').toLowerCase().includes(query) ||
+          (p.scientific_name || '').toLowerCase().includes(query) ||
+          (p.identification || '').toLowerCase().includes(query) ||
+          (p.removal_tips || '').toLowerCase().includes(query) ||
+          (p.threat || '').toLowerCase().includes(query)
+        );
+      }
+
+      if (countEl) countEl.innerHTML = `Showing <strong>${invasives.length}</strong> Kansas City High-Threat Invasive Species`;
+      const mobileFilteredCount = document.getElementById('mobileFilteredCount');
+      if (mobileFilteredCount) mobileFilteredCount.textContent = invasives.length;
+
+      if (invasives.length === 0) {
+        grid.style.display = 'none';
+        if (empty) {
+          empty.style.display = 'block';
+          const h3 = empty.querySelector('h3');
+          if (h3) h3.textContent = 'No Kansas City invasive species match your search';
+        }
+        return;
+      }
+
+      grid.style.display = 'grid';
+      if (empty) {
+        empty.style.display = 'none';
+        const h3 = empty.querySelector('h3');
+        if (h3) h3.textContent = 'No Kansas City native plants match your filters';
+      }
+      grid.innerHTML = '';
+
+      // Render contractors banner at top of invasive grid
+      const banner = document.createElement('div');
+      banner.className = 'invasive-contractors-banner';
+      banner.style.cssText = 'grid-column: 1 / -1; background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-md); padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; box-shadow: var(--shadow-sm);';
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">🚜</span>
+          <div>
+            <div style="font-weight: 700; color: #991b1b; font-size: 14px;">Kansas City Invasive Removal &amp; Natural Resource Contractors</div>
+            <div style="font-size: 12px; color: #7f1d1d;">Need professional removal or forestry mulching? Refer clients to vetted local ecological contractors from our official report template.</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenContractorsBanner" style="border-color: #f87171; color: #991b1b; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; background: #fff;">
+          <i data-lucide="phone-call" style="width: 14px; height: 14px;"></i>
+          <span>View Removal Professionals (10)</span>
+        </button>
+      `;
+      banner.querySelector('#btnOpenContractorsBanner')?.addEventListener('click', () => {
+        openContractorsModal();
+      });
+      grid.appendChild(banner);
+
+      invasives.forEach(plant => {
+        const isStaged = (state.stagedInvasives || []).some(inv => inv.id === plant.id || inv.scientific_name === plant.scientific_name);
+        const images = (plant.images && plant.images.length > 0) ? plant.images : [{ url: plant.image_url, label: 'Overview', caption: plant.common_name }];
+        const card = document.createElement('div');
+        card.className = 'plant-card invasive-card';
+        card.innerHTML = `
+          <div class="plant-card-inner">
+            <div class="card-media" style="position:relative;cursor:pointer;" title="Click to view full photo identification gallery">
+              <img src="${images[0].url}" alt="${escapeHtml(plant.common_name)}" class="invasive-main-img" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&w=600&q=80';">
+              <div class="card-badges">
+                <span class="badge-invasive">⚠️ High Threat</span>
+                <span class="badge-img-label" style="background:rgba(0,0,0,0.72);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;backdrop-filter:blur(4px);">${escapeHtml(images[0].label || 'Overview')}</span>
+              </div>
+              <span class="badge-layer" style="${images.length > 1 ? 'top:10px;right:10px;bottom:auto;' : ''}background:#b91c1c;color:#fff;">${escapeHtml(plant.plant_type)}</span>
+
+              <span class="badge-img-attr" style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.72);color:rgba(255,255,255,0.9);font-size:9px;padding:2px 6px;border-radius:4px;backdrop-filter:blur(4px);max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:2;" title="Photo: ${escapeHtml(images[0].author || 'Conservation Source')} (${escapeHtml(images[0].license || 'CC')})">
+                📷 ${escapeHtml(images[0].author || 'Conservation Source')} (${escapeHtml(images[0].license || 'CC')})
+              </span>
+
+              ${images.length > 1 ? `
+              <div class="invasive-thumb-strip" style="position:absolute;bottom:6px;right:6px;display:flex;gap:4px;background:rgba(0,0,0,0.78);backdrop-filter:blur(4px);padding:3px 5px;border-radius:6px;z-index:2;">
+                ${images.map((img, iIdx) => `
+                  <button type="button" class="invasive-thumb-btn ${iIdx === 0 ? 'active' : ''}" data-idx="${iIdx}" aria-label="Switch preview to photo ${iIdx + 1}: ${escapeHtml(img.label)}" title="${escapeHtml(img.label)}: ${escapeHtml(img.caption)}" style="width:26px;height:26px;border-radius:4px;overflow:hidden;border:1.5px solid ${iIdx === 0 ? '#ef4444' : 'rgba(255,255,255,0.45)'};padding:0;background:#000;cursor:pointer;display:block;">
+                    <img src="${img.url}" alt="${escapeHtml(img.label)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&w=100&q=80';">
+                  </button>
+                `).join('')}
+              </div>
+              ` : ''}
+            </div>
+            <div class="card-body">
+              <div class="card-title-group">
+                <h3 class="card-common-name">${escapeHtml(plant.common_name)}</h3>
+                <p class="card-sci-name" style="font-style:italic;color:#dc2626;">${escapeHtml(plant.scientific_name)}</p>
+              </div>
+
+              <div class="invasive-box invasive-id-box">
+                <strong><i data-lucide="eye" style="width:12px;height:12px;vertical-align:-1px;"></i> How to Identify:</strong><br>
+                ${escapeHtml(plant.identification)}
+              </div>
+
+              <div class="invasive-box invasive-removal-box">
+                <strong><i data-lucide="shield-alert" style="width:12px;height:12px;vertical-align:-1px;"></i> Removal Tips:</strong><br>
+                ${escapeHtml(plant.removal_tips)}
+                <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                  <a href="${plant.control_url || plant.ref_url}" target="_blank" rel="noopener noreferrer" style="color: #b91c1c; text-decoration: underline; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-lucide="shield" style="width: 11px; height: 11px;"></i>
+                    <span>${escapeHtml(plant.control_name || 'Official Control Guide')} &rarr;</span>
+                  </a>
+                  <button type="button" class="hire-pro-btn" style="background: none; border: none; padding: 0; color: #b91c1c; text-decoration: underline; font-weight: 600; cursor: pointer; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; text-align: left;">
+                    <i data-lucide="wrench" style="width: 11px; height: 11px;"></i>
+                    <span>Need professional removal? View vetted KC contractors</span>
+                  </button>
+                </div>
+              </div>
+
+              <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">
+                <em>Impact:</em> ${escapeHtml(plant.threat)}
+              </p>
+            </div>
+            <div class="card-footer" style="display:flex;gap:6px;">
+              <a href="${plant.info_url || plant.ref_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:11px;" title="View official field guide identification profile">
+                <i data-lucide="book-open" style="width:12px;height:12px;"></i>
+                <span>${escapeHtml(plant.ref_name || 'Field Guide')}</span>
+              </a>
+              <a href="${plant.control_url || plant.ref_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#991b1b;border-color:#fecdd3;" title="View official eradication and management protocol">
+                <i data-lucide="shield-alert" style="width:12px;height:12px;"></i>
+                <span>Control</span>
+              </a>
+              ${state.currentUser ? `
+              <button class="btn btn-primary btn-sm add-invasive-btn" style="flex:1.4;background:${isStaged ? '#15803d' : '#b91c1c'};border-color:${isStaged ? '#15803d' : '#b91c1c'};font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:4px;">
+                <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width:13px;height:13px;"></i>
+                <span>${isStaged ? 'In Report' : 'Add to Report'}</span>
+              </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+
+        const mainImg = card.querySelector('.invasive-main-img');
+        const badgeLabel = card.querySelector('.badge-img-label');
+        const thumbBtns = card.querySelectorAll('.invasive-thumb-btn');
+
+        thumbBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(btn.getAttribute('data-idx'), 10);
+            const chosen = images[idx];
+            if (chosen && mainImg) {
+              mainImg.src = chosen.url;
+              if (badgeLabel) badgeLabel.textContent = chosen.label;
+              const badgeAttr = card.querySelector('.badge-img-attr');
+              if (badgeAttr) {
+                badgeAttr.textContent = `📷 ${chosen.author || 'Conservation Source'} (${chosen.license || 'CC'})`;
+                badgeAttr.title = `Photo: ${chosen.author || 'Conservation Source'} (${chosen.license || 'CC'})`;
+              }
+              thumbBtns.forEach(b => {
+                b.style.borderColor = 'rgba(255,255,255,0.45)';
+                b.classList.remove('active');
+              });
+              btn.style.borderColor = '#ef4444';
+              btn.classList.add('active');
+            }
+          });
+        });
+
+        card.querySelector('.card-media')?.addEventListener('click', () => {
+          openInvasiveDetailModal(plant);
+        });
+
+        card.querySelector('.hire-pro-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openContractorsModal();
+        });
+
+        card.querySelector('.add-invasive-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleStagedInvasive(plant);
+        });
+
+        grid.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+    function openInvasiveDetailModal(plant) {
+      let modal = document.getElementById('invasiveDetailModal');
+      if (!modal) {
+        modal = document.createElement('dialog');
+        modal.id = 'invasiveDetailModal';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'invasiveDetailTitle');
+        modal.style.cssText = 'max-width: 650px; width: 92vw; border: none; border-radius: var(--radius-lg); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface); color: var(--text-main);';
+        document.body.appendChild(modal);
+      }
+
+      const images = (plant.images && plant.images.length > 0) ? plant.images : [{ url: plant.image_url, label: 'Overview', caption: plant.common_name }];
+      const isStaged = (state.stagedInvasives || []).some(inv => inv.id === plant.id || inv.scientific_name === plant.scientific_name);
+
+      modal.innerHTML = `
+        <div class="dialog-header" style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; background: #fff1f2;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">⚠️</span>
+              <h3 id="invasiveDetailTitle" style="font-size: 18px; font-weight: 800; color: #991b1b; margin: 0;">${escapeHtml(plant.common_name)}</h3>
+            </div>
+            <p style="font-style: italic; color: #dc2626; font-size: 13px; margin: 2px 0 0 0;">${escapeHtml(plant.scientific_name)}</p>
+          </div>
+          <button type="button" class="btn-icon" id="closeInvasiveModalBtn" aria-label="Close invasive species guide" style="border: none; background: transparent; cursor: pointer; color: #991b1b;">
+            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+          </button>
+        </div>
+        <div class="dialog-body" style="padding: 20px; max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+          <!-- Identification Image Gallery -->
+          <div>
+            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="camera" style="width: 13px; height: 13px;"></i>
+                <span>Botanical Identification Photo Gallery (${images.length})</span>
+              </div>
+              <span style="font-size: 11px; color: #dc2626; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="maximize-2" style="width: 11px; height: 11px;"></i>
+                <span>Click photo for full size &amp; source</span>
+              </span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+              ${images.map((img, idx) => `
+                <div class="gallery-photo-card" data-idx="${idx}" style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-subtle); background: var(--bg-base); cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;" title="Click to view full-size photo and attribution">
+                  <div style="height: 115px; overflow: hidden; background: #000; position: relative;">
+                    <img src="${img.url}" alt="${escapeHtml(img.label)}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1590682680695-43b964a3ae17?auto=format&fit=crop&w=400&q=80';">
+                    <span style="position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.75); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; display: flex; align-items: center; gap: 3px; backdrop-filter: blur(2px);">
+                      <i data-lucide="maximize-2" style="width: 10px; height: 10px;"></i>
+                      <span>Full size</span>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 8px;">
+                    <span style="font-weight: 700; font-size: 11px; color: #991b1b; display: block;">${escapeHtml(img.label)}</span>
+                    <span style="font-size: 10px; color: var(--text-muted); line-height: 1.3; display: block; margin-top: 2px;">${escapeHtml(img.caption)}</span>
+                    <div style="font-size: 9px; color: var(--text-secondary); margin-top: 6px; border-top: 1px dashed var(--border-subtle); padding-top: 4px; line-height: 1.2;">
+                      📷 ${escapeHtml(img.author || 'Conservation Source')} · <span style="color: var(--text-muted);">${escapeHtml(img.license || 'CC BY 3.0 US')}</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Identification Guide -->
+          <div style="background: #fff5f5; border-left: 4px solid #ef4444; border-radius: var(--radius-sm); padding: 12px 14px;">
+            <div style="font-weight: 700; color: #991b1b; font-size: 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="eye" style="width: 13px; height: 13px;"></i>
+              <span>How to Identify in the Field:</span>
+            </div>
+            <p style="font-size: 13px; line-height: 1.5; margin: 0; color: var(--text-main);">${escapeHtml(plant.identification)}</p>
+          </div>
+
+          <!-- Removal Tips -->
+          <div style="background: var(--bg-base); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 12px 14px;">
+            <div style="font-weight: 700; color: var(--primary); font-size: 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="shield-alert" style="width: 13px; height: 13px;"></i>
+              <span>Removal &amp; Management Protocol:</span>
+            </div>
+            <p style="font-size: 13px; line-height: 1.5; margin: 0; color: var(--text-main);">${escapeHtml(plant.removal_tips)}</p>
+          </div>
+
+          <!-- Ecological Threat Impact -->
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; background: var(--bg-surface-elevated); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <strong>Ecological Impact:</strong> ${escapeHtml(plant.threat)}
+          </div>
+
+          <!-- Official Links -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <a href="${plant.info_url || plant.ref_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
+              <span>${escapeHtml(plant.ref_name || 'MDC Field Guide')}</span>
+            </a>
+            <a href="${plant.control_url || plant.ref_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="font-size: 12px; color: #991b1b; border-color: #fca5a5; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="shield" style="width: 13px; height: 13px;"></i>
+              <span>${escapeHtml(plant.control_name || 'Official Control Guide')}</span>
+            </a>
+            <button type="button" class="btn btn-secondary" id="modalOpenContractorsBtn" style="font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="wrench" style="width: 13px; height: 13px;"></i>
+              <span>Vetted KC Contractors</span>
+            </button>
+          </div>
+        </div>
+        <div class="dialog-footer" style="padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: ${state.currentUser ? 'space-between' : 'flex-end'}; align-items: center; background: var(--bg-surface-elevated);">
+          <button type="button" class="btn btn-secondary" id="modalCloseFooterBtn">Close</button>
+          ${state.currentUser ? `
+          <button type="button" class="btn btn-primary" id="modalToggleStagedBtn" style="background:${isStaged ? '#15803d' : '#b91c1c'}; border-color:${isStaged ? '#15803d' : '#b91c1c'}; display: inline-flex; align-items: center; gap: 6px;">
+            <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width: 14px; height: 14px;"></i>
+            <span>${isStaged ? 'Staged in Report' : 'Add to Report'}</span>
+          </button>
+          ` : ''}
+        </div>
+      `;
+
+      modal.querySelector('#closeInvasiveModalBtn')?.addEventListener('click', () => modal.close());
+      modal.querySelector('#modalCloseFooterBtn')?.addEventListener('click', () => modal.close());
+      modal.querySelector('#modalOpenContractorsBtn')?.addEventListener('click', () => {
+        openContractorsModal();
+      });
+      modal.querySelector('#modalToggleStagedBtn')?.addEventListener('click', () => {
+        toggleStagedInvasive(plant);
+        modal.close();
+      });
+
+      modal.querySelectorAll('.gallery-photo-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const idx = parseInt(card.getAttribute('data-idx'), 10) || 0;
+          openInvasiveLightbox(plant, idx);
+        });
+      });
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+    window.openInvasiveDetailModal = openInvasiveDetailModal;
+
+    function openInvasiveLightbox(plant, initialIdx = 0) {
+      let modal = document.getElementById('invasiveLightboxModal');
+      if (!modal) {
+        modal = document.createElement('dialog');
+        modal.id = 'invasiveLightboxModal';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-label', 'Full size botanical photo preview');
+        modal.className = 'lightbox-dialog';
+        modal.style.cssText = 'max-width: 95vw; width: 920px; max-height: 94vh; border: 1px solid rgba(255,255,255,0.18); border-radius: var(--radius-lg); padding: 0; box-shadow: 0 25px 60px rgba(0,0,0,0.85); background: #0b1120; color: #f8fafc; overflow: hidden;';
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.close();
+        });
+      }
+
+      const images = (plant.images && plant.images.length > 0) ? plant.images : [{
+        url: plant.image_url,
+        label: 'Overview',
+        caption: plant.common_name,
+        author: 'Conservation Source',
+        license: 'Educational Use',
+        source_name: plant.ref_name || 'MDC / Bugwood',
+        source_url: plant.ref_url || plant.info_url || 'https://mdc.mo.gov'
+      }];
+
+      let currentIdx = Math.max(0, Math.min(initialIdx, images.length - 1));
+
+      function renderSlide(idx) {
+        currentIdx = idx;
+        const img = images[currentIdx];
+        const hasPrev = images.length > 1;
+        const hasNext = images.length > 1;
+
+        const fullResUrl = img.url.includes('bugwoodcloud.org/images/768x512/')
+          ? img.url.replace('/768x512/', '/1536x1024/')
+          : img.url;
+
+        modal.innerHTML = `
+          <div style="padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; background: #0f172a;">
+            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+              <span style="font-size: 16px;">⚠️</span>
+              <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span style="font-weight: 800; font-size: 15px; color: #f87171;">${escapeHtml(plant.common_name)}</span>
+                <span style="font-style: italic; color: #94a3b8; font-size: 12px; margin-left: 6px;">(${escapeHtml(plant.scientific_name)})</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #cbd5e1; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 999px;">
+                Photo ${currentIdx + 1} of ${images.length}
+              </span>
+              <a href="${img.source_url || img.url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #93c5fd; font-size: 11px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;" title="Open original resource page on ${escapeHtml(img.source_name || 'Conservation Source')}">
+                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+                <span class="hide-mobile">Source Page</span>
+              </a>
+              <button type="button" class="btn-icon" id="closeLightboxBtn" aria-label="Close photo preview" style="border: none; background: transparent; cursor: pointer; color: #cbd5e1; padding: 4px;" title="Close full size view">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="position: relative; background: #020617; display: flex; align-items: center; justify-content: center; min-height: 320px; max-height: 62vh; padding: 12px; overflow: hidden;">
+            <img src="${fullResUrl}" alt="${escapeHtml(img.label)} - ${escapeHtml(plant.common_name)}" style="max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); user-select: none;" onerror="this.onerror=null; this.src='${img.url}';">
+
+            ${hasPrev ? `
+              <button type="button" id="lightboxPrevBtn" class="btn-icon" aria-label="Previous photo" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(15,23,42,0.82); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Previous Photo (Left Arrow)">
+                <i data-lucide="chevron-left" style="width: 22px; height: 22px;"></i>
+              </button>
+            ` : ''}
+
+            ${hasNext ? `
+              <button type="button" id="lightboxNextBtn" class="btn-icon" aria-label="Next photo" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(15,23,42,0.82); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Next Photo (Right Arrow)">
+                <i data-lucide="chevron-right" style="width: 22px; height: 22px;"></i>
+              </button>
+            ` : ''}
+          </div>
+
+          <!-- Caption & Detailed Attribution Metadata -->
+          <div style="padding: 12px 18px; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; background: #dc2626; color: #fff; padding: 2px 7px; border-radius: 4px;">
+                ${escapeHtml(img.label)}
+              </span>
+              <span style="font-size: 13px; color: #f1f5f9; font-weight: 500;">
+                ${escapeHtml(img.caption)}
+              </span>
+            </div>
+
+            <!-- Source & Attribution Credit Line -->
+            <div style="font-size: 11px; color: #94a3b8; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; line-height: 1.4; border-top: 1px dashed rgba(255,255,255,0.12); padding-top: 8px; margin-top: 4px;">
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <span>📷</span>
+                <span>Photograph by: <strong style="color: #f8fafc;">${escapeHtml(img.author || 'Conservation Source / Photographer')}</strong></span>
+              </div>
+              <div>
+                <span>License: <strong style="color: #f8fafc;">${escapeHtml(img.license || 'Educational Conservation Use')}</strong></span>
+              </div>
+              <div>
+                <span>Source: <a href="${img.source_url || 'https://mdc.mo.gov'}" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: underline;">${escapeHtml(img.source_name || 'Conservation Partner')} ↗</a></span>
+              </div>
+            </div>
+
+            <!-- Thumbnail Navigator Strip -->
+            ${images.length > 1 ? `
+              <div style="display: flex; gap: 8px; overflow-x: auto; padding-top: 10px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
+                ${images.map((item, iIdx) => `
+                  <button type="button" class="lightbox-nav-thumb ${iIdx === currentIdx ? 'active' : ''}" data-idx="${iIdx}" aria-label="View photo ${iIdx + 1}: ${escapeHtml(item.label)}" style="flex-shrink: 0; width: 56px; height: 42px; border-radius: 4px; overflow: hidden; border: 2px solid ${iIdx === currentIdx ? '#ef4444' : 'rgba(255,255,255,0.25)'}; padding: 0; background: #000; cursor: pointer; transition: border-color 0.15s, transform 0.15s; position: relative;" title="${escapeHtml(item.label)}">
+                    <img src="${item.url}" alt="${escapeHtml(item.label)}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <span style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: #fff; font-size: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 1px 2px;">${escapeHtml(item.label)}</span>
+                  </button>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        modal.querySelector('#closeLightboxBtn')?.addEventListener('click', () => modal.close());
+
+        modal.querySelector('#lightboxPrevBtn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const prevIdx = (currentIdx - 1 + images.length) % images.length;
+          renderSlide(prevIdx);
+        });
+
+        modal.querySelector('#lightboxNextBtn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const nextIdx = (currentIdx + 1) % images.length;
+          renderSlide(nextIdx);
+        });
+
+        modal.querySelectorAll('.lightbox-nav-thumb').forEach(thumb => {
+          thumb.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(thumb.getAttribute('data-idx'), 10) || 0;
+            renderSlide(idx);
+          });
+        });
+
+        if (window.lucide) lucide.createIcons();
+      }
+
+      const keyHandler = (e) => {
+        if (!modal.open) return;
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prevIdx = (currentIdx - 1 + images.length) % images.length;
+          renderSlide(prevIdx);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const nextIdx = (currentIdx + 1) % images.length;
+          renderSlide(nextIdx);
+        }
+      };
+
+      window.addEventListener('keydown', keyHandler);
+      modal.addEventListener('close', () => {
+        window.removeEventListener('keydown', keyHandler);
+      }, { once: true });
+
+      renderSlide(currentIdx);
+      if (!modal.open) {
+        modal.showModal();
+      }
+    }
+    window.openInvasiveLightbox = openInvasiveLightbox;
+    window.openInvasiveDetailModal = openInvasiveDetailModal;
+
+    function toggleStagedInvasive(plant) {
+      if (!state.stagedInvasives) state.stagedInvasives = [];
+      const idx = state.stagedInvasives.findIndex(i => i.id === plant.id || i.scientific_name === plant.scientific_name);
+      if (idx >= 0) {
+        state.stagedInvasives.splice(idx, 1);
+        if (state.stagedInvasives.length === 0) {
+          state.reportOptions.invasivePresent = false;
+        }
+        showToast(`Removed ${plant.common_name} from report.`);
+      } else {
+        state.stagedInvasives.push({
+          id: plant.id,
+          name: plant.common_name,
+          scientific: plant.scientific_name,
+          image_url: plant.image_url,
+          notes: plant.removal_tips,
+          added_at: Date.now()
+        });
+        state.reportOptions.invasivePresent = true;
+        showToast(`Added ${plant.common_name} to consultation invasives!`);
+      }
+
+      persistStagedInvasives();
+      renderStagedInvasives();
+      if (state.catalogMode === 'invasive') renderInvasiveGrid();
+    }
+
+    function persistStagedInvasives() {
+      localStorage.setItem('dr_staged_invasives', JSON.stringify(state.stagedInvasives));
+      localStorage.setItem('dr_report_options', JSON.stringify(state.reportOptions));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.stagedInvasives = JSON.parse(JSON.stringify(state.stagedInvasives));
+          active.reportOptions = JSON.parse(JSON.stringify(state.reportOptions));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+
+    
+    function persistReportOptions() {
+      localStorage.setItem('dr_report_options', JSON.stringify(state.reportOptions));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.reportOptions = JSON.parse(JSON.stringify(state.reportOptions));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+
+    function syncReportOptionsUI() {
+      const opts = state.reportOptions || {};
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = Boolean(val);
+      };
+      setVal('toggleInvasivePresent', opts.invasivePresent);
+      setVal('toggleBirdNestBox', opts.birdNestBox !== false);
+      setVal('toggleBirdBath', opts.birdBath !== false);
+      setVal('toggleBatBox', opts.batBox === true);
+      setVal('toggleBeeHabitat', opts.beeHabitat !== false);
+      setVal('toggleJohnsonCounty', opts.johnsonCounty === true);
+      setVal('toggleWyandotteCounty', opts.wyandotteCounty === true);
+      setVal('toggleRainwaterHarvesting', opts.rainwaterHarvesting !== false);
+    }
+
+    function renderStagedInvasives() {
+      const container = document.getElementById('stagedInvasivesList');
+      const badge = document.getElementById('stagedInvasivesCountBadge');
+      const checkbox = document.getElementById('toggleInvasivePresent');
+      const summary = document.getElementById('invasiveStatusSummary');
+      if (!container) return;
+
+      const invasives = state.stagedInvasives || [];
+      const isPresent = state.reportOptions.invasivePresent || invasives.length > 0;
+
+      if (badge) badge.textContent = invasives.length;
+      if (checkbox) checkbox.checked = isPresent;
+
+      if (summary) {
+        if (isPresent) {
+          summary.innerHTML = `<span style="color:#dc2626;font-weight:700;">⚠️ Invasive plants present.</span> Found species will be listed with removal instructions.`;
+        } else {
+          summary.innerHTML = `🌿 <strong>Clean Landscape:</strong> No invasive plants recorded. Report will include the Big Three vigilance warning.`;
+        }
+      }
+
+      if (isPresent) {
+        container.style.display = 'flex';
+      } else {
+        container.style.display = 'none';
+      }
+
+      container.innerHTML = '';
+      if (invasives.length === 0) {
+        container.innerHTML = `
+          <div style="font-size:11px;color:var(--text-muted);background:var(--bg-base);padding:8px;border-radius:var(--radius-sm);text-align:center;">
+            Toggle is ON. No specific species added yet.<br>Click <strong>Browse & Add Invasives</strong> below.
+          </div>
+        `;
+        return;
+      }
+
+      invasives.forEach((inv, iIdx) => {
+        const row = document.createElement('div');
+        row.className = 'garden-area-row';
+        row.style.borderColor = 'rgba(220, 38, 38, 0.4)';
+        row.innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;flex:1;">
+            <img src="${inv.image_url}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none';">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-main);">${escapeHtml(inv.name)}</div>
+              <div style="font-size:10px;font-style:italic;color:#dc2626;">${escapeHtml(inv.scientific)}</div>
+            </div>
+          </div>
+          <input type="text" class="inv-note-input" value="${escapeHtml(inv.notes || '')}" aria-label="Observation notes for ${escapeHtml(inv.name)}" placeholder="Observation / location on property..." style="flex:1.2;font-size:11px;padding:3px 6px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-main);">
+          <button type="button" class="btn-icon remove-inv-btn" title="Remove invasive from report" aria-label="Remove ${escapeHtml(inv.name)} from report" style="color:var(--danger);padding:3px;">
+            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+          </button>
+        `;
+
+        row.querySelector('.inv-note-input').addEventListener('input', (e) => {
+          inv.notes = e.target.value;
+          persistStagedInvasives();
+        });
+
+        row.querySelector('.remove-inv-btn').addEventListener('click', () => {
+          state.stagedInvasives.splice(iIdx, 1);
+          if (state.stagedInvasives.length === 0) {
+            state.reportOptions.invasivePresent = false;
+          }
+          persistStagedInvasives();
+          renderStagedInvasives();
+          if (state.catalogMode === 'invasive') renderInvasiveGrid();
+        });
+
+        row.querySelector('.planner-row-btn')?.addEventListener('click', () => {
+          closeDrawer();
+          openGardenPlanner(idx);
+        });
+        container.appendChild(row);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderGardenAreasManager() {
+      const container = document.getElementById('gardenAreasList');
+      const countBadge = document.getElementById('gardenAreasCountBadge');
+      if (!container) return;
+
+      if (!state.gardenAreas || state.gardenAreas.length === 0) {
+        state.gardenAreas = ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+      }
+
+      if (countBadge) {
+        countBadge.textContent = state.gardenAreas.length;
+      }
+
+      container.innerHTML = '';
+      const canDelete = state.gardenAreas.length > 1;
+
+      state.gardenAreas.forEach((areaName, idx) => {
+        const plantCount = (state.stagedPlants || []).filter(p => (p.target_area || state.gardenAreas[0]) === areaName).length;
+        const row = document.createElement('div');
+        row.className = 'garden-area-row';
+        row.innerHTML = `
+          <span style="font-size:11px;font-weight:700;color:var(--primary);white-space:nowrap;">
+            <i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i>
+          </span>
+          <button type="button" class="btn-icon planner-row-btn" data-area-idx="${idx}" title="Get plant recommendations for this area" aria-label="Get plant recommendations for ${escapeHtml(areaName)}" style="color:var(--primary);padding:3px;margin-right:2px;">
+            <i data-lucide="sparkles" style="width:13px;height:13px;"></i>
+          </button>
+          <input type="text" class="garden-area-input" value="${escapeHtml(areaName)}" aria-label="Garden area name" placeholder="e.g. Area ${idx + 1}: Front Porch">
+          <span class="garden-area-badge" title="${plantCount} plant(s) assigned to this area">
+            ${plantCount} plant${plantCount === 1 ? '' : 's'}
+          </span>
+          ${canDelete ? `
+            <button type="button" class="btn-icon delete-area-btn" title="Remove this garden area" aria-label="Remove garden area ${escapeHtml(areaName)}" style="color:var(--danger);padding:3px;opacity:0.75;">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
+          ` : ''}
+        `;
+
+        const input = row.querySelector('.garden-area-input');
+        input.addEventListener('change', (e) => {
+          const newName = (e.target.value || '').trim() || `Area ${idx + 1}`;
+          const oldName = state.gardenAreas[idx];
+          if (newName !== oldName) {
+            state.gardenAreas[idx] = newName;
+            // Auto re-assign staged plants from old area name to new name
+            (state.stagedPlants || []).forEach(p => {
+              if (p.target_area === oldName) p.target_area = newName;
+            });
+            saveStaging();
+            persistGardenAreas();
+            renderGardenAreasManager();
+            renderStaging();
+          }
+        });
+
+        if (canDelete) {
+          row.querySelector('.delete-area-btn')?.addEventListener('click', () => {
+            const removedName = state.gardenAreas[idx];
+            if (confirm(`Remove "${removedName}"? Any plants in this area will be reassigned to the first remaining area.`)) {
+              state.gardenAreas.splice(idx, 1);
+              const fallbackArea = state.gardenAreas[0];
+              (state.stagedPlants || []).forEach(p => {
+                if (p.target_area === removedName) p.target_area = fallbackArea;
+              });
+              saveStaging();
+              persistGardenAreas();
+              renderGardenAreasManager();
+              renderStaging();
+            }
+          });
+        }
+
+        container.appendChild(row);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function persistGardenAreas() {
+      localStorage.setItem('dr_garden_areas', JSON.stringify(state.gardenAreas));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.gardenAreas = JSON.parse(JSON.stringify(state.gardenAreas));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+
+    function duplicateConsultation(consultationId) {
+      const targetId = consultationId || state.activeConsultationId;
+      const original = state.consultations.find(c => c.id === targetId);
+      if (!original) return;
+
+      const newId = `rep-${Date.now()}`;
+      const clone = JSON.parse(JSON.stringify(original));
+      clone.id = newId;
+      clone.clientName = `${original.clientName || 'Consultation'} (Copy)`;
+      clone.gardenAreas = original.gardenAreas
+        ? JSON.parse(JSON.stringify(original.gardenAreas))
+        : ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+      clone.stagedInvasives = original.stagedInvasives ? JSON.parse(JSON.stringify(original.stagedInvasives)) : [];
+      clone.reportOptions = original.reportOptions ? JSON.parse(JSON.stringify(original.reportOptions)) : {"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true};
+      clone.createdAt = Date.now();
+      clone.lastModified = Date.now();
+
+      state.consultations.unshift(clone);
+      persistConsultations();
+      switchActiveConsultation(newId, false);
+      showToast(`Duplicated to "${clone.clientName}".`);
+    }
+
+    async function deleteConsultation(consultationId) {
+      const c = state.consultations.find(item => item.id === consultationId);
+      const name = c ? (c.clientName || 'Untitled Consultation') : 'this consultation';
+      if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) {
+        return;
+      }
+
+      const idx = state.consultations.findIndex(item => item.id === consultationId);
+      if (idx >= 0) {
+        state.consultations.splice(idx, 1);
+      }
+      persistConsultations();
+
+      // If signed in, delete from Cloud Firestore
+      if (state.currentUser) {
+        const username = state.currentUser.username;
+        const authorUsername = c?.username || username;
+        const baseUrl = getFirestoreBaseUrl();
+        const deleteUrls = [
+          `${baseUrl}/reports/${consultationId}`,
+          `${baseUrl}/plants/_report_${consultationId}`,
+          `${baseUrl}/users/${username}/reports/${consultationId}`,
+          `${baseUrl}/plants/_report_${username}_${consultationId}`
+        ];
+        if (authorUsername && authorUsername !== username) {
+          deleteUrls.push(`${baseUrl}/users/${authorUsername}/reports/${consultationId}`);
+          deleteUrls.push(`${baseUrl}/plants/_report_${authorUsername}_${consultationId}`);
+        }
+        Promise.allSettled(deleteUrls.map(u => fetch(u, { method: 'DELETE' }))).catch(e => console.warn("Firestore report delete notice:", e));
+      }
+
+      // Sync with admin repository state if present
+      if (state.allAdvisorReports) {
+        state.allAdvisorReports = state.allAdvisorReports.filter(r => r.id !== consultationId);
+        updateAdminReportsBadge(state.allAdvisorReports.length);
+      }
+
+      showToast(`Deleted "${name}".`);
+
+      if (state.activeConsultationId === consultationId) {
+        if (state.consultations.length > 0) {
+          switchActiveConsultation(state.consultations[0].id, true);
+        } else {
+          createNewConsultation({ clientName: 'New Consultation' });
+        }
+      } else {
+        renderConsultationSwitcher();
+        const modal = document.getElementById('consultationsModal');
+        if (modal && modal.open) {
+          renderConsultationsModalList(document.getElementById('consultationSearchInput')?.value || '');
+        }
+      }
+    }
+
+    function renderConsultationSwitcher() {
+      const select = document.getElementById('consultationSelect');
+      if (!select) return;
+
+      updateConsultationCounts();
+      select.innerHTML = '';
+
+      if (state.consultations.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No Consultations';
+        select.appendChild(opt);
+        return;
+      }
+
+      state.consultations.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        const name = c.clientName || 'Untitled Client';
+        const dateStr = c.consultationDate ? ` (${c.consultationDate})` : '';
+        const plantCount = `${(c.stagedPlants || []).length} plants`;
+        opt.textContent = `${name}${dateStr} · ${plantCount}`;
+        if (c.id === state.activeConsultationId) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+
+      // Update status text & indicator
+      const statusText = document.getElementById('consultationStatusText');
+      const statusDot = document.getElementById('consultationSavedDot');
+      if (statusText && statusDot) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active && active.lastModified) {
+          const timeAgo = formatTimeAgo(active.lastModified);
+          statusText.textContent = `Saved (${timeAgo})`;
+          statusDot.className = 'status-dot synced';
+        } else {
+          statusText.textContent = 'Saved locally';
+          statusDot.className = 'status-dot';
+        }
+      }
+    }
+
+    function renderConsultationsModalList(filterQuery = '') {
+      const container = document.getElementById('consultationsListContainer');
+      if (!container) return;
+
+      const q = (filterQuery || '').trim().toLowerCase();
+      const filtered = (state.consultations || []).filter(c => {
+        if (!q) return true;
+        return (c.clientName || '').toLowerCase().includes(q) ||
+               (c.clientAddress || '').toLowerCase().includes(q) ||
+               (c.consultationDate || '').toLowerCase().includes(q) ||
+               (c.advisorNotes || '').toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px 10px;color:var(--text-muted);font-size:13px;">
+            <i data-lucide="folder-search" style="width:36px;height:36px;opacity:0.4;margin:0 auto 10px;display:block;"></i>
+            No consultations match your search.<br>Click <strong>+ New Consultation</strong> to create one.
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach(c => {
+        const isActive = c.id === state.activeConsultationId;
+        const card = document.createElement('div');
+        card.className = `consultation-card ${isActive ? 'is-active' : ''}`;
+
+        const plantCount = (c.stagedPlants || []).length;
+        const dateDisplay = c.consultationDate || 'No date set';
+        const clientNameDisplay = c.clientName || 'Untitled Client Consultation';
+
+        card.innerHTML = `
+          <div class="consultation-card-header">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="consultation-card-title">${clientNameDisplay}</span>
+                ${isActive ? `<span class="badge-keystone" style="font-size:10px;padding:2px 8px;font-weight:800;">Active</span>` : ''}
+              </div>
+              <div class="consultation-card-meta" style="margin-top:4px;">
+                <span><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:-1px;"></i> ${dateDisplay}</span>
+                ${c.clientAddress ? `<span><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i> ${c.clientAddress}</span>` : ''}
+                <span><i data-lucide="sprout" style="width:12px;height:12px;vertical-align:-1px;"></i> ${plantCount} species</span>
+                <span><i data-lucide="clock" style="width:12px;height:12px;vertical-align:-1px;"></i> ${formatTimeAgo(c.lastModified)}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-secondary btn-sm prelim-btn" style="padding:6px 10px;font-size:12px;font-weight:700;color:var(--primary);border-color:var(--primary-border);" title="Generate Preliminary Report (PDF / Client Takeaway)">
+                <i data-lucide="file-check-2" style="width:13px;height:13px;"></i>
+                <span>Preliminary Report</span>
+              </button>
+              <button class="btn btn-secondary btn-sm switch-btn" style="padding:6px 12px;font-size:12px;font-weight:700;">
+                <i data-lucide="${isActive ? 'check' : 'arrow-right-left'}" style="width:13px;height:13px;"></i>
+                <span>${isActive ? 'Selected' : 'Switch'}</span>
+              </button>
+              <button class="btn-icon btn-sm-icon duplicate-btn" title="Duplicate consultation" aria-label="Duplicate consultation for ${escapeHtml(c.clientMeta?.name || 'client')}">
+                <i data-lucide="copy" style="width:13px;height:13px;"></i>
+              </button>
+              <button class="btn-icon btn-sm-icon text-danger delete-btn" title="Delete consultation" aria-label="Delete consultation for ${escapeHtml(c.clientMeta?.name || 'client')}">
+                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.prelim-btn')?.addEventListener('click', () => {
+          openPreliminaryReport(c);
+        });
+
+        card.querySelector('.switch-btn').addEventListener('click', () => {
+          switchActiveConsultation(c.id);
+          document.getElementById('consultationsModal').close();
+          document.getElementById('stagingDrawer')?.classList.add('open');
+          document.getElementById('drawerOverlay')?.classList.add('open');
+          showToast(`Switched active consultation to "${clientNameDisplay}".`);
+        });
+
+        card.querySelector('.duplicate-btn').addEventListener('click', () => {
+          duplicateConsultation(c.id);
+        });
+
+        card.querySelector('.delete-btn').addEventListener('click', () => {
+          deleteConsultation(c.id);
+        });
+
+        container.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openConsultationsManagerModal() {
+      const modal = document.getElementById('consultationsModal');
+      if (!modal) return;
+      const adminNotice = document.getElementById('adminConsultationsRepoNotice');
+      if (adminNotice) {
+        adminNotice.style.display = (state.currentUser && state.currentUser.isAdmin) ? 'flex' : 'none';
+      }
+      const searchInput = document.getElementById('consultationSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderConsultationsModalList('');
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ==================== User Consultation Reports Cloud Sync ====================
+    async function saveCurrentReportToCloud() {
+      if (!state.currentUser) {
+        showToast("Please sign in as an advisor to save reports.", "warning");
+        openLoginModal();
+        return;
+      }
+
+      if (state.stagedPlants.length === 0) {
+        showToast("No plants staged in consultation report.", "warning");
+        return;
+      }
+
+      // Ensure active consultation is up-to-date with current state
+      const username = state.currentUser.username;
+      const reportId = state.activeConsultationId || `rep-${Date.now()}`;
+      state.activeConsultationId = reportId;
+
+      const meta = state.clientMeta || {};
+      const activeIdx = state.consultations.findIndex(c => c.id === reportId);
+      if (activeIdx >= 0) {
+        state.consultations[activeIdx].clientName = meta.name || 'Kansas City Native Garden';
+        state.consultations[activeIdx].clientAddress = meta.address || '';
+        state.consultations[activeIdx].consultationDate = meta.date || new Date().toISOString().split('T')[0];
+        state.consultations[activeIdx].advisorName = meta.advisor || state.currentUser.name;
+        state.consultations[activeIdx].advisorNotes = meta.notes || '';
+        state.consultations[activeIdx].stagedPlants = JSON.parse(JSON.stringify(state.stagedPlants));
+        state.consultations[activeIdx].lastModified = Date.now();
+      }
+
+      const reportPayload = {
+        fields: {
+          id: { stringValue: reportId },
+          username: { stringValue: username },
+          client_name: { stringValue: meta.name || 'Kansas City Native Garden' },
+          client_address: { stringValue: meta.address || '' },
+          project_name: { stringValue: meta.name ? `${meta.name}'s Native Landscape` : 'Native Consultation' },
+          advisor_name: { stringValue: meta.advisor || state.currentUser.name },
+          advisor_email: { stringValue: state.currentUser.email || '' },
+          consultation_date: { stringValue: meta.date || new Date().toISOString().split('T')[0] },
+          site_summary: { stringValue: meta.notes || '' },
+          drive_doc_url: { stringValue: '' },
+          last_modified: { integerValue: String(Date.now()) },
+          is_drive_synced: { booleanValue: false },
+          garden_areas: {
+            arrayValue: {
+              values: (state.gardenAreas || ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"]).map(a => ({ stringValue: a }))
+            }
+          },
+          staged_recommendations: {
+            arrayValue: {
+              values: state.stagedPlants.map(p => ({
+                mapValue: {
+                  fields: {
+                    plant_id: { stringValue: p.id || p.scientific_name },
+                    plant_common: { stringValue: p.common_name || p.common_names?.[0] || '' },
+                    plant_scientific: { stringValue: p.scientific_name || '' },
+                    recommended_count: { integerValue: String(p.quantity || 1) },
+                    notes: { stringValue: p.custom_notes || '' },
+                    target_area: { stringValue: p.target_area || (state.gardenAreas && state.gardenAreas[0]) || 'Area 1: Front Porch' }
+                  }
+                }
+              }))
+            }
+          },
+          staged_invasives: {
+            arrayValue: {
+              values: (state.stagedInvasives || []).map(inv => ({
+                mapValue: {
+                  fields: {
+                    id: { stringValue: inv.id || '' },
+                    name: { stringValue: inv.name || '' },
+                    scientific: { stringValue: inv.scientific || '' },
+                    location_notes: { stringValue: inv.location_notes || '' },
+                    status: { stringValue: inv.status || 'Confirmed on site' }
+                  }
+                }
+              }))
+            }
+          },
+          report_options: {
+            mapValue: {
+              fields: {
+                invasive_present: { booleanValue: Boolean(state.reportOptions.invasivePresent) },
+                bird_nest_box: { booleanValue: state.reportOptions.birdNestBox !== false },
+                bird_bath: { booleanValue: state.reportOptions.birdBath !== false },
+                bat_box: { booleanValue: state.reportOptions.batBox === true },
+                bee_habitat: { booleanValue: state.reportOptions.beeHabitat !== false },
+                johnson_county: { booleanValue: state.reportOptions.johnsonCounty === true },
+                wyandotte_county: { booleanValue: state.reportOptions.wyandotteCounty === true },
+                rainwater_harvesting: { booleanValue: state.reportOptions.rainwaterHarvesting !== false }
+              }
+            }
+          }
+        }
+      };
+
+      try {
+        showToast("Saving report to advisor cloud profile...", "info");
+        // 1. Save to user reports subcollection
+        const stdUrl = `${getFirestoreBaseUrl()}/users/${username}/reports/${reportId}`;
+        fetch(stdUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reportPayload)
+        }).catch(() => {});
+
+        // 2. Save to top-level reports collection
+        const topUrl = `${getFirestoreBaseUrl()}/reports/${reportId}`;
+        fetch(topUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reportPayload)
+        }).catch(() => {});
+
+        // 3. Save to /plants fallback collection
+        const fbUrl = `${getFirestoreBaseUrl()}/plants/_report_${username}_${reportId}`;
+        await fetch(fbUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reportPayload)
+        });
+
+        persistConsultations();
+        renderConsultationSwitcher();
+
+        const statusText = document.getElementById('consultationStatusText');
+        const statusDot = document.getElementById('consultationSavedDot');
+        if (statusText && statusDot) {
+          statusText.textContent = 'Saved to Cloud (just now)';
+          statusDot.className = 'status-dot synced';
+        }
+
+        showToast("Consultation report saved to your advisor profile in Firestore!", "success");
+      } catch (err) {
+        console.warn("Report cloud save notice:", err);
+        persistConsultations();
+        renderConsultationSwitcher();
+        showToast("Saved report locally to your advisor profile.", "success");
+      }
+    }
+
+    // Screen Reader Announcer Helper (WCAG 4.1.3 Status Messages)
+    let a11yAnnounceTimer = null;

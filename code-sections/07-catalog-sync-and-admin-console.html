@@ -1,0 +1,1557 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/07-catalog-sync-and-admin-console.html
+  Title: Section 7: Plant Catalog Loader, Firestore Parser & Administrator Console
+  Source Lines in index.html: Lines 8443 – 9989 (1547 lines)
+  Overview: Master plant catalog initialization (loadMasterPlants), Firestore document parsing, Advisor Profile & Password dialogs, and Admin Console tabs (Advisor Roster, Provisioning, and Consultation Repository).
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+    function announceToScreenReader(msg, immediate = false) {
+      const announcer = document.getElementById('a11yAnnouncer');
+      if (!announcer) return;
+      if (a11yAnnounceTimer) clearTimeout(a11yAnnounceTimer);
+      const doAnnounce = () => {
+        announcer.textContent = '';
+        setTimeout(() => {
+          announcer.textContent = msg;
+        }, 50);
+      };
+      if (immediate) {
+        doAnnounce();
+      } else {
+        a11yAnnounceTimer = setTimeout(doAnnounce, 300);
+      }
+    }
+
+    // Modal Focus Management (WCAG 2.4.3 Focus Order)
+    if (typeof HTMLDialogElement !== 'undefined' && HTMLDialogElement.prototype.showModal) {
+      const originalShowModal = HTMLDialogElement.prototype.showModal;
+      HTMLDialogElement.prototype.showModal = function() {
+        this._previousActiveElement = document.activeElement;
+        originalShowModal.apply(this, arguments);
+        setTimeout(() => {
+          const focusable = this.querySelector('input:not([type="hidden"]), select, textarea, button.btn-primary, button.btn-icon, button:not([disabled])');
+          if (focusable) focusable.focus();
+        }, 50);
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('dialog').forEach(dlg => {
+          dlg.addEventListener('close', () => {
+            if (dlg._previousActiveElement && typeof dlg._previousActiveElement.focus === 'function') {
+              try { dlg._previousActiveElement.focus(); } catch (e) {}
+              dlg._previousActiveElement = null;
+            }
+          });
+        });
+      });
+    }
+
+    // Toast Helper
+    window.showToast = function(msg, type = "success") {
+      announceToScreenReader(msg, true);
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    };
+
+    // Safe getters for plant fields
+    function getPlantUrl(p) {
+      if (p.plant_url && p.plant_url.startsWith('http')) return p.plant_url;
+      if (p.official_url && p.official_url.startsWith('http')) return p.official_url;
+      if (p.sources && p.sources.length > 0) {
+        for (const s of p.sources) {
+          const u = s.source_url || s.url;
+          if (u && u.startsWith('http')) return u;
+        }
+      }
+      return `https://grownative.org/native_plants/${(p.common_names?.[0] || p.scientific_name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`;
+    }
+
+    function getPlantHeight(p) {
+      if (p.height_display) return p.height_display;
+      if (p.mature_height && p.mature_height.display) return p.mature_height.display;
+      if (p.mature_height_min || p.mature_height_max) {
+        return `${p.mature_height_min || 1}–${p.mature_height_max || 3} ft`;
+      }
+      return '-';
+    }
+
+    function getPlantLayer(p) {
+      return p.architectural_layer || p.ecological_layer || 'Herbaceous Layer';
+    }
+
+    function getPlantDesc(p) {
+      return p.advisor_description || p.raw_desc || 'High-value native species for Kansas City landscapes.';
+    }
+
+    function getPlantSociability(p) {
+      return p.sociability || p.plant_sociability || 'Medium / Moderate Spreading';
+    }
+
+    function getPlantMaintenanceLevel(p) {
+      return p.maintenance_level || p.maintenanceLevel || 'Low';
+    }
+
+    function getPlantMaintenanceGuide(p) {
+      if (p.maintenance_guide && typeof p.maintenance_guide === 'object') return p.maintenance_guide;
+      return {
+        summary: "Low-maintenance native requiring minimal care once established. Benefits from leaving standing stems over winter for cavity-nesting bees and songbirds.",
+        level: p.maintenance_level || 'Low',
+        spring: "Wait until daytime temperatures consistently exceed 50°F before cutting back dead foliage. Leave 8 to 18 inches of standing stems to provide nesting cavities for native solitary bees.",
+        summer: "Minimal irrigation needed once established. Inspect periodically for invasive weed encroachment; no routine supplemental fertilizer required.",
+        fall: "Leave seedheads and architectural dried foliage standing throughout autumn to supply vital winter seeds for native songbirds and protect the crown.",
+        winter: "Preserve snow cover and natural leaf litter mulch around root zones to protect dormant crowns and overwintering beneficial insects.",
+        division: "Rarely requires division; if desired, divide mature clumps in early spring just as new growth emerges.",
+        sources: "Xerces Society for Invertebrate Conservation, Grow Native! (Missouri Prairie Foundation), Missouri Botanical Garden"
+      };
+    }
+
+    function normalizePlantLookupKey(str) {
+      if (!str) return '';
+      return String(str)
+        .toLowerCase()
+        .replace(/symphiotrichum/g, 'symphyotrichum')
+        .replace(/[\u2018\u2019']/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function getEmbeddedMasterMap() {
+      const rawEmbedded = document.getElementById('embeddedMasterPlants')?.textContent;
+      const embeddedMap = new Map();
+      if (rawEmbedded) {
+        try {
+          const emb = JSON.parse(rawEmbedded);
+          emb.forEach(p => {
+            if (p.scientific_name) {
+              const sciRaw = p.scientific_name.toLowerCase().trim();
+              embeddedMap.set(sciRaw, p);
+              embeddedMap.set(normalizePlantLookupKey(sciRaw), p);
+            }
+            if (p.id) embeddedMap.set(p.id, p);
+            if (Array.isArray(p.common_names)) {
+              p.common_names.forEach(cn => {
+                if (cn) {
+                  const ck = normalizePlantLookupKey(cn);
+                  if (!embeddedMap.has(ck)) embeddedMap.set(ck, p);
+                  if (ck.endsWith('s') && !embeddedMap.has(ck.slice(0, -1))) {
+                    embeddedMap.set(ck.slice(0, -1), p);
+                  } else if (!ck.endsWith('s') && !embeddedMap.has(ck + 's')) {
+                    embeddedMap.set(ck + 's', p);
+                  }
+                }
+              });
+            }
+          });
+        } catch (e) {}
+      }
+      return embeddedMap;
+    }
+
+    function overlayCanonicalMasterFields(plantList) {
+      if (!Array.isArray(plantList) || plantList.length === 0) return plantList;
+      const embeddedMap = getEmbeddedMasterMap();
+      if (embeddedMap.size === 0) return plantList;
+
+      plantList.forEach(p => {
+        const sciKey = (p.scientific_name || '').toLowerCase().trim();
+        const normSci = normalizePlantLookupKey(sciKey);
+        const emb = embeddedMap.get(sciKey) || embeddedMap.get(normSci) || (p.id ? embeddedMap.get(p.id) : null);
+        if (emb) {
+          if (emb.advisor_description) p.advisor_description = emb.advisor_description;
+          if (emb.maintenance_level) p.maintenance_level = emb.maintenance_level;
+          if (emb.maintenance_guide) p.maintenance_guide = emb.maintenance_guide;
+          if (emb.wildlife_detail) p.wildlife_detail = emb.wildlife_detail;
+          if (emb.wildlife_ecological_value) p.wildlife_ecological_value = emb.wildlife_ecological_value;
+          if (emb.images && emb.images.length > 0) {
+            const remoteHasPm = (p.images || []).some(im => (im.url || '').includes('prairiemoon.com'));
+            const remoteHasMobot = (p.images || []).some(im => (im.url || '').includes('mobot.org'));
+            if (remoteHasPm || !remoteHasMobot || (emb.images.length > (p.images || []).length)) {
+              p.images = emb.images;
+              p.plantfinder_url = emb.plantfinder_url || p.plantfinder_url;
+            }
+          }
+        }
+      });
+      return plantList;
+    }
+
+    function refreshStagedPlantsFromCatalog() {
+      const embeddedMap = getEmbeddedMasterMap();
+      const findMaster = (item) => {
+        if (!item) return null;
+        const sciKey = (item.scientific_name || '').toLowerCase().trim();
+        const normSci = normalizePlantLookupKey(sciKey);
+        const commonKey = normalizePlantLookupKey(item.common_name || '');
+        return embeddedMap.get(sciKey)
+          || embeddedMap.get(normSci)
+          || (item.id ? embeddedMap.get(item.id) : null)
+          || (commonKey ? embeddedMap.get(commonKey) : null)
+          || (state.allPlants || []).find(mp => mp.id === item.id || (mp.scientific_name && normalizePlantLookupKey(mp.scientific_name) === normSci));
+      };
+
+      const syncItem = (item) => {
+        const master = findMaster(item);
+        if (!master) return;
+        if (master.advisor_description) item.advisor_description = master.advisor_description;
+        if (master.maintenance_level) item.maintenance_level = master.maintenance_level;
+        if (master.maintenance_guide) item.maintenance_guide = master.maintenance_guide;
+        if (master.wildlife_detail) item.wildlife_detail = master.wildlife_detail;
+      };
+
+      if (Array.isArray(state.stagedPlants)) {
+        state.stagedPlants.forEach(syncItem);
+      }
+      if (Array.isArray(state.consultations)) {
+        state.consultations.forEach(c => {
+          if (Array.isArray(c.stagedPlants)) c.stagedPlants.forEach(syncItem);
+        });
+      }
+    }
+
+    // Load and Synchronize Plants
+    async function loadMasterPlants() {
+      // 1. Initial load from local Firestore cache or embedded master catalog
+      const raw = document.getElementById('embeddedMasterPlants')?.textContent;
+      let embeddedList = [];
+      if (raw) {
+        try { embeddedList = JSON.parse(raw); } catch (e) {}
+      }
+
+      const cached = localStorage.getItem('dr_firestore_cache_plants');
+      if (cached) {
+        if (cached.includes('prairiemoon.com') || !cached.includes('mobot.org') || !cached.includes('maintenance_level')) {
+          localStorage.removeItem('dr_firestore_cache_plants');
+        } else {
+          try {
+            const parsedCache = JSON.parse(cached);
+            const hasMobot = parsedCache.some(p => p.plantfinder_url || (p.images && p.images.some(img => img.url && img.url.includes('mobot.org'))));
+            if (hasMobot && Array.isArray(parsedCache) && parsedCache.length > 50) {
+              state.allPlants = overlayCanonicalMasterFields(parsedCache);
+              document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore (Cached)';
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (!state.allPlants || state.allPlants.length === 0) {
+        state.allPlants = embeddedList;
+      }
+
+      if (!state.allPlants || state.allPlants.length === 0) {
+        const raw = document.getElementById('embeddedMasterPlants').textContent;
+        try {
+          state.allPlants = JSON.parse(raw);
+        } catch (err) {
+          console.error("Error loading embedded plants:", err);
+        }
+      }
+
+      overlayCanonicalMasterFields(state.allPlants);
+
+      // Ensure all plants have consistent Sweet 16 & Keystone flags
+      state.allPlants.forEach(p => {
+        const s16 = isSweet16(p);
+        p.is_sweet_16 = s16;
+        p.is_sweet16 = s16;
+        const key = isKcKeystone(p);
+        p.is_kc_keystone = key;
+        p.isKcKeystone = key;
+      });
+
+      // 2. Apply any custom local advisor edits
+      applyCustomEditsToPlants();
+      refreshStagedPlantsFromCatalog();
+
+      // 3. Attempt live sync from database endpoints
+      await tryLiveSyncFromDatabase(false);
+
+      try {
+        fetchPlantApprovalsFromFirestore().then(() => {
+          updateApprovalBadges();
+          if (state.catalogMode === 'native') applyFilters();
+        }).catch(() => {});
+      } catch(e) {}
+
+      applyFilters();
+      updateHeaderInfo();
+    }
+
+    function applyCustomEditsToPlants() {
+      const customs = state.customPlants;
+      const count = Object.keys(customs).length;
+      document.getElementById('dbCustomCountTxt').textContent = `${count} Modified`;
+
+      state.allPlants.forEach((p, idx) => {
+        const id = p.id || p.scientific_name;
+        if (customs[id]) {
+          state.allPlants[idx] = { ...p, ...customs[id] };
+        }
+      });
+    }
+
+    async function tryLiveSyncFromDatabase(showNotification = false) {
+      // 1. Try local REST API endpoint first if running via server.py
+      try {
+        const res = await fetch('/api/plants?limit=300', { signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          const data = await res.json();
+          const remoteList = data.plants || data;
+          if (Array.isArray(remoteList) && remoteList.length > 50) {
+            replaceWithRemotePlants(remoteList);
+            state.lastSyncTime = new Date().toLocaleTimeString();
+            document.getElementById('dbEngineTxt').textContent = 'Live SQLite & Shared API';
+            if (showNotification) showToast(`Synchronized ${remoteList.length} plants from local server.`);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 2. Try Cloud Firestore REST endpoint with pagination & multi-database fallback
+      const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      let dbId = localStorage.getItem('dr_firestore_database_id');
+      if (!dbId || dbId === '(default)') {
+        dbId = 'deep-roots-nature-advisors';
+        localStorage.setItem('dr_firestore_database_id', dbId);
+      }
+      // Cloud Firestore read is open for community species catalog without Google tokens
+      const headers = { 'Accept': 'application/json' };
+
+      async function queryFirestoreDb(targetDb) {
+        let docs = [];
+        let pToken = '';
+        let count = 0;
+        let err = null;
+        do {
+          count++;
+          let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${targetDb}/documents/plants?pageSize=100`;
+          if (pToken) url += `&pageToken=${encodeURIComponent(pToken)}`;
+          const res = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            err = { status: res.status, data: errData };
+            break;
+          }
+          const data = await res.json();
+          if (data.documents && data.documents.length > 0) {
+            docs.push(...data.documents);
+          }
+          pToken = data.nextPageToken || '';
+        } while (pToken && count < 10);
+        return { docs, err };
+      }
+
+      try {
+        let { docs: allDocs, err: syncError } = await queryFirestoreDb(dbId);
+
+        // If (default) does not exist, attempt fallback to projectId
+        if (syncError && syncError.data?.error?.message?.includes('database (default) does not exist') && dbId === '(default)') {
+          console.info(`Database '(default)' not found. Checking database '${projectId}'...`);
+          const fallback = await queryFirestoreDb(projectId);
+          if (fallback.docs.length > 0 || !fallback.err) {
+            allDocs = fallback.docs;
+            syncError = fallback.err;
+            dbId = projectId;
+            localStorage.setItem('dr_firestore_database_id', projectId);
+          }
+        }
+
+        if (allDocs.length > 0) {
+          const parsed = allDocs.map(doc => parseFirestoreDoc(doc)).filter(Boolean);
+          if (parsed.length > 0) {
+            replaceWithRemotePlants(parsed);
+            state.lastSyncTime = new Date().toLocaleTimeString();
+            document.getElementById('dbEngineTxt').textContent = `Cloud Firestore (${dbId})`;
+            updateHeaderInfo();
+            try {
+              localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(state.allPlants));
+            } catch (e) {}
+            showToast(`Synchronized ${parsed.length} plants directly from Cloud Firestore!`, 'success');
+            return;
+          }
+        } else if (syncError) {
+          const msg = syncError.data?.error?.message || `HTTP ${syncError.status}`;
+          if (syncError.status === 403 && msg.includes('disabled')) {
+            showToast("Cloud Firestore API is disabled in project deep-roots-nature-advisors. Please enable it in Google Cloud Console.", "warning", 9000);
+          } else if (msg.includes('does not exist')) {
+            showToast(`Database '${dbId}' does not exist in project '${projectId}'.`, "warning", 9000);
+          } else if (syncError.status === 401 || syncError.status === 403) {
+            if (showNotification) showToast("Firestore access restricted. Please sign in with your Nature Advisor account.", "warning");
+          } else {
+            console.warn("Firestore sync warning:", msg);
+            if (showNotification) showToast("Firestore sync notice: " + msg, "warning");
+          }
+        }
+      } catch (err) {
+        console.warn("Firestore live sync exception:", err);
+        if (showNotification) showToast("Could not reach Firestore: " + err.message, "warning");
+      }
+    }
+
+    function replaceWithRemotePlants(remoteList) {
+      if (!Array.isArray(remoteList) || remoteList.length === 0) return;
+
+      overlayCanonicalMasterFields(remoteList);
+
+      state.allPlants = remoteList;
+      applyCustomEditsToPlants();
+      refreshStagedPlantsFromCatalog();
+      applyFilters();
+      updateHeaderInfo();
+      renderGrid();
+    }
+
+    function parseFirestoreValue(val) {
+      if (!val) return null;
+      if (val.stringValue !== undefined) return val.stringValue;
+      if (val.integerValue !== undefined) return parseInt(val.integerValue, 10);
+      if (val.doubleValue !== undefined) return parseFloat(val.doubleValue);
+      if (val.booleanValue !== undefined) return val.booleanValue;
+      if (val.timestampValue !== undefined) return val.timestampValue;
+      if (val.arrayValue !== undefined) {
+        return (val.arrayValue.values || []).map(parseFirestoreValue);
+      }
+      if (val.mapValue !== undefined) {
+        const out = {};
+        for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
+          out[k] = parseFirestoreValue(v);
+        }
+        return out;
+      }
+      return null;
+    }
+
+    function parseFirestoreDoc(doc) {
+      if (!doc || !doc.fields) return null;
+      const res = {};
+      for (const [k, v] of Object.entries(doc.fields)) {
+        res[k] = parseFirestoreValue(v);
+      }
+      if (!res.id && doc.name) {
+        res.id = doc.name.split('/').pop();
+      }
+      if (res.id && (res.id.startsWith('_user_') || res.id.startsWith('_report_'))) {
+        return null;
+      }
+      if (!res.scientific_name) {
+        return null;
+      }
+
+      // Format mature height display
+      if (res.mature_height && typeof res.mature_height === 'object') {
+        res.height_display = res.mature_height.display || `${res.mature_height.min_ft || ''}–${res.mature_height.max_ft || ''} ft`;
+        if (res.mature_height.min_ft !== undefined) res.mature_height_min = res.mature_height.min_ft;
+        if (res.mature_height.max_ft !== undefined) res.mature_height_max = res.mature_height.max_ft;
+      }
+
+      // Ensure plant_url from sources if missing
+      if (!res.plant_url && Array.isArray(res.sources)) {
+        for (const s of res.sources) {
+          if (s && s.source_url && s.source_url.startsWith('http')) {
+            res.plant_url = s.source_url;
+            break;
+          }
+        }
+      }
+      res.plant_url = res.plant_url || '';
+
+      // Normalize tags & sweet 16 / keystone flags
+      const sci = (res.scientific_name || '').toLowerCase().trim();
+      const tags = (res.special_tags || []).map(t => String(t).toLowerCase());
+      const s16 = Boolean(
+        res.is_sweet16 === true ||
+        res.is_sweet_16 === true ||
+        SWEET_16_SPECIES.has(sci) ||
+        tags.some(t => t.includes('sweet 16'))
+      );
+      res.is_sweet_16 = s16;
+      res.is_sweet16 = s16;
+
+      const key = Boolean(
+        res.is_kc_keystone === true ||
+        res.isKcKeystone === true ||
+        tags.some(t => t.includes('keystone'))
+      );
+      res.is_kc_keystone = key;
+      res.isKcKeystone = key;
+
+      return res;
+    }
+
+    function updateHeaderInfo() {
+      const dbCountTxt = document.getElementById('dbCountTxt');
+      if (dbCountTxt) dbCountTxt.textContent = `${state.allPlants.length} Species`;
+      const dbLastSyncTxt = document.getElementById('dbLastSyncTxt');
+      if (dbLastSyncTxt) dbLastSyncTxt.textContent = state.lastSyncTime || 'Just now';
+      renderAuthUser();
+      renderSyncModal();
+    }
+
+    function renderSyncModal() {
+      const modal = document.getElementById('syncModal');
+      if (!modal) return;
+
+      const dbCountTxt = document.getElementById('dbCountTxt');
+      if (dbCountTxt) dbCountTxt.textContent = `${state.allPlants.length} Species`;
+
+      const dbLastSyncTxt = document.getElementById('dbLastSyncTxt');
+      if (dbLastSyncTxt) dbLastSyncTxt.textContent = state.lastSyncTime || 'Just now';
+
+      const dbCustomCountTxt = document.getElementById('dbCustomCountTxt');
+      if (dbCustomCountTxt) {
+        const count = Object.keys(state.customPlants || {}).length;
+        dbCustomCountTxt.textContent = `${count} Modified`;
+      }
+
+      const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
+      const adminOptions = document.getElementById('syncAdminOptions');
+      if (adminOptions) {
+        adminOptions.style.display = isAdmin ? 'flex' : 'none';
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Render Auth in Header
+    function renderAuthUser() {
+      const container = document.getElementById('authContainer');
+      const reportDrawerBtn = document.getElementById('reportDrawerBtn');
+      const u = state.currentUser;
+      if (u && u.name) {
+        document.body.classList.add('advisor-authenticated');
+        document.body.classList.remove('advisor-guest');
+        if (reportDrawerBtn) {
+          reportDrawerBtn.classList.remove('hidden');
+          reportDrawerBtn.style.display = 'inline-flex';
+        }
+        const firstName = u.name.split(' ')[0];
+        const isAdmin = u.isAdmin;
+        container.innerHTML = `
+          <button id="userProfileBtn" class="btn btn-secondary user-profile-header-btn" style="padding:4px 10px;gap:8px;" title="View Advisor Profile (${escapeHtml(u.name)})">
+            ${u.photoURL ? `<img src="${u.photoURL}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : `
+              <div class="user-avatar-initials" style="width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">
+                ${getUserInitials(u)}
+              </div>
+            `}
+            <span class="user-profile-name" style="font-size:12px;font-weight:700;">${firstName}</span>
+            ${isAdmin ? `<span class="role-badge admin profile-header-role-badge" style="font-size:10px;padding:1px 6px;">Admin</span>` : ''}
+          </button>
+        `;
+        document.getElementById('userProfileBtn').addEventListener('click', openUserProfileModal);
+
+        const addPlantBtn = document.getElementById('openAddPlantBtn');
+        if (addPlantBtn) addPlantBtn.style.display = 'inline-flex';
+        updateApprovalBadges();
+
+        // Set advisor name in report staging if blank
+        const advInput = document.getElementById('advisorNameInput');
+        if (advInput && !advInput.value) {
+          advInput.value = u.name;
+          state.clientMeta.advisor = u.name;
+          localStorage.setItem('dr_client_meta', JSON.stringify(state.clientMeta));
+        }
+      } else {
+        document.body.classList.remove('advisor-authenticated');
+        document.body.classList.add('advisor-guest');
+        if (reportDrawerBtn) {
+          reportDrawerBtn.classList.add('hidden');
+          reportDrawerBtn.style.display = 'none';
+        }
+        // Ensure staging drawer is closed for guests
+        const drawer = document.getElementById('stagingDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        if (drawer) drawer.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+
+        const addPlantBtn = document.getElementById('openAddPlantBtn');
+        if (addPlantBtn) addPlantBtn.style.display = 'none';
+
+        container.innerHTML = `
+          <button id="headerSignInBtn" class="btn btn-secondary" style="font-weight:700;">
+            <i data-lucide="user-check"></i>
+            <span class="btn-text-long">Advisor Sign In</span>
+            <span class="btn-text-short">Sign In</span>
+          </button>
+        `;
+        document.getElementById('headerSignInBtn').addEventListener('click', () => {
+          openLoginModal();
+        });
+      }
+      renderSyncModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openLoginModal() {
+      const modal = document.getElementById('advisorLoginModal');
+      if (!modal) return;
+      document.getElementById('loginUsernameInput').value = '';
+      document.getElementById('loginPasswordInput').value = '';
+      const banner = document.getElementById('loginErrorBanner');
+      if (banner) banner.style.display = 'none';
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openUserProfileModal() {
+      const u = state.currentUser;
+      if (!u) return;
+
+      const avatarBox = document.getElementById('profileAvatarContainer');
+      if (u.photoURL) {
+        avatarBox.innerHTML = `<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;">`;
+      } else {
+        avatarBox.textContent = getUserInitials(u);
+      }
+
+      document.getElementById('profileNameTxt').textContent = u.name;
+      document.getElementById('profileUsernameTxt').textContent = `@${u.username}`;
+
+      const roleBadge = document.getElementById('profileRoleBadge');
+      if (roleBadge) {
+        roleBadge.className = `role-badge ${u.isAdmin ? 'admin' : 'advisor'}`;
+        document.getElementById('profileRoleTxt').textContent = u.isAdmin ? 'Admin' : 'Advisor';
+      }
+
+      document.getElementById('profileAdvisorTypeTxt').textContent = u.advisorType || 'Advisor in Training';
+      document.getElementById('profileEmailTxt').textContent = u.email || 'None';
+      document.getElementById('profilePhoneTxt').textContent = u.phoneNumber || 'None';
+
+      updateConsultationCounts();
+
+      const profileAdminSection = document.getElementById('profileAdminSection');
+      if (profileAdminSection) {
+        profileAdminSection.style.display = u.isAdmin ? 'block' : 'none';
+      }
+
+      const editSelfBtn = document.getElementById('openEditSelfBtn');
+      if (editSelfBtn) {
+        editSelfBtn.style.display = u.isAdmin ? 'inline-flex' : 'none';
+      }
+
+      const adminReportsBtn = document.getElementById('openAdminReportsBtn');
+      if (adminReportsBtn) {
+        adminReportsBtn.style.display = u.isAdmin ? 'flex' : 'none';
+        if (u.isAdmin) {
+          fetchAllAdvisorReports().then(reps => updateAdminReportsBadge(reps.length)).catch(() => {});
+        }
+      }
+
+      const profileAddPlantBtn = document.getElementById('profileAddPlantBtn');
+      if (profileAddPlantBtn) {
+        profileAddPlantBtn.style.display = 'flex';
+      }
+
+      const openApprovalsBtn = document.getElementById('openAdminApprovalsBtn');
+      if (openApprovalsBtn) {
+        openApprovalsBtn.style.display = u.isAdmin ? 'flex' : 'none';
+        if (u.isAdmin) {
+          updateApprovalBadges();
+        }
+      }
+
+      const adminBtn = document.getElementById('openAdminConsoleBtn');
+      if (adminBtn) {
+        adminBtn.style.display = u.isAdmin ? 'flex' : 'none';
+      }
+
+      updateTextScaleUI(getUserTextScale());
+
+      document.getElementById('userProfileModal').showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openChangePasswordModal(isFirstLogin = false) {
+      const modal = document.getElementById('changePasswordModal');
+      if (!modal) return;
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('confirmPasswordInput').value = '';
+      const banner = document.getElementById('changePasswordErrorBanner');
+      if (banner) banner.style.display = 'none';
+
+      const title = document.getElementById('changePasswordTitle');
+      const notice = document.getElementById('changePasswordNotice');
+      if (isFirstLogin) {
+        if (title) title.textContent = 'Welcome! Set Strong Password';
+        if (notice) notice.textContent = 'You have logged in with a temporary password. To secure your advisor account, you must set a permanent strong password before continuing.';
+      } else {
+        if (title) title.textContent = 'Set Strong Password';
+        if (notice) notice.textContent = 'Please choose a strong permanent password (at least 8 characters with uppercase, lowercase, and numbers).';
+      }
+
+      updatePasswordStrengthUI('');
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updatePasswordStrengthUI(pw) {
+      const minLength = (pw || '').length >= 8;
+      const upper = /[A-Z]/.test(pw || '');
+      const lower = /[a-z]/.test(pw || '');
+      const digit = /[0-9]/.test(pw || '');
+
+      setReqState('reqMinLength', minLength);
+      setReqState('reqUppercase', upper);
+      setReqState('reqLowercase', lower);
+      setReqState('reqDigit', digit);
+    }
+
+    function setReqState(elementId, isValid) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (isValid) {
+        el.className = 'req-item valid';
+        el.innerHTML = `<i data-lucide="check-circle" style="width:12px;height:12px;color:var(--primary);"></i> ${el.textContent.trim().replace(/^.*?\s/, '')}`;
+      } else {
+        el.className = 'req-item';
+        el.innerHTML = `<i data-lucide="circle" style="width:12px;height:12px;"></i> ${el.textContent.trim().replace(/^.*?\s/, '')}`;
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateAdminReportsBadge(count) {
+      const b1 = document.getElementById('adminReportsTabBadge');
+      if (b1) b1.textContent = count;
+      const b2 = document.getElementById('profileReportsRepoCount');
+      if (b2) b2.textContent = count;
+    }
+
+    async function fetchAllAdvisorReports() {
+      const allReports = [];
+      const seenIds = new Set();
+
+      function addReport(r) {
+        if (!r || !r.id) return;
+        if (!seenIds.has(r.id)) {
+          seenIds.add(r.id);
+          allReports.push(r);
+        } else {
+          const existingIdx = allReports.findIndex(item => item.id === r.id);
+          if (existingIdx >= 0 && (r.lastModified || 0) > (allReports[existingIdx].lastModified || 0)) {
+            allReports[existingIdx] = r;
+          }
+        }
+      }
+
+      // 1. Scan LocalStorage for all consultations cached on this device across any advisor
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('dr_reports_')) {
+            const u = key.replace('dr_reports_', '');
+            try {
+              const list = JSON.parse(localStorage.getItem(key) || '[]');
+              if (Array.isArray(list)) {
+                list.forEach(c => {
+                  if (c && c.id) {
+                    if (!c.username) c.username = u;
+                    addReport(c);
+                  }
+                });
+              }
+            } catch (err) {}
+          }
+        }
+      } catch (err) {
+        console.warn('Local storage scan notice:', err);
+      }
+
+      // Also include active consultations in state
+      if (state.consultations && Array.isArray(state.consultations)) {
+        state.consultations.forEach(c => addReport(c));
+      }
+
+      // 2. Fetch from Cloud Firestore fallback collection: /plants looking for all _report_ documents
+      try {
+        const url = `${getFirestoreBaseUrl()}/plants?pageSize=300`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const docId = doc.name ? doc.name.split('/').pop() : '';
+            if (docId.startsWith('_report_')) {
+              const parts = docId.split('_');
+              const authorUser = parts[2] || '';
+              const r = parseFirestoreReportDoc(doc, authorUser);
+              if (r) addReport(r);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Firestore plants fallback scan notice:', err);
+      }
+
+      // 3. Fetch from top-level /reports collection
+      try {
+        const url = `${getFirestoreBaseUrl()}/reports?pageSize=100`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const r = parseFirestoreReportDoc(doc);
+            if (r) addReport(r);
+          }
+        }
+      } catch (err) {}
+
+      // 4. Fetch from /users/{username}/reports for every known advisor in the roster
+      try {
+        const users = loadUsersCache();
+        const fetchPromises = users.map(async (u) => {
+          if (!u.username || u.username === 'guest') return;
+          try {
+            const uUrl = `${getFirestoreBaseUrl()}/users/${u.username}/reports?pageSize=100`;
+            const res = await fetch(uUrl);
+            if (res.ok) {
+              const data = await res.json();
+              for (const doc of data.documents || []) {
+                const r = parseFirestoreReportDoc(doc, u.username);
+                if (r) addReport(r);
+              }
+            }
+          } catch (e) {}
+        });
+        await Promise.allSettled(fetchPromises);
+      } catch (err) {
+        console.warn('Firestore user reports fetch notice:', err);
+      }
+
+      allReports.sort((a, b) => (b.lastModified || b.createdAt || 0) - (a.lastModified || a.createdAt || 0));
+      state.allAdvisorReports = allReports;
+      updateAdminReportsBadge(allReports.length);
+      return allReports;
+    }
+
+    function renderAdminReportsRepository(searchQuery = '', advisorFilter = '', sortOrder = 'newest') {
+      const listEl = document.getElementById('adminReportsList');
+      if (!listEl) return;
+
+      const reports = state.allAdvisorReports || [];
+      const q = (searchQuery || '').toLowerCase().trim();
+      const advFilter = (advisorFilter || '').toLowerCase().trim();
+
+      // Populate advisor filter dropdown
+      const advisorFilterSelect = document.getElementById('adminReportsAdvisorFilter');
+      if (advisorFilterSelect) {
+        const advisorMap = new Map();
+        reports.forEach(r => {
+          const u = r.username || 'unknown';
+          const name = r.advisorName || u;
+          advisorMap.set(u, { username: u, name: name });
+        });
+        const currentVal = advisorFilterSelect.value;
+        advisorFilterSelect.innerHTML = '<option value="">All Advisors</option>';
+        Array.from(advisorMap.values()).sort((a, b) => a.name.localeCompare(b.name)).forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.username;
+          opt.textContent = `${item.name} (@${item.username})`;
+          advisorFilterSelect.appendChild(opt);
+        });
+        if (currentVal) advisorFilterSelect.value = currentVal;
+      }
+
+      // Filter reports
+      let filtered = reports.filter(r => {
+        if (advFilter && (r.username || '').toLowerCase() !== advFilter) {
+          return false;
+        }
+        if (!q) return true;
+        const cName = (r.clientName || '').toLowerCase();
+        const aName = (r.advisorName || '').toLowerCase();
+        const uName = (r.username || '').toLowerCase();
+        const addr = (r.clientAddress || '').toLowerCase();
+        const notes = (r.advisorNotes || '').toLowerCase();
+        const plantNames = (r.stagedPlants || []).map(p => `${p.common_name} ${p.scientific_name}`).join(' ').toLowerCase();
+        const invNames = (r.stagedInvasives || []).map(p => `${p.name} ${p.scientific}`).join(' ').toLowerCase();
+
+        return cName.includes(q) || aName.includes(q) || uName.includes(q) || addr.includes(q) || notes.includes(q) || plantNames.includes(q) || invNames.includes(q);
+      });
+
+      // Sort reports
+      filtered.sort((a, b) => {
+        if (sortOrder === 'oldest') {
+          return (a.lastModified || a.createdAt || 0) - (b.lastModified || b.createdAt || 0);
+        } else if (sortOrder === 'client') {
+          return (a.clientName || '').localeCompare(b.clientName || '');
+        } else if (sortOrder === 'plants') {
+          return ((b.stagedPlants || []).length) - ((a.stagedPlants || []).length);
+        }
+        return (b.lastModified || b.createdAt || 0) - (a.lastModified || a.createdAt || 0);
+      });
+
+      // Update summary stat counters
+      const statTotal = document.getElementById('adminStatTotalReports');
+      if (statTotal) statTotal.textContent = reports.length;
+
+      const uniqueAdvisors = new Set(reports.map(r => r.username || r.advisorName).filter(Boolean));
+      const statAdvisors = document.getElementById('adminStatTotalAdvisors');
+      if (statAdvisors) statAdvisors.textContent = uniqueAdvisors.size;
+
+      const totalPlantsStaged = reports.reduce((sum, r) => sum + (r.stagedPlants || []).length, 0);
+      const statPlants = document.getElementById('adminStatTotalPlants');
+      if (statPlants) statPlants.textContent = totalPlantsStaged;
+
+      updateAdminReportsBadge(reports.length);
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align:center;padding:40px 10px;color:var(--text-muted);font-size:13px;background:var(--bg-base);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);">
+            <i data-lucide="folder-search" style="width:36px;height:36px;opacity:0.4;margin:0 auto 10px;display:block;"></i>
+            No consultation reports found matching your criteria.<br>
+            <span style="font-size:11px;">Try adjusting your search terms or clicking <strong>Refresh</strong> to sync with cloud.</span>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      listEl.innerHTML = '';
+      filtered.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'admin-report-card';
+        card.dataset.reportId = r.id;
+
+        const nativeCount = (r.stagedPlants || []).length;
+        const invCount = (r.stagedInvasives || []).length;
+        const areasCount = (r.gardenAreas || []).length;
+        const clientDisplay = r.clientName || 'Untitled Client Consultation';
+        const advisorDisplay = r.advisorName || (r.username ? `@${r.username}` : 'Nature Advisor');
+        const dateDisplay = r.consultationDate || (r.lastModified ? new Date(r.lastModified).toLocaleDateString() : 'No date set');
+        const timeAgo = r.lastModified ? formatTimeAgo(r.lastModified) : '';
+
+        const topPlants = (r.stagedPlants || []).slice(0, 4);
+        const remainingCount = nativeCount - topPlants.length;
+        const plantPillsHtml = topPlants.map(p => `
+          <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;background:var(--primary-light);color:var(--primary-dark);font-size:11px;font-weight:600;white-space:nowrap;">
+            🌱 ${escapeHtml(p.common_name || p.scientific_name)} ${p.quantity > 1 ? `(x${p.quantity})` : ''}
+          </span>
+        `).join('');
+
+        const invPillsHtml = (r.stagedInvasives || []).slice(0, 3).map(inv => `
+          <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;background:#fee2e2;color:#991b1b;font-size:11px;font-weight:700;white-space:nowrap;">
+            ⚠️ ${escapeHtml(inv.name || inv.scientific)}
+          </span>
+        `).join('');
+
+        card.innerHTML = `
+          <div class="admin-report-card-header">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h4 style="font-size:15px;font-weight:800;color:var(--text-main);margin:0;">${escapeHtml(clientDisplay)}</h4>
+                <span style="font-size:11px;padding:2px 8px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:12px;font-weight:700;color:var(--text-secondary);">
+                  👤 ${escapeHtml(advisorDisplay)} ${r.username ? `<span style="opacity:0.75;font-family:monospace;">(@${r.username})</span>` : ''}
+                </span>
+                ${timeAgo ? `<span style="font-size:10px;color:var(--text-muted);"><i data-lucide="clock" style="width:11px;height:11px;vertical-align:-1px;"></i> ${timeAgo}</span>` : ''}
+              </div>
+              <div style="display:flex;gap:12px;margin-top:5px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">
+                <span><i data-lucide="calendar" style="width:12px;height:12px;vertical-align:-1px;"></i> ${escapeHtml(dateDisplay)}</span>
+                ${r.clientAddress ? `<span><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i> ${escapeHtml(r.clientAddress)}</span>` : ''}
+                <span><i data-lucide="layers" style="width:12px;height:12px;vertical-align:-1px;"></i> ${areasCount} Areas</span>
+                <span style="font-weight:700;color:var(--primary);"><i data-lucide="sprout" style="width:12px;height:12px;vertical-align:-1px;"></i> ${nativeCount} Natives</span>
+                ${invCount > 0 ? `<span style="font-weight:700;color:var(--danger);"><i data-lucide="alert-triangle" style="width:12px;height:12px;vertical-align:-1px;"></i> ${invCount} Invasives</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;">
+              <button type="button" class="btn btn-secondary btn-sm repo-prelim-btn" style="padding:6px 10px;font-size:12px;font-weight:700;color:var(--primary);border-color:var(--primary-border);" title="Generate Preliminary Report (PDF / Client Takeaway)">
+                <i data-lucide="file-check-2" style="width:13px;height:13px;"></i>
+                <span>Preliminary</span>
+              </button>
+              <button type="button" class="btn btn-primary btn-sm repo-regen-docx-btn" style="padding:6px 12px;font-size:12px;font-weight:700;" title="Regenerate and download official Word document (.docx)">
+                <i data-lucide="file-down" style="width:13px;height:13px;"></i>
+                <span>Regenerate .docx</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-view-details-btn" style="padding:6px 10px;font-size:12px;" title="View consultation details">
+                <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                <span>View</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-copy-summary-btn" style="padding:6px 10px;font-size:12px;" title="Copy summary text">
+                <i data-lucide="copy" style="width:13px;height:13px;"></i>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-load-workspace-btn" style="padding:6px 10px;font-size:12px;" title="Load into your active consultation workspace">
+                <i data-lucide="folder-input" style="width:13px;height:13px;"></i>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm repo-delete-btn" style="padding:6px 10px;font-size:12px;color:var(--danger);border-color:rgba(220,38,38,0.35);" title="Permanently delete consultation report" aria-label="Delete consultation report for ${escapeHtml(clientDisplay)}">
+                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;">
+            ${plantPillsHtml}
+            ${remainingCount > 0 ? `<span style="font-size:10px;color:var(--text-muted);font-weight:700;">+${remainingCount} more</span>` : ''}
+            ${invPillsHtml}
+          </div>
+
+          ${r.advisorNotes ? `
+            <div style="font-size:12px;color:var(--text-secondary);background:var(--bg-surface);padding:8px 10px;border-radius:var(--radius-sm);border-left:3px solid var(--primary-border);margin-top:2px;line-height:1.4;max-height:48px;overflow:hidden;text-overflow:ellipsis;">
+              "${escapeHtml(r.advisorNotes.length > 140 ? r.advisorNotes.slice(0, 140) + '...' : r.advisorNotes)}"
+            </div>
+          ` : ''}
+        `;
+
+        // Event listeners
+        card.querySelector('.repo-prelim-btn')?.addEventListener('click', () => {
+          openPreliminaryReport(r);
+        });
+
+        const regenBtn = card.querySelector('.repo-regen-docx-btn');
+        regenBtn.addEventListener('click', async () => {
+          const original = regenBtn.innerHTML;
+          regenBtn.disabled = true;
+          regenBtn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width:13px;height:13px;"></i> <span>Generating...</span>`;
+          if (window.lucide) lucide.createIcons();
+          try {
+            await downloadDocxReport(r);
+          } catch (err) {
+            showToast(`Error: ${err.message}`, 'danger');
+          } finally {
+            regenBtn.disabled = false;
+            regenBtn.innerHTML = original;
+            if (window.lucide) lucide.createIcons();
+          }
+        });
+
+        card.querySelector('.repo-view-details-btn').addEventListener('click', () => {
+          openAdminReportDetailModal(r);
+        });
+
+        card.querySelector('.repo-copy-summary-btn').addEventListener('click', () => {
+          const summary = `Deep Roots Consultation Report: ${clientDisplay}\nNature Advisor: ${advisorDisplay}\nDate: ${dateDisplay}\nAddress: ${r.clientAddress || 'N/A'}\n\nStaged Plants (${nativeCount}):\n` +
+            (r.stagedPlants || []).map(p => `• ${p.quantity}x ${p.common_name} (${p.scientific_name}) - ${p.target_area || 'Garden'}`).join('\n') +
+            (invCount > 0 ? `\n\nInvasive Species (${invCount}):\n` + (r.stagedInvasives || []).map(inv => `• ${inv.name} (${inv.scientific}) - ${inv.location_notes || 'Observed'}`).join('\n') : '');
+          navigator.clipboard.writeText(summary).then(() => {
+            showToast(`Copied consultation summary for "${clientDisplay}" to clipboard!`, 'success');
+          });
+        });
+
+        card.querySelector('.repo-load-workspace-btn').addEventListener('click', () => {
+          loadReportIntoWorkspace(r);
+        });
+
+        card.querySelector('.repo-delete-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          adminDeleteConsultationReport(r);
+        });
+
+        listEl.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openAdminReportDetailModal(report) {
+      if (!report) return;
+      state.currentViewingReport = report;
+      const modal = document.getElementById('adminReportDetailModal');
+      if (!modal) return;
+
+      const titleEl = document.getElementById('adminDetailClientTitle');
+      const metaEl = document.getElementById('adminDetailAdvisorMeta');
+      const contentEl = document.getElementById('adminDetailContent');
+
+      if (titleEl) titleEl.textContent = report.clientName || 'Untitled Client Consultation';
+      if (metaEl) {
+        metaEl.textContent = `Consultation with ${report.advisorName || report.username || 'Advisor'} (${report.consultationDate || 'No date set'}) • @${report.username || 'unknown'}`;
+      }
+
+      const areas = (report.gardenAreas && report.gardenAreas.length > 0)
+        ? report.gardenAreas
+        : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'];
+
+      const areaGroups = {};
+      areas.forEach(a => { areaGroups[a] = []; });
+      (report.stagedPlants || []).forEach(p => {
+        let area = p.target_area || p.targetArea;
+        if (!area || !areaGroups[area]) {
+          const m = areas.find(a => a.toLowerCase().trim() === (area || '').toLowerCase().trim());
+          if (m) area = m;
+          else area = areas[0];
+        }
+        areaGroups[area].push(p);
+      });
+
+      let areasHtml = '';
+      areas.forEach((areaName) => {
+        const plantsInArea = areaGroups[areaName] || [];
+        areasHtml += `
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--border-subtle);padding-bottom:6px;">
+              <strong style="color:var(--primary-dark);font-size:14px;">🌿 ${escapeHtml(areaName)}</strong>
+              <span style="font-size:11px;font-weight:700;color:var(--text-muted);">${plantsInArea.length} species staged</span>
+            </div>
+            ${plantsInArea.length === 0 ? `
+              <div style="font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 0;">No native species staged for this area.</div>
+            ` : `
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                ${plantsInArea.map(p => `
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06);font-size:12px;">
+                    <div>
+                      <div><strong style="color:var(--text-main);">${escapeHtml(p.common_name || p.scientific_name)}</strong> <em style="color:var(--text-muted);font-family:var(--font-serif);">${escapeHtml(p.scientific_name || '')}</em></div>
+                      <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
+                        ${p.height ? `Height: ${escapeHtml(p.height)} | ` : ''}
+                        ${p.sun ? `Sun: ${escapeHtml(p.sun)} | ` : ''}
+                        ${p.moisture ? `Moisture: ${escapeHtml(p.moisture)}` : ''}
+                      </div>
+                      ${p.custom_notes ? `<div style="font-size:11px;color:var(--primary);margin-top:3px;background:rgba(45,90,39,0.06);padding:3px 8px;border-radius:4px;"><strong>Advisor Note:</strong> ${escapeHtml(p.custom_notes)}</div>` : ''}
+                    </div>
+                    <div style="font-weight:800;color:var(--primary);font-size:13px;white-space:nowrap;padding:2px 8px;background:var(--primary-light);border-radius:12px;">
+                      x${p.quantity || 1}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      });
+
+      const invasives = report.stagedInvasives || [];
+      let invasivesHtml = '';
+      if (invasives.length > 0) {
+        invasivesHtml = `
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius-md);padding:12px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid #fecaca;padding-bottom:6px;">
+              <strong style="color:#991b1b;font-size:14px;">⚠️ Non-Native Invasive Species Observed (${invasives.length})</strong>
+              <span style="font-size:11px;font-weight:700;color:#b91c1c;">Case B Directives</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${invasives.map(inv => `
+                <div style="font-size:12px;padding:6px 0;border-bottom:1px dashed rgba(239,68,68,0.2);">
+                  <strong style="color:#7f1d1d;">${escapeHtml(inv.name)}</strong> <em style="color:#b91c1c;">(${escapeHtml(inv.scientific)})</em>
+                  ${inv.location_notes ? `<div style="font-size:11px;color:#991b1b;margin-top:2px;"><strong>Site &amp; Eradication Notes:</strong> ${escapeHtml(inv.location_notes)}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        invasivesHtml = `
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;font-size:12px;color:#166534;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="check-circle" style="width:16px;height:16px;flex-shrink:0;"></i>
+            <span><strong>Invasive-Free Landscape (Case A):</strong> No non-native invasive plant species were flagged during this consultation.</span>
+          </div>
+        `;
+      }
+
+      const opts = report.reportOptions || {};
+      const stewardshipBadges = [
+        opts.birdNestBox !== false ? '🐦 Bird Nest Boxes' : null,
+        opts.birdBath !== false ? '💧 Bird Baths' : null,
+        opts.batBox === true ? '🦇 Bat Box' : null,
+        opts.beeHabitat !== false ? '🐝 Native Bee Habitat' : null,
+        opts.johnsonCounty === true ? '🌧️ Contain The Rain (Johnson Co.)' : null,
+        opts.wyandotteCounty === true ? '🏛️ Unified Gov (Wyandotte Co.)' : null,
+        opts.rainwaterHarvesting !== false ? '🪣 Rainwater Harvesting' : null
+      ].filter(Boolean);
+
+      contentEl.innerHTML = `
+        <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+            <div><strong>Client Name:</strong> ${escapeHtml(report.clientName || 'N/A')}</div>
+            <div><strong>Consultation Date:</strong> ${escapeHtml(report.consultationDate || 'N/A')}</div>
+            <div><strong>Property Address:</strong> ${escapeHtml(report.clientAddress || 'None provided')}</div>
+            <div><strong>Nature Advisor:</strong> ${escapeHtml(report.advisorName || report.username || 'N/A')} (@${escapeHtml(report.username || '')})</div>
+          </div>
+          ${report.advisorNotes ? `
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-secondary);">
+              <strong>Introductory / Site Summary Notes:</strong>
+              <div style="margin-top:4px;white-space:pre-wrap;background:var(--bg-surface);padding:8px 10px;border-radius:4px;">${escapeHtml(report.advisorNotes)}</div>
+            </div>
+          ` : ''}
+        </div>
+
+        ${invasivesHtml}
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Enabled Stewardship &amp; Stormwater Modules</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${stewardshipBadges.map(b => `<span style="font-size:11px;padding:3px 9px;border-radius:12px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);font-weight:600;">${b}</span>`).join('')}
+          </div>
+        </div>
+
+        <div style="font-size:13px;font-weight:800;color:var(--text-main);margin-bottom:8px;">Garden Planting Areas &amp; Species Palette</div>
+        ${areasHtml}
+      `;
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function loadReportIntoWorkspace(report) {
+      if (!report) return;
+      if (state.stagedPlants.length > 0) {
+        if (!confirm(`Switch your active consultation workspace to "${report.clientName || 'this report'}"? Any unsaved changes in your current draft will be preserved.`)) {
+          return;
+        }
+      }
+
+      const existingIdx = state.consultations.findIndex(c => c.id === report.id);
+      if (existingIdx >= 0) {
+        state.consultations[existingIdx] = JSON.parse(JSON.stringify(report));
+      } else {
+        state.consultations.unshift(JSON.parse(JSON.stringify(report)));
+      }
+
+      persistConsultations();
+      switchActiveConsultation(report.id);
+      renderConsultationSwitcher();
+      updateConsultationCounts();
+
+      document.getElementById('adminReportDetailModal')?.close();
+      document.getElementById('adminManagementModal')?.close();
+      document.getElementById('consultationsModal')?.close();
+      document.getElementById('stagingDrawer')?.classList.add('open');
+      document.getElementById('drawerOverlay')?.classList.add('open');
+
+      showToast(`Loaded "${report.clientName || 'consultation'}" into workspace!`, 'success');
+      announceToScreenReader(`Consultation report for ${report.clientName} loaded into staging workspace.`);
+    }
+
+    async function adminDeleteConsultationReport(report) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast("Administrator privileges required to delete consultation reports.", "danger");
+        return;
+      }
+      if (!report || !report.id) return;
+
+      const clientName = report.clientName || 'Untitled Consultation';
+      const authorDisplay = report.advisorName
+        ? `${report.advisorName}${report.username ? ` (@${report.username})` : ''}`
+        : (report.username ? `@${report.username}` : 'unknown advisor');
+
+      const confirmed = confirm(
+        `Are you sure you want to permanently delete the consultation report for "${clientName}" by ${authorDisplay}?\n\nThis will remove the report from Cloud Firestore and all repository records. This action cannot be undone.`
+      );
+      if (!confirmed) return;
+
+      const reportId = report.id;
+      const authorUsername = report.username || '';
+      const baseUrl = getFirestoreBaseUrl();
+
+      showToast(`Deleting report for "${clientName}"...`, "info");
+
+      // Build list of all potential Firestore delete endpoints
+      const deleteUrls = [
+        `${baseUrl}/reports/${reportId}`,
+        `${baseUrl}/plants/_report_${reportId}`
+      ];
+      if (authorUsername) {
+        deleteUrls.push(`${baseUrl}/users/${authorUsername}/reports/${reportId}`);
+        deleteUrls.push(`${baseUrl}/plants/_report_${authorUsername}_${reportId}`);
+      }
+      if (state.currentUser.username && state.currentUser.username !== authorUsername) {
+        deleteUrls.push(`${baseUrl}/users/${state.currentUser.username}/reports/${reportId}`);
+        deleteUrls.push(`${baseUrl}/plants/_report_${state.currentUser.username}_${reportId}`);
+      }
+
+      // Execute deletion across all Firestore paths
+      try {
+        await Promise.allSettled(
+          deleteUrls.map(url => fetch(url, { method: 'DELETE' }))
+        );
+      } catch (err) {
+        console.warn("Firestore delete reports notice:", err);
+      }
+
+      // Purge from active memory state
+      if (state.allAdvisorReports) {
+        state.allAdvisorReports = state.allAdvisorReports.filter(r => r.id !== reportId);
+      }
+      if (state.consultations) {
+        state.consultations = state.consultations.filter(c => c.id !== reportId);
+        persistConsultations();
+        renderConsultationSwitcher();
+        updateConsultationCounts();
+      }
+
+      // Purge from author's local storage cache if available
+      if (authorUsername) {
+        try {
+          const key = `dr_reports_${authorUsername}`;
+          const cached = JSON.parse(localStorage.getItem(key) || '[]');
+          const filtered = cached.filter(r => r.id !== reportId);
+          localStorage.setItem(key, JSON.stringify(filtered));
+        } catch (e) {}
+      }
+      if (state.currentUser.username && state.currentUser.username !== authorUsername) {
+        try {
+          const key = `dr_reports_${state.currentUser.username}`;
+          const cached = JSON.parse(localStorage.getItem(key) || '[]');
+          const filtered = cached.filter(r => r.id !== reportId);
+          localStorage.setItem(key, JSON.stringify(filtered));
+        } catch (e) {}
+      }
+
+      // If active consultation in workspace matches, switch or create new
+      if (state.activeConsultationId === reportId) {
+        if (state.consultations && state.consultations.length > 0) {
+          switchActiveConsultation(state.consultations[0].id, true);
+        } else {
+          createNewConsultation({ clientName: 'New Consultation' });
+        }
+      }
+
+      // Close detail modal if currently viewing this report
+      if (state.currentViewingReport && state.currentViewingReport.id === reportId) {
+        state.currentViewingReport = null;
+        document.getElementById('adminReportDetailModal')?.close();
+      }
+
+      // Re-render admin reports repository view
+      const searchInput = document.getElementById('adminReportsSearchInput')?.value || '';
+      const advFilter = document.getElementById('adminReportsAdvisorFilter')?.value || '';
+      const sortSelect = document.getElementById('adminReportsSortSelect')?.value || 'newest';
+      renderAdminReportsRepository(searchInput, advFilter, sortSelect);
+      updateAdminReportsBadge(state.allAdvisorReports?.length || 0);
+
+      showToast(`Successfully deleted consultation report for "${clientName}".`, "success");
+      announceToScreenReader(`Consultation report for ${clientName} permanently deleted by administrator.`);
+    }
+
+    function openAdminConsoleModal(initialTab = 'roster') {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast("Administrator privileges required.", "danger");
+        return;
+      }
+      const modal = document.getElementById('adminManagementModal');
+      if (!modal) return;
+
+      switchAdminTab(initialTab);
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function switchAdminTab(tab) {
+      const rosterTabBtn = document.getElementById('adminRosterTabBtn');
+      const provisionTabBtn = document.getElementById('adminProvisionTabBtn');
+      const reportsTabBtn = document.getElementById('adminReportsTabBtn');
+      const approvalsTabBtn = document.getElementById('adminApprovalsTabBtn');
+      const rosterPanel = document.getElementById('adminRosterPanel');
+      const provisionPanel = document.getElementById('adminProvisionPanel');
+      const reportsPanel = document.getElementById('adminReportsPanel');
+      const approvalsPanel = document.getElementById('adminApprovalsPanel');
+
+      if (tab === 'roster') {
+        rosterTabBtn.classList.add('active');
+        provisionTabBtn.classList.remove('active');
+        reportsTabBtn?.classList.remove('active');
+        approvalsTabBtn?.classList.remove('active');
+        rosterPanel.style.display = 'block';
+        provisionPanel.style.display = 'none';
+        if (reportsPanel) reportsPanel.style.display = 'none';
+        if (approvalsPanel) approvalsPanel.style.display = 'none';
+        renderAdminRoster(document.getElementById('adminRosterSearchInput')?.value || '');
+      } else if (tab === 'provision') {
+        provisionTabBtn.classList.add('active');
+        rosterTabBtn.classList.remove('active');
+        reportsTabBtn?.classList.remove('active');
+        approvalsTabBtn?.classList.remove('active');
+        rosterPanel.style.display = 'none';
+        provisionPanel.style.display = 'block';
+        if (reportsPanel) reportsPanel.style.display = 'none';
+        if (approvalsPanel) approvalsPanel.style.display = 'none';
+        updateCanonicalPreview();
+      } else if (tab === 'reports') {
+        reportsTabBtn?.classList.add('active');
+        rosterTabBtn.classList.remove('active');
+        provisionTabBtn.classList.remove('active');
+        approvalsTabBtn?.classList.remove('active');
+        rosterPanel.style.display = 'none';
+        provisionPanel.style.display = 'none';
+        if (reportsPanel) reportsPanel.style.display = 'block';
+        if (approvalsPanel) approvalsPanel.style.display = 'none';
+        fetchAllAdvisorReports().then(() => {
+          renderAdminReportsRepository(
+            document.getElementById('adminReportsSearchInput')?.value || '',
+            document.getElementById('adminReportsAdvisorFilter')?.value || '',
+            document.getElementById('adminReportsSortSelect')?.value || 'newest'
+          );
+        });
+      } else if (tab === 'approvals') {
+        approvalsTabBtn?.classList.add('active');
+        rosterTabBtn.classList.remove('active');
+        provisionTabBtn.classList.remove('active');
+        reportsTabBtn?.classList.remove('active');
+        rosterPanel.style.display = 'none';
+        provisionPanel.style.display = 'none';
+        if (reportsPanel) reportsPanel.style.display = 'none';
+        if (approvalsPanel) approvalsPanel.style.display = 'block';
+        fetchPlantApprovalsFromFirestore().then(() => {
+          renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
+        });
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateCanonicalPreview() {
+      const f = document.getElementById('provisionFirstName')?.value || '';
+      const l = document.getElementById('provisionLastName')?.value || '';
+      const users = loadUsersCache();
+      const canon = generateCanonicalUsername(f, l, users);
+      const preview = document.getElementById('provisionUsernamePreview');
+      if (preview) preview.textContent = canon;
+    }
+
+    function openEditUserModal(username) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast('Administrator privileges required.', 'danger');
+        return;
+      }
+      const users = loadUsersCache();
+      const u = users.find(user => user.username === username);
+      if (!u) {
+        showToast(`Advisor @${username} not found.`, 'danger');
+        return;
+      }
+
+      const modal = document.getElementById('editUserModal');
+      const errBanner = document.getElementById('editUserErrorBanner');
+      if (errBanner) {
+        errBanner.style.display = 'none';
+        errBanner.textContent = '';
+      }
+
+      document.getElementById('editUserUsername').value = u.username;
+      document.getElementById('editUserUsernameDisplay').textContent = `@${u.username}`;
+      document.getElementById('editUserFirstName').value = u.firstName || u.first_name || '';
+      document.getElementById('editUserLastName').value = u.lastName || u.last_name || '';
+      document.getElementById('editUserEmail').value = u.email || '';
+      document.getElementById('editUserPhone').value = u.phoneNumber || u.phone_number || '';
+      document.getElementById('editUserAdvisorType').value = u.advisorType || u.advisor_type || 'Advisor in Training';
+      document.getElementById('editUserRole').value = (u.role || '').toLowerCase() === 'admin' ? 'admin' : 'user';
+
+      const roleTag = document.getElementById('editUserRoleTag');
+      if (roleTag) {
+        const isAdmin = (u.role || '').toLowerCase() === 'admin';
+        roleTag.className = `role-badge ${isAdmin ? 'admin' : 'user'}`;
+        roleTag.textContent = isAdmin ? 'Admin' : 'User';
+      }
+
+      const monikerPreview = document.getElementById('editUserMonikerPreview');
+      if (monikerPreview) {
+        monikerPreview.textContent = getUserInitials(u);
+      }
+
+      const textSizeSelect = document.getElementById('editUserTextSize');
+      if (textSizeSelect) {
+        textSizeSelect.value = u.textSize || u.text_size || 'standard';
+      }
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderAdminRoster(searchQuery = '') {
+      const listEl = document.getElementById('adminRosterList');
+      if (!listEl) return;
+      const q = searchQuery.toLowerCase().trim();
+      let users = loadUsersCache();
+
+      if (q) {
+        users = users.filter(u => 
+          (u.username || '').toLowerCase().includes(q) ||
+          (u.firstName || '').toLowerCase().includes(q) ||
+          (u.lastName || '').toLowerCase().includes(q) ||
+          (u.email || '').toLowerCase().includes(q)
+        );
+      }
+
+      if (users.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px;">No advisors found matching "${searchQuery}".</div>`;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      users.forEach(u => {
+        const isSelf = state.currentUser && state.currentUser.username === u.username;
+        const card = document.createElement('div');
+        card.className = 'roster-card';
+        const isAdmin = (u.role || '').toLowerCase() === 'admin';
+        const isTemp = !!(u.isTemporaryPassword || u.is_temporary_password);
+
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;min-width:240px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;border:1px solid var(--primary-border);flex-shrink:0;">
+              ${getUserInitials(u)}
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <strong style="font-size:13px;color:var(--text-main);">${u.firstName || ''} ${u.lastName || ''}</strong>
+                <span class="role-badge ${isAdmin ? 'admin' : 'user'}">${isAdmin ? 'Admin' : 'User'}</span>
+                ${isTemp ? `<span style="font-size:10px;background:#FFF3CD;color:#856404;border:1px solid #FFEEBA;padding:1px 6px;border-radius:4px;font-weight:700;">Temp PW</span>` : ''}
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">@${u.username} &bull; ${u.advisorType || 'Advisor in Training'}</div>
+              <div style="font-size:11px;color:var(--text-secondary);">${u.email || ''} ${u.phoneNumber ? `&bull; ${u.phoneNumber}` : ''}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;">
+            <button class="btn btn-secondary edit-user-btn" data-username="${u.username}" style="font-size:11px;padding:5px 9px;" title="Edit Advisor Record">
+              <i data-lucide="pencil" style="width:12px;height:12px;"></i>
+              <span>Edit</span>
+            </button>
+            ${!isSelf ? `
+              <button class="btn btn-secondary toggle-role-btn" data-username="${u.username}" style="font-size:11px;padding:5px 9px;">
+                <i data-lucide="${isAdmin ? 'user-minus' : 'shield'}" style="width:12px;height:12px;"></i>
+                <span>${isAdmin ? 'Demote to User' : 'Make Admin'}</span>
+              </button>
+            ` : `<span style="font-size:11px;color:var(--text-muted);font-style:italic;padding:4px 8px;">(You)</span>`}
+            <button class="btn btn-secondary reset-pw-btn" data-username="${u.username}" style="font-size:11px;padding:5px 9px;">
+              <i data-lucide="key" style="width:12px;height:12px;"></i>
+              <span>Reset PW</span>
+            </button>
+          </div>
+        `;
+
+        // Listeners for card actions
+        const editBtn = card.querySelector('.edit-user-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => {
+            openEditUserModal(u.username);
+          });
+        }
+
+        const toggleBtn = card.querySelector('.toggle-role-btn');
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', async () => {
+            const res = await toggleAdvisorRole(u.username);
+            if (res.success) {
+              showToast(`Updated role for ${u.username} to ${res.newRole}.`, 'success');
+              renderAdminRoster(document.getElementById('adminRosterSearchInput')?.value || '');
+            } else {
+              showToast(res.error || 'Failed to toggle role', 'danger');
+            }
+          });
+        }
+
+        const resetBtn = card.querySelector('.reset-pw-btn');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', async () => {
+            if (confirm(`Reset password for advisor @${u.username} to a new temporary password?`)) {
+              const res = await resetAdvisorPassword(u.username);
+              if (res.success) {
+                alert(`Temporary password generated for @${u.username}:\n\n${res.tempPassword}\n\nPlease share this temporary password with the advisor.`);
+                showToast(`Password reset for ${u.username}!`, 'success');
+                renderAdminRoster(document.getElementById('adminRosterSearchInput')?.value || '');
+              } else {
+                showToast(res.error || 'Failed to reset password', 'danger');
+              }
+            }
+          });
+        }
+
+        listEl.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Filter Logic

@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Roots Codebase Academy — Interactive Code Walkthrough &amp; Checkpoints</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #f4f7f4;
+      --bg-surface: #ffffff;
+      --bg-elevated: #edf3ee;
+      --bg-code: #0f1912;
+      --text-main: #132419;
+      --text-secondary: #374d3e;
+      --text-muted: #5e7465;
+      --primary: #235c36;
+      --primary-hover: #1a4729;
+      --primary-light: #e3f1e7;
+      --primary-border: #a8d4b5;
+      --accent-gold: #b45309;
+      --accent-gold-bg: #fef3c7;
+      --accent-blue: #0369a1;
+      --accent-blue-bg: #e0f2fe;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --success: #059669;
+      --success-bg: #d1fae5;
+      --border-subtle: #d5e2d8;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 2px 6px rgba(19, 36, 25, 0.06);
+      --shadow-md: 0 8px 24px rgba(19, 36, 25, 0.1);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-base: #0b130e;
+      --bg-surface: #132018;
+      --bg-elevated: #1b2d22;
+      --bg-code: #070d09;
+      --text-main: #ecfdf3;
+      --text-secondary: #b7d1c0;
+      --text-muted: #7fa18b;
+      --primary: #10b981;
+      --primary-hover: #34d399;
+      --primary-light: rgba(16, 185, 129, 0.16);
+      --primary-border: rgba(16, 185, 129, 0.38);
+      --accent-gold: #fbbf24;
+      --accent-gold-bg: rgba(245, 158, 11, 0.18);
+      --accent-blue: #38bdf8;
+      --accent-blue-bg: rgba(56, 189, 248, 0.16);
+      --danger: #f87171;
+      --danger-bg: rgba(239, 68, 68, 0.18);
+      --success: #34d399;
+      --success-bg: rgba(16, 185, 129, 0.2);
+      --border-subtle: #253d2e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Header */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .progress-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .progress-bar-track {
+      width: 110px;
+      height: 8px;
+      background: var(--border-subtle);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-elevated);
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    /* Main Workspace Layout */
+    .academy-layout {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      max-width: 1640px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    /* Left Curriculum Sidebar */
+    .curriculum-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: sticky;
+      top: 78px;
+      height: calc(100vh - 102px);
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .sidebar-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-heading {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .module-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .module-nav-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .module-nav-btn:hover {
+      border-color: var(--primary-border);
+      background: var(--bg-elevated);
+    }
+    .module-nav-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      border-left: 4px solid var(--primary);
+    }
+
+    .module-nav-num {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .module-nav-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+
+    .module-nav-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-family: var(--font-mono);
+    }
+
+    .module-status-badge {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+    .module-status-badge.completed {
+      background: var(--success);
+      border-color: var(--success);
+      color: #ffffff;
+    }
+
+    /* Lesson Content Area */
+    .lesson-main {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    .lesson-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lesson-banner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .pill-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+    }
+
+    .pill-badge.mono {
+      font-family: var(--font-mono);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border-color: var(--border-subtle);
+    }
+
+    .lesson-title {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    .lesson-overview {
+      font-size: 0.96rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .section-h3 {
+      font-size: 1.12rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+    }
+
+    /* Syntax & Concept Cards Grid */
+    .syntax-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .syntax-card {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .syntax-token {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      align-self: flex-start;
+      border: 1px solid var(--primary-border);
+    }
+
+    .syntax-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .syntax-desc {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Annotated Code Walkthrough Blocks */
+    .walkthrough-item {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 18px;
+      background: var(--bg-base);
+    }
+
+    .walkthrough-header {
+      padding: 10px 16px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .walkthrough-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .walkthrough-lines {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .code-pre {
+      background: var(--bg-code);
+      color: #e2f1e8;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      padding: 16px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .walkthrough-explanation {
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+    .walkthrough-explanation ul {
+      padding-left: 20px;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .walkthrough-explanation code {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: var(--bg-elevated);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Knowledge Checkpoint Quiz */
+    .checkpoint-card {
+      background: var(--bg-surface);
+      border: 2px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .quiz-question-box {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-q-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+    .quiz-opt-btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-elevated);
+    }
+    .quiz-opt-btn.correct {
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: var(--text-main);
+      font-weight: 800;
+    }
+    .quiz-opt-btn.wrong {
+      background: var(--danger-bg);
+      border-color: var(--danger);
+      color: var(--text-main);
+    }
+
+    .quiz-feedback {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      line-height: 1.45;
+      display: none;
+    }
+    .quiz-feedback.show {
+      display: block;
+    }
+    .quiz-feedback.correct {
+      background: var(--success-bg);
+      border: 1px solid var(--success);
+      color: var(--text-main);
+    }
+    .quiz-feedback.wrong {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger);
+      color: var(--text-main);
+    }
+
+    .lesson-footer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+    }
+
+    /* Live File Viewer Drawer/Box */
+    #liveSectionSourceBox {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    @media (max-width: 960px) {
+      .academy-layout {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+      .curriculum-sidebar {
+        position: static;
+        height: auto;
+      }
+      .module-nav-list {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 6px;
+      }
+      .module-nav-btn {
+        min-width: 230px;
+        flex: 0 0 auto;
+      }
+      .lesson-card, .checkpoint-card {
+        padding: 18px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="brand-wrap">
+      <div class="brand-icon">DR</div>
+      <div>
+        <div class="brand-title">Deep Roots Codebase Academy</div>
+        <div class="brand-subtitle">Interactive Section-by-Section Walkthrough, Syntax Guide &amp; Knowledge Checkpoints</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="progress-pill" title="Completed Knowledge Checkpoints">
+        <span>Mastery: <strong id="masteryCountText">0 / 10</strong> Modules (<span id="masteryScoreText">0</span>%)</span>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="masteryBarFill"></div>
+        </div>
+      </div>
+      <a href="./index.html" class="btn">🌿 Open Live Web App</a>
+      <a href="./docs.html" class="btn">📘 Architecture Manual</a>
+      <button type="button" class="btn" id="themeToggleBtn">🌓 Theme</button>
+      <button type="button" class="btn" id="resetProgressBtn" title="Clear saved quiz progress">↺ Reset Quiz Progress</button>
+    </div>
+  </header>
+
+  <div class="academy-layout">
+    <!-- Left Sidebar: 10 Manageable Code Sections -->
+    <aside class="curriculum-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-heading">
+          <span>10 Modular Code Sections</span>
+          <span style="font-family:var(--font-mono);font-size:0.7rem;">code-sections/</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;line-height:1.45;">
+          <code>index.html</code> (18,501 lines) is split into 10 fast-loading section files in <code>code-sections/</code>. Select any section below to study its code and take its Knowledge Checkpoint.
+        </p>
+        <div class="module-nav-list" id="moduleNavList"></div>
+      </div>
+
+      <div class="sidebar-card" style="font-size:0.8rem;color:var(--text-secondary);">
+        <div class="sidebar-heading"><span>Editing Workflow Tip</span></div>
+        <p style="line-height:1.45;margin-bottom:8px;">
+          You can open any file in <code>code-sections/</code> in your text editor (each code file is only 24–166 KB because the 1.7 MB plant JSON is isolated in Section 03).
+        </p>
+        <p style="line-height:1.45;">
+          After editing a section file, run:<br>
+          <code style="font-family:var(--font-mono);font-size:0.75rem;background:var(--bg-elevated);padding:3px 6px;border-radius:4px;display:inline-block;margin-top:4px;color:var(--primary);font-weight:700;">node code-sections/rebuild-index.js</code><br>
+          to automatically stitch all 10 sections back into <code>index.html</code>!
+        </p>
+      </div>
+    </aside>
+
+    <!-- Right Main Content: Active Module Walkthrough + Quiz -->
+    <main class="lesson-main" id="lessonMainContainer"></main>
+  </div>
+
+  <script>
+    const CURRICULUM_MODULES = [
+      {
+        id: "sec-01",
+        num: "Section 01",
+        file: "code-sections/01-head-and-styles.html",
+        lines: "Lines 1 – 3,249 (85 KB)",
+        title: "Document Head & CSS Design System",
+        overview: "Defines the HTML5 <head>, external icon/ZIP libraries, CSS Custom Properties (Design Tokens) for Light and Dark themes, dynamic user text-size scaling (--text-scale), responsive Flexbox/Grid layouts, and mobile @media breakpoints.",
+        syntaxCards: [
+          {
+            token: ":root & [data-theme=\"dark\"]",
+            title: "CSS Custom Properties (Variables)",
+            desc: "Variables like --primary: #235c36 and --bg-surface: #ffffff are defined on :root for Light Mode and overridden under [data-theme=\"dark\"]. When JavaScript flips document.body.dataset.theme, the entire UI re-colors automatically."
+          },
+          {
+            token: "html[data-text-scale=\"large\"]",
+            title: "Attribute Selector & Dynamic Text Scaling",
+            desc: "Matches the <html> tag when data-text-scale is set to standard, comfortable, large, or extra-large. Adjusts root font-size (16px to 22px) and --text-scale (1 to 1.4) so all rem and calc() sizes scale proportionally."
+          },
+          {
+            token: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))",
+            title: "Fluid Responsive CSS Grid",
+            desc: "Creates as many columns as fit on screen where each card is at least 300px wide (or 100% on narrow phones) and shares remaining space equally (1fr)—preventing horizontal scrollbars."
+          },
+          {
+            token: "#gardenPlannerModal:not([open])",
+            title: "Negation Pseudo-Class :not([open])",
+            desc: "HTML <dialog> elements add the [open] attribute when opened via .showModal(). Scoping display: none !important to :not([open]) guarantees closed dialogs stay hidden even when mobile media queries style #gardenPlannerModal[open]."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Dynamic User Text Scaling & CSS Math (calc + var)",
+            lines: "Lines 185 – 226",
+            code: `html {
+  font-size: 16px;
+  --text-scale: 1;
+  --ui-scale: 1;
+}
+html[data-text-scale="large"] {
+  font-size: 19.5px;
+  --text-scale: 1.25;
+  --ui-scale: 1.12;
+}
+body {
+  font-family: var(--font-sans);
+  font-size: calc(14px * var(--text-scale));
+}`,
+            explanation: [
+              "<code>--text-scale</code> and <code>--ui-scale</code> are custom CSS variables that act as multipliers across the entire stylesheet.",
+              "<code>calc(14px * var(--text-scale))</code> multiplies the base pixel size by the user's chosen scale factor in real time.",
+              "Elements sized in <code>rem</code> (root ems) automatically scale whenever <code>html { font-size: ... }</code> changes."
+            ]
+          },
+          {
+            title: "2. Mobile Full-Viewport Modal Architecture (@media query)",
+            lines: "Lines 2479 – 2501",
+            code: `#gardenPlannerModal:not([open]),
+#plannerAreaConditionsModal:not([open]) {
+  display: none !important;
+}
+@media (max-width: 900px) {
+  #gardenPlannerModal[open] {
+    width: 100vw !important;
+    height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+}`,
+            explanation: [
+              "<code>@media (max-width: 900px)</code> applies rules only when the browser viewport is 900px wide or narrower (tablets and phones).",
+              "<code>100dvh</code> stands for <strong>100% Dynamic Viewport Height</strong>, which automatically adjusts when mobile browser address bars expand or retract.",
+              "Targeting <code>#gardenPlannerModal[open]</code> ensures the flex container only activates when the dialog is actually open."
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "What happens in CSS when JavaScript changes <html data-text-scale=\"extra-large\">?",
+            options: [
+              "Only headings (h1-h3) change size; body text stays 14px.",
+              "Root font-size increases to 22px and --text-scale updates to 1.4, scaling both rem units and calc(Npx * var(--text-scale)) rules.",
+              "The browser zooms the entire page including images using CSS transform: scale(1.4).",
+              "It reloads the page from Cloud Firestore."
+            ],
+            correct: 1,
+            why: "html[data-text-scale=\"extra-large\"] sets font-size: 22px (scaling all rem units) and --text-scale: 1.4 (scaling all calc() font rules)."
+          },
+          {
+            q: "Why must mobile CSS rules that set 'display: flex !important' on a <dialog> use '#gardenPlannerModal[open]' instead of '#gardenPlannerModal'?",
+            options: [
+              "Because <dialog> elements are hidden by default until opened (which adds the [open] attribute); setting display: flex !important without [open] forces the closed modal to appear on page load.",
+              "Because [open] is required for dark mode to work.",
+              "Because CSS IDs cannot be used inside @media queries without attribute selectors.",
+              "Because [open] loads the plant images faster."
+            ],
+            correct: 0,
+            why: "A closed <dialog> relies on the browser's user-agent stylesheet (display: none) unless it has the [open] attribute. Overriding display with !important on the bare ID makes it visible even when closed!"
+          },
+          {
+            q: "What does the CSS unit '100dvh' do on mobile browsers?",
+            options: [
+              "Sets width to 100 pixels.",
+              "Matches 100% of the Dynamic Viewport Height, adapting smoothly to mobile browser toolbars.",
+              "Divides the vertical height by 100.",
+              "Forces desktop mode on phones."
+            ],
+            correct: 1,
+            why: "dvh (Dynamic Viewport Height) was introduced in modern CSS specifically so full-screen mobile layouts don't get clipped behind the mobile browser's address/navigation bars."
+          }
+        ]
+      },
+      {
+        id: "sec-02",
+        num: "Section 02",
+        file: "code-sections/02-main-layout-and-modals.html",
+        lines: "Lines 3,250 – 5,405 (131 KB)",
+        title: "HTML Body, Filter Sidebar, Drawers & Modals",
+        overview: "Contains all semantic HTML5 markup inside <body>: WCAG accessibility landmarks, top navigation bar, faceted filter accordion sidebar, main catalog grid, slide-out consultation staging drawer, and 12 native <dialog> modals.",
+        syntaxCards: [
+          {
+            token: "<dialog id=\"...\" aria-modal=\"true\">",
+            title: "Native HTML5 <dialog> Element",
+            desc: "Provides built-in modal behavior, backdrop dimming (::backdrop), Escape-key closing, and accessibility focus trapping when opened via dialogElement.showModal()."
+          },
+          {
+            token: "aria-live=\"polite\" & aria-label=\"...\"",
+            title: "WCAG / ADA Accessibility Attributes",
+            desc: "Screen readers announce text injected into #a11yLiveAnnouncer (aria-live=\"polite\") without interrupting the user, and aria-label gives icon-only buttons clear spoken names."
+          },
+          {
+            token: "data-category=\"sun\" data-value=\"Full Sun\"",
+            title: "Custom HTML Data Attributes (data-*)",
+            desc: "Stores structured metadata directly on HTML filter buttons. In JavaScript, el.dataset.category and el.dataset.value read these values cleanly without parsing button text."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Accessible Skip Link & Screen Reader Live Region",
+            lines: "Lines 3251 – 3256",
+            code: `<!-- Accessible Skip Navigation Link (WCAG 2.4.1) -->
+<a href="#mainCatalogRegion" class="skip-link">Skip to plant catalog</a>
+
+<!-- ARIA Live Region for Screen Reader Announcements (WCAG 4.1.3) -->
+<div id="a11yLiveAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>`,
+            explanation: [
+              "<code>.skip-link</code> remains off-screen until a keyboard user presses <code>Tab</code>, allowing them to jump straight past the header and filters to <code>#mainCatalogRegion</code>.",
+              "<code>#a11yLiveAnnouncer</code> is visually hidden (<code>.sr-only</code>) but read aloud by screen readers whenever JavaScript updates its text via <code>announceToScreenReader()</code>."
+            ]
+          },
+          {
+            title: "2. Faceted Filter Chips Using data-* Attributes",
+            lines: "Lines 3419 – 3431",
+            code: `<div class="accordion-content" id="filter-sun">
+  <div class="chip-filter" data-category="sun" data-value="Full Sun">☀️ Full Sun</div>
+  <div class="chip-filter" data-category="sun" data-value="Part Shade">⛅ Part Sun/Shade</div>
+  <div class="chip-filter" data-category="sun" data-value="Full Shade">☁️ Full Shade</div>
+</div>`,
+            explanation: [
+              "Each <code>.chip-filter</code> carries <code>data-category</code> (which state filter bucket to update) and <code>data-value</code> (the exact filter value to toggle).",
+              "This allows a single event listener loop in Section 10 to wire all 50+ filter chips across 10 categories with just a few lines of code!"
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "How does JavaScript read the value 'Full Sun' from <div class=\"chip-filter\" data-category=\"sun\" data-value=\"Full Sun\">?",
+            options: [
+              "chip.getAttribute('data-value') or chip.dataset.value",
+              "chip.innerHTML.split('☀️')[0]",
+              "document.readData('sun')",
+              "window.sunValue"
+            ],
+            correct: 0,
+            why: "HTML5 data-* attributes are accessed via element.dataset.value (or element.getAttribute('data-value')), decoupling UI labels/emojis from filter logic."
+          },
+          {
+            q: "What is the purpose of #a11yLiveAnnouncer with aria-live=\"polite\"?",
+            options: [
+              "It plays sound effects when buttons are clicked.",
+              "It allows assistive technologies (screen readers) to announce dynamic changes—like filter counts or staged plants—without moving keyboard focus.",
+              "It translates the page into Spanish.",
+              "It logs errors to Cloud Firestore."
+            ],
+            correct: 1,
+            why: "WCAG 4.1.3 Status Messages requires dynamic page updates (like 'Showing 24 native plants' or 'Added Butterfly Milkweed to Front Porch') to be announced to screen readers via an ARIA live region."
+          },
+          {
+            q: "Which native HTML element is used for modals like #gardenPlannerModal and #plantDetailModal?",
+            options: [
+              "<popup>",
+              "<window>",
+              "<dialog>",
+              "<iframe modal=\"true\">"
+            ],
+            correct: 2,
+            why: "The native HTML5 <dialog> element provides built-in top-layer rendering, ::backdrop styling, and Escape key handling via .showModal() and .close()."
+          }
+        ]
+      },
+      {
+        id: "sec-03",
+        num: "Section 03",
+        file: "code-sections/03-embedded-plant-catalog-data.html",
+        lines: "Lines 5,406 – 5,410 (1,721 KB)",
+        title: "Embedded Master Plant Catalog JSON (184 Species)",
+        overview: "Stores the complete 184-species botanical dataset inside a non-executing <script type=\"application/json\" id=\"embeddedMasterPlants\"> block so the app works 100% offline, loads instantaneously, and never fails due to CORS or network outages.",
+        syntaxCards: [
+          {
+            token: "<script type=\"application/json\">",
+            title: "Non-Executing JSON Data Island",
+            desc: "When a <script> tag has type=\"application/json\", the browser does not execute it as JavaScript. Instead, it holds raw JSON text in the DOM until read via JSON.parse(el.textContent)."
+          },
+          {
+            token: "JSON.parse(el.textContent)",
+            title: "Deserializing JSON into JS Objects",
+            desc: "Converts the raw JSON text string from #embeddedMasterPlants into a live JavaScript Array of 184 plant objects."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. The Embedded Master Plant Data Island",
+            lines: "Lines 5406 – 5410",
+            code: `<!-- Embedded Master Plant Data (184 Species from Shared Database) -->
+<script type="application/json" id="embeddedMasterPlants">
+[{"id":"amorpha-canescens","scientific_name":"Amorpha canescens","common_names":["Leadplant"], ...}]
+<\/script>`,
+            explanation: [
+              "Why is <code>index.html</code> 2.6 MB? Because <strong>1.72 MB of it is this single 5-line block</strong> containing all 184 plant records, botanical descriptions, seasonal maintenance guides, and image metadata!",
+              "By isolating these 5 lines into <code>code-sections/03-embedded-plant-catalog-data.html</code>, the other 9 code files in <code>code-sections/</code> drop to 24–166 KB so they open instantaneously in any text editor."
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "Why does the app use <script type=\"application/json\" id=\"embeddedMasterPlants\"> instead of fetching a separate plants.json file over HTTP?",
+            options: [
+              "Because browsers don't support external .json files.",
+              "It guarantees instant zero-latency startup, works offline in the field during consultations, and works even when opening index.html directly via file:// without a web server.",
+              "Because Firestore requires all JSON to be inside <script> tags.",
+              "To make the HTML file larger for SEO."
+            ],
+            correct: 1,
+            why: "Embedding the canonical catalog in a <script type=\"application/json\"> data island ensures offline reliability and avoids file:// CORS restrictions while still syncing live updates from Firestore in the background."
+          },
+          {
+            q: "Does the browser execute the contents of <script type=\"application/json\"> as JavaScript code?",
+            options: [
+              "Yes, it runs immediately on page load.",
+              "No—any <script> with type=\"application/json\" is treated as inert text data until JavaScript reads its .textContent and calls JSON.parse().",
+              "Only in Dark Mode.",
+              "Only when signed in as an Administrator."
+            ],
+            correct: 1,
+            why: "The HTML5 specification states that <script> tags with a MIME type other than JavaScript/module act as inert data blocks."
+          }
+        ]
+      },
+      {
+        id: "sec-04",
+        num: "Section 04",
+        file: "code-sections/04-state-utilities-and-invasive-species.html",
+        lines: "Lines 5,411 – 6,205 (43 KB)",
+        title: "Global State, Markdown Link Parser & Invasive Data",
+        overview: "Initializes the central 'state' object, security sanitization (escapeHtml/escapeXml), the rich Markdown & clickable botanical link parser (renderRichMarkdownText), the KC Sweet 16 & Keystone classifiers, and the Invasive Species & Vetted Contractors datasets.",
+        syntaxCards: [
+          {
+            token: "<script type=\"module\">",
+            title: "ES6 Module Scope",
+            desc: "Runs in strict mode ('use strict') with top-level scope isolation so internal variables don't pollute window unless explicitly attached (e.g., window.openGardenPlanner = openGardenPlanner)."
+          },
+          {
+            token: "const state = { ... }",
+            title: "Single Source of Truth State Pattern",
+            desc: "All active filters, staged plants, garden areas, current user, and active consultation live inside one central state object. UI functions read from state and re-render."
+          },
+          {
+            token: "str.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^)]+)\\)/g, ...)",
+            title: "Regular Expression (Regex) Link Parsing",
+            desc: "Matches Markdown links like [Missouri Botanical Garden](https://...) using capture groups $1 (label) and $2 (URL) and converts them into clickable <a href=\"...\" target=\"_blank\"> tags."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Preventing XSS & Rendering Clickable Botanical Links",
+            lines: "Lines 5415 – 5475",
+            code: `function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}`,
+            explanation: [
+              "Before injecting any user-entered text (like client names, custom area names, or notes) into <code>innerHTML</code>, <code>escapeHtml()</code> converts special characters like <code>&lt;</code> and <code>&gt;</code> into safe HTML entities.",
+              "<code>renderRichMarkdownText(str, plantRef)</code> first calls <code>ensureClickableSourceLinksInMarkdown()</code> and <code>escapeHtml()</code>, and then safely converts <code>**bold**</code>, <code>*italic*</code>, and <code>[Label](https://...)</code> into formatted HTML."
+            ]
+          },
+          {
+            title: "2. Identifying KC Sweet 16 & Keystone Native Species",
+            lines: "Lines 6188 – 6205",
+            code: `const SWEET_16_SCIENTIFIC = new Set([
+  "amorpha canescens", "amsonia illustris", "aquilegia canadensis",
+  "asclepias tuberosa", "baptisia australis", "bouteloua curtipendula", ...
+]);
+function isSweet16(plant) {
+  if (!plant) return false;
+  if (plant.is_sweet_16 === true) return true;
+  const sci = (plant.scientific_name || "").toLowerCase().trim();
+  return SWEET_16_SCIENTIFIC.has(sci);
+}`,
+            explanation: [
+              "Using a JavaScript <code>Set</code> (<code>SWEET_16_SCIENTIFIC.has(sci)</code>) provides $O(1)$ constant-time lookup when filtering or scoring hundreds of plants.",
+              "Normalizing <code>scientific_name</code> with <code>.toLowerCase().trim()</code> ensures case-insensitive matching."
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "Why do we call escapeHtml(str) before inserting user-typed text into element.innerHTML?",
+            options: [
+              "To make the font bold.",
+              "To prevent Cross-Site Scripting (XSS) and broken HTML if a user types characters like <, >, or \".",
+              "To compress the string for localStorage.",
+              "To translate scientific names into Latin."
+            ],
+            correct: 1,
+            why: "If unescaped text containing '<script>' or '\"' is placed into innerHTML, it can break the DOM structure or execute unintended script tags."
+          },
+          {
+            q: "Why does isSweet16(plant) store the 16 scientific names in a JavaScript 'Set' instead of an Array?",
+            options: [
+              "Because Arrays cannot hold strings in ES6.",
+              "Set.prototype.has() performs an instant O(1) hash lookup rather than scanning every element one by one.",
+              "Sets automatically sort plants by height.",
+              "Sets are required by CSS Grid."
+            ],
+            correct: 1,
+            why: "A Set is optimized for membership testing (.has()), which is called repeatedly during filtering, card rendering, and Garden Planner scoring."
+          },
+          {
+            q: "What does renderRichMarkdownText() do when it encounters '(Source: Missouri Botanical Garden)' in a plant's advisor description?",
+            options: [
+              "Deletes the parenthetical text.",
+              "Resolves the canonical botanical URL for that source and renders a clickable <a href=\"...\" target=\"_blank\">Missouri Botanical Garden</a> link.",
+              "Opens a popup error.",
+              "Converts the whole page into a PDF."
+            ],
+            correct: 1,
+            why: "ensureClickableSourceLinksInMarkdown() and renderRichMarkdownText() automatically upgrade plain-text source citations into clickable external links."
+          }
+        ]
+      },
+      {
+        id: "sec-05",
+        num: "Section 05",
+        file: "code-sections/05-auth-rbac-and-text-scaling.html",
+        lines: "Lines 6,206 – 6,873 (25 KB)",
+        title: "Advisor Auth, RBAC, Firestore User Sync & Text Scaling",
+        overview: "Implements salted SHA-256 password hashing via the browser's Web Crypto API, Role-Based Access Control (Guest vs. Advisor vs. Administrator), Cloud Firestore REST synchronization for user accounts, and the user text-size scaling preference manager.",
+        syntaxCards: [
+          {
+            token: "crypto.subtle.digest('SHA-256', data)",
+            title: "Web Crypto API (Cryptographic Hashing)",
+            desc: "Uses the browser's native hardware-accelerated SHA-256 digest so plain-text passwords are never stored in localStorage or Cloud Firestore—only salted hashes."
+          },
+          {
+            token: "async function ... / await fetch(url)",
+            title: "Async / Await & Promises",
+            desc: "Pauses execution inside an async function until a network request (fetch) or crypto digest finishes, without freezing the browser UI thread."
+          },
+          {
+            token: "localStorage.getItem / setItem",
+            title: "Web Storage API (localStorage)",
+            desc: "Persists key-value string data (like dr_text_scale or dr_firestore_project_id) across browser refreshes and offline sessions."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Salted SHA-256 Password Hashing with Web Crypto API",
+            lines: "Lines 6208 – 6220",
+            code: `async function hashPasswordWithSalt(password, salt) {
+  const enc = new TextEncoder();
+  const data = enc.encode(salt + ":" + password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}`,
+            explanation: [
+              "<code>TextEncoder().encode()</code> converts the <code>salt + ':' + password</code> string into a binary <code>Uint8Array</code> of UTF-8 bytes.",
+              "<code>await crypto.subtle.digest('SHA-256', data)</code> computes a 32-byte (256-bit) cryptographic hash.",
+              "<code>b.toString(16).padStart(2, '0')</code> converts each byte into a 2-digit hexadecimal string (producing a 64-character hex hash)."
+            ]
+          },
+          {
+            title: "2. Central Cloud Firestore Base URL Builder",
+            lines: "Lines 6271 – 6276",
+            code: `function getFirestoreBaseUrl() {
+  const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+  let dbId = localStorage.getItem('dr_firestore_database_id');
+  if (!dbId || dbId === 'default') dbId = '(default)';
+  return \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/\${dbId}/documents\`;
+}`,
+            explanation: [
+              "Every Cloud Firestore read/write in the app calls <code>getFirestoreBaseUrl()</code>.",
+              "Because it uses standard HTTPS REST URLs, the app can be hosted on any domain (GitHub Pages, <code>deeproots.org</code>, or local <code>file://</code>) and still communicate with the same Firestore database!"
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "How are advisor passwords stored in localStorage and Cloud Firestore?",
+            options: [
+              "As plain text so admins can read them.",
+              "Encrypted with CSS variables.",
+              "As a unique random salt plus a 64-character hexadecimal SHA-256 hash computed via crypto.subtle.digest('SHA-256', ...).",
+              "They are not stored anywhere."
+            ],
+            correct: 2,
+            why: "hashPasswordWithSalt() combines a per-user random salt with the password and hashes it using SHA-256 so raw passwords are never saved."
+          },
+          {
+            q: "If you move index.html to deeproots.org and want to point the app to a brand-new Google Cloud Firestore project, which function controls the endpoint URL?",
+            options: [
+              "renderGrid()",
+              "getFirestoreBaseUrl()",
+              "setUserTextScale()",
+              "escapeHtml()"
+            ],
+            correct: 1,
+            why: "getFirestoreBaseUrl() constructs the https://firestore.googleapis.com/v1/projects/${projectId}/databases/${dbId}/documents endpoint used by all cloud sync functions."
+          },
+          {
+            q: "What does the 'await' keyword do in 'const hashBuffer = await crypto.subtle.digest(...)'?",
+            options: [
+              "Blocks the entire computer for 5 seconds.",
+              "Waits for the asynchronous Promise returned by crypto.subtle.digest() to resolve and unwraps its result without freezing the browser UI.",
+              "Converts a string to uppercase.",
+              "Deletes old cache entries."
+            ],
+            correct: 1,
+            why: "crypto.subtle.digest() and fetch() are asynchronous and return Promises; 'await' pauses the async function until the Promise resolves."
+          }
+        ]
+      },
+      {
+        id: "sec-06",
+        num: "Section 06",
+        file: "code-sections/06-consultations-and-invasive-ui.html",
+        lines: "Lines 6,874 – 8,442 (80 KB)",
+        title: "Multi-Consultation Manager, Invasive UI & Cloud Sync",
+        overview: "Manages multiple client consultations per advisor (creating, switching, duplicating, deleting, and syncing to Cloud Firestore), renders the Invasive Species Identification & Removal catalog mode, and manages the list of custom Garden Areas.",
+        syntaxCards: [
+          {
+            token: "Promise.allSettled([...])",
+            title: "Parallel Resilient Async Requests",
+            desc: "Runs multiple fetch() requests in parallel and waits for all of them to finish, even if one fails—ideal for syncing or deleting redundant backup paths in Firestore."
+          },
+          {
+            token: "JSON.parse(JSON.stringify(obj))",
+            title: "Deep Cloning State Objects",
+            desc: "Creates an independent deep copy of nested arrays/objects (such as stagedPlants or gardenAreaProfiles) when saving or duplicating a consultation so edits don't mutate another consultation by reference."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Switching Between Client Consultations Safely",
+            lines: "Lines 7162 – 7210",
+            code: `function switchActiveConsultation(targetId, skipSaveCurrent = false) {
+  if (!skipSaveCurrent && state.activeConsultationId) {
+    saveActiveConsultation(false);
+  }
+  const target = state.consultations.find(c => c.id === targetId);
+  if (!target) return;
+
+  state.activeConsultationId = target.id;
+  state.clientMeta = JSON.parse(JSON.stringify(target.clientMeta || {}));
+  state.stagedPlants = JSON.parse(JSON.stringify(target.stagedPlants || []));
+  state.gardenAreas = JSON.parse(JSON.stringify(target.gardenAreas || [...]));
+  ...
+  renderStaging();
+  renderGrid();
+}`,
+            explanation: [
+              "First, <code>saveActiveConsultation(false)</code> snapshots the currently open consultation so no work is lost before switching.",
+              "Next, <code>state.consultations.find(c => c.id === targetId)</code> locates the requested client consultation.",
+              "Finally, deep copies of <code>clientMeta</code>, <code>stagedPlants</code>, and <code>gardenAreas</code> are loaded into <code>state</code> and the UI re-renders."
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "Why does switchActiveConsultation() call saveActiveConsultation() before loading the new target consultation?",
+            options: [
+              "To log out the current advisor.",
+              "To ensure any unsaved changes (staged plants, notes, or area edits) in the current consultation are preserved before switching to another client.",
+              "To clear the browser history.",
+              "To reset all plant filters."
+            ],
+            correct: 1,
+            why: "Saving the current consultation snapshot before switching guarantees zero data loss when jumping between multiple client projects."
+          },
+          {
+            q: "Why do we use JSON.parse(JSON.stringify(target.stagedPlants)) when copying arrays between a saved consultation and active state?",
+            options: [
+              "Because JavaScript arrays are assigned by reference; without a deep copy, modifying state.stagedPlants would accidentally mutate other consultations sharing that array reference.",
+              "Because localStorage only accepts numbers.",
+              "To sort the plants alphabetically.",
+              "To remove invasive species."
+            ],
+            correct: 0,
+            why: "In JavaScript, 'state.stagedPlants = target.stagedPlants' copies only the memory reference. Deep-cloning creates an independent copy."
+          }
+        ]
+      },
+      {
+        id: "sec-07",
+        num: "Section 07",
+        file: "code-sections/07-catalog-sync-and-admin-console.html",
+        lines: "Lines 8,443 – 9,989 (71 KB)",
+        title: "Catalog Loader, Firestore Parser & Admin Console",
+        overview: "Loads the 184-species catalog from the embedded JSON island, merges live Cloud Firestore edits on top while preserving canonical botanical fields, and powers the 4-tab Administrator Console (Advisor Roster, New Advisor Provisioning, All-Advisor Consultation Repository, and Approval Badges).",
+        syntaxCards: [
+          {
+            token: "new Map() — map.set(key, val) / map.get(key)",
+            title: "ES6 Map for Fast Record Merging",
+            desc: "Used in getEmbeddedMasterMap() and loadMasterPlants() to index all 184 plants by ID and scientific name so cloud updates merge cleanly without creating duplicate plants."
+          },
+          {
+            token: "Object.entries(fields).forEach(([k, v]) => ...)",
+            title: "Destructuring Object Entries",
+            desc: "Iterates through every [key, value] pair in a raw Firestore REST document and unwraps typed Firestore values (stringValue, arrayValue, booleanValue) into clean JS properties."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Unwrapping Cloud Firestore REST API Documents",
+            lines: "Lines 8846 – 8876",
+            code: `function parseFirestoreValue(val) {
+  if (val.stringValue !== undefined) return val.stringValue;
+  if (val.integerValue !== undefined) return Number(val.integerValue);
+  if (val.doubleValue !== undefined) return Number(val.doubleValue);
+  if (val.booleanValue !== undefined) return Boolean(val.booleanValue);
+  if (val.arrayValue !== undefined) {
+    return (val.arrayValue.values || []).map(parseFirestoreValue);
+  }
+  if (val.mapValue !== undefined) {
+    const out = {};
+    const fields = val.mapValue.fields || {};
+    Object.keys(fields).forEach(k => { out[k] = parseFirestoreValue(fields[k]); });
+    return out;
+  }
+  return null;
+}`,
+            explanation: [
+              "Firestore's REST API wraps every field in a type descriptor object—for example, <code>{ \"stringValue\": \"Amorpha canescens\" }</code> or <code>{ \"arrayValue\": { \"values\": [...] } }</code>.",
+              "<code>parseFirestoreValue(val)</code> is a <strong>recursive function</strong>: when it encounters an <code>arrayValue</code> or <code>mapValue</code>, it calls itself on each child element to return a clean, normal JavaScript object!"
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "Why is parseFirestoreValue(val) written as a recursive function (calling itself on arrayValue and mapValue)?",
+            options: [
+              "Because Firestore REST documents nest typed values (e.g., an arrayValue containing stringValues, or a mapValue containing nested fields).",
+              "To make the browser run faster on mobile.",
+              "Because JavaScript does not have for-loops.",
+              "To encrypt the plant descriptions."
+            ],
+            correct: 0,
+            why: "Recursion naturally handles arbitrarily nested arrays (like common_names or images) and maps (like seasonal_maintenance) in Firestore REST responses."
+          },
+          {
+            q: "What happens if an user is offline when loadMasterPlants() runs?",
+            options: [
+              "The page crashes with a blank screen.",
+              "It immediately loads the 184 species from #embeddedMasterPlants (and local cache) so the catalog and Garden Planner work 100% offline.",
+              "It redirects to google.com.",
+              "It deletes localStorage."
+            ],
+            correct: 1,
+            why: "loadMasterPlants() is offline-first: step 1 loads the embedded catalog synchronously so the UI renders immediately, and step 2 fetches cloud updates in the background."
+          }
+        ]
+      },
+      {
+        id: "sec-08",
+        num: "Section 08",
+        file: "code-sections/08-filtering-plant-cards-and-staging.html",
+        lines: "Lines 9,990 – 11,842 (96 KB)",
+        title: "Faceted Search/Filter Engine, Plant Cards & Staging",
+        overview: "Executes multi-faceted filtering (applyFilters) across 10 ecological categories + search query + Sweet 16 / Keystone toggles, sorts results (sortPlants), renders dynamic plant cards with bloom-color gradients (createPlantCard), manages the Consultation Staging Drawer, and handles role-aware plant edits/approvals.",
+        syntaxCards: [
+          {
+            token: "state.allPlants.filter(plant => { ... })",
+            title: "Array.prototype.filter() Predicate",
+            desc: "Evaluates every plant against active search terms and facet sets. Only plants where the callback returns true are included in state.filteredPlants."
+          },
+          {
+            token: "plant.common_names?.[0] || plant.scientific_name",
+            title: "Optional Chaining (?.) & Logical OR Fallback (||)",
+            desc: "Safely accesses the first common name without throwing a TypeError if common_names is undefined or null, falling back to scientific_name."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Faceted Filtering Logic (AND across categories, OR within a category)",
+            lines: "Lines 9990 – 10065",
+            code: `function applyFilters() {
+  const q = state.searchQuery.toLowerCase().trim();
+  state.filteredPlants = state.allPlants.filter(plant => {
+    if (plant.is_invasive === true) return false;
+    if (state.onlySweet16 && !isSweet16(plant)) return false;
+    if (state.onlyKeystone && !isKcKeystone(plant)) return false;
+
+    // Sunlight facet check
+    if (state.filters.sun.size > 0) {
+      const plantSun = toArray(plant.light_requirements);
+      const match = Array.from(state.filters.sun).some(sel =>
+        plantSun.some(ps => ps.toLowerCase().includes(sel.toLowerCase()))
+      );
+      if (!match) return false;
+    }
+    return true;
+  });
+  sortPlants();
+  renderGrid();
+}`,
+            explanation: [
+              "Notice how faceted search works: if a user selects <em>Full Sun</em> AND <em>Dry Moisture</em>, both conditions must pass (<strong>AND</strong> across categories).",
+              "Within a single category (e.g., selecting both <em>Yellow</em> and <em>Purple</em> in Bloom Color), <code>Array.from(state.filters.color).some(...)</code> checks if <strong>any</strong> selected color matches (<strong>OR</strong> within a category)."
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "In applyFilters(), what is the difference between selecting multiple chips in the SAME category (e.g. Yellow + Purple bloom color) vs. DIFFERENT categories (e.g. Full Sun + Dry Soil)?",
+            options: [
+              "Both use AND logic.",
+              "Selections within the same category use OR (.some()), while selections across different categories use AND (each category block must pass).",
+              "Only one filter chip can be active at a time.",
+              "Filters only apply to invasive plants."
+            ],
+            correct: 1,
+            why: "Standard e-commerce and botanical faceted search uses OR within a facet (Yellow OR Purple flowers) and AND across facets (must also tolerate Full Sun AND Dry Soil)."
+          },
+          {
+            q: "What does the expression 'plant.common_names?.[0] || plant.scientific_name' evaluate to if plant.common_names is undefined?",
+            options: [
+              "It throws an Uncaught TypeError and stops rendering.",
+              "It safely evaluates to plant.scientific_name because optional chaining (?.) short-circuits to undefined and || returns the fallback.",
+              "It returns null.",
+              "It returns an empty array []."
+            ],
+            correct: 1,
+            why: "Optional chaining (?.) prevents 'Cannot read properties of undefined' errors and hands control to the || fallback."
+          }
+        ]
+      },
+      {
+        id: "sec-09",
+        num: "Section 09",
+        file: "code-sections/09-reports-pdf-and-docx-generators.html",
+        lines: "Lines 11,843 – 15,282 (166 KB)",
+        title: "Citation Engine, Preliminary PDF & Word (.docx) Generators",
+        overview: "Resolves botanical citations into clickable links, generates the client-ready Preliminary Report HTML preview, builds a genuine multi-page binary PDF 1.4 file from scratch in pure JavaScript (buildPreliminaryReportPdfBytes), and builds a formatted Word .docx file by injecting OpenXML into a ZIP archive.",
+        syntaxCards: [
+          {
+            token: "new Blob([pdfBytes], { type: 'application/pdf' })",
+            title: "Binary Blob & Object URL Downloads",
+            desc: "Wraps raw binary bytes (Uint8Array) into a browser Blob so URL.createObjectURL(blob) or navigator.share() can download or share a real .pdf or .docx file with zero server backend."
+          },
+          {
+            token: "/Type /Action /S /URI /URI (https://...)",
+            title: "PDF 1.4 Interactive Link Annotations",
+            desc: "Inside buildPreliminaryReportPdfBytes(), clickable links on PDF pages are created by emitting PDF /Subtype /Link annotation rectangles mapped to the exact (x, y) coordinates of link tokens."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Concise Preliminary Report Plant Cards (Description + Clickable Source Links)",
+            lines: "Lines 13265 – 13305",
+            code: `const rawDesc = ensureClickableSourceLinksInMarkdown(
+  resolved.advisor_description || p.advisor_description || '',
+  resolved
+);
+const descHtml = rawDesc ? renderRichMarkdownText(rawDesc, resolved) : '';`,
+            explanation: [
+              "In the Preliminary Report, each staged plant card focuses on its botanical specs and full <code>advisor_description</code> (with Wildlife and Care/Maintenance sub-bullets omitted so cards stay clean and readable).",
+              "<code>ensureClickableSourceLinksInMarkdown()</code> guarantees that source citations in the description become clickable links in both the HTML preview and the generated PDF!"
+            ]
+          },
+          {
+            title: "2. Native PDF 1.4 Binary Stream & Link Annotation Generator",
+            lines: "Lines 13549 – 14105",
+            code: `function wrapPdfRichMarkdownTokens(markdownText, maxWidthPt, fontSize, baseFontKey = 'F1', italicFontKey = 'F3', boldFontKey = 'F2', plantRef = null) {
+  const normalized = ensureClickableSourceLinksInMarkdown(markdownText || '', plantRef);
+  const segments = parseInlineMarkdownSegments(normalized, plantRef);
+  // Splits text into words, tracks exact point width on each line,
+  // and records linkUrl coordinates for PDF /Annot rectangles!
+}`,
+            explanation: [
+              "Unlike screenshot-based PDF libraries that produce blurry images with unclickable links, <code>buildPreliminaryReportPdfBytes()</code> constructs real PDF 1.4 vector text streams (<code>BT ... ET</code>), embeds JPEG thumbnails, never truncates descriptions, and attaches clickable <code>/Subtype /Link</code> annotations over every URL!"
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "How does the Preliminary Report PDF generator make botanical source links clickable inside the downloaded .pdf file?",
+            options: [
+              "PDFs cannot have clickable links.",
+              "wrapPdfRichMarkdownTokens() tracks the exact (x, y, width, height) coordinates of each link token and emits a PDF /Subtype /Link annotation with /S /URI (https://...) on that page.",
+              "It embeds an <iframe> inside the PDF.",
+              "It sends the HTML to an external server."
+            ],
+            correct: 1,
+            why: "In the PDF 1.4 specification, clickable regions are defined by /Annot objects of /Subtype /Link with a /Rect [x1 y1 x2 y2] and a /URI action."
+          },
+          {
+            q: "Why were the Wildlife and Maintenance sub-bullets removed from the individual plant cards in the Preliminary Report?",
+            options: [
+              "Because native plants don't support wildlife.",
+              "To keep individual plant cards on the Preliminary Report concise and prevent text overcrowding while preserving the full advisor description and clickable links.",
+              "Because PDF files only allow 50 words per page.",
+              "Because Word .docx files don't support bullet points."
+            ],
+            correct: 1,
+            why: "Keeping just the botanical specs and full advisor description on Preliminary Report cards prevents oversized cards while retaining complete seasonal care guides in the full Word (.docx) consultation report."
+          }
+        ]
+      },
+      {
+        id: "sec-10",
+        num: "Section 10",
+        file: "code-sections/10-events-and-garden-planner.html",
+        lines: "Lines 15,283 – 18,501 (152 KB)",
+        title: "Event Listeners & Guided Garden Area Planner Engine",
+        overview: "Wires all DOM event listeners (setupEventListeners), defines the 6 architectural planting matrix layers (PLANNER_LAYER_METADATA), manages the 2-step Guided Garden Planner workflow (Setup Wizard -> Zone Recommendations), and calculates weighted ecological match scores (getPlantRecommendationsForArea).",
+        syntaxCards: [
+          {
+            token: "element?.addEventListener('click', (e) => { ... })",
+            title: "DOM Event Listeners & Event Object (e)",
+            desc: "Registers a callback function that runs whenever the user clicks/taps the element. Using e.stopPropagation() on nested buttons (like 'Edit' or 'Delete' inside a zone card) prevents triggering the parent card's click handler."
+          },
+          {
+            token: "results.sort(comparePlannerRecommendations)",
+            title: "Custom Comparator Sorting Function",
+            desc: "Sorts recommendations by weighted match percentage (including the +10% KC Sweet 16 bonus margin for qualifying plants), criteria qualification, Sweet 16 status, raw score, and Keystone status."
+          }
+        ],
+        walkthroughs: [
+          {
+            title: "1. Ecological Scoring & +10% KC Sweet 16 Bonus Margin",
+            lines: "Lines 17435 – 17475",
+            code: `const SWEET_16_MATCH_MARGIN_PCT = 10;
+
+function getRecommendationWeightedMatchPct(rec) {
+  if (!rec) return 0;
+  const baseMatchPct = typeof rec.matchPct === 'number'
+    ? rec.matchPct
+    : Math.min(100, Math.round(((rec.score || 0) / 135) * 100));
+  const plantIsSweet16 = Boolean(rec.isSweet16 !== undefined ? rec.isSweet16 : (rec.plant && isSweet16(rec.plant)));
+  const qualifies = rec.matchesCriteria !== false;
+  return baseMatchPct + ((plantIsSweet16 && qualifies) ? SWEET_16_MATCH_MARGIN_PCT : 0);
+}`,
+            explanation: [
+              "<code>getPlantRecommendationsForArea(profile)</code> scores every non-invasive species up to 135 points across Sunlight (35 pts), Moisture (30 pts), Soil Texture (+6 pts), Structural Layer (25 pts), Maintenance (15 pts), Bloom Color (15 pts), and Ecological Superchargers (Sweet 16 +12 pts, Keystone +8 pts).",
+              "Disqualifying mismatches (e.g., a shade-only plant in a Full Sun zone, or a layer not checked for that zone) immediately exclude the plant (<code>isDisqualified = true</code>).",
+              "Qualifying <strong>KC Sweet 16</strong> species receive an additional <code>+10%</code> weighted priority margin in <code>comparePlannerRecommendations()</code> so proven homeowner-friendly flagship natives surface at the top of each layer (capped at top 6 per layer)."
+            ]
+          },
+          {
+            title: "2. Mobile-Optimized Horizontal Zone Switcher & Auto-Scroll",
+            lines: "Lines 17410 – 17422",
+            code: `const activeAreaCard = roster.querySelector('.planner-area-card.active');
+if (activeAreaCard && typeof activeAreaCard.scrollIntoView === 'function') {
+  try { activeAreaCard.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
+}`,
+            explanation: [
+              "On mobile screens (<code>&lt;= 900px</code>), <code>#plannerWizardAreasList</code> and <code>#plannerAreasRoster</code> transform into swipeable horizontal pill strips.",
+              "Calling <code>scrollIntoView({ block: 'nearest', inline: 'center' })</code> smoothly centers the active zone pill in the horizontal strip whenever the user switches zones or steps through the workflow."
+            ]
+          }
+        ],
+        quiz: [
+          {
+            q: "In getPlantRecommendationsForArea(profile), how many top recommended species are displayed per selected architectural layer?",
+            options: [
+              "All 184 species in one giant list.",
+              "Strictly the top 6 highest-scoring species per selected architectural layer.",
+              "Only 1 plant per garden.",
+              "Randomly chosen plants."
+            ],
+            correct: 1,
+            why: "Each selected architectural layer (Groundcover, Seasonal/Herbaceous, Structural, Understory, Canopy, Vine) is capped at its top 6 highest-matching species (items = allItems.slice(0, 6)) so advisors and clients get a curated, actionable matrix."
+          },
+          {
+            q: "Why do nested buttons inside a zone card (like the 'Edit' button) call 'e.stopPropagation()' inside their click listener?",
+            options: [
+              "To close the browser tab.",
+              "To prevent the click event from bubbling up to the parent .planner-area-card and triggering a zone switch instead of opening the Edit Conditions modal.",
+              "To disable CSS animations.",
+              "To save data to localStorage."
+            ],
+            correct: 1,
+            why: "In the DOM event model, clicks bubble up from child elements to parent elements. e.stopPropagation() stops the parent card's click listener from firing when you tap the child 'Edit' or 'Delete' button."
+          },
+          {
+            q: "After you edit any of the 10 modular files in code-sections/, what command rebuilds index.html, test.html, and test/index.html?",
+            options: [
+              "npm start",
+              "node code-sections/rebuild-index.js",
+              "python server.py",
+              "git init"
+            ],
+            correct: 1,
+            why: "Running 'node code-sections/rebuild-index.js' strips the section header comments and stitches all 10 files in code-sections/ back into index.html, test.html, and test/index.html."
+          }
+        ]
+      }
+    ];
+
+    // State & Persistence in localStorage
+    const STORAGE_KEY = "dr_code_academy_progress_v1";
+    let progress = {
+      activeModuleIdx: 0,
+      answers: {}, // { "sec-01_0": 1, ... }
+      completedModules: {} // { "sec-01": true, ... }
+    };
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          progress = {
+            activeModuleIdx: parsed.activeModuleIdx || 0,
+            answers: parsed.answers || {},
+            completedModules: parsed.completedModules || {}
+          };
+        }
+      } catch (e) {}
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      } catch (e) {}
+      updateHeaderMastery();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function updateHeaderMastery() {
+      let totalQ = 0;
+      let correctQ = 0;
+      let completedCount = 0;
+
+      CURRICULUM_MODULES.forEach(mod => {
+        let modAllCorrect = true;
+        mod.quiz.forEach((qObj, qIdx) => {
+          totalQ++;
+          const key = `${mod.id}_${qIdx}`;
+          if (progress.answers[key] === qObj.correct) {
+            correctQ++;
+          } else {
+            modAllCorrect = false;
+          }
+        });
+        if (modAllCorrect && mod.quiz.length > 0) {
+          progress.completedModules[mod.id] = true;
+          completedCount++;
+        } else {
+          delete progress.completedModules[mod.id];
+        }
+      });
+
+      const pct = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
+      document.getElementById("masteryCountText").textContent = `${completedCount} / ${CURRICULUM_MODULES.length}`;
+      document.getElementById("masteryScoreText").textContent = pct;
+      document.getElementById("masteryBarFill").style.width = `${pct}%`;
+    }
+
+    function renderSidebarNav() {
+      const listEl = document.getElementById("moduleNavList");
+      listEl.innerHTML = "";
+
+      CURRICULUM_MODULES.forEach((mod, idx) => {
+        const isDone = Boolean(progress.completedModules[mod.id]);
+        const isActive = idx === progress.activeModuleIdx;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `module-nav-btn ${isActive ? "active" : ""}`;
+        btn.innerHTML = `
+          <div style="min-width:0;">
+            <div class="module-nav-num">${escapeHtml(mod.num)}</div>
+            <div class="module-nav-title">${escapeHtml(mod.title)}</div>
+            <div class="module-nav-meta">${escapeHtml(mod.lines)}</div>
+          </div>
+          <div class="module-status-badge ${isDone ? "completed" : ""}" title="${isDone ? "Checkpoint Passed!" : "Checkpoint Pending"}">
+            ${isDone ? "✓" : idx + 1}
+          </div>
+        `;
+        btn.addEventListener("click", () => {
+          progress.activeModuleIdx = idx;
+          saveProgress();
+          renderSidebarNav();
+          renderActiveLesson();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+        listEl.appendChild(btn);
+      });
+    }
+
+    function renderActiveLesson() {
+      const mod = CURRICULUM_MODULES[progress.activeModuleIdx] || CURRICULUM_MODULES[0];
+      const container = document.getElementById("lessonMainContainer");
+      const isDone = Boolean(progress.completedModules[mod.id]);
+
+      const syntaxHtml = mod.syntaxCards.map(sc => `
+        <div class="syntax-card">
+          <span class="syntax-token">${escapeHtml(sc.token)}</span>
+          <div class="syntax-title">${escapeHtml(sc.title)}</div>
+          <div class="syntax-desc">${escapeHtml(sc.desc)}</div>
+        </div>
+      `).join("");
+
+      const walkthroughHtml = mod.walkthroughs.map(wt => `
+        <div class="walkthrough-item">
+          <div class="walkthrough-header">
+            <span class="walkthrough-title">${escapeHtml(wt.title)}</span>
+            <span class="walkthrough-lines">${escapeHtml(wt.lines)} in index.html</span>
+          </div>
+          <pre class="code-pre">${escapeHtml(wt.code)}</pre>
+          <div class="walkthrough-explanation">
+            <strong>How It Works:</strong>
+            <ul>
+              ${wt.explanation.map(item => `<li>${item}</li>`).join("")}
+            </ul>
+          </div>
+        </div>
+      `).join("");
+
+      const quizHtml = mod.quiz.map((qObj, qIdx) => {
+        const key = `${mod.id}_${qIdx}`;
+        const savedAns = progress.answers[key];
+        const hasAnswered = savedAns !== undefined;
+        const isCorrect = savedAns === qObj.correct;
+
+        const optsHtml = qObj.options.map((optText, oIdx) => {
+          let stateClass = "";
+          if (hasAnswered) {
+            if (oIdx === qObj.correct) stateClass = "correct";
+            else if (oIdx === savedAns && savedAns !== qObj.correct) stateClass = "wrong";
+          }
+          const letter = String.fromCharCode(65 + oIdx);
+          return `
+            <button type="button" class="quiz-opt-btn ${stateClass}" data-qidx="${qIdx}" data-oidx="${oIdx}">
+              <span style="font-weight:800;color:var(--primary);flex-shrink:0;">${letter}.</span>
+              <span>${escapeHtml(optText)}</span>
+            </button>
+          `;
+        }).join("");
+
+        return `
+          <div class="quiz-question-box">
+            <div class="quiz-q-title">Question ${qIdx + 1} of ${mod.quiz.length}: ${escapeHtml(qObj.q)}</div>
+            <div class="quiz-options">
+              ${optsHtml}
+            </div>
+            <div class="quiz-feedback ${hasAnswered ? "show" : ""} ${isCorrect ? "correct" : "wrong"}" id="feedback_${qIdx}">
+              ${hasAnswered ? (isCorrect
+                ? `<strong>✅ Correct!</strong> ${escapeHtml(qObj.why)}`
+                : `<strong>❌ Not quite.</strong> ${escapeHtml(qObj.why)}`
+              ) : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const prevIdx = progress.activeModuleIdx > 0 ? progress.activeModuleIdx - 1 : null;
+      const nextIdx = progress.activeModuleIdx < CURRICULUM_MODULES.length - 1 ? progress.activeModuleIdx + 1 : null;
+
+      container.innerHTML = `
+        <!-- Module Overview & File Link Card -->
+        <section class="lesson-card">
+          <div class="lesson-banner">
+            <div style="min-width:0;flex:1;">
+              <div class="badge-row">
+                <span class="pill-badge">${escapeHtml(mod.num)} of 10</span>
+                <span class="pill-badge mono">📄 ${escapeHtml(mod.file)}</span>
+                <span class="pill-badge mono">📍 ${escapeHtml(mod.lines)}</span>
+                ${isDone ? `<span class="pill-badge" style="background:var(--success-bg);color:var(--success);border-color:var(--success);">✓ Checkpoint Completed</span>` : ""}
+              </div>
+              <h1 class="lesson-title">${escapeHtml(mod.title)}</h1>
+              <p class="lesson-overview">${escapeHtml(mod.overview)}</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;">
+              <button type="button" class="btn btn-primary" id="previewSectionCodeBtn">
+                🔍 Inspect Full Section File (${escapeHtml(mod.file.split("/")[1])})
+              </button>
+              <a href="./${encodeURI(mod.file)}" target="_blank" rel="noopener" class="btn">
+                ↗ Open Raw File in New Tab
+              </a>
+            </div>
+          </div>
+
+          <div id="liveSectionSourceBox">
+            <div class="walkthrough-header">
+              <span class="walkthrough-title">Live File Contents: ${escapeHtml(mod.file)}</span>
+              <button type="button" class="btn" id="closeLiveSourceBtn" style="padding:3px 8px;font-size:0.75rem;">Close Preview ✕</button>
+            </div>
+            <pre class="code-pre" id="liveSectionSourcePre" style="max-height:420px;overflow-y:auto;">Loading section file...</pre>
+          </div>
+
+          <h3 class="section-h3">🧩 Key Syntax &amp; Language Concepts in This Section</h3>
+          <div class="syntax-grid">
+            ${syntaxHtml}
+          </div>
+        </section>
+
+        <!-- Annotated Code Walkthroughs -->
+        <section class="lesson-card">
+          <h3 class="section-h3">🔬 Line-by-Line Production Code Walkthrough</h3>
+          <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:14px;">
+            Below are actual excerpts from <code>${escapeHtml(mod.file)}</code> showing how these concepts work together in the Deep Roots app.
+          </p>
+          ${walkthroughHtml}
+        </section>
+
+        <!-- Knowledge Checkpoint Quiz -->
+        <section class="checkpoint-card" id="checkpointSection">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+            <div>
+              <h3 class="section-h3" style="margin-bottom:2px;">🎯 Knowledge Checkpoint: ${escapeHtml(mod.title)}</h3>
+              <p style="font-size:0.86rem;color:var(--text-muted);">
+                Answer all ${mod.quiz.length} questions correctly to earn your mastery badge for ${escapeHtml(mod.num)}.
+              </p>
+            </div>
+            <span class="pill-badge" id="moduleQuizStatusPill" style="${isDone ? "background:var(--success-bg);color:var(--success);border-color:var(--success);" : ""}">
+              ${isDone ? "🎉 All Correct — Module Mastered!" : "In Progress"}
+            </span>
+          </div>
+
+          ${quizHtml}
+
+          <div class="lesson-footer-nav">
+            <div>
+              ${prevIdx !== null ? `
+                <button type="button" class="btn" id="prevModuleBtn">
+                  ← Previous: ${escapeHtml(CURRICULUM_MODULES[prevIdx].num)}
+                </button>
+              ` : ""}
+            </div>
+            <div>
+              ${nextIdx !== null ? `
+                <button type="button" class="btn btn-primary" id="nextModuleBtn">
+                  Next Module: ${escapeHtml(CURRICULUM_MODULES[nextIdx].num)} — ${escapeHtml(CURRICULUM_MODULES[nextIdx].title)} →
+                </button>
+              ` : `
+                <button type="button" class="btn btn-primary" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+                  🏆 Back to Top
+                </button>
+              `}
+            </div>
+          </div>
+        </section>
+      `;
+
+      // Wire quiz option buttons
+      container.querySelectorAll(".quiz-opt-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const qIdx = Number(btn.dataset.qidx);
+          const oIdx = Number(btn.dataset.oidx);
+          progress.answers[`${mod.id}_${qIdx}`] = oIdx;
+          saveProgress();
+          renderSidebarNav();
+          renderActiveLesson();
+        });
+      });
+
+      // Wire Prev / Next navigation
+      document.getElementById("prevModuleBtn")?.addEventListener("click", () => {
+        progress.activeModuleIdx = prevIdx;
+        saveProgress();
+        renderSidebarNav();
+        renderActiveLesson();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      document.getElementById("nextModuleBtn")?.addEventListener("click", () => {
+        progress.activeModuleIdx = nextIdx;
+        saveProgress();
+        renderSidebarNav();
+        renderActiveLesson();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      // Wire Live Section Code Inspector
+      document.getElementById("previewSectionCodeBtn")?.addEventListener("click", async () => {
+        const box = document.getElementById("liveSectionSourceBox");
+        const pre = document.getElementById("liveSectionSourcePre");
+        if (!box || !pre) return;
+        box.style.display = "block";
+        try {
+          const res = await fetch(`./${mod.file}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          // Show up to first 350 lines in inline preview so even Section 3 (1.7MB single line) doesn't lag the preview box
+          const previewText = text.length > 65000
+            ? text.slice(0, 65000) + "\n\n/* ... [Preview truncated at 65 KB for speed — open file in text editor to view full content] ... */"
+            : text;
+          pre.textContent = previewText;
+        } catch (err) {
+          pre.textContent = `Note: Your browser blocked fetch() on local file:// URLs. You can open "${mod.file}" directly in your text editor or view this page via a local server / GitHub Pages!`;
+        }
+      });
+
+      document.getElementById("closeLiveSourceBtn")?.addEventListener("click", () => {
+        const box = document.getElementById("liveSectionSourceBox");
+        if (box) box.style.display = "none";
+      });
+    }
+
+    // Theme toggle
+    document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
+      const htmlEl = document.documentElement;
+      const next = htmlEl.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      htmlEl.setAttribute("data-theme", next);
+      localStorage.setItem("dr_academy_theme", next);
+    });
+
+    // Reset quiz progress
+    document.getElementById("resetProgressBtn")?.addEventListener("click", () => {
+      if (confirm("Reset all Knowledge Checkpoint quiz answers and progress?")) {
+        progress.answers = {};
+        progress.completedModules = {};
+        saveProgress();
+        renderSidebarNav();
+        renderActiveLesson();
+      }
+    });
+
+    // Init
+    const savedTheme = localStorage.getItem("dr_academy_theme");
+    if (savedTheme === "dark" || savedTheme === "light") {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    }
+    loadProgress();
+    updateHeaderMastery();
+    renderSidebarNav();
+    renderActiveLesson();
+  </script>
+</body>
+</html>

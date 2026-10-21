@@ -1,0 +1,804 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/04-state-utilities-and-invasive-species.html
+  Title: Section 4: Global State, Markdown/Link Utilities & Invasive Species Data
+  Source Lines in index.html: Lines 5411 – 6205 (795 lines)
+  Overview: Main ES Module entry, state object initialization, HTML/XML escaping, rich Markdown & botanical link parser (renderRichMarkdownText), invasive species dataset, contractor directory, and Sweet 16 / Keystone helpers.
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+  <!-- Main ES Module Application Logic -->
+  <script type="module">
+
+    // ==================== Global Utility Helpers ====================
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeXml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function renderRichMarkdownText(str, plantRef = null) {
+      if (!str) return '';
+      const normalized = typeof ensureClickableSourceLinksInMarkdown === 'function'
+        ? ensureClickableSourceLinksInMarkdown(str, plantRef)
+        : String(str);
+      let s = escapeHtml(normalized);
+      // Markdown bold: **text**
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--text-main);font-weight:700;">$1</strong>');
+      // Markdown italics: *text*
+      s = s.replace(/(^|[^*])\*([^*]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
+      // Markdown links: [text](url)
+      s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color:inherit;text-decoration:underline;font-weight:600;">$1</a>');
+      // Paragraph spacing
+      s = s.replace(/\n\n/g, '<div style="margin-top:8px;"></div>');
+      s = s.replace(/\n/g, '<br>');
+      return s;
+    }
+
+    // Application State
+    try { localStorage.removeItem('dr_gdrive_token'); } catch(e){}
+    const INVASIVE_SPECIES_CATALOG = [
+  {
+    "id": "inv-bush-honeysuckle",
+    "common_name": "Bush Honeysuckle",
+    "scientific_name": "Lonicera maackii",
+    "plant_type": "Deciduous Shrub (6\u201318 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2014/12/bush_honeysuckle_lonicera_maackii.jpg?itok=F01RQWg4",
+    "identification": "Opposite dark green ovate leaves, fragrant white-to-yellow spring flowers, paired bright red berries in autumn. Stems have hollow brown pith and shaggy striped bark. Retains green leaves weeks after native trees drop foliage.",
+    "removal_tips": "Pull small seedlings with roots intact (Extractigator). Cut larger shrubs at ground level and immediately paint the outer cut ring with 20\u201325% glyphosate or triclopyr within 5 minutes. Foliar spray in late fall after native leaf drop.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles",
+    "threat": "Allelopathic roots poison native tree and wildflower seedlings. Forms impenetrable dense shade preventing forest regeneration.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/bush-honeysuckle-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2014/12/bush_honeysuckle_lonicera_maackii.jpg?itok=F01RQWg4",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of bush honeysuckle leaves, paired flowers, and paired red fruit",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5392284.jpg",
+        "label": "Flowers",
+        "caption": "Fragrant paired tubular white-to-yellow flowers in spring",
+        "author": "John M. Randall, The Nature Conservancy",
+        "license": "CC BY-NC 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=5392284"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1237034.jpg",
+        "label": "Fruit / Berries",
+        "caption": "Bright red paired spherical berries maturing in autumn",
+        "author": "Chuck Bargeron, University of Georgia",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1237034"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5447999.jpg",
+        "label": "Growth Habit",
+        "caption": "Multi-stemmed upright spreading shrub forming dense thicket",
+        "author": "Leslie J. Mehrhoff, University of Connecticut",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=5447999"
+      }
+    ]
+  },
+  {
+    "id": "inv-japanese-honeysuckle",
+    "common_name": "Japanese Honeysuckle",
+    "scientific_name": "Lonicera japonica",
+    "plant_type": "Woody Climbing Vine",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Japanese_Honeysuckle_Lonicera_japonica.jpg?itok=dzXhZ1gX",
+    "identification": "Semi-evergreen opposite leaves, highly fragrant white-to-yellow tubular flowers, shiny black berries in late summer/fall. Twining reddish-brown hairy stems twist clockwise around supporting trees and shrubs.",
+    "removal_tips": "Hand-pull shallow runners when soil is moist. Sever thick climbing vines near ground level and paint cut stems with systemic herbicide. Apply late autumn foliar spray (2\u20133% glyphosate) when natives are dormant.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle",
+    "threat": "Girdles and topples saplings; blankets and smothers structural layer shrubs and prairie groundcovers.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/japanese-honeysuckle-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Japanese_Honeysuckle_Lonicera_japonica.jpg?itok=dzXhZ1gX",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of Japanese honeysuckle twining stems, paired tubular flowers, and black berries",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1150068.jpg",
+        "label": "Flowers",
+        "caption": "Fragrant white and yellow two-lipped tubular flowers in pairs",
+        "author": "Chuck Bargeron, University of Georgia",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1150068"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/0016120.jpg",
+        "label": "Foliage & Vine Habit",
+        "caption": "Opposite semi-evergreen leaves and twining climbing stems",
+        "author": "James H. Miller & Ted Bodner, Southern Weed Science Society",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=0016120"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2308108.jpg",
+        "label": "Fruit / Berries",
+        "caption": "Paired berries maturing from green to shiny black in autumn",
+        "author": "Chuck Bargeron, University of Georgia",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=2308108"
+      }
+    ]
+  },
+  {
+    "id": "inv-wintercreeper",
+    "common_name": "Wintercreeper",
+    "scientific_name": "Euonymus fortunei",
+    "plant_type": "Evergreen Groundcover & Vine",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Wintercreeper_Euonymus_fortunei.jpg?itok=d49KC-xY",
+    "identification": "Evergreen opposite, leathery, dark green oval leaves with distinct silvery-white veins and finely toothed margins. Climbs trees via aerial rootlets; climbing forms produce small pink capsules with orange seeds.",
+    "removal_tips": "Cut a 3-foot 'window' in all climbing vines around tree trunks to prevent fruiting and kill canopy growth. Dig ground roots or apply triclopyr ester with non-ionic surfactant during sunny warm winter days or early spring.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus",
+    "threat": "Forms a suffocating evergreen monoculture that blocks sunlight from native spring wildflowers and adds hazardous ice weight to trees.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/wintercreeper-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Wintercreeper_Euonymus_fortunei.jpg?itok=d49KC-xY",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of wintercreeper climbing vine, leathery leaves, and seed capsules",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2307141.jpg",
+        "label": "Foliage & Groundcover",
+        "caption": "Dense mat of evergreen opposite leaves with silvery veins",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=2307141"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5330075.jpg",
+        "label": "Forest Infestation",
+        "caption": "Extensive evergreen ground carpet displacing native woodland flora",
+        "author": "Chris Evans, University of Illinois",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=5330075"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/0016113.jpg",
+        "label": "Aerial Rootlets",
+        "caption": "Aerial rootlets enabling woody vines to climb tree trunks",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=0016113"
+      }
+    ]
+  },
+  {
+    "id": "inv-english-ivy",
+    "common_name": "English Ivy",
+    "scientific_name": "Hedera helix",
+    "plant_type": "Evergreen Climbing Vine",
+    "image_url": "https://bugwoodcloud.org/images/768x512/9005071.jpg",
+    "identification": "Alternate, thick, waxy evergreen leaves with 3–5 shallow lobes and pale veins. Adult flowering foliage becomes unlobed and diamond-shaped, bearing terminal clusters of greenish flowers and dark poisonous berries.",
+    "removal_tips": "Sever climbing stems in a clear band around tree bases (do not pull off bark). Carefully dig up ground root crowns; repeat mowing or targeted triclopyr spray with methylated seed oil.",
+    "ref_url": "https://www.invasive.org/browse/subinfo.cfm?sub=3026",
+    "threat": "Girdles and suffocates mature trees, traps moisture causing fungal rot, and creates barren ground deserts.",
+    "info_url": "https://www.invasive.org/browse/subinfo.cfm?sub=3026",
+    "control_url": "https://www.fs.usda.gov/database/feis/plants/vine/hedhel/all.html",
+    "ref_name": "Invasive.org Field Guide",
+    "control_name": "USDA Forest Service FEIS",
+    "images": [
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/9005071.jpg",
+        "label": "Juvenile Foliage & Stems",
+        "caption": "Alternate, waxy evergreen leaves with 3–5 shallow lobes and distinct light-colored veins",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Forestry Images",
+        "source_url": "https://www.forestryimages.org/browse/detail.cfm?imgnum=9005071"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2307149.jpg",
+        "label": "Climbing Habit & Aerial Rootlets",
+        "caption": "Heavy woody climbing stems clinging to tree bark with dense aerial rootlets",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Forestry Images",
+        "source_url": "https://www.forestryimages.org/browse/detail.cfm?imgnum=2307149"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5159060.jpg",
+        "label": "Mature Growth & Flowers",
+        "caption": "Unlobed adult flowering foliage bearing terminal umbels of flowers and dark berries",
+        "author": "Forest & Kim Starr, Starr Environmental",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Forestry Images",
+        "source_url": "https://www.forestryimages.org/browse/detail.cfm?imgnum=5159060"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5159061.jpg",
+        "label": "Vigorous Ground Infestation",
+        "caption": "Dense evergreen monoculture blanketing the forest floor and smothering native plants",
+        "author": "Forest & Kim Starr, Starr Environmental",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Forestry Images",
+        "source_url": "https://www.forestryimages.org/browse/detail.cfm?imgnum=5159061"
+      }
+    ]
+  },
+  {
+    "id": "inv-callery-pear",
+    "common_name": "Callery / Bradford Pear",
+    "scientific_name": "Pyrus calleryana",
+    "plant_type": "Deciduous Tree (20\u201340 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2010/06/callery_pear.jpg?itok=G7Bz3CQ4",
+    "identification": "Dense masses of white 5-petaled spring flowers with a distinct foul, rotting odor. Glossy leathery round leaves turning reddish-purple in late fall. Wild escapes produce sharp, tire-puncturing thorns.",
+    "removal_tips": "Chainsaw trees and treat cut stump immediately (within 5 minutes) with concentrated 25% triclopyr or glyphosate. Apply basal bark oil sprays to young saplings.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/callery-pear-bradford-pear",
+    "threat": "Cross-pollinates readily to invade pastures, roadsides, and prairies with impenetrable thorny thickets that destroy native grasslands.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/callery-pear-bradford-pear",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/callery-pear-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2010/06/callery_pear.jpg?itok=G7Bz3CQ4",
+        "label": "MDC Diagnostic Guide",
+        "caption": "Callery pear spring flowers, glossy leaves, and branching habit in full bloom",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/callery-pear-bradford-pear"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1539081.jpg",
+        "label": "Spring Flowers",
+        "caption": "5-petaled white blossoms with unpleasant rotting odor",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1539081"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1539087.jpg",
+        "label": "Fruit / Pomes",
+        "caption": "Small hard brownish-russet speckled pomes consumed and dispersed by birds",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1539087"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2308070.jpg",
+        "label": "Growth Form",
+        "caption": "Pyramidal to spreading tree canopy blooming along Missouri roadsides",
+        "author": "Dan Tenaglia, Missouriplants.com",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Missouriplants.com",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=2308070"
+      }
+    ]
+  },
+  {
+    "id": "inv-multiflora-rose",
+    "common_name": "Multiflora Rose",
+    "scientific_name": "Rosa multiflora",
+    "plant_type": "Thorny Shrub (10\u201315 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Multiflora_Rose_Rosa_multiflora.jpg?itok=Pkh-R-gW",
+    "identification": "Vigorous arching green-to-red stems with sharp curved prickles. Fringed (feather-like) stipules at the base of each leaf stalk (key diagnostic ID). Clusters of white flowers followed by small persistent red rose hips.",
+    "removal_tips": "Uproot whole plants with root claws or tractor pull. Cut thick canes and treat crowns with systemic herbicide. Controlled burns set back above-ground growth.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/multiflora-rose",
+    "threat": "Invades woodland borders and open pastures, creating dense thorny hedges that exclude wildlife and livestock.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/multiflora-rose",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/multiflora-rose-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Multiflora_Rose_Rosa_multiflora.jpg?itok=Pkh-R-gW",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of multiflora rose leaves with fringed stipules, flowers, and rose hips",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/multiflora-rose"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/0016232.jpg",
+        "label": "Flowers",
+        "caption": "Pyramidal clusters of numerous small 5-petaled white flowers",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=0016232"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1380237.jpg",
+        "label": "Diagnostic Fringed Stipule",
+        "caption": "Feathery fringed stipule at base of leaf stalk\u2014distinguishes multiflora from native roses",
+        "author": "Chris Evans, University of Illinois",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1380237"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/0016089.jpg",
+        "label": "Shrub Habit",
+        "caption": "Large arching thorny shrub forming impenetrable thicket",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=0016089"
+      }
+    ]
+  },
+  {
+    "id": "inv-garlic-mustard",
+    "common_name": "Garlic Mustard",
+    "scientific_name": "Alliaria petiolata",
+    "plant_type": "Biennial Herb (1\u20133 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2014/01/garlic_mustard_01-01-14.jpg?itok=joR5uHaQ",
+    "identification": "First year: low rosette of dark green kidney-shaped leaves. Second year: upright stems with triangular toothed leaves and small white 4-petaled cross flowers. Strong garlic aroma when any plant part is crushed.",
+    "removal_tips": "Hand-pull entire plants before seed capsules ripen (ensure entire S-shaped taproot is extracted). Bag and trash; do NOT compost as pulled plants continue ripening seeds.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/garlic-mustard",
+    "threat": "Releases toxic glucosinolates that sterilize soil by killing beneficial mycorrhizal fungi required by native tree roots.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/garlic-mustard",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/garlic-mustard-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2014/01/garlic_mustard_01-01-14.jpg?itok=joR5uHaQ",
+        "label": "MDC Diagnostic Guide",
+        "caption": "Garlic mustard upright flowering stalk with 4-petaled white flowers and toothed leaves",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/garlic-mustard"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1330037.jpg",
+        "label": "1st Year Rosette",
+        "caption": "First-year basal rosette with scalloped, kidney-shaped leaves",
+        "author": "Chris Evans, University of Illinois",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1330037"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1330041.jpg",
+        "label": "Seed Pods (Siliques)",
+        "caption": "Upright narrow seed capsules ripening hundreds of seeds per plant",
+        "author": "Chris Evans, University of Illinois",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1330041"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5270003.jpg",
+        "label": "Forest Infestation",
+        "caption": "Dense woodland carpet outcompeting native spring ephemerals",
+        "author": "Leslie J. Mehrhoff, University of Connecticut",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=5270003"
+      }
+    ]
+  },
+  {
+    "id": "inv-tree-of-heaven",
+    "common_name": "Tree of Heaven",
+    "scientific_name": "Ailanthus altissima",
+    "plant_type": "Deciduous Tree (40\u201370 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Tree-Of-Heaven_Ailanthus_altissima.jpg?itok=AaM8fVg9",
+    "identification": "Large pinnate leaves (1\u20133 ft long) with 10\u201340 leaflets, each having 1\u20132 glandular notches at the base. Crushed leaves smell like burnt peanut butter. Smooth light gray cantaloupe-patterned bark.",
+    "removal_tips": "NEVER simply cut down, or it will send up hundreds of aggressive root suckers. Use 'hack-and-squirt' or basal bark triclopyr in late summer/fall. Wait 30 days until tree dies before cutting.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/tree-heaven",
+    "threat": "Primary preferred breeding host for the destructive Spotted Lanternfly; spreads aggressive underground runner clones.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/tree-heaven",
+    "control_url": "https://extension.psu.edu/tree-of-heaven",
+    "ref_name": "MDC Field Guide",
+    "control_name": "Penn State / USDA Protocol",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/field-guide/Tree-Of-Heaven_Ailanthus_altissima.jpg?itok=AaM8fVg9",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of tree-of-heaven compound leaves, glandular teeth, flowers, and winged samaras",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/tree-heaven"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5402914.jpg",
+        "label": "Foliage & Glands",
+        "caption": "Long pinnately compound leaves showing diagnostic glandular notches at leaflet bases",
+        "author": "Annemarie Smith, ODNR Division of Forestry",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / ODNR Division of Forestry",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=5402914"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5533198.jpg",
+        "label": "Fruit / Samaras",
+        "caption": "Dense clusters of twisted papery winged samaras",
+        "author": "Richard Gardner, Bugwood.org",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=5533198"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1560105.jpg",
+        "label": "Bark Pattern",
+        "caption": "Smooth pale grey bark resembling cantaloupe rind",
+        "author": "Ohio State Weed Lab, The Ohio State University",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Ohio State Weed Lab",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1560105"
+      }
+    ]
+  },
+  {
+    "id": "inv-autumn-olive",
+    "common_name": "Autumn Olive",
+    "scientific_name": "Elaeagnus umbellata",
+    "plant_type": "Deciduous Shrub (up to 20 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2014/12/autumn_olive_elaeagnus_umbellata.jpg?itok=okNwqS7K",
+    "identification": "Undersides of leaves, young stems, and red berries are covered in dense silvery shimmering scales. Pale yellow fragrant tubular flowers in spring; dotted red berries in autumn.",
+    "removal_tips": "Cut stump treatment with 20% triclopyr ester or glyphosate. Basal bark application around bottom 15 inches of stems during dormant season.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/autumn-olive",
+    "threat": "Fixes atmospheric nitrogen into the soil, disrupting natural nutrient-poor prairie chemistry and outcompeting native shrubs.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/autumn-olive",
+    "control_url": "https://mdc.mo.gov/trees-plants/invasive-plants/autumn-olive-control",
+    "ref_name": "MDC Field Guide",
+    "control_name": "MDC Control Guide",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/mo_nature/media/images/2014/12/autumn_olive_elaeagnus_umbellata.jpg?itok=okNwqS7K",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of autumn olive silvery-scaled leaves, tubular flowers, and speckled berries",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/autumn-olive"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/1330008.jpg",
+        "label": "Silvery Underside",
+        "caption": "Dense shimmering silvery scales covering leaf undersides",
+        "author": "Chris Evans, University of Illinois",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=1330008"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/0016043.jpg",
+        "label": "Flowers",
+        "caption": "Fragrant pale yellow tubular 4-lobed spring flowers",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=0016043"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2188036.jpg",
+        "label": "Shrub Infestation",
+        "caption": "Large multi-stemmed spreading shrubs colonizing open field",
+        "author": "Chris Evans, University of Illinois",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / Invasive.org",
+        "source_url": "https://www.invasive.org/browse/detail.cfm?imgnum=2188036"
+      }
+    ]
+  },
+  {
+    "id": "inv-privet",
+    "common_name": "Privet",
+    "scientific_name": "Ligustrum sinense / vulgare",
+    "plant_type": "Semi-evergreen Shrub (8\u201315 ft)",
+    "image_url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/2022-02/Border_Privet_Ligustrum_obtusifolium.jpg?itok=MX3r10-O",
+    "identification": "Dense opposite, oval, dark green leaves with smooth edges. Clusters of heavily scented small white flowers in early summer followed by persistent dark blue-black berries.",
+    "removal_tips": "Uproot shallow root systems when young. Cut larger stems close to ground and apply 20% glyphosate or triclopyr to cut stump. Foliar spray in late fall.",
+    "ref_url": "https://mdc.mo.gov/discover-nature/field-guide/privets",
+    "threat": "Rapidly dominates woodland understories, preventing oak and hickory seedling regeneration and displacing native shrub layers.",
+    "info_url": "https://mdc.mo.gov/discover-nature/field-guide/privets",
+    "control_url": "https://moinvasives.org/project/invasive-privets-ligustrum/",
+    "ref_name": "MDC Field Guide",
+    "control_name": "Mo. Invasive Plant Council",
+    "images": [
+      {
+        "url": "https://mdc.mo.gov/sites/default/files/styles/gallery_main_image/public/2022-02/Border_Privet_Ligustrum_obtusifolium.jpg?itok=MX3r10-O",
+        "label": "MDC Diagnostic Guide",
+        "caption": "MDC field guide illustration of privet branch, opposite leaves, flower clusters, and dark berries",
+        "author": "Missouri Department of Conservation",
+        "license": "Educational Conservation Use",
+        "source_name": "MDC Field Guide",
+        "source_url": "https://mdc.mo.gov/discover-nature/field-guide/privets"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/0016061.jpg",
+        "label": "Flowers in Bloom",
+        "caption": "Dense panicles of fragrant white flowers blooming along branches in May",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/image/0016061"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2307079.jpg",
+        "label": "Fruit / Berries",
+        "caption": "Heavy clusters of persistent dark purple-black berries in winter (January)",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/image/2307079"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/5079012.jpg",
+        "label": "Foliage & Leaves",
+        "caption": "Opposite, oval dark green leaves with smooth margins characteristic of privet",
+        "author": "Troy Evans, Great Smoky Mountains National Park",
+        "license": "CC BY 3.0 US",
+        "source_name": "Bugwood.org / National Park Service",
+        "source_url": "https://www.invasive.org/browse/image/5079012"
+      },
+      {
+        "url": "https://bugwoodcloud.org/images/768x512/2307077.jpg",
+        "label": "Growth Habit & Thicket",
+        "caption": "Dense multi-stemmed privet thicket invading and dominating a woodland understory",
+        "author": "James H. Miller, USDA Forest Service",
+        "license": "Public Domain / CC BY 3.0 US",
+        "source_name": "Bugwood.org / USDA Forest Service",
+        "source_url": "https://www.invasive.org/browse/image/2307077"
+      }
+    ]
+  }
+];
+
+    const INVASIVE_REMOVAL_PROFESSIONALS = [
+      {
+        name: "Belfield Botanica Co.",
+        phone: "913.660.2420",
+        email: "BelfieldBotanica@gmail.com",
+        specialty: "Invasive removal, ecological planting, and stewardship",
+        url: "https://belfieldbotanica.com/"
+      },
+      {
+        name: "Bluestem Habitat Restoration",
+        phone: "816.714.8342",
+        email: "bluestemhabitatrestoration@gmail.com",
+        specialty: "Woodland restoration and woody invasive removal",
+        url: "https://bluestemhabitatrestoration.square.site/"
+      },
+      {
+        name: "Bur Oak Ventures",
+        phone: "816.974.3462",
+        email: "kyle@buroakventures.com",
+        specialty: "Brush management, mechanical and cut-stump removal",
+        url: "https://www.buroakventures.com/"
+      },
+      {
+        name: "Habitat Architects, LLC",
+        phone: "816.645.0026",
+        email: "",
+        specialty: "Large-scale invasive clearing and landscape restoration",
+        url: "https://www.habitatarchitects.net/"
+      },
+      {
+        name: "Kansas Property Services",
+        phone: "785.845.4072",
+        email: "kansaspropertyservices@gmail.com",
+        specialty: "Targeted invasive shrub and vine eradication",
+        url: ""
+      },
+      {
+        name: "Orris Horticulture",
+        phone: "573.355.0786 / 816.785.3773",
+        email: "travis@orrishorticulture.com, iris@orrishorticulture.com",
+        specialty: "Horticultural consulting, native plant care and invasive control",
+        url: "https://www.orrishorticulture.com/"
+      },
+      {
+        name: "Otto’s Environmental Improvements",
+        phone: "816.652.6886",
+        email: "",
+        specialty: "Habitat improvements and invasive species removal",
+        url: "https://ottosenvironmental.com/"
+      },
+      {
+        name: "Polli-Native",
+        phone: "913.701.4565",
+        email: "Paul@atgib.com, nanette@atgib.com",
+        specialty: "Pollinator habitat installation and invasive clearing",
+        url: "https://www.polli-native.com/"
+      },
+      {
+        name: "Rogue Natives",
+        phone: "913.244.7327",
+        email: "roguenativesllc@gmail.com",
+        specialty: "Native landscape establishment and weed management",
+        url: "https://roguenatives.godaddysites.com/"
+      },
+      {
+        name: "Grow Native! Professional Resource Guide",
+        phone: "",
+        email: "",
+        specialty: "Statewide directory of certified native landscape professionals and contractors",
+        url: "https://grownative.org/resource-guide/"
+      }
+    ];
+    window.INVASIVE_REMOVAL_PROFESSIONALS = INVASIVE_REMOVAL_PROFESSIONALS;
+
+    function openContractorsModal() {
+      const modal = document.getElementById('contractorsModal');
+      const list = document.getElementById('contractorsList');
+      if (!modal) return;
+      if (list && list.children.length === 0) {
+        INVASIVE_REMOVAL_PROFESSIONALS.forEach(pro => {
+          const item = document.createElement('div');
+          item.className = 'contractor-card-item';
+          item.style.cssText = 'padding:12px 14px;background:var(--bg-base);border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:6px;transition:box-shadow 0.15s, border-color 0.15s;';
+          
+          const phones = pro.phone ? pro.phone.split('/').map(p => p.trim()).filter(Boolean) : [];
+          const phoneHtml = phones.map(p => {
+            const digits = p.replace(/[^0-9]/g, '');
+            return `<a href="tel:${digits}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);font-weight:600;font-size:12px;" title="Call ${escapeHtml(pro.name)}">📞 ${escapeHtml(p)}</a>`;
+          }).join('');
+
+          const emails = pro.email ? pro.email.split(',').map(e => e.trim()).filter(Boolean) : [];
+          const emailHtml = emails.map(e => {
+            return `<a href="mailto:${e}" style="color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);font-weight:600;font-size:12px;" title="Email ${escapeHtml(pro.name)}">✉️ ${escapeHtml(e)}</a>`;
+          }).join('');
+
+          const webHtml = pro.url ? `<a href="${escapeHtml(pro.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);font-weight:700;font-size:12px;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;" title="Visit website">🌐 ${pro.name.includes('Grow Native') ? 'Official Directory' : 'Website'} &rarr;</a>` : '';
+
+          item.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;">
+              <strong style="color:var(--text-main);font-size:14px;font-weight:700;">${escapeHtml(pro.name)}</strong>
+              ${webHtml}
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.4;">${escapeHtml(pro.specialty)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;margin-top:2px;">
+              ${phoneHtml}
+              ${emailHtml}
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      // Configure backdrop click once
+      if (!modal.dataset.backdropReady) {
+        modal.dataset.backdropReady = 'true';
+        modal.addEventListener('click', (e) => {
+          const rect = modal.getBoundingClientRect();
+          const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height
+            && rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+          if (!isInDialog) {
+            modal.close();
+          }
+        });
+      }
+
+      try {
+        if (!modal.open) {
+          modal.showModal();
+        }
+      } catch (e) {
+        modal.setAttribute('open', '');
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+    window.openContractorsModal = openContractorsModal;
+
+    const state = {
+      catalogMode: 'native', // 'native' | 'invasive'
+      invasivePlants: INVASIVE_SPECIES_CATALOG,
+      stagedInvasives: JSON.parse(localStorage.getItem('dr_staged_invasives') || '[]'),
+      plantApprovals: JSON.parse(localStorage.getItem('dr_plant_approvals') || '[]'),
+      reportOptions: JSON.parse(localStorage.getItem('dr_report_options') || '{"invasivePresent":false,"birdNestBox":true,"birdBath":true,"batBox":false,"beeHabitat":true,"johnsonCounty":false,"wyandotteCounty":false,"rainwaterHarvesting":true}'),
+      allPlants: [],
+      filteredPlants: [],
+      stagedPlants: JSON.parse(localStorage.getItem('dr_staged_plants') || '[]'),
+      gardenAreas: JSON.parse(localStorage.getItem('dr_garden_areas') || '["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"]'),
+      clientMeta: JSON.parse(localStorage.getItem('dr_client_meta') || '{"name":"","address":"","date":"","advisor":"","notes":""}'),
+      gardenAreaProfiles: JSON.parse(localStorage.getItem('dr_garden_area_profiles') || '[]'),
+      activePlannerAreaIdx: 0,
+      activePlannerLayer: null,
+      plannerWorkflow: { status: 'setup_areas', currentStepAreaIdx: 0 },
+      customPlants: JSON.parse(localStorage.getItem('dr_custom_plants') || '{}'),
+      consultations: [],
+      activeConsultationId: null,
+      filters: {
+        search: '',
+        sweet16: false,
+        keystone: false,
+        habitat: new Set(),
+        light: new Set(),
+        moisture: new Set(),
+        height: new Set(),
+        type: new Set(),
+        layer: new Set(),
+        season: new Set(),
+        bloomColor: new Set(),
+        sociability: new Set(),
+        maintenance: new Set(),
+      },
+      sortOrder: localStorage.getItem('dr_sort_order') || 'common_asc',
+      defaultNameDisplay: localStorage.getItem('dr_default_name_display') || 'common_first',
+      currentUser: JSON.parse(localStorage.getItem('dr_current_user') || 'null'),
+      // No google drive token needed
+      gdriveToken: null,
+      activeModalPlant: null,
+      lastSyncTime: new Date().toLocaleTimeString()
+    };
+
+    function shouldShowScientificFirst() {
+      return state.defaultNameDisplay === 'scientific_first';
+    }
+
+    // Google Web Application Client ID (from client_secret_636374214354-idc96pfjogkq13cqochh48it37h7jele...)
+        // Authoritative Deep Roots Sweet 16 & Keystone definitions
+    const SWEET_16_SPECIES = new Set([
+      'echinacea purpurea', 'coreopsis lanceolata', 'symphyotrichum oblongifolium', 
+      'bouteloua curtipendula', 'asclepias verticillata', 'aquilegia canadensis',
+      'sporobolus heterolepis', 'zizia aurea', 'asclepias tuberosa', 'monarda fistulosa',
+      'penstemon digitalis', 'baptisia australis', 'glandularia canadensis',
+      'schizachyrium scoparium', 'packera obovata', 'geranium maculatum'
+    ]);
+
+    function isSweet16(plant) {
+      if (!plant) return false;
+      if (plant.is_sweet16 === true || plant.is_sweet_16 === true) return true;
+      const sci = (plant.scientific_name || '').toLowerCase().trim();
+      if (SWEET_16_SPECIES.has(sci)) return true;
+      const tags = plant.special_tags || [];
+      return tags.some(t => String(t).toLowerCase().includes('sweet 16'));
+    }
+
+    function isKcKeystone(plant) {
+      if (!plant) return false;
+      if (plant.is_kc_keystone === true || plant.isKcKeystone === true) return true;
+      const tags = plant.special_tags || [];
+      return tags.some(t => String(t).toLowerCase().includes('keystone'));
+    }

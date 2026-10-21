@@ -1,0 +1,677 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/05-auth-rbac-and-text-scaling.html
+  Title: Section 5: Advisor Authentication, RBAC, Firestore User Sync & Text Scaling
+  Source Lines in index.html: Lines 6206 – 6873 (668 lines)
+  Overview: Salted SHA-256 password hashing, role-based access control (Advisor vs Admin vs Guest), Cloud Firestore REST API user synchronization (syncUserToFirestore), and dynamic text size scaling (setUserTextScale).
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+    // ==================== Native Advisor Auth Engine & RBAC ====================
+    async function hashPassword(password, salt) {
+      const enc = new TextEncoder();
+      const data = enc.encode(`${salt}:${password}`);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function generateSalt() {
+      const arr = new Uint8Array(16);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function isPasswordStrong(pw) {
+      if (!pw || pw.length < 8) return false;
+      const hasUpper = /[A-Z]/.test(pw);
+      const hasLower = /[a-z]/.test(pw);
+      const hasDigit = /[0-9]/.test(pw);
+      return hasUpper && hasLower && hasDigit;
+    }
+
+    function generateCanonicalUsername(firstName, lastName, existingUsers) {
+      const f = (firstName || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const l = (lastName || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanFirst = f || 'advisor';
+      const cleanLast = l || 'nature';
+
+      const takenUsernames = new Set((existingUsers || []).map(u => (u.username || '').toLowerCase()));
+      const base = `${cleanFirst}.${cleanLast}`;
+      if (!takenUsernames.has(base)) {
+        return base;
+      }
+
+      let counter = 1;
+      while (takenUsernames.has(`${cleanFirst}${counter}.${cleanLast}`)) {
+        counter++;
+      }
+      return `${cleanFirst}${counter}.${cleanLast}`;
+    }
+
+    function generateTemporaryPassword() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+      let res = "DR-";
+      const arr = new Uint8Array(6);
+      crypto.getRandomValues(arr);
+      for (let i = 0; i < 6; i++) {
+        res += chars[arr[i] % chars.length];
+      }
+      return res;
+    }
+
+    function loadUsersCache() {
+      try {
+        return JSON.parse(localStorage.getItem('dr_users_cache') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveUsersCache(users) {
+      localStorage.setItem('dr_users_cache', JSON.stringify(users));
+    }
+
+    function getFirestoreBaseUrl() {
+      const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      let dbId = localStorage.getItem('dr_firestore_database_id');
+      if (!dbId || dbId === '(default)') dbId = 'deep-roots-nature-advisors';
+      return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${dbId}/documents`;
+    }
+
+    // Convert local UserRecord to Firestore document fields
+    function userToFirestoreDoc(u) {
+      return {
+        fields: {
+          id: { stringValue: u.id || `user-${u.username}` },
+          username: { stringValue: u.username },
+          first_name: { stringValue: u.firstName || u.first_name || '' },
+          last_name: { stringValue: u.lastName || u.last_name || '' },
+          email: { stringValue: u.email || '' },
+          phone_number: { stringValue: u.phoneNumber || u.phone_number || '' },
+          advisor_type: { stringValue: u.advisorType || u.advisor_type || 'Advisor in Training' },
+          role: { stringValue: u.role || 'user' },
+          password_hash: { stringValue: u.passwordHash || u.password_hash || '' },
+          salt: { stringValue: u.salt || '' },
+          is_temporary_password: { booleanValue: !!(u.isTemporaryPassword || u.is_temporary_password) },
+          avatar_url: { stringValue: u.avatarUrl || u.avatar_url || '' },
+          text_size: { stringValue: u.textSize || u.text_size || 'standard' },
+          created_at: { integerValue: String(u.createdAt || u.created_at || Date.now()) },
+          updated_at: { integerValue: String(u.updatedAt || u.updated_at || Date.now()) }
+        }
+      };
+    }
+
+    function parseFirestoreUser(doc) {
+      if (!doc || !doc.fields) return null;
+      const f = doc.fields;
+      const getStr = (k) => f[k]?.stringValue || '';
+      const getBool = (k) => !!f[k]?.booleanValue;
+      const getNum = (k) => Number(f[k]?.integerValue || f[k]?.doubleValue || 0);
+
+      let username = getStr('username');
+      if (!username && doc.name) {
+        username = doc.name.split('/').pop().replace('_user_', '');
+      }
+      if (!username) return null;
+
+      return {
+        id: getStr('id') || `user-${username}`,
+        username: username,
+        firstName: getStr('first_name'),
+        lastName: getStr('last_name'),
+        email: getStr('email'),
+        phoneNumber: getStr('phone_number'),
+        advisorType: getStr('advisor_type') || 'Advisor in Training',
+        role: getStr('role') || 'user',
+        passwordHash: getStr('password_hash'),
+        salt: getStr('salt'),
+        isTemporaryPassword: getBool('is_temporary_password'),
+        avatarUrl: getStr('avatar_url'),
+        textSize: getStr('text_size') || 'standard',
+        createdAt: getNum('created_at') || Date.now(),
+        updatedAt: getNum('updated_at') || Date.now()
+      };
+    }
+
+    async function syncUserToFirestore(user) {
+      try {
+        const payload = userToFirestoreDoc(user);
+        const url = `${getFirestoreBaseUrl()}/users/${user.username}`;
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          // Fallback to /plants/_user_${username}
+          const fbUrl = `${getFirestoreBaseUrl()}/plants/_user_${user.username}`;
+          await fetch(fbUrl, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+      } catch (e) {
+        console.warn("User Firestore sync notice:", e);
+      }
+    }
+
+    async function fetchAllRemoteUsers() {
+      const users = [];
+      const seen = new Set();
+      try {
+        const res = await fetch(`${getFirestoreBaseUrl()}/users?pageSize=100`);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const u = parseFirestoreUser(doc);
+            if (u && !seen.has(u.username)) {
+              seen.add(u.username);
+              users.push(u);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Fetch users from standard collection notice:", e);
+      }
+
+      // Check fallback /plants/_user_*
+      try {
+        const res = await fetch(`${getFirestoreBaseUrl()}/plants?pageSize=300`);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            if (doc.name && doc.name.includes('/plants/_user_')) {
+              const u = parseFirestoreUser(doc);
+              if (u && !seen.has(u.username)) {
+                seen.add(u.username);
+                users.push(u);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Fetch users from fallback notice:", e);
+      }
+
+      return users;
+    }
+
+    // Initialize Advisor Auth & Pre-seed Chris Bradley Administrator
+    async function initAdvisorAuth() {
+      let users = loadUsersCache();
+      const adminUsername = 'chris.bradley';
+      let existingAdmin = users.find(u => u.username === adminUsername);
+
+      if (!existingAdmin) {
+        const salt = generateSalt();
+        const hash = await hashPassword('deeproots_admin', salt);
+        existingAdmin = {
+          id: `user-${adminUsername}`,
+          username: adminUsername,
+          firstName: 'Chris',
+          lastName: 'Bradley',
+          email: 'ctbbradley@gmail.com',
+          phoneNumber: '9134242205',
+          advisorType: 'Advisor in Training',
+          role: 'admin',
+          passwordHash: hash,
+          salt: salt,
+          isTemporaryPassword: false,
+          avatarUrl: '',
+          textSize: 'standard',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        users.unshift(existingAdmin);
+        saveUsersCache(users);
+        syncUserToFirestore(existingAdmin);
+      }
+
+      // Restore session if user was logged in
+      const loggedInUsername = localStorage.getItem('dr_logged_in_username');
+      if (loggedInUsername) {
+        const current = users.find(u => u.username === loggedInUsername);
+        if (current) {
+          state.currentUser = userRecordToProfile(current);
+          const userScale = current.textSize || localStorage.getItem(`dr_text_scale_${current.username}`) || localStorage.getItem('dr_text_scale') || 'standard';
+          setUserTextScale(userScale, false);
+        } else {
+          localStorage.removeItem('dr_logged_in_username');
+          state.currentUser = null;
+          const defaultScale = localStorage.getItem('dr_text_scale') || 'standard';
+          setUserTextScale(defaultScale, false);
+        }
+      } else {
+        const defaultScale = localStorage.getItem('dr_text_scale') || 'standard';
+        setUserTextScale(defaultScale, false);
+      }
+
+      renderAuthUser();
+      await initConsultations();
+
+      // Refresh users from remote in background
+      fetchAllRemoteUsers().then(remoteUsers => {
+        if (remoteUsers && remoteUsers.length > 0) {
+          const map = new Map();
+          for (const u of loadUsersCache()) map.set(u.username, u);
+          for (const u of remoteUsers) map.set(u.username, u);
+          const merged = Array.from(map.values()).sort((a, b) => a.username.localeCompare(b.username));
+          saveUsersCache(merged);
+
+          if (state.currentUser) {
+            const updated = merged.find(u => u.username === state.currentUser.username);
+            if (updated) {
+              if (updated.textSize && !state.currentUser.textSize) {
+                state.currentUser.textSize = updated.textSize;
+                setUserTextScale(updated.textSize, false);
+              }
+              state.currentUser = userRecordToProfile(updated);
+              renderAuthUser();
+            }
+          }
+        }
+      }).catch(e => console.warn("Remote users refresh notice:", e));
+    }
+
+    function getUserInitials(u) {
+      if (!u) return 'NA';
+      let first = '';
+      let last = '';
+      if (typeof u === 'object') {
+        if (u.firstName && u.lastName) {
+          first = u.firstName.trim();
+          last = u.lastName.trim();
+        } else if (u.first_name && u.last_name) {
+          first = u.first_name.trim();
+          last = u.last_name.trim();
+        } else if (u.name) {
+          const parts = u.name.trim().split(/\s+/);
+          first = parts[0] || '';
+          last = parts.length > 1 ? parts[parts.length - 1] : '';
+        } else if (u.username) {
+          const parts = u.username.split(/[._-]/);
+          first = parts[0] || '';
+          last = parts.length > 1 ? parts[parts.length - 1] : '';
+        }
+      } else if (typeof u === 'string') {
+        const parts = u.trim().split(/\s+/);
+        first = parts[0] || '';
+        last = parts.length > 1 ? parts[parts.length - 1] : '';
+      }
+      const fInit = first ? first[0].toUpperCase() : '';
+      const lInit = last ? last[0].toUpperCase() : '';
+      if (fInit && lInit) return `${fInit}${lInit}`;
+      if (fInit) return fInit;
+      return 'NA';
+    }
+
+    function userRecordToProfile(u) {
+      return {
+        id: u.id || `user-${u.username}`,
+        username: u.username,
+        firstName: u.firstName || u.first_name || '',
+        lastName: u.lastName || u.last_name || '',
+        name: `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || u.username,
+        email: u.email || '',
+        phoneNumber: u.phoneNumber || u.phone_number || '',
+        advisorType: u.advisorType || u.advisor_type || 'Advisor in Training',
+        role: u.role || 'user',
+        isAdmin: (u.role || '').toLowerCase() === 'admin',
+        isTemporaryPassword: !!(u.isTemporaryPassword || u.is_temporary_password),
+        photoURL: u.avatarUrl || u.avatar_url || '',
+        textSize: u.textSize || u.text_size || 'standard'
+      };
+    }
+
+    // ==================== Text Size & Dynamic Scaling Management ====================
+    function getUserTextScale() {
+      if (state.currentUser && state.currentUser.textSize) {
+        return state.currentUser.textSize;
+      }
+      if (state.currentUser && state.currentUser.username) {
+        const userSaved = localStorage.getItem(`dr_text_scale_${state.currentUser.username}`);
+        if (userSaved) return userSaved;
+      }
+      return localStorage.getItem('dr_text_scale') || 'standard';
+    }
+
+    function setUserTextScale(scaleKey, persistUser = true) {
+      const validScales = ['standard', 'comfortable', 'large', 'extra-large'];
+      if (!validScales.includes(scaleKey)) scaleKey = 'standard';
+
+      document.documentElement.setAttribute('data-text-scale', scaleKey);
+      localStorage.setItem('dr_text_scale', scaleKey);
+
+      if (state.currentUser) {
+        state.currentUser.textSize = scaleKey;
+        localStorage.setItem(`dr_text_scale_${state.currentUser.username}`, scaleKey);
+        localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
+
+        if (persistUser) {
+          const users = loadUsersCache();
+          const idx = users.findIndex(u => u.username === state.currentUser.username);
+          if (idx >= 0) {
+            users[idx].textSize = scaleKey;
+            users[idx].updatedAt = Date.now();
+            saveUsersCache(users);
+            syncUserToFirestore(users[idx]);
+          }
+        }
+      }
+
+      updateTextScaleUI(scaleKey);
+    }
+
+    function updateTextScaleUI(scaleKey) {
+      const validScales = ['standard', 'comfortable', 'large', 'extra-large'];
+      if (!validScales.includes(scaleKey)) scaleKey = 'standard';
+
+      const labels = {
+        'standard': 'Standard (100%)',
+        'comfortable': 'Comfortable (110%)',
+        'large': 'Large (125%)',
+        'extra-large': 'Extra Large (140%)'
+      };
+
+      // Update segmented controls in Profile modal
+      document.querySelectorAll('#profileTextSizeControls .text-size-btn').forEach(btn => {
+        const isMatch = btn.getAttribute('data-scale') === scaleKey;
+        btn.classList.toggle('active', isMatch);
+      });
+
+      const labelEl = document.getElementById('profileTextSizeActiveLabel');
+      if (labelEl) {
+        labelEl.textContent = labels[scaleKey] || 'Standard (100%)';
+      }
+
+      // Update option cards in Text Size modal
+      document.querySelectorAll('#textSizeModal .text-size-option-card').forEach(card => {
+        const isMatch = card.getAttribute('data-scale') === scaleKey;
+        card.classList.toggle('active', isMatch);
+      });
+    }
+
+    function openTextSizeModal() {
+      const currentScale = getUserTextScale();
+      updateTextScaleUI(currentScale);
+      const modal = document.getElementById('textSizeModal');
+      if (modal) {
+        modal.showModal();
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    window.getUserTextScale = getUserTextScale;
+    window.setUserTextScale = setUserTextScale;
+    window.updateTextScaleUI = updateTextScaleUI;
+    window.openTextSizeModal = openTextSizeModal;
+
+    async function loginAdvisor(usernameOrEmail, password) {
+      const query = (usernameOrEmail || '').trim().toLowerCase();
+      if (!query || !password) {
+        return { success: false, error: 'Please enter both username/email and password.' };
+      }
+
+      let users = loadUsersCache();
+      let user = users.find(u => u.username.toLowerCase() === query || (u.email && u.email.toLowerCase() === query));
+
+      if (!user) {
+        // Try fetching from remote
+        const remoteUsers = await fetchAllRemoteUsers();
+        if (remoteUsers.length > 0) {
+          const map = new Map();
+          for (const u of users) map.set(u.username, u);
+          for (const u of remoteUsers) map.set(u.username, u);
+          users = Array.from(map.values());
+          saveUsersCache(users);
+          user = users.find(u => u.username.toLowerCase() === query || (u.email && u.email.toLowerCase() === query));
+        }
+      }
+
+      if (!user) {
+        return { success: false, error: 'Advisor account not found. Please check your username or email.' };
+      }
+
+      const expectedHash = await hashPassword(password, user.salt);
+      if (expectedHash !== user.passwordHash) {
+        return { success: false, error: 'Incorrect password. Please try again.' };
+      }
+
+      // Success
+      const profile = userRecordToProfile(user);
+      state.currentUser = profile;
+      localStorage.setItem('dr_logged_in_username', user.username);
+      localStorage.setItem('dr_current_user', JSON.stringify(profile));
+
+      // Apply user's text size preference
+      const userScale = profile.textSize || localStorage.getItem(`dr_text_scale_${user.username}`) || localStorage.getItem('dr_text_scale') || 'standard';
+      setUserTextScale(userScale, false);
+
+      renderAuthUser();
+      await initConsultations();
+      renderGrid();
+
+      // If user has a temporary password, force password change
+      if (profile.isTemporaryPassword) {
+        openChangePasswordModal(true);
+      }
+
+      return { success: true, user: profile };
+    }
+
+    async function signOutAdvisor() {
+      saveActiveConsultation(false);
+      state.currentUser = null;
+      localStorage.removeItem('dr_logged_in_username');
+      localStorage.removeItem('dr_current_user');
+
+      // Revert text size to device default
+      const defaultScale = localStorage.getItem('dr_text_scale') || 'standard';
+      setUserTextScale(defaultScale, false);
+
+      renderAuthUser();
+      await initConsultations();
+      renderGrid();
+      const modal = document.getElementById('userProfileModal');
+      if (modal && modal.open) modal.close();
+      showToast("Signed out successfully.");
+    }
+
+    async function changeAdvisorPassword(newPassword) {
+      if (!state.currentUser) {
+        return { success: false, error: 'No advisor is currently signed in.' };
+      }
+      if (!isPasswordStrong(newPassword)) {
+        return { success: false, error: 'Password must be at least 8 characters and include uppercase, lowercase, and numeric digits.' };
+      }
+
+      const users = loadUsersCache();
+      const idx = users.findIndex(u => u.username === state.currentUser.username);
+      if (idx < 0) {
+        return { success: false, error: 'User record not found.' };
+      }
+
+      const newSalt = generateSalt();
+      const newHash = await hashPassword(newPassword, newSalt);
+
+      users[idx].passwordHash = newHash;
+      users[idx].salt = newSalt;
+      users[idx].isTemporaryPassword = false;
+      users[idx].updatedAt = Date.now();
+
+      saveUsersCache(users);
+      state.currentUser = userRecordToProfile(users[idx]);
+      localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
+
+      await syncUserToFirestore(users[idx]);
+      return { success: true };
+    }
+
+    async function provisionAdvisor(firstName, lastName, email, phoneNumber, advisorType, role) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        return { success: false, error: 'Only administrators have privilege to provision new advisor accounts.' };
+      }
+      if (!firstName || !lastName) {
+        return { success: false, error: 'First name and last name are required.' };
+      }
+      if (!email || !email.includes('@')) {
+        return { success: false, error: 'A valid email address is required.' };
+      }
+
+      const users = loadUsersCache();
+      const username = generateCanonicalUsername(firstName, lastName, users);
+      const tempPassword = generateTemporaryPassword();
+      const salt = generateSalt();
+      const hash = await hashPassword(tempPassword, salt);
+
+      const newUser = {
+        id: `user-${username}`,
+        username: username,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phoneNumber: (phoneNumber || '').trim(),
+        advisorType: advisorType || 'Advisor in Training',
+        role: (role === 'admin') ? 'admin' : 'user',
+        passwordHash: hash,
+        salt: salt,
+        isTemporaryPassword: true,
+        avatarUrl: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+
+      users.push(newUser);
+      saveUsersCache(users);
+      await syncUserToFirestore(newUser);
+
+      return { success: true, newUser, tempPassword };
+    }
+
+    async function resetAdvisorPassword(username) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        return { success: false, error: 'Only administrators have privilege to reset passwords.' };
+      }
+
+      const users = loadUsersCache();
+      const idx = users.findIndex(u => u.username === username);
+      if (idx < 0) {
+        return { success: false, error: `User ${username} not found.` };
+      }
+
+      const tempPassword = generateTemporaryPassword();
+      const salt = generateSalt();
+      const hash = await hashPassword(tempPassword, salt);
+
+      users[idx].passwordHash = hash;
+      users[idx].salt = salt;
+      users[idx].isTemporaryPassword = true;
+      users[idx].updatedAt = Date.now();
+
+      saveUsersCache(users);
+      await syncUserToFirestore(users[idx]);
+
+      return { success: true, tempPassword };
+    }
+
+    async function toggleAdvisorRole(username) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        return { success: false, error: 'Only administrators have privilege to change user roles.' };
+      }
+      if (username === state.currentUser.username) {
+        return { success: false, error: 'You cannot change your own administrator role.' };
+      }
+
+      const users = loadUsersCache();
+      const idx = users.findIndex(u => u.username === username);
+      if (idx < 0) {
+        return { success: false, error: `User ${username} not found.` };
+      }
+
+      const currentRole = users[idx].role || 'user';
+      const newRole = (currentRole === 'admin') ? 'user' : 'admin';
+      users[idx].role = newRole;
+      users[idx].updatedAt = Date.now();
+
+      saveUsersCache(users);
+      await syncUserToFirestore(users[idx]);
+
+      return { success: true, newRole };
+    }
+
+    async function updateAdvisorUser(username, updates) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        return { success: false, error: 'Only administrators have privilege to edit advisor records.' };
+      }
+      if (!username) {
+        return { success: false, error: 'Username is required.' };
+      }
+
+      const users = loadUsersCache();
+      const idx = users.findIndex(u => u.username === username);
+      if (idx < 0) {
+        return { success: false, error: `User @${username} not found.` };
+      }
+
+      const user = users[idx];
+
+      if (updates.firstName !== undefined) {
+        if (!updates.firstName.trim()) return { success: false, error: 'First name cannot be empty.' };
+        user.firstName = updates.firstName.trim();
+      }
+      if (updates.lastName !== undefined) {
+        if (!updates.lastName.trim()) return { success: false, error: 'Last name cannot be empty.' };
+        user.lastName = updates.lastName.trim();
+      }
+      user.name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
+
+      if (updates.email !== undefined) {
+        if (!updates.email || !updates.email.includes('@')) {
+          return { success: false, error: 'A valid email address is required.' };
+        }
+        user.email = updates.email.trim();
+      }
+
+      if (updates.phoneNumber !== undefined) {
+        user.phoneNumber = updates.phoneNumber.trim();
+      }
+
+      if (updates.advisorType !== undefined) {
+        user.advisorType = updates.advisorType.trim() || 'Advisor in Training';
+      }
+
+      if (updates.role !== undefined) {
+        const newRole = updates.role.toLowerCase() === 'admin' ? 'admin' : 'user';
+        if (user.username === state.currentUser.username && newRole !== 'admin') {
+          const otherAdmins = users.filter(u => u.username !== user.username && (u.role || '').toLowerCase() === 'admin');
+          if (otherAdmins.length === 0) {
+            return { success: false, error: 'You are the only active administrator. Please designate another administrator before changing your own role.' };
+          }
+        }
+        user.role = newRole;
+      }
+
+      if (updates.textSize !== undefined) {
+        user.textSize = updates.textSize;
+      }
+
+      user.updatedAt = Date.now();
+      users[idx] = user;
+      saveUsersCache(users);
+      await syncUserToFirestore(user);
+
+      // If this user is currently logged in, update current session profile & header & text size
+      if (state.currentUser && state.currentUser.username === user.username) {
+        state.currentUser = userRecordToProfile(user);
+        localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
+        if (updates.textSize) {
+          setUserTextScale(updates.textSize, false);
+        }
+        renderAuthUser();
+      }
+
+      return { success: true, user: userRecordToProfile(user) };
+    }

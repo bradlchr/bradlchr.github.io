@@ -1,0 +1,3450 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/09-reports-pdf-and-docx-generators.html
+  Title: Section 9: Citation Engine, Preliminary Report (HTML/PDF) & Word (.docx) Generators
+  Source Lines in index.html: Lines 11843 – 15282 (3440 lines)
+  Overview: Botanical source URL resolver, Markdown/HTML consultation report builders, Preliminary Report preview, zero-dependency native PDF 1.4 binary generator (buildPreliminaryReportPdfBytes), and Word .docx OpenXML generator.
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+    function getUnobservedBigThree(stagedInvasives) {
+      const staged = stagedInvasives || [];
+      const text = staged.map(i => {
+        return [
+          i.name, i.common_name,
+          i.scientific, i.scientific_name,
+          i.id
+        ].filter(Boolean).join(' ').toLowerCase();
+      }).join(' ');
+
+      const unobserved = [];
+      if (!text.includes('bush honeysuckle') && !text.includes('lonicera maackii') && !text.includes('inv-bush-honeysuckle')) {
+        unobserved.push(BIG_THREE_DATA.bush_honeysuckle);
+      }
+      if (!text.includes('wintercreeper') && !text.includes('euonymus fortunei') && !text.includes('inv-wintercreeper')) {
+        unobserved.push(BIG_THREE_DATA.wintercreeper);
+      }
+      if (!text.includes('japanese honeysuckle') && !text.includes('lonicera japonica') && !text.includes('inv-japanese-honeysuckle')) {
+        unobserved.push(BIG_THREE_DATA.japanese_honeysuckle);
+      }
+      return unobserved;
+    }
+
+    // Canonical botanical source URL lookup & markdown link normalizer
+    function resolveCanonicalSourceUrlForLabel(label, plantRef = null) {
+      const cleanLabel = String(label || '').trim();
+      const lower = cleanLabel.toLowerCase();
+      const master = (plantRef && plantRef.master) ? plantRef.master : plantRef;
+
+      // 1. Check plant's structured sources array first
+      if (master && Array.isArray(master.sources)) {
+        for (const s of master.sources) {
+          if (!s || !s.url) continue;
+          const sName = String(s.name || '').toLowerCase();
+          if (sName === lower || (lower.includes('missouri botanical') && sName.includes('missouri botanical')) ||
+              (lower.includes('illinois wildflowers') && sName.includes('illinois wildflowers')) ||
+              (lower.includes('lady bird') && sName.includes('lady bird')) ||
+              (lower.includes('usda') && sName.includes('usda')) ||
+              (lower.includes('grow native') && sName.includes('grow native')) ||
+              (lower.includes('flora of north america') && sName.includes('flora of north america')) ||
+              (lower.includes('missouri department of conservation') && sName.includes('missouri department of conservation'))) {
+            return s.url;
+          }
+        }
+      }
+
+      // 2. Check existing markdown links in master catalog's advisor_description
+      if (master && master.advisor_description) {
+        const mdRe = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+        let m;
+        while ((m = mdRe.exec(master.advisor_description)) !== null) {
+          if (m[1].trim().toLowerCase() === lower) {
+            return m[2].trim();
+          }
+        }
+      }
+
+      // 3. Plant-specific URLs & canonical botanical databases
+      if (lower.includes('missouri botanical') || lower.includes('plantfinder') || lower.includes('mobot')) {
+        return (master && master.plantfinder_url) || 'https://www.missouribotanicalgarden.org/plantfinder/plantfindersearch.aspx';
+      }
+      if (lower.includes('grow native')) {
+        return (master && (master.plant_url || master.url)) || 'https://grownative.org/native-plant-database/';
+      }
+      if (lower.includes('illinois wildflowers')) {
+        return 'https://www.illinoiswildflowers.info/';
+      }
+      if (lower.includes('lady bird') || lower.includes('wildflower center')) {
+        return 'https://www.wildflower.org/plants/';
+      }
+      if (lower.includes('usda')) {
+        return 'https://plants.usda.gov/';
+      }
+      if (lower.includes('flora of north america')) {
+        return 'http://floranorthamerica.org/';
+      }
+      if (lower.includes('xerces stem')) {
+        return 'https://xerces.org/publications/fact-sheets/nesting-overwintering-habitat';
+      }
+      if (lower.includes('xerces')) {
+        return 'https://xerces.org/pollinator-conservation/plant-lists';
+      }
+      if (lower.includes('national wildlife federation') || lower.includes('leave the leaves')) {
+        return 'https://www.nwf.org/Magazines/National-Wildlife/2015/OctNov/Gardening/Leave-the-Leaves';
+      }
+      if (lower.includes('butterflies and moths')) {
+        return 'https://www.butterfliesandmoths.org/';
+      }
+      if (lower.includes('missouri department of conservation') || lower.includes('mdc')) {
+        return 'https://mdc.mo.gov/discover-nature/field-guide';
+      }
+      return (master && (master.plant_url || master.plantfinder_url || master.url)) || 'https://grownative.org/native-plant-database/';
+    }
+
+    function ensureClickableSourceLinksInMarkdown(text, plantRef = null) {
+      if (!text) return '';
+      let out = String(text);
+
+      // 1. Convert any raw HTML <a href="...">Label</a> tags into Markdown [Label](url)
+      out = out.replace(/<a\b[^>]*?\bhref=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, url, inner) => {
+        const cleanInner = inner.replace(/<[^>]+>/g, '').trim() || url;
+        return `[${cleanInner}](${url.trim()})`;
+      });
+
+      // 2. Repair any broken/truncated markdown links where URL was cut off or had spaces injected
+      // e.g. "([Missouri Botanical Garden PlantFinder](https://www. missouribotanicalgarden."
+      out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]*)\s+([a-zA-Z0-9._/-]+)(?:\)|$)/g, (full, label, urlPart1, urlPart2) => {
+        const resolved = resolveCanonicalSourceUrlForLabel(label, plantRef);
+        return `[${label.trim()}](${resolved})`;
+      });
+      out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]*)$/g, (full, label) => {
+        const resolved = resolveCanonicalSourceUrlForLabel(label, plantRef);
+        return `[${label.trim()}](${resolved})`;
+      });
+
+      // 3. Convert plain parenthetical source citations into clickable markdown links if not already linked
+      const knownSourcesPattern = /\((Missouri Botanical Garden PlantFinder|Missouri Botanical Garden|Illinois Wildflowers|Grow Native!|Lady Bird Johnson Wildflower Center|USDA PLANTS Database|Missouri Department of Conservation|MDC Field Guide|Flora of North America|Xerces Society|Xerces Stem Guide|National Wildlife Federation|Butterflies and Moths of North America)\)/gi;
+      out = out.replace(knownSourcesPattern, (full, sourceName) => {
+        const url = resolveCanonicalSourceUrlForLabel(sourceName, plantRef);
+        return `([${sourceName}](${url}))`;
+      });
+
+      // 4. Convert bare URLs not already inside markdown links into clickable markdown links
+      out = out.replace(/(^|[^(\["'])(https?:\/\/[^\s)\]]+)/g, (full, prefix, rawUrl) => {
+        const cleanUrl = rawUrl.replace(/[.,;:!?]+$/, '');
+        const trailing = rawUrl.slice(cleanUrl.length);
+        let label = 'Botanical Source';
+        if (/missouribotanicalgarden\.org/i.test(cleanUrl)) label = 'Missouri Botanical Garden PlantFinder';
+        else if (/grownative\.org/i.test(cleanUrl)) label = 'Grow Native!';
+        else if (/illinoiswildflowers\.info/i.test(cleanUrl)) label = 'Illinois Wildflowers';
+        else if (/wildflower\.org/i.test(cleanUrl)) label = 'Lady Bird Johnson Wildflower Center';
+        else if (/plants\.usda\.gov/i.test(cleanUrl)) label = 'USDA PLANTS Database';
+        else if (/mdc\.mo\.gov/i.test(cleanUrl)) label = 'MDC Field Guide';
+        else if (/xerces\.org/i.test(cleanUrl)) label = 'Xerces Society';
+        else if (/nwf\.org/i.test(cleanUrl)) label = 'National Wildlife Federation';
+        else if (/floranorthamerica\.org/i.test(cleanUrl)) label = 'Flora of North America';
+        return `${prefix}[${label}](${cleanUrl})${trailing}`;
+      });
+
+      return out;
+    }
+
+    // Report Plant Resolution & Concise Section Formatters
+    function resolveReportPlantRecord(staged) {
+      if (!staged) return {};
+      const sciKey = (staged.scientific_name || '').toLowerCase().trim();
+      const normSciKey = typeof normalizePlantLookupKey === 'function' ? normalizePlantLookupKey(staged.scientific_name) : sciKey;
+      const normCommonKey = typeof normalizePlantLookupKey === 'function'
+        ? normalizePlantLookupKey(staged.common_name || (staged.common_names && staged.common_names[0]))
+        : '';
+
+      const embeddedMap = typeof getEmbeddedMasterMap === 'function' ? getEmbeddedMasterMap() : null;
+      const masterFromEmbedded = embeddedMap
+        ? ((staged.id && embeddedMap.get(staged.id))
+           || (sciKey && embeddedMap.get(sciKey))
+           || (normSciKey && embeddedMap.get(normSciKey))
+           || (normCommonKey && embeddedMap.get(normCommonKey)))
+        : null;
+
+      const masterFromState = (state.allPlants || []).find(mp => {
+        if (staged.id && mp.id === staged.id) return true;
+        const mpSci = (mp.scientific_name || '').toLowerCase().trim();
+        if (sciKey && mpSci === sciKey) return true;
+        if (normSciKey && typeof normalizePlantLookupKey === 'function' && normalizePlantLookupKey(mp.scientific_name) === normSciKey) return true;
+        if (normCommonKey && typeof normalizePlantLookupKey === 'function' && Array.isArray(mp.common_names)) {
+          if (mp.common_names.some(cn => normalizePlantLookupKey(cn) === normCommonKey)) return true;
+        }
+        return false;
+      });
+
+      const master = masterFromEmbedded || masterFromState || null;
+      const resolvedId = (master && master.id) || staged.id || '';
+      const customOverride = (resolvedId && state.customPlants && state.customPlants[resolvedId])
+        ? state.customPlants[resolvedId]
+        : ((staged.id && state.customPlants && state.customPlants[staged.id]) ? state.customPlants[staged.id] : null);
+
+      const hasMarkdownLinks = (str) => Boolean(str && /\[[^\]]+\]\(https?:\/\/[^\s)]+\)/.test(String(str)));
+      const embeddedDesc = (masterFromEmbedded && masterFromEmbedded.advisor_description) || '';
+      const stateDesc = (masterFromState && masterFromState.advisor_description) || '';
+      const customDesc = (customOverride && customOverride.advisor_description) || '';
+      const stagedDesc = staged.advisor_description || '';
+
+      // Prefer customDesc only if it preserves clickable markdown links or no canonical linked description exists
+      let rawCanonicalDesc = '';
+      if (customDesc && (hasMarkdownLinks(customDesc) || !hasMarkdownLinks(embeddedDesc))) {
+        rawCanonicalDesc = customDesc;
+      } else if (hasMarkdownLinks(embeddedDesc)) {
+        rawCanonicalDesc = embeddedDesc;
+      } else if (hasMarkdownLinks(stateDesc)) {
+        rawCanonicalDesc = stateDesc;
+      } else if (hasMarkdownLinks(stagedDesc)) {
+        rawCanonicalDesc = stagedDesc;
+      } else {
+        rawCanonicalDesc = embeddedDesc || stateDesc || stagedDesc || customDesc || (master && master.description) || '';
+      }
+
+      const canonicalDesc = ensureClickableSourceLinksInMarkdown(rawCanonicalDesc, master || staged);
+
+      const commonName = staged.common_name
+        || (master && master.common_names && master.common_names[0])
+        || staged.scientific_name
+        || 'Native Species';
+      const sciName = staged.scientific_name || (master && master.scientific_name) || '';
+      const plantUrl = (master && (master.plant_url || master.url)) || staged.plant_url || (typeof getPlantUrl === 'function' && master ? getPlantUrl(master) : 'https://grownative.org');
+      const imageUrl = staged.image_url || (master && (master.image_url || (master.images && master.images[0] && master.images[0].url))) || '';
+      const layer = (master && master.architectural_layer) || staged.layer || 'Mid-layer';
+      const habitat = (master && master.native_environment) || staged.environment || 'Garden / Native Landscape';
+      const height = (master && (master.height_display || (master.mature_height && master.mature_height.display) || (typeof master.mature_height === 'string' ? master.mature_height : '') || master.height)) || staged.height || 'Variable';
+      const sun = (master && Array.isArray(master.light_requirements) && master.light_requirements.length > 0)
+        ? master.light_requirements.join(', ')
+        : (staged.sun || 'Sun to Part Sun');
+      const moisture = (master && Array.isArray(master.moisture_requirements) && master.moisture_requirements.length > 0)
+        ? master.moisture_requirements.join(', ')
+        : (staged.moisture || 'Average');
+      const sociability = (master && (master.sociability || master.plant_sociability)) || staged.sociability || '';
+      const bloomColors = (master && (master.bloom_color || master.bloomColor)) || [];
+      const bloomSeasons = (master && (master.bloom_period || master.bloom_season || master.bloomSeason)) || [];
+      const maintLevel = (customOverride && customOverride.maintenance_level)
+        || (masterFromEmbedded && masterFromEmbedded.maintenance_level)
+        || (masterFromState && masterFromState.maintenance_level)
+        || staged.maintenance_level
+        || 'Low';
+      const maintGuide = (customOverride && customOverride.maintenance_guide && hasMarkdownLinks(JSON.stringify(customOverride.maintenance_guide)))
+        ? customOverride.maintenance_guide
+        : ((masterFromEmbedded && masterFromEmbedded.maintenance_guide)
+          || (masterFromState && masterFromState.maintenance_guide)
+          || staged.maintenance_guide
+          || {});
+      const wildlifeDetail = (customOverride && customOverride.wildlife_detail && hasMarkdownLinks(JSON.stringify(customOverride.wildlife_detail)))
+        ? customOverride.wildlife_detail
+        : ((masterFromEmbedded && masterFromEmbedded.wildlife_detail)
+          || (masterFromState && masterFromState.wildlife_detail)
+          || staged.wildlife_detail
+          || null);
+      const wildlifeBenefits = (master && master.wildlife_ecosystem_benefits) || [];
+      const isSweet16 = Boolean(
+        (master && (master.kc_sweet_16 || (typeof isKcSweet16Plant === 'function' && isKcSweet16Plant(master)))) ||
+        staged.kc_sweet_16
+      );
+
+      return {
+        id: resolvedId,
+        master,
+        common_name: commonName,
+        scientific_name: sciName,
+        advisor_description: canonicalDesc,
+        plant_url: plantUrl,
+        image_url: imageUrl,
+        layer,
+        habitat,
+        height,
+        sun,
+        moisture,
+        sociability,
+        bloomColors,
+        bloomSeasons,
+        maintenance_level: maintLevel,
+        maintenance_guide: maintGuide,
+        wildlife_detail: wildlifeDetail,
+        wildlife_ecosystem_benefits: wildlifeBenefits,
+        kc_sweet_16: isSweet16,
+        quantity: staged.quantity || 1,
+        custom_notes: staged.custom_notes || '',
+        target_area: staged.target_area || staged.targetArea || ''
+      };
+    }
+
+    // Deduplicate identical parenthetical markdown link URLs within a single bullet string without ever stripping links to plain text
+    function deduplicateMarkdownLinksInBullet(text) {
+      if (!text) return '';
+      const seenUrls = new Set();
+      // Match ([Label](url)) or [Label](url)
+      return String(text).replace(/\(\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)\)|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (full, pLabel, pUrl, bLabel, bUrl) => {
+        const url = (pUrl || bUrl || '').trim();
+        const normUrl = url.replace(/\/+$/, '').toLowerCase();
+        if (seenUrls.has(normUrl)) {
+          return pLabel ? '' : full;
+        }
+        seenUrls.add(normUrl);
+        return full;
+      }).replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1').trim();
+    }
+
+    // Condense Maintenance section for reports (omits repetitive summary boilerplate & shortens seasonal guidance)
+    function formatConciseMaintenanceForReport(resolvedOrStaged) {
+      const resolved = resolvedOrStaged && resolvedOrStaged.maintenance_guide !== undefined
+        ? resolvedOrStaged
+        : resolveReportPlantRecord(resolvedOrStaged);
+      const guide = resolved.maintenance_guide || {};
+      if (!guide || typeof guide !== 'object') {
+        return 'Cut back dead stems at 50°F+ in spring ([Xerces Stem Guide](https://xerces.org/publications/fact-sheets/nesting-overwintering-habitat)); leave 8–18" stems and seedheads over winter for stem-nesting bees and songbirds ([National Wildlife Federation](https://www.nwf.org/Magazines/National-Wildlife/2015/OctNov/Gardening/Leave-the-Leaves)).';
+      }
+
+      const shortenSeasonText = (str) => {
+        if (!str) return '';
+        return String(str)
+          .replace(/Cut back last year's dead stems in late winter or early spring once temperatures reach 50°F/gi, 'Cut back dead stems at 50°F+')
+          .replace(/Wait until sustained 50°F\+ temperatures before cutting back dead winter stems to/gi, 'Cut winter stems at 50°F+ to')
+          .replace(/in spring after 50°F\+ temperatures/gi, 'at 50°F+ in spring')
+          .replace(/in early spring at 50°F\+/gi, 'at 50°F+ in spring')
+          .replace(/Water deeply during extended drought only during the first establishment year\.?/gi, 'Water during Yr 1 drought.')
+          .replace(/Water occasionally during severe summer drought in year one; avoid overwatering\.?/gi, 'Water only in Yr 1 drought.')
+          .replace(/Keep soil consistently moist during establishment; mulch root zone with Shredded leaves\.?/gi, 'Keep moist in Yr 1; leaf-mulch roots.')
+          .replace(/Leave spent flower heads and standing stems intact through autumn to feed migrating songbirds/gi, 'Retain seedheads/stems for songbirds')
+          .replace(/through fall and winter to feed/gi, 'over winter for')
+          .replace(/Leave hollow and pithy stems standing 8–18 inches over winter for native stem-nesting bees/gi, 'Leave 8–18" winter stems for nesting bees')
+          .replace(/Divide clumps every 3–5 years in spring or early fall if center dies out or to control spread\.?/gi, 'Divide every 3–5 yrs if needed.')
+          .replace(/every (\d+[–-]\d+) years in early spring/gi, 'every $1 yrs in spring')
+          .replace(/Prune dead, damaged, or crossing branches in late winter while dormant\.?/gi, 'Prune dead/crossing branches in late winter.')
+          .replace(/Do not cut back woody stems; leave fallen leaves beneath canopy as pupation habitat/gi, 'Keep woody stems & leaf litter for pupation')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+      };
+
+      const parts = [];
+      if (guide.spring) parts.push(`Spring: ${shortenSeasonText(guide.spring)}`);
+      if (guide.summer) parts.push(`Summer: ${shortenSeasonText(guide.summer)}`);
+      if (guide.fall) parts.push(`Fall: ${shortenSeasonText(guide.fall)}`);
+      if (guide.winter) parts.push(`Winter: ${shortenSeasonText(guide.winter)}`);
+      if (guide.division && !/do not divide|rarely needs division/i.test(guide.division)) {
+        parts.push(`Division: ${shortenSeasonText(guide.division)}`);
+      }
+
+      if (parts.length === 0 && guide.summary) {
+        return ensureClickableSourceLinksInMarkdown(deduplicateMarkdownLinksInBullet(guide.summary), resolved.master || resolved);
+      }
+      const combined = parts.join(' | ');
+      return ensureClickableSourceLinksInMarkdown(deduplicateMarkdownLinksInBullet(combined), resolved.master || resolved);
+    }
+
+    // Condense Wildlife & Host Value section for reports
+    function formatConciseWildlifeForReport(resolvedOrStaged) {
+      const resolved = resolvedOrStaged && resolvedOrStaged.wildlife_detail !== undefined
+        ? resolvedOrStaged
+        : resolveReportPlantRecord(resolvedOrStaged);
+      const wd = resolved.wildlife_detail;
+      if (wd && (wd.host_insects || wd.wildlife_users)) {
+        const cleanSegment = (str) => {
+          if (!str) return '';
+          return String(str)
+            .replace(/\s*Specialist bees and native pollinators are supported\.?/gi, '')
+            .replace(/Supports native pollinators and beneficial insects;\s*provides foraging and shelter habitat\.?/gi, 'Foraging & shelter for native pollinators')
+            .replace(/nectar and pollen attract native long-tongued and short-tongued bees,\s*butterflies,\s*hoverflies,\s*and hummingbirds/gi, 'nectar/pollen for native bees, butterflies & hummingbirds')
+            .replace(/nectar and pollen attract native long-tongued and short-tongued bees,\s*butterflies,\s*and beneficial insects/gi, 'nectar/pollen for native bees & butterflies')
+            .replace(/Provides vital nectar, pollen, and structural habitat for native bees, butterflies, and songbirds/gi, 'Nectar, pollen & cover for bees, butterflies & songbirds')
+            .replace(/Larval host plant for /gi, 'Larval host for ')
+            .replace(/\.\s*$/, '')
+            .trim();
+        };
+        const hostPart = cleanSegment(wd.host_insects);
+        const usersPart = cleanSegment(wd.wildlife_users);
+        const sections = [];
+        if (hostPart) sections.push(`Host: ${hostPart}`);
+        if (usersPart) sections.push(`Wildlife: ${usersPart}`);
+        return ensureClickableSourceLinksInMarkdown(deduplicateMarkdownLinksInBullet(sections.join(' | ') + '.'), resolved.master || resolved);
+      }
+      if (Array.isArray(resolved.wildlife_ecosystem_benefits) && resolved.wildlife_ecosystem_benefits.length > 0) {
+        return resolved.wildlife_ecosystem_benefits.slice(0, 4).join(' · ');
+      }
+      return '';
+    }
+
+    // Parse inline markdown links [Label](url) and *italics* into tokens
+    function parseInlineMarkdownSegments(text, plantRef = null) {
+      if (!text) return [];
+      const normalized = ensureClickableSourceLinksInMarkdown(text, plantRef);
+      const tokens = [];
+      const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*([^*]+)\*/g;
+      let lastIndex = 0;
+      let match;
+      while ((match = regex.exec(normalized)) !== null) {
+        if (match.index > lastIndex) {
+          tokens.push({ type: 'text', text: normalized.slice(lastIndex, match.index) });
+        }
+        if (match[1] && match[2]) {
+          tokens.push({ type: 'link', text: match[1].trim(), url: match[2].trim() });
+        } else if (match[3]) {
+          tokens.push({ type: 'italic', text: match[3] });
+        }
+        lastIndex = regex.lastIndex;
+      }
+      if (lastIndex < normalized.length) {
+        tokens.push({ type: 'text', text: normalized.slice(lastIndex) });
+      }
+      return tokens;
+    }
+
+    function formatReportAccessedDate(dateInput) {
+      let d = new Date();
+      if (dateInput && /^\d{4}-\d{2}-\d{2}$/.test(String(dateInput).trim())) {
+        const [y, m, day] = String(dateInput).trim().split('-').map(Number);
+        d = new Date(y, m - 1, day);
+      }
+      const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
+      return `${d.getDate()} ${months[d.getMonth()] || 'Mar.'} ${d.getFullYear()}`;
+    }
+
+    function createCitationCollector(accessedDateStr) {
+      const citations = [];
+      const addCitation = (label, url) => {
+        const cleanLabel = String(label || 'Source').replace(/\.+$/, '').trim();
+        const cleanUrl = String(url || '').trim();
+        const num = citations.length + 1;
+        citations.push({
+          num,
+          label: cleanLabel,
+          url: cleanUrl,
+          accessed: accessedDateStr || formatReportAccessedDate()
+        });
+        return num;
+      };
+      return { citations, addCitation };
+    }
+
+    function renderInlineMarkdownWithCitationsMd(text, collector, plantRef = null) {
+      if (!text) return '';
+      const segments = parseInlineMarkdownSegments(text, plantRef);
+      return segments.map(seg => {
+        if (seg.type === 'link') {
+          const num = collector ? collector.addCitation(seg.text, seg.url) : null;
+          return num ? `[${seg.text}](${seg.url}) [${num}]` : `[${seg.text}](${seg.url})`;
+        }
+        if (seg.type === 'italic') {
+          return `*${seg.text}*`;
+        }
+        return seg.text;
+      }).join('');
+    }
+
+    function renderInlineMarkdownWithCitationsHtml(text, collector, plantRef = null) {
+      if (!text) return '';
+      const segments = parseInlineMarkdownSegments(text, plantRef);
+      return segments.map(seg => {
+        if (seg.type === 'link') {
+          const num = collector ? collector.addCitation(seg.text, seg.url) : null;
+          const sup = num ? `<sup style="font-size:0.72em;margin-left:1px;"><a href="#report-cite-${num}" style="color:#1b6535;text-decoration:none;">[${num}]</a></sup>` : '';
+          return `<a href="${escapeHtml(seg.url)}" target="_blank" rel="noopener noreferrer" class="dr-inline-link">${escapeHtml(seg.text)}</a>${sup}`;
+        }
+        if (seg.type === 'italic') {
+          return `<em>${escapeHtml(seg.text)}</em>`;
+        }
+        return escapeHtml(seg.text);
+      }).join('');
+    }
+
+    // Generate Markdown Report
+    function generateMarkdownReport(customReport = null) {
+      const meta = customReport ? {
+        name: customReport.clientName || customReport.client_name || '',
+        address: customReport.clientAddress || customReport.client_address || '',
+        date: customReport.consultationDate || customReport.consultation_date || '',
+        advisor: customReport.advisorName || customReport.advisor_name || '',
+        notes: customReport.advisorNotes || customReport.advisor_notes || ''
+      } : (state.clientMeta || {});
+      const accessedStr = formatReportAccessedDate(meta.date);
+      const collector = createCitationCollector(accessedStr);
+
+      let md = `# Deep Roots Nature Advisors - Consultation Report\n\n`;
+      if (meta.name) md += `**Client:** ${meta.name}\n`;
+      if (meta.address) md += `**Project Address:** ${meta.address}\n`;
+      if (meta.date) md += `**Consultation Date:** ${meta.date}\n`;
+      if (meta.advisor) md += `**Nature Advisor:** ${meta.advisor}\n\n`;
+      if (meta.notes) {
+        md += `### Site Analysis & Strategy\n${meta.notes}\n\n`;
+      }
+      md += `## Recommended Native Plant Palette by Garden Area\n\n`;
+
+      const stagedList = customReport
+        ? (customReport.stagedPlants || customReport.staged_plants || [])
+        : (state.stagedPlants || []);
+      const definedAreas = customReport
+        ? ((customReport.gardenAreas && customReport.gardenAreas.length > 0) ? customReport.gardenAreas : (customReport.garden_areas && customReport.garden_areas.length > 0) ? customReport.garden_areas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'])
+        : ((state.gardenAreas && state.gardenAreas.length > 0)
+            ? state.gardenAreas
+            : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden']);
+
+      const groups = {};
+      definedAreas.forEach(a => { groups[a] = []; });
+      stagedList.forEach(p => {
+        let areaKey = p.target_area || p.targetArea;
+        if (!areaKey || !groups[areaKey]) {
+          const match = definedAreas.find(a => a.toLowerCase().trim() === (areaKey || '').toLowerCase().trim());
+          if (match) areaKey = match;
+          else areaKey = definedAreas[0];
+        }
+        if (!groups[areaKey]) groups[areaKey] = [];
+        groups[areaKey].push(p);
+      });
+
+      definedAreas.forEach((area, aIdx) => {
+        const plants = groups[area] || [];
+        const heading = (/^area\s*\d+[\s:–-]/i.test(area.trim())) ? area.trim() : `Area ${aIdx + 1} – ${area.trim()}`;
+        md += `### ${heading}\n\n`;
+        if (plants.length === 0) {
+          md += `*No plants currently staged for this area.*\n\n`;
+        } else {
+          plants.forEach(rawPlant => {
+            const p = resolveReportPlantRecord(rawPlant);
+            const plantCiteNum = collector.addCitation(`${p.common_name} (${p.scientific_name})`, p.plant_url);
+            md += `#### [${p.common_name}](${p.plant_url}) [${plantCiteNum}] (*${p.scientific_name}*)\n\n`;
+            if (p.advisor_description) {
+              md += `${renderInlineMarkdownWithCitationsMd(p.advisor_description, collector, p)}\n\n`;
+            }
+            md += `* **Quantity:** ${p.quantity} | **Layer:** ${p.layer} | **Height:** ${p.height}\n`;
+            md += `* **Light & Moisture:** ${p.sun} / ${p.moisture}\n`;
+            const maintShort = formatConciseMaintenanceForReport(p);
+            if (maintShort) {
+              md += `* **Maintenance (${p.maintenance_level}):** ${renderInlineMarkdownWithCitationsMd(maintShort, collector, p)}\n`;
+            }
+            const wildlifeShort = formatConciseWildlifeForReport(p);
+            if (wildlifeShort) {
+              md += `* **Wildlife & Host Value:** ${renderInlineMarkdownWithCitationsMd(wildlifeShort, collector, p)}\n`;
+            }
+            if (p.custom_notes) md += `* **Advisor Recommendation:** ${renderInlineMarkdownWithCitationsMd(p.custom_notes, collector, p)}\n`;
+            md += `\n`;
+          });
+        }
+        md += `---\n\n`;
+      });
+
+      // Invasive Species Section
+      const opts = customReport ? (customReport.reportOptions || customReport.report_options || {}) : (state.reportOptions || {});
+      const stagedInvs = customReport ? (customReport.stagedInvasives || customReport.staged_invasives || []) : (state.stagedInvasives || []);
+      const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+
+      md += `## Non-Native, Invasive Plants & Problematic Species\n\n`;
+      if (!hasInvasives) {
+        const cBush = collector.addCitation('Bush Honeysuckles - MDC Field Guide', 'https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles');
+        const cJap = collector.addCitation('Japanese Honeysuckle - MDC Field Guide', 'https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle');
+        const cWint = collector.addCitation('Wintercreeper - MDC Field Guide', 'https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus');
+        md += `### Invasive-Free Landscape!\n\n`;
+        md += `Congratulations on an invasive-free landscape! We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: [Bush Honeysuckle (*Lonicera maackii*)](https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles) [${cBush}], [Japanese Honeysuckle (*Lonicera japonica*)](https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle) [${cJap}], and [Wintercreeper (*Euonymus fortunei*)](https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus) [${cWint}].\n\n`;
+      } else {
+        md += `### Invasive Species Observed on Property\n\n`;
+        md += `We found the following invasive plants in your landscape during our visit:\n\n`;
+        stagedInvs.forEach(inv => {
+          const invName = inv.name || inv.common_name || 'Invasive Species';
+          const invSci = inv.scientific || inv.scientific_name || '';
+          const invNotes = inv.notes || inv.removal_tips || '';
+          md += `* **${invName}** (*${invSci}*)\n`;
+          if (invNotes) md += `  * *Removal Guidance & Notes:* ${invNotes}\n`;
+        });
+        md += `\n`;
+
+        const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+        if (unobservedBigThree.length > 0) {
+          const otherNamesStr = unobservedBigThree.map(b => `${b.name} (*${b.scientific}*)`).join(', ');
+          md += `### Regional High-Threat Invasives to Monitor\n\n`;
+          md += `*More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.*\n\n`;
+          unobservedBigThree.forEach(other => {
+            const cInfo = collector.addCitation(`${other.name} - MDC Field Guide`, other.info_url);
+            const cCtrl = collector.addCitation(`${other.name} Control - MDC`, other.control_url);
+            md += `* **${other.name}** (*${other.scientific}*) – [MDC Field Guide](${other.info_url}) [${cInfo}] | [Control Protocol](${other.control_url}) [${cCtrl}]\n`;
+            md += `  * *Identification & Ecology:* ${other.summary}\n`;
+          });
+          md += `\n`;
+        }
+      }
+
+      // Wildlife Stewardship Section
+      const showWildlife = opts.birdNestBox !== false || opts.birdBath !== false || opts.batBox === true || opts.beeHabitat !== false;
+      if (showWildlife) {
+        md += `## Wildlife Stewardship Structures\n\n`;
+        if (opts.birdNestBox !== false) {
+          md += `### Bird Nest Box\nAn artificial nest box provides supplemental nesting opportunities for native birds while giving you and your family a chance to observe bird breeding biology up close.\n\n`;
+        }
+        if (opts.birdBath !== false) {
+          md += `### Bird Bath\nBirds seek water to clean their feathers for optimum flight ability as well as to quench their thirst. Maintain shallow, fresh water with perching stones.\n\n`;
+        }
+        if (opts.batBox === true) {
+          md += `### Bat Box\nBat houses support insect-eating bats. Mount on steel poles or sides of buildings 15–20 feet high receiving direct morning sun.\n\n`;
+        }
+        if (opts.beeHabitat !== false) {
+          md += `### Native Bee Habitat\nSupport native solitary bees by preserving perennial stems over winter, retaining dead wood logs/stumps, and using leaf mulch instead of wood mulch.\n\n`;
+        }
+      }
+
+      // Stormwater Section
+      const showStormwater = opts.johnsonCounty === true || opts.wyandotteCounty === true || opts.rainwaterHarvesting !== false;
+      if (showStormwater) {
+        md += `## Stormwater Management\n\n`;
+        if (opts.johnsonCounty === true) {
+          md += `### Cost-Share Reimbursement (Johnson County, KS)\nThe **Contain The Rain** program in Johnson County encourages homeowners to make stormwater improvements (rain gardens, rain barrels) with cost-share reimbursements.\n\n`;
+        }
+        if (opts.wyandotteCounty === true) {
+          md += `### Cost-Share Reimbursement (Wyandotte County, KS)\nThe **Unified Government Stormwater Quality Cost-Share Program** in Wyandotte County provides grant reimbursement for residential green infrastructure.\n\n`;
+        }
+        if (opts.rainwaterHarvesting !== false) {
+          md += `### Rainwater Harvesting\nCapturing rainwater on downspouts with rain barrels or cisterns reduces stormwater runoff and erosion while providing naturally unchlorinated irrigation water.\n\n`;
+        }
+      }
+
+      // Sources Cited Section at End of Document
+      if (collector.citations.length > 0) {
+        md += `## Sources Cited\n\n`;
+        collector.citations.forEach(c => {
+          md += `${c.num}. "${c.label}." [${c.url}](${c.url}). Accessed ${c.accessed}.\n`;
+        });
+        md += `\n`;
+      }
+
+      return md;
+    }
+
+    function buildHtmlReport(customReport = null) {
+      const meta = customReport ? {
+        name: customReport.clientName || customReport.client_name || '',
+        address: customReport.clientAddress || customReport.client_address || '',
+        date: customReport.consultationDate || customReport.consultation_date || '',
+        advisor: customReport.advisorName || customReport.advisor_name || '',
+        notes: customReport.advisorNotes || customReport.advisor_notes || ''
+      } : (state.clientMeta || {});
+      const docTitle = `Deep Roots Consultation Report - ${meta.name || 'Kansas City Native Garden'}`;
+      const opts = customReport ? (customReport.reportOptions || customReport.report_options || {}) : (state.reportOptions || {});
+      const stagedInvs = customReport ? (customReport.stagedInvasives || customReport.staged_invasives || []) : (state.stagedInvasives || []);
+      const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+      const accessedStr = formatReportAccessedDate(meta.date);
+      const collector = createCitationCollector(accessedStr);
+
+      let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(docTitle)}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #1c281e; line-height: 1.6; max-width: 820px; margin: 40px auto; padding: 0 20px; }
+    h1 { color: #235c36; font-size: 24pt; border-bottom: 2pt solid #235c36; padding-bottom: 6pt; margin-bottom: 4pt; }
+    h2 { color: #235c36; font-size: 16pt; margin-top: 22pt; border-bottom: 1pt solid #c2d1c4; padding-bottom: 4pt; }
+    h3 { color: #1c281e; font-size: 13pt; margin-top: 14pt; }
+    a { color: #1155cc; text-decoration: underline; }
+    .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20pt; margin-top: 12pt; }
+    .meta-table td { padding: 6pt 10pt; border: 1pt solid #c2d1c4; }
+    .meta-label { font-weight: bold; background: #e8f5ec; width: 25%; }
+    .area-block { margin-top: 18pt; margin-bottom: 20pt; }
+    .plant-block { margin-bottom: 14pt; padding: 12pt; background: #f4f7f4; border-left: 4pt solid #235c36; border-radius: 4px; }
+    .invasive-box { margin-bottom: 12pt; padding: 12pt; background: #fff1f2; border-left: 4pt solid #dc2626; border-radius: 4px; }
+    .stewardship-box { margin-bottom: 12pt; padding: 12pt; background: #f0fdf4; border-left: 4pt solid #16a34a; border-radius: 4px; }
+    .sources-list { font-size: 10pt; color: #334155; padding-left: 22px; line-height: 1.45; }
+    .sources-list li { margin-bottom: 4pt; word-break: break-word; }
+    ul { margin-top: 6pt; }
+  </style>
+</head>
+<body>
+  <h1>Deep Roots Nature Advisors</h1>
+  <p><strong>Kansas City Native Plant Consultation Report</strong></p>
+  
+  <table class="meta-table">
+    <tr><td class="meta-label">Client Name:</td><td>${escapeHtml(meta.name || 'Client')}</td></tr>
+    <tr><td class="meta-label">Project Address:</td><td>${escapeHtml(meta.address || '-')}</td></tr>
+    <tr><td class="meta-label">Date:</td><td>${escapeHtml(meta.date || new Date().toLocaleDateString())}</td></tr>
+    <tr><td class="meta-label">Nature Advisor:</td><td>${escapeHtml(meta.advisor || (state.currentUser ? state.currentUser.name : 'Nature Advisor'))}</td></tr>
+  </table>
+
+  ${meta.notes ? `<h2>Site Analysis &amp; Ecological Strategy</h2><p>${escapeHtml(meta.notes).replace(/\n/g, '<br>')}</p>` : ''}
+
+  <h2>Recommended Native Plant Palette by Garden Area</h2>
+`;
+
+      const stagedList = customReport
+        ? (customReport.stagedPlants || customReport.staged_plants || [])
+        : (state.stagedPlants || []);
+      const definedAreas = customReport
+        ? ((customReport.gardenAreas && customReport.gardenAreas.length > 0) ? customReport.gardenAreas : (customReport.garden_areas && customReport.garden_areas.length > 0) ? customReport.garden_areas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'])
+        : ((state.gardenAreas && state.gardenAreas.length > 0)
+            ? state.gardenAreas
+            : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden']);
+
+      const groups = {};
+      definedAreas.forEach(a => { groups[a] = []; });
+      stagedList.forEach(p => {
+        let areaKey = p.target_area || p.targetArea;
+        if (!areaKey || !groups[areaKey]) {
+          const match = definedAreas.find(a => a.toLowerCase().trim() === (areaKey || '').toLowerCase().trim());
+          if (match) areaKey = match;
+          else areaKey = definedAreas[0];
+        }
+        if (!groups[areaKey]) groups[areaKey] = [];
+        groups[areaKey].push(p);
+      });
+
+      definedAreas.forEach((area, aIdx) => {
+        const plants = groups[area] || [];
+        const heading = (/^area\s*\d+[\s:–-]/i.test(area.trim())) ? area.trim() : `Area ${aIdx + 1} – ${area.trim()}`;
+        html += `<div class="area-block"><h3>${escapeHtml(heading)}</h3>`;
+        if (plants.length === 0) {
+          html += `<p style="font-style:italic;color:#718096;">No plants currently staged for this area.</p>`;
+        } else {
+          plants.forEach(rawPlant => {
+            const p = resolveReportPlantRecord(rawPlant);
+            const plantCiteNum = collector.addCitation(`${p.common_name} (${p.scientific_name})`, p.plant_url);
+            const maintShort = formatConciseMaintenanceForReport(p);
+            const wildlifeShort = formatConciseWildlifeForReport(p);
+            html += `
+  <div class="plant-block">
+    <h4 style="margin:0 0 6pt 0;"><a href="${escapeHtml(p.plant_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.common_name)}</a><sup style="font-size:0.72em;margin-left:1px;"><a href="#report-cite-${plantCiteNum}" style="color:#1b6535;text-decoration:none;">[${plantCiteNum}]</a></sup> <em>(${escapeHtml(p.scientific_name)})</em></h4>
+    ${p.advisor_description ? `<p style="margin:4pt 0 8pt 0;">${renderInlineMarkdownWithCitationsHtml(p.advisor_description, collector, p)}</p>` : ''}
+    <ul style="margin:0;padding-left:20px;">
+      <li><strong>Quantity:</strong> ${p.quantity} | <strong>Layer:</strong> ${escapeHtml(p.layer)} | <strong>Height:</strong> ${escapeHtml(p.height)}</li>
+      <li><strong>Sun &amp; Moisture:</strong> ${escapeHtml(p.sun)} / ${escapeHtml(p.moisture)}</li>
+      ${maintShort ? `<li><strong>Maintenance (${escapeHtml(p.maintenance_level)}):</strong> ${renderInlineMarkdownWithCitationsHtml(maintShort, collector, p)}</li>` : ''}
+      ${wildlifeShort ? `<li><strong>Wildlife &amp; Host Value:</strong> ${renderInlineMarkdownWithCitationsHtml(wildlifeShort, collector, p)}</li>` : ''}
+      ${p.custom_notes ? `<li><strong>Advisor Notes:</strong> ${renderInlineMarkdownWithCitationsHtml(p.custom_notes, collector, p)}</li>` : ''}
+    </ul>
+  </div>`;
+          });
+        }
+        html += `</div>`;
+      });
+
+      // Invasives in HTML
+      html += `<h2>Non-Native, Invasive Plants &amp; Problematic Species</h2>`;
+      if (!hasInvasives) {
+        const cBush = collector.addCitation('Bush Honeysuckles - MDC Field Guide', 'https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles');
+        const cJap = collector.addCitation('Japanese Honeysuckle - MDC Field Guide', 'https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle');
+        const cWint = collector.addCitation('Wintercreeper - MDC Field Guide', 'https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus');
+        html += `
+  <div class="stewardship-box">
+    <h3 style="color:#15803d;margin-top:0;">Congratulations on an invasive-free landscape!</h3>
+    <p>We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: <a href="https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles" target="_blank">Bush Honeysuckle (Lonicera maackii)</a><sup><a href="#report-cite-${cBush}">[${cBush}]</a></sup>, <a href="https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle" target="_blank">Japanese Honeysuckle (Lonicera japonica)</a><sup><a href="#report-cite-${cJap}">[${cJap}]</a></sup>, and <a href="https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus" target="_blank">Wintercreeper (Euonymus fortunei)</a><sup><a href="#report-cite-${cWint}">[${cWint}]</a></sup>.</p>
+  </div>`;
+      } else {
+        html += `
+  <p>We found the following invasive plants in your landscape during our visit:</p>`;
+        stagedInvs.forEach(inv => {
+          const invName = inv.name || inv.common_name || 'Invasive Species';
+          const invSci = inv.scientific || inv.scientific_name || '';
+          const invNotes = inv.notes || inv.removal_tips || 'High-threat invasive. Prompt removal recommended.';
+          html += `
+  <div class="invasive-box">
+    <h4 style="margin:0 0 4pt 0;color:#991b1b;">• ${escapeHtml(invName)} <em>(${escapeHtml(invSci)})</em></h4>
+    <p style="margin:0;font-size:13px;">${escapeHtml(invNotes)}</p>
+  </div>`;
+        });
+
+        const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+        if (unobservedBigThree.length > 0) {
+          const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
+          html += `
+  <div style="margin-top: 18pt;">
+    <h3 style="color:#334155;font-size:12pt;margin-bottom:6pt;">Regional High-Threat Invasives to Monitor</h3>
+    <p style="font-style:italic;color:#475569;margin-bottom:10pt;">
+      <strong>More Information:</strong> Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${escapeHtml(otherNamesStr)}.
+    </p>`;
+          unobservedBigThree.forEach(other => {
+            const cInfo = collector.addCitation(`${other.name} - MDC Field Guide`, other.info_url);
+            const cCtrl = collector.addCitation(`${other.name} Control - MDC`, other.control_url);
+            html += `
+    <div class="invasive-box" style="background:#fef2f2;border-left:4pt solid #ea580c;margin-bottom:10pt;padding:10pt 12pt;">
+      <h4 style="margin:0 0 4pt 0;color:#991b1b;">
+        • <a href="${other.info_url}" target="_blank" style="color:#1155cc;text-decoration:underline;">${escapeHtml(other.name)}</a><sup><a href="#report-cite-${cInfo}">[${cInfo}]</a></sup>
+        <em>(${escapeHtml(other.scientific)})</em>
+        <span style="font-size:11px;font-weight:normal;margin-left:6px;">[<a href="${other.control_url}" target="_blank" style="color:#c00000;font-weight:bold;">Control Protocol</a><sup><a href="#report-cite-${cCtrl}">[${cCtrl}]</a></sup>]</span>
+      </h4>
+      <p style="margin:0;font-size:12px;color:#334155;">${escapeHtml(other.summary)}</p>
+    </div>`;
+          });
+          html += `</div>`;
+        }
+      }
+
+      if (collector.citations.length > 0) {
+        html += `
+  <h2>Sources Cited</h2>
+  <ol class="sources-list">
+    ${collector.citations.map(c => `<li id="report-cite-${c.num}">"${escapeHtml(c.label)}." <a href="${escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(c.url)}</a>. Accessed ${escapeHtml(c.accessed)}.</li>`).join('\n    ')}
+  </ol>`;
+      }
+
+      html += `
+  <hr style="margin-top: 30pt; border: none; border-top: 1pt solid #c2d1c4;">
+  <p style="font-size: 10pt; color: #677f6c;">
+    Report prepared by Deep Roots Nature Advisors. For cultivation guides and local ethical nurseries, visit 
+    <a href="https://deeproots.org">deeproots.org</a> and <a href="https://grownative.org">grownative.org</a>.
+  </p>
+</body>
+</html>`;
+      return html;
+    }
+
+    // =========================================================================
+    // PRELIMINARY REPORT GENERATOR (Deep Roots KC Branded HTML & Native PDF)
+    // =========================================================================
+    const DEEP_ROOTS_FALLBACK_LOGO_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 240">
+        <rect width="260" height="240" fill="#ffffff"/>
+        <text x="130" y="42" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" letter-spacing="2" fill="#231F20">NATURE</text>
+        <circle cx="102" cy="82" r="24" fill="#FDE047" opacity="0.85"/>
+        <polygon points="62,115 110,72 158,115" fill="#F59E0B" opacity="0.85"/>
+        <rect x="74" y="112" width="72" height="44" fill="#7DD3FC" stroke="#38BDF8" stroke-width="1.5"/>
+        <rect x="88" y="120" width="12" height="12" fill="#ffffff"/>
+        <rect x="106" y="120" width="12" height="12" fill="#ffffff"/>
+        <ellipse cx="174" cy="105" rx="28" ry="30" fill="#65A30D"/>
+        <rect x="169" y="114" width="10" height="42" fill="#78350F"/>
+        <path d="M46,128 C36,118 36,136 48,136 C56,136 56,120 46,128 Z" fill="#EA580C" stroke="#231F20" stroke-width="1.5"/>
+        <text x="130" y="190" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="33" font-weight="700" letter-spacing="1.5" fill="#231F20">ADVISORS</text>
+        <rect x="44" y="202" width="172" height="26" rx="13" fill="#58B9DA"/>
+        <text x="130" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="0.8" fill="#231F20">BY DEEP ROOTS KC</text>
+      </svg>`
+    );
+
+    function parseJpegDimensionsFromBytes(bytes) {
+      if (!bytes || bytes.length < 4 || bytes[0] !== 0xFF || bytes[1] !== 0xD8) return null;
+      let i = 2;
+      while (i + 9 < bytes.length) {
+        if (bytes[i] !== 0xFF) { i++; continue; }
+        const marker = bytes[i + 1];
+        if (marker === 0xFF) { i++; continue; }
+        const len = (bytes[i + 2] << 8) | bytes[i + 3];
+        if (marker >= 0xC0 && marker <= 0xC3) {
+          const height = (bytes[i + 5] << 8) | bytes[i + 6];
+          const width = (bytes[i + 7] << 8) | bytes[i + 8];
+          const components = bytes[i + 9];
+          return { width, height, components };
+        }
+        i += 2 + len;
+      }
+      return null;
+    }
+
+    async function ensureDeepRootsBrandAssets() {
+      if (state.deepRootsBrandAssets && state.deepRootsBrandAssets.loaded) {
+        return state.deepRootsBrandAssets;
+      }
+      if (!state.deepRootsBrandAssets) {
+        state.deepRootsBrandAssets = {
+          loaded: false,
+          logoDataUrl: DEEP_ROOTS_FALLBACK_LOGO_SVG,
+          footerLogosDataUrl: '',
+          logoJpegBytes: null,
+          logoWidth: 488,
+          logoHeight: 488,
+          footerJpegBytes: null,
+          footerWidth: 1692,
+          footerHeight: 233
+        };
+      }
+      try {
+        if (typeof JSZip !== 'undefined') {
+          let zip = null;
+          if (typeof window !== 'undefined' && window.REPORT_TEMPLATE_BASE64) {
+            zip = await JSZip.loadAsync(window.REPORT_TEMPLATE_BASE64, { base64: true });
+          } else if (typeof fetch === 'function') {
+            const resp = await fetch('report_template.docx');
+            if (resp && resp.ok) {
+              const buf = await resp.arrayBuffer();
+              zip = await JSZip.loadAsync(buf);
+            }
+          }
+          if (zip) {
+            const logoFile = zip.file('word/media/image1.jpg');
+            if (logoFile) {
+              const b64 = await logoFile.async('base64');
+              const bytes = await logoFile.async('uint8array');
+              const dims = parseJpegDimensionsFromBytes(bytes) || { width: 488, height: 488 };
+              state.deepRootsBrandAssets.logoDataUrl = 'data:image/jpeg;base64,' + b64;
+              state.deepRootsBrandAssets.logoJpegBytes = bytes;
+              state.deepRootsBrandAssets.logoWidth = dims.width;
+              state.deepRootsBrandAssets.logoHeight = dims.height;
+            }
+            const footerFile = zip.file('media/image3.jpg');
+            if (footerFile) {
+              const b64 = await footerFile.async('base64');
+              const bytes = await footerFile.async('uint8array');
+              const dims = parseJpegDimensionsFromBytes(bytes) || { width: 1692, height: 233 };
+              state.deepRootsBrandAssets.footerLogosDataUrl = 'data:image/jpeg;base64,' + b64;
+              state.deepRootsBrandAssets.footerJpegBytes = bytes;
+              state.deepRootsBrandAssets.footerWidth = dims.width;
+              state.deepRootsBrandAssets.footerHeight = dims.height;
+            }
+            state.deepRootsBrandAssets.loaded = true;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not extract Deep Roots brand assets from template:', e);
+      }
+      return state.deepRootsBrandAssets;
+    }
+
+    function extractPreliminaryReportData(customReport = null) {
+      const meta = customReport ? {
+        name: customReport.clientName || customReport.client_name || 'Homeowner Consultation',
+        address: customReport.clientAddress || customReport.client_address || '',
+        date: customReport.consultationDate || customReport.consultation_date || '',
+        advisor: customReport.advisorName || customReport.advisor_name || customReport.username || (state.currentUser ? state.currentUser.name : 'Deep Roots Nature Advisor'),
+        notes: customReport.advisorNotes || customReport.advisor_notes || customReport.site_summary || ''
+      } : {
+        name: (state.clientMeta && state.clientMeta.name) || 'Homeowner Consultation',
+        address: (state.clientMeta && state.clientMeta.address) || '',
+        date: (state.clientMeta && state.clientMeta.date) || '',
+        advisor: (state.clientMeta && state.clientMeta.advisor) || (state.currentUser ? state.currentUser.name : 'Deep Roots Nature Advisor'),
+        notes: (state.clientMeta && state.clientMeta.notes) || ''
+      };
+
+      let dateDisplay = meta.date || '';
+      try {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateDisplay)) {
+          const [y, m, d] = dateDisplay.split('-').map(Number);
+          dateDisplay = new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } else if (!dateDisplay) {
+          dateDisplay = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+      } catch (e) {
+        dateDisplay = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+
+      const clientFirstName = ((meta.name || 'Friend').trim().split(/[\s,&]+/)[0] || 'Friend').trim();
+
+      const fullAddress = (meta.address || '').trim();
+      let streetLine = fullAddress;
+      let cityStateZipLine = '';
+      if (fullAddress.includes('\n')) {
+        const lines = fullAddress.split('\n').map(l => l.trim()).filter(Boolean);
+        streetLine = lines[0] || fullAddress;
+        cityStateZipLine = lines.slice(1).join(', ');
+      } else if (fullAddress.includes(',')) {
+        const parts = fullAddress.split(',').map(p => p.trim()).filter(Boolean);
+        if (parts.length >= 2) {
+          streetLine = parts[0];
+          cityStateZipLine = parts.slice(1).join(', ');
+        }
+      }
+
+      const stagedList = customReport
+        ? (customReport.stagedPlants || customReport.staged_plants || [])
+        : (state.stagedPlants || []);
+      const definedAreas = customReport
+        ? ((customReport.gardenAreas && customReport.gardenAreas.length > 0) ? customReport.gardenAreas : (customReport.garden_areas && customReport.garden_areas.length > 0) ? customReport.garden_areas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'])
+        : ((state.gardenAreas && state.gardenAreas.length > 0)
+            ? state.gardenAreas
+            : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden']);
+
+      const areaProfiles = customReport
+        ? (customReport.gardenAreaProfiles || customReport.garden_area_profiles || {})
+        : (state.gardenAreaProfiles || {});
+
+      const groups = {};
+      definedAreas.forEach(a => { groups[a] = []; });
+      stagedList.forEach(p => {
+        let areaKey = p.target_area || p.targetArea;
+        if (!areaKey || !groups[areaKey]) {
+          const match = definedAreas.find(a => a.toLowerCase().trim() === (areaKey || '').toLowerCase().trim());
+          if (match) areaKey = match;
+          else areaKey = definedAreas[0];
+        }
+        if (!groups[areaKey]) groups[areaKey] = [];
+        groups[areaKey].push(p);
+      });
+
+      let consultedAreas = definedAreas.filter(a => {
+        const hasPlants = (groups[a] && groups[a].length > 0);
+        const prof = areaProfiles[a];
+        const hasCustomProf = prof && ((prof.notes && prof.notes.trim()) || (prof.sun && prof.sun.length > 0) || (prof.moisture && prof.moisture.length > 0));
+        return hasPlants || hasCustomProf;
+      });
+      if (consultedAreas.length === 0) {
+        consultedAreas = definedAreas.slice(0, 3);
+      }
+
+      const resolvedAll = stagedList.map(p => resolveReportPlantRecord(p));
+      const totalSpeciesCount = resolvedAll.length;
+      const totalSpecimenCount = resolvedAll.reduce((acc, p) => acc + (Number(p.quantity) || 1), 0);
+      const sweet16Count = resolvedAll.filter(p => p.kc_sweet_16).length;
+
+      const stagedInvs = customReport
+        ? (customReport.stagedInvasives || customReport.staged_invasives || [])
+        : (state.stagedInvasives || []);
+      const reportOpts = customReport
+        ? (customReport.reportOptions || customReport.report_options || {})
+        : (state.reportOptions || {});
+      const hasInvasives = (Boolean(reportOpts.invasivePresent) || stagedInvs.length > 0) && stagedInvs.length > 0;
+
+      return {
+        meta,
+        dateDisplay,
+        clientFirstName,
+        streetLine,
+        cityStateZipLine,
+        stagedList,
+        definedAreas,
+        areaProfiles,
+        groups,
+        consultedAreas,
+        resolvedAll,
+        totalSpeciesCount,
+        totalSpecimenCount,
+        sweet16Count,
+        stagedInvs,
+        hasInvasives
+      };
+    }
+
+    function generatePreliminaryReportHtml(customReport = null, options = {}) {
+      const isStandaloneFile = Boolean(options.standalone);
+      const data = extractPreliminaryReportData(customReport);
+      const {
+        meta,
+        dateDisplay,
+        clientFirstName,
+        streetLine,
+        cityStateZipLine,
+        areaProfiles,
+        groups,
+        consultedAreas,
+        totalSpeciesCount,
+        totalSpecimenCount,
+        sweet16Count,
+        stagedInvs,
+        hasInvasives
+      } = data;
+
+      const brandAssets = state.deepRootsBrandAssets || {
+        logoDataUrl: DEEP_ROOTS_FALLBACK_LOGO_SVG,
+        footerLogosDataUrl: ''
+      };
+      const logoSrc = brandAssets.logoDataUrl || DEEP_ROOTS_FALLBACK_LOGO_SVG;
+      const footerLogosSrc = brandAssets.footerLogosDataUrl || '';
+
+      // Auto-select print density so takeaway fits cleanly within <= 3 pages
+      const densityClass = totalSpeciesCount > 16 ? 'density-ultra' : (totalSpeciesCount > 8 ? 'density-compact' : 'density-standard');
+
+      const formatPrelimDescriptionHtml = (descText, plantRef = null) => {
+        if (!descText) return '';
+        const cleaned = ensureClickableSourceLinksInMarkdown(String(descText).trim(), plantRef);
+        return parseInlineMarkdownSegments(cleaned, plantRef).map(seg => {
+          if (seg.type === 'link') {
+            return `<a href="${escapeHtml(seg.url)}" target="_blank" rel="noopener noreferrer" class="dr-inline-link">${escapeHtml(seg.text)}</a>`;
+          }
+          if (seg.type === 'italic') {
+            return `<em>${escapeHtml(seg.text)}</em>`;
+          }
+          return escapeHtml(seg.text);
+        }).join('');
+      };
+
+      const extractInlineLinks = (text, plantRef = null) => {
+        const links = [];
+        const seen = new Set();
+        for (const seg of parseInlineMarkdownSegments(text || '', plantRef)) {
+          if (seg.type === 'link' && seg.url && !seen.has(seg.url)) {
+            seen.add(seg.url);
+            links.push({ label: seg.text, url: seg.url });
+          }
+        }
+        return links;
+      };
+
+      let areasHtml = '';
+      consultedAreas.forEach((areaName, aIdx) => {
+        const areaPlants = (groups[areaName] || []).map(p => resolveReportPlantRecord(p));
+        const prof = areaProfiles[areaName] || null;
+        const heading = (/^area\s*\d+[\s:–-]/i.test(areaName.trim()))
+          ? areaName.trim()
+          : `Area ${aIdx + 1} – ${areaName.trim()}`;
+
+        const conditionPills = [];
+        if (prof) {
+          if (Array.isArray(prof.sun) && prof.sun.length > 0) conditionPills.push(`Sun: ${prof.sun.join(', ')}`);
+          if (Array.isArray(prof.moisture) && prof.moisture.length > 0) conditionPills.push(`Moisture: ${prof.moisture.join(', ')}`);
+          if (Array.isArray(prof.layers) && prof.layers.length > 0 && prof.layers.length < 6) conditionPills.push(`Layers: ${prof.layers.join(', ')}`);
+          if (prof.maxHeightFt && Number(prof.maxHeightFt) < 50) conditionPills.push(`Max Height: ${prof.maxHeightFt} ft`);
+        }
+
+        areasHtml += `
+        <section class="dr-area-section">
+          <div class="dr-area-header">
+            <h3 class="dr-area-title">${escapeHtml(heading)}</h3>
+            <div class="dr-area-conditions">
+              ${conditionPills.map(c => `<span class="dr-cond-pill">${escapeHtml(c)}</span>`).join('')}
+              <span class="dr-count-pill">${areaPlants.length} Recommended Species</span>
+            </div>
+          </div>
+          ${prof && prof.notes && prof.notes.trim() ? `<p class="dr-area-notes"><strong>Area Strategy &amp; Notes:</strong> ${escapeHtml(prof.notes.trim())}</p>` : ''}
+          ${areaPlants.length === 0 ? `
+            <div class="dr-empty-area">No specific plant specimens staged for this zone yet.</div>
+          ` : `
+            <div class="dr-plant-grid">
+              ${areaPlants.map(p => {
+                const bloomStr = [
+                  Array.isArray(p.bloomColors) && p.bloomColors.length ? p.bloomColors.slice(0, 2).join('/') : '',
+                  Array.isArray(p.bloomSeasons) && p.bloomSeasons.length ? p.bloomSeasons.join(', ') : ''
+                ].filter(Boolean).join(' · ');
+                const extraLinks = [
+                  ...extractInlineLinks(p.advisor_description, p)
+                ].slice(0, 3);
+
+                return `
+                <article class="dr-plant-card">
+                  <div class="dr-card-top">
+                    ${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.common_name)}" class="dr-plant-thumb" loading="lazy">` : `<div class="dr-plant-thumb dr-thumb-placeholder">🌿</div>`}
+                    <div class="dr-card-head">
+                      <div class="dr-name-row">
+                        <div class="dr-title-group">
+                          <a href="${escapeHtml(p.plant_url)}" target="_blank" rel="noopener noreferrer" class="dr-plant-link">${escapeHtml(p.common_name)}</a>
+                          <span class="dr-sci-name">(${escapeHtml(p.scientific_name)})</span>
+                        </div>
+                        <div class="dr-badges">
+                          ${p.kc_sweet_16 ? `<span class="dr-sweet16-pill" title="Deep Roots KC Sweet 16 Anchor Species">★ KC Sweet 16</span>` : ''}
+                          <span class="dr-qty-pill">Qty: ${p.quantity}</span>
+                        </div>
+                      </div>
+                      <div class="dr-specs-row">
+                        <span class="dr-spec-item"><strong>Layer:</strong> ${escapeHtml(p.layer)}</span>
+                        <span class="dr-spec-sep">|</span>
+                        <span class="dr-spec-item"><strong>Height:</strong> ${escapeHtml(p.height)}</span>
+                        <span class="dr-spec-sep">|</span>
+                        <span class="dr-spec-item"><strong>Sun:</strong> ${escapeHtml(p.sun)}</span>
+                        <span class="dr-spec-sep">|</span>
+                        <span class="dr-spec-item"><strong>Moisture:</strong> ${escapeHtml(p.moisture)}</span>
+                        ${bloomStr ? `<span class="dr-spec-sep">|</span><span class="dr-spec-item"><strong>Bloom:</strong> ${escapeHtml(bloomStr)}</span>` : ''}
+                      </div>
+                    </div>
+                  </div>
+                  ${p.advisor_description ? `<div class="dr-plant-desc">${formatPrelimDescriptionHtml(p.advisor_description, p)}</div>` : ''}
+                  ${p.custom_notes && p.custom_notes.trim() ? `<div class="dr-custom-note"><strong>Advisor Note:</strong> ${formatPrelimDescriptionHtml(p.custom_notes.trim(), p)}</div>` : ''}
+                  <div class="dr-card-links">
+                    <a href="${escapeHtml(p.plant_url)}" target="_blank" rel="noopener noreferrer" class="dr-resource-btn">Grow Native! Plant Profile ↗</a>
+                    ${extraLinks.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="dr-sub-link">${escapeHtml(l.label)} ↗</a>`).join('')}
+                  </div>
+                </article>`;
+              }).join('')}
+            </div>
+          `}
+        </section>`;
+      });
+
+      const invasiveStripHtml = hasInvasives ? `
+        <div class="dr-section-banner" style="margin-top:12px;">II. NON-NATIVE, INVASIVE PLANTS &amp; PROBLEMATIC PLANTS</div>
+        <div class="dr-invasive-box">
+          <div class="dr-invasive-lead">Priority invasive species observed during our visit — prompt removal is recommended before planting natives nearby:</div>
+          <div class="dr-invasive-items">
+            ${stagedInvs.map(inv => {
+              const invName = inv.name || inv.common_name || 'Invasive Species';
+              const invSci = inv.scientific || inv.scientific_name || '';
+              const catalogEntry = (state.invasivePlants || []).find(ip => ip.id === inv.id || ip.scientific_name === invSci || ip.common_name === invName);
+              const infoUrl = (catalogEntry && (catalogEntry.info_url || catalogEntry.ref_url)) || inv.ref_url || 'https://mdc.mo.gov/trees-plants/invasive-plants';
+              const ctrlUrl = (catalogEntry && catalogEntry.control_url) || 'https://mdc.mo.gov/trees-plants/invasive-plants';
+              return `<span class="dr-inv-chip">• <a href="${escapeHtml(infoUrl)}" target="_blank" rel="noopener noreferrer"><strong>${escapeHtml(invName)}</strong></a> <em>(${escapeHtml(invSci)})</em> — <a href="${escapeHtml(ctrlUrl)}" target="_blank" rel="noopener noreferrer">MDC Control Guide ↗</a></span>`;
+            }).join('')}
+          </div>
+        </div>` : '';
+
+      const standaloneToolbar = isStandaloneFile ? `
+        <div class="dr-floating-bar no-print">
+          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:#ffffff;">
+            <span>🌿 Deep Roots KC — Preliminary Site Visit Report (Preliminary Consultation Takeaway)</span>
+          </div>
+          <button onclick="window.print()" style="background:#9BBB59;color:#142408;border:1px solid #b5d576;padding:7px 14px;border-radius:6px;font-weight:800;font-size:12px;cursor:pointer;">
+            Save as PDF / Print Takeaway
+          </button>
+        </div>` : '';
+
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base target="_blank">
+  <title>Preliminary Consultation Takeaway – ${escapeHtml(meta.name)}</title>
+  <style>
+    @page {
+      size: letter portrait;
+      margin: 0.35in 0.42in;
+    }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Times New Roman', 'Lora', Georgia, serif;
+      color: #0d0d0d;
+      background: ${isStandaloneFile ? '#e5e9df' : '#ffffff'};
+      line-height: 1.38;
+    }
+    .dr-floating-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #231F20;
+      border-bottom: 3px solid #9BBB59;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dr-sheet {
+      max-width: 8.5in;
+      margin: ${isStandaloneFile ? '16px auto' : '0 auto'};
+      background: #ffffff;
+      padding: ${isStandaloneFile ? '0.35in 0.42in' : '18px 24px'};
+      box-shadow: ${isStandaloneFile ? '0 8px 28px rgba(0,0,0,0.12)' : 'none'};
+    }
+    /* Official Deep Roots 2-Column Bordered Header Table */
+    .dr-header-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #231F20;
+      margin-bottom: 10px;
+    }
+    .dr-header-table td {
+      border: 1px solid #231F20;
+      vertical-align: middle;
+      padding: 10px 14px;
+    }
+    .dr-header-logo-cell {
+      width: 48%;
+      text-align: center;
+      background: #ffffff;
+    }
+    .dr-header-logo {
+      max-height: 138px;
+      max-width: 210px;
+      width: auto;
+      height: auto;
+      display: inline-block;
+    }
+    .dr-header-info-cell {
+      width: 52%;
+      text-align: center;
+      font-family: 'Times New Roman', 'Lora', Georgia, serif;
+      color: #000000;
+    }
+    .dr-report-main-title {
+      font-size: 17pt;
+      font-weight: 700;
+      line-height: 1.18;
+      margin: 0;
+    }
+    .dr-report-sub-title {
+      font-size: 14.5pt;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0 0 3px 0;
+    }
+    .dr-report-kicker {
+      display: inline-block;
+      background: #58B9DA;
+      color: #111827;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 7.5pt;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 9px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+    .dr-client-details {
+      font-size: 10.5pt;
+      line-height: 1.32;
+      margin-top: 4px;
+    }
+    .dr-greeting {
+      font-size: 10pt;
+      line-height: 1.4;
+      margin: 6px 0 8px 0;
+      color: #111111;
+    }
+    .dr-site-notes {
+      background: #f5f9ee;
+      border-left: 3.5px solid #9BBB59;
+      border-top: 1px solid #d5e3b8;
+      border-right: 1px solid #d5e3b8;
+      border-bottom: 1px solid #d5e3b8;
+      padding: 6px 10px;
+      font-size: 9.5pt;
+      margin-bottom: 8px;
+      color: #1f2d16;
+    }
+    /* Official Deep Roots Olive-Meadow Section Banner (#9BBB59) */
+    .dr-section-banner {
+      background: #9BBB59;
+      color: #000000;
+      font-family: 'Times New Roman', 'Lora', Georgia, serif;
+      font-size: 12.5pt;
+      font-weight: 700;
+      font-style: italic;
+      padding: 4px 10px;
+      margin: 8px 0 6px 0;
+      letter-spacing: 0.01em;
+    }
+    .dr-subheading-h2 {
+      font-family: 'Times New Roman', 'Lora', Georgia, serif;
+      font-size: 11.5pt;
+      font-weight: 700;
+      text-decoration: underline;
+      margin: 6px 0 4px 0;
+      color: #000000;
+    }
+    .dr-intro-p {
+      font-size: 9.5pt;
+      margin: 0 0 8px 0;
+      color: #111111;
+      line-height: 1.36;
+    }
+    .dr-intro-p a, .dr-inline-link {
+      color: #1155CC;
+      text-decoration: underline;
+    }
+    .dr-summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      background: #f4f7ee;
+      border: 1px solid #c9d8a7;
+      padding: 4px 10px;
+      margin-bottom: 8px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8.5pt;
+      color: #233318;
+    }
+    .dr-area-section {
+      margin-bottom: 10px;
+      break-inside: avoid-page;
+    }
+    .dr-area-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      border-bottom: 1px solid #9BBB59;
+      padding-bottom: 3px;
+      margin-bottom: 5px;
+    }
+    .dr-area-title {
+      font-family: 'Times New Roman', 'Lora', Georgia, serif;
+      font-size: 11.5pt;
+      font-weight: 700;
+      text-decoration: underline;
+      margin: 0;
+      color: #000000;
+    }
+    .dr-area-conditions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .dr-cond-pill {
+      background: #eef5e1;
+      border: 1px solid #b8cf8b;
+      color: #2b4218;
+      font-size: 7.5pt;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .dr-count-pill {
+      background: #58B9DA;
+      color: #111827;
+      font-size: 7.5pt;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 3px;
+    }
+    .dr-area-notes {
+      font-size: 9pt;
+      margin: 0 0 6px 0;
+      color: #222222;
+      font-style: italic;
+    }
+    .dr-plant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+    .dr-plant-card {
+      border: 1px solid #b8c997;
+      border-left: 3.5px solid #9BBB59;
+      background: #ffffff;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .dr-card-top {
+      display: flex;
+      gap: 7px;
+      align-items: flex-start;
+    }
+    .dr-plant-thumb {
+      width: 42px;
+      height: 42px;
+      object-fit: cover;
+      border: 1px solid #9BBB59;
+      flex-shrink: 0;
+      background: #f4f7ee;
+    }
+    .dr-thumb-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .dr-card-head {
+      flex: 1;
+      min-width: 0;
+    }
+    .dr-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .dr-title-group {
+      line-height: 1.2;
+    }
+    .dr-plant-link {
+      font-size: 10pt;
+      font-weight: 700;
+      color: #1155CC;
+      text-decoration: underline;
+    }
+    .dr-sci-name {
+      font-size: 9pt;
+      font-style: italic;
+      color: #333333;
+      margin-left: 3px;
+    }
+    .dr-badges {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .dr-sweet16-pill {
+      font-size: 7pt;
+      font-weight: 800;
+      background: #9BBB59;
+      color: #111b07;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .dr-qty-pill {
+      font-size: 7pt;
+      font-weight: 800;
+      background: #58B9DA;
+      color: #111827;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .dr-specs-row {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 7.5pt;
+      color: #374151;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+    .dr-spec-sep {
+      margin: 0 3px;
+      color: #9ca3af;
+    }
+    .dr-plant-desc {
+      font-size: 8.8pt;
+      color: #111111;
+      line-height: 1.3;
+    }
+    .dr-plant-subbullet {
+      font-size: 8.2pt;
+      color: #1f2937;
+      line-height: 1.26;
+    }
+    .dr-custom-note {
+      font-size: 8.2pt;
+      background: #f5f9ee;
+      border-left: 2.5px solid #9BBB59;
+      padding: 2px 6px;
+      color: #1e2e11;
+    }
+    .dr-card-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 3px;
+      border-top: 1px dotted #d1d5db;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .dr-resource-btn {
+      font-size: 7.5pt;
+      font-weight: 700;
+      color: #1155CC;
+      text-decoration: underline;
+    }
+    .dr-sub-link {
+      font-size: 7.2pt;
+      color: #1155CC;
+      text-decoration: underline;
+    }
+    .dr-invasive-box {
+      border: 1px solid #dc2626;
+      border-left: 3.5px solid #dc2626;
+      background: #fef2f2;
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      font-size: 8.8pt;
+    }
+    .dr-invasive-lead {
+      font-weight: 700;
+      color: #7f1d1d;
+      margin-bottom: 4px;
+    }
+    .dr-invasive-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+    }
+    .dr-inv-chip a {
+      color: #1155CC;
+      text-decoration: underline;
+    }
+    /* Official Deep Roots Footer */
+    .dr-footer {
+      margin-top: 12px;
+      padding-top: 6px;
+      border-top: 1px solid #a0a0a0;
+      text-align: center;
+    }
+    .dr-footer-partners {
+      max-width: 100%;
+      height: auto;
+      max-height: 54px;
+      display: block;
+      margin: 2px auto 6px auto;
+    }
+    .dr-footer-address {
+      font-family: 'Times New Roman', 'Lora', Georgia, serif;
+      font-size: 9pt;
+      color: #000000;
+    }
+    .dr-footer-address a {
+      color: #1155CC;
+      text-decoration: underline;
+    }
+    /* Density Scaling for <= 3 Pages Guarantee */
+    .density-compact .dr-header-logo { max-height: 105px; }
+    .density-compact .dr-plant-thumb { width: 34px; height: 34px; }
+    .density-compact .dr-plant-card { padding: 4px 6px; gap: 2px; }
+    .density-compact .dr-plant-desc { font-size: 8.2pt; line-height: 1.24; }
+    .density-compact .dr-plant-subbullet { font-size: 7.8pt; }
+    .density-ultra .dr-header-logo { max-height: 90px; }
+    .density-ultra .dr-plant-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+    .density-ultra .dr-plant-thumb { width: 26px; height: 26px; }
+    .density-ultra .dr-plant-card { padding: 3px 5px; gap: 1.5px; }
+    .density-ultra .dr-plant-desc { font-size: 7.8pt; line-height: 1.2; }
+    .density-ultra .dr-plant-subbullet { font-size: 7.4pt; line-height: 1.18; }
+    @media (max-width: 640px) {
+      .dr-plant-grid { grid-template-columns: 1fr !important; }
+    }
+    @media print {
+      body { background: #ffffff !important; }
+      .no-print { display: none !important; }
+      .dr-sheet {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+      .dr-plant-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      .density-ultra .dr-plant-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      }
+    }
+  </style>
+</head>
+<body class="${densityClass}">
+  ${standaloneToolbar}
+  <main class="dr-sheet">
+    <!-- Official Deep Roots 2-Column Bordered Header Box -->
+    <table class="dr-header-table" role="presentation">
+      <tr>
+        <td class="dr-header-logo-cell">
+          <img src="${logoSrc}" alt="Nature Advisors by Deep Roots KC" class="dr-header-logo">
+        </td>
+        <td class="dr-header-info-cell">
+          <div class="dr-report-kicker">Preliminary Consultation Takeaway</div>
+          <div class="dr-report-main-title">Nature Advisors</div>
+          <div class="dr-report-sub-title">Preliminary Site Visit Report</div>
+          <div class="dr-client-details">
+            <div><strong>${escapeHtml(meta.name)}</strong></div>
+            ${streetLine ? `<div>${escapeHtml(streetLine)}</div>` : ''}
+            ${cityStateZipLine ? `<div>${escapeHtml(cityStateZipLine)}</div>` : ''}
+            <div style="margin-top:5px;">${escapeHtml(dateDisplay)}</div>
+            <div style="margin-top:5px;">
+              <div>Nature Advisor(s):</div>
+              <div><strong>${escapeHtml(meta.advisor)}</strong></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <p class="dr-greeting">
+      ${escapeHtml(clientFirstName)}, it was a pleasure visiting your property to discuss your goals for supporting native wildlife and ecological health. Below is your preliminary takeaway summarizing the garden areas we consulted on and the native species recommended for your site conditions. Click any plant or source link below to explore photos and growing guides while we prepare your full consultation report.
+    </p>
+
+    ${meta.notes && meta.notes.trim() ? `
+    <div class="dr-site-notes">
+      <strong>Visit Highlights &amp; Ecological Strategy:</strong> ${escapeHtml(meta.notes.trim())}
+    </div>` : ''}
+
+    <div class="dr-section-banner">I. NATURESCAPING — PRELIMINARY PLANT RECOMMENDATIONS</div>
+
+    <div class="dr-subheading-h2">Plant Recommendations</div>
+    <p class="dr-intro-p">
+      Remember to plant with high density and diversity! Two great starting points are <a href="https://deeproots.org/sweet-16/" target="_blank" rel="noopener noreferrer">Deep Roots’ “Sweet 16 Most Likely to Succeed”</a> and <a href="https://deeproots.org/keystones-101/" target="_blank" rel="noopener noreferrer">Deep Roots KC Keystones</a>. Find local nurseries at <a href="https://deeproots.org/where-to-buy-native-plants/" target="_blank" rel="noopener noreferrer">Deep Roots KC Metro Native Plant Nurseries</a>.
+    </p>
+
+    <div class="dr-summary-bar">
+      <span><strong>Consulted Areas:</strong> ${consultedAreas.length}</span>
+      <span>•</span>
+      <span><strong>Recommended Native Species:</strong> ${totalSpeciesCount} (${totalSpecimenCount} total plants)</span>
+      ${sweet16Count > 0 ? `<span>•</span><span><strong>★ KC Sweet 16 Species:</strong> ${sweet16Count}</span>` : ''}
+    </div>
+
+    ${areasHtml}
+
+    ${invasiveStripHtml}
+
+    <footer class="dr-footer">
+      ${footerLogosSrc ? `<img src="${footerLogosSrc}" alt="Deep Roots KC Partners: Renew the Blue, Kansas City, Missouri Dept. of Conservation, Evergy, Miller Hammond Charitable Fund" class="dr-footer-partners">` : ''}
+      <div class="dr-footer-address">
+        Deep Roots, PO Box 32131, Kansas City, MO 64171 | 816.301.7545 | <a href="https://deeproots.org" target="_blank" rel="noopener noreferrer">Deeproots.org</a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>`;
+    }
+
+    // =========================================================================
+    // NATIVE VECTOR PDF 1.4 GENERATOR FOR PRELIMINARY REPORT (<= 3 PAGES)
+    // =========================================================================
+    function sanitizePdfWinAnsiText(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/[\u2018\u2019\u2032]/g, "'")
+        .replace(/[\u201C\u201D\u2033]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/\u2026/g, '...')
+        .replace(/[\u2022\u00B7]/g, '*')
+        .replace(/\u2605/g, '*')
+        .replace(/[\u2197\u2192]/g, '->')
+        .replace(/[^\x20-\x7E]/g, ' ')
+        .replace(/\s+/g, ' ');
+    }
+
+    function escapePdfLiteralString(str) {
+      return sanitizePdfWinAnsiText(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/\(/g, '\\(')
+        .replace(/\)/g, '\\)');
+    }
+
+    const TIMES_CHAR_WIDTHS = {
+      ' ': 0.25, '!': 0.33, '"': 0.41, '#': 0.50, '$': 0.50, '%': 0.83, '&': 0.78, "'": 0.28,
+      '(': 0.33, ')': 0.33, '*': 0.50, '+': 0.56, ',': 0.25, '-': 0.33, '.': 0.25, '/': 0.28,
+      '0': 0.50, '1': 0.50, '2': 0.50, '3': 0.50, '4': 0.50, '5': 0.50, '6': 0.50, '7': 0.50,
+      '8': 0.50, '9': 0.50, ':': 0.28, ';': 0.28, '<': 0.56, '=': 0.56, '>': 0.56, '?': 0.44,
+      '@': 0.92, 'A': 0.72, 'B': 0.67, 'C': 0.67, 'D': 0.72, 'E': 0.61, 'F': 0.56, 'G': 0.72,
+      'H': 0.72, 'I': 0.33, 'J': 0.39, 'K': 0.72, 'L': 0.61, 'M': 0.89, 'N': 0.72, 'O': 0.72,
+      'P': 0.56, 'Q': 0.72, 'R': 0.67, 'S': 0.56, 'T': 0.61, 'U': 0.72, 'V': 0.72, 'W': 0.94,
+      'X': 0.72, 'Y': 0.72, 'Z': 0.61, '[': 0.33, '\\': 0.28, ']': 0.33, '_': 0.50,
+      'a': 0.44, 'b': 0.50, 'c': 0.44, 'd': 0.50, 'e': 0.44, 'f': 0.33, 'g': 0.50, 'h': 0.50,
+      'i': 0.28, 'j': 0.28, 'k': 0.50, 'l': 0.28, 'm': 0.78, 'n': 0.50, 'o': 0.50, 'p': 0.50,
+      'q': 0.50, 'r': 0.33, 's': 0.39, 't': 0.28, 'u': 0.50, 'v': 0.50, 'w': 0.72, 'x': 0.50,
+      'y': 0.50, 'z': 0.44, '|': 0.22
+    };
+
+    function estimatePdfTextWidth(text, fontSize, isTimes = true, isBold = false) {
+      const s = sanitizePdfWinAnsiText(text);
+      let units = 0;
+      for (let i = 0; i < s.length; i++) {
+        const ch = s[i];
+        const baseW = TIMES_CHAR_WIDTHS[ch] !== undefined ? TIMES_CHAR_WIDTHS[ch] : 0.52;
+        units += baseW;
+      }
+      const factor = (isTimes ? 1.01 : 1.07) * (isBold ? 1.06 : 1.0);
+      return units * fontSize * factor;
+    }
+
+    function wrapPdfPlainLines(text, maxWidthPt, fontSize, isTimes = true, isBold = false) {
+      const clean = sanitizePdfWinAnsiText(text).trim();
+      if (!clean) return [];
+      const words = clean.split(' ');
+      const lines = [];
+      let current = '';
+      for (const w of words) {
+        const candidate = current ? `${current} ${w}` : w;
+        if (estimatePdfTextWidth(candidate, fontSize, isTimes, isBold) <= maxWidthPt || !current) {
+          current = candidate;
+        } else {
+          lines.push(current);
+          current = w;
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    function wrapPdfRichMarkdownTokens(markdownText, maxWidthPt, fontSize, baseFontKey = 'F1', italicFontKey = 'F3', boldFontKey = 'F2', plantRef = null) {
+      const segs = parseInlineMarkdownSegments(markdownText || '', plantRef);
+      const wordTokens = [];
+      for (const seg of segs) {
+        const clean = sanitizePdfWinAnsiText(seg.text);
+        if (!clean) continue;
+        const parts = clean.split(' ');
+        for (let i = 0; i < parts.length; i++) {
+          const word = parts[i];
+          if (!word) continue;
+          const isPunctOnly = /^[).,:;!?]+$/.test(word);
+          const isOpenParenOnly = /^[(]+$/.test(word);
+          if (isPunctOnly && wordTokens.length > 0 && !wordTokens[wordTokens.length - 1].isLink) {
+            wordTokens[wordTokens.length - 1].word += word;
+            continue;
+          }
+          wordTokens.push({
+            word,
+            fontKey: seg.type === 'italic' ? italicFontKey : (seg.type === 'bold' ? boldFontKey : baseFontKey),
+            isLink: seg.type === 'link',
+            url: seg.type === 'link' ? seg.url : null,
+            noSpaceBefore: isPunctOnly,
+            noSpaceAfter: isOpenParenOnly
+          });
+        }
+      }
+      const lines = [];
+      let curLine = [];
+      let curWidth = 0;
+      const spaceW = fontSize * 0.27;
+      for (const tok of wordTokens) {
+        const w = estimatePdfTextWidth(tok.word, fontSize, true, tok.fontKey === boldFontKey);
+        const prevTok = curLine.length > 0 ? curLine[curLine.length - 1] : null;
+        const needsSpace = prevTok && !prevTok.noSpaceAfter && !tok.noSpaceBefore;
+        const addW = curLine.length > 0 ? (needsSpace ? spaceW + w : w) : w;
+        if (curWidth + addW > maxWidthPt && curLine.length > 0 && !tok.noSpaceBefore) {
+          lines.push(curLine);
+          curLine = [tok];
+          curWidth = w;
+        } else {
+          curLine.push(tok);
+          curWidth += addW;
+        }
+      }
+      if (curLine.length > 0) lines.push(curLine);
+      return lines;
+    }
+
+    function buildPreliminaryReportPdfBytes(customReport = null) {
+      const data = extractPreliminaryReportData(customReport);
+      const {
+        meta,
+        dateDisplay,
+        clientFirstName,
+        streetLine,
+        cityStateZipLine,
+        areaProfiles,
+        groups,
+        consultedAreas,
+        totalSpeciesCount,
+        stagedInvs,
+        hasInvasives
+      } = data;
+
+      const brandAssets = state.deepRootsBrandAssets || {};
+      const hasLogoJpeg = Boolean(brandAssets.logoJpegBytes && brandAssets.logoJpegBytes.length > 100);
+      const hasFooterJpeg = Boolean(brandAssets.footerJpegBytes && brandAssets.footerJpegBytes.length > 100);
+
+      const PAGE_W = 612;
+      const PAGE_H = 792;
+      const MARGIN_X = 32;
+      const CONTENT_W = PAGE_W - MARGIN_X * 2;
+      const TOP_Y = PAGE_H - 30;
+      const FOOTER_TOP_Y = hasFooterJpeg ? 98 : 44;
+
+      const isCompact = totalSpeciesCount > 8;
+      const isUltra = totalSpeciesCount > 16;
+      const bodyFontSz = isUltra ? 7.4 : (isCompact ? 7.9 : 8.3);
+      const bodyLineH = isUltra ? 9.2 : (isCompact ? 9.9 : 10.6);
+
+      const pages = [];
+      let curPage = null;
+      let cursorY = TOP_Y;
+
+      const startNewPage = () => {
+        if (pages.length >= 24) {
+          return false;
+        }
+        curPage = { ops: [], links: [] };
+        pages.push(curPage);
+        cursorY = TOP_Y;
+        return true;
+      };
+
+      const pdfFillRect = (x, yBottom, w, h, r, g, b) => {
+        curPage.ops.push(`${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} rg ${x.toFixed(2)} ${yBottom.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`);
+      };
+
+      const pdfStrokeRect = (x, yBottom, w, h, r, g, b, lineW = 0.8) => {
+        curPage.ops.push(`${lineW.toFixed(2)} w ${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} RG ${x.toFixed(2)} ${yBottom.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re S`);
+      };
+
+      const pdfLine = (x1, y1, x2, y2, r, g, b, lineW = 0.75) => {
+        curPage.ops.push(`${lineW.toFixed(2)} w ${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} RG ${x1.toFixed(2)} ${y1.toFixed(2)} m ${x2.toFixed(2)} ${y2.toFixed(2)} l S`);
+      };
+
+      const pdfText = (text, x, yBaseline, fontKey, size, r = 0, g = 0, b = 0, opts = {}) => {
+        const clean = escapePdfLiteralString(text);
+        if (!clean) return 0;
+        curPage.ops.push(`BT /${fontKey} ${size.toFixed(2)} Tf ${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} rg ${x.toFixed(2)} ${yBaseline.toFixed(2)} Td (${clean}) Tj ET`);
+        const w = estimatePdfTextWidth(text, size, fontKey === 'F1' || fontKey === 'F2' || fontKey === 'F3' || fontKey === 'F4', fontKey === 'F2' || fontKey === 'F4' || fontKey === 'F6');
+        if (opts.underline) {
+          pdfLine(x, yBaseline - 1.5, x + w, yBaseline - 1.5, r, g, b, 0.55);
+        }
+        if (opts.url) {
+          curPage.links.push({
+            x1: x,
+            y1: yBaseline - 2,
+            x2: x + w,
+            y2: yBaseline + size,
+            url: opts.url
+          });
+        }
+        return w;
+      };
+
+      const pdfCenteredText = (text, centerX, yBaseline, fontKey, size, r = 0, g = 0, b = 0, opts = {}) => {
+        const w = estimatePdfTextWidth(text, size, true, fontKey === 'F2' || fontKey === 'F4' || fontKey === 'F6');
+        const x = centerX - w / 2;
+        pdfText(text, x, yBaseline, fontKey, size, r, g, b, opts);
+        return w;
+      };
+
+      const pdfRichLine = (tokens, startX, yBaseline, size) => {
+        let x = startX;
+        const spaceW = estimatePdfTextWidth(' ', size, true, false);
+        let activeLinkSpan = null;
+        const flushLinkSpan = () => {
+          if (activeLinkSpan) {
+            pdfLine(activeLinkSpan.x1, yBaseline - 1.5, activeLinkSpan.x2, yBaseline - 1.5, 0.067, 0.333, 0.800, 0.55);
+            curPage.links.push({
+              x1: activeLinkSpan.x1,
+              y1: yBaseline - 2,
+              x2: activeLinkSpan.x2,
+              y2: yBaseline + size,
+              url: activeLinkSpan.url
+            });
+            activeLinkSpan = null;
+          }
+        };
+        for (let i = 0; i < tokens.length; i++) {
+          const tok = tokens[i];
+          const prevTok = i > 0 ? tokens[i - 1] : null;
+          if (prevTok && !prevTok.noSpaceAfter && !tok.noSpaceBefore) {
+            x += spaceW;
+          }
+          const isLink = Boolean(tok.isLink && tok.url);
+          if (!isLink || (activeLinkSpan && activeLinkSpan.url !== tok.url)) {
+            flushLinkSpan();
+          }
+          const r = isLink ? 0.067 : 0.08;
+          const g = isLink ? 0.333 : 0.08;
+          const b = isLink ? 0.800 : 0.08;
+          const w = pdfText(tok.word, x, yBaseline, tok.fontKey, size, r, g, b);
+          if (isLink) {
+            if (!activeLinkSpan) {
+              activeLinkSpan = { x1: x, x2: x + w, url: tok.url };
+            } else {
+              activeLinkSpan.x2 = x + w;
+            }
+          }
+          x += w;
+        }
+        flushLinkSpan();
+      };
+
+      startNewPage();
+
+      // 1. Official Deep Roots 2-Column Bordered Header Box on Page 1
+      const headerBoxH = isUltra ? 96 : 112;
+      const headerBottomY = cursorY - headerBoxH;
+      const halfW = Math.round(CONTENT_W * 0.46);
+      const rightW = CONTENT_W - halfW;
+      pdfFillRect(MARGIN_X, headerBottomY, CONTENT_W, headerBoxH, 1, 1, 1);
+      pdfStrokeRect(MARGIN_X, headerBottomY, halfW, headerBoxH, 0.137, 0.122, 0.125, 0.9);
+      pdfStrokeRect(MARGIN_X + halfW, headerBottomY, rightW, headerBoxH, 0.137, 0.122, 0.125, 0.9);
+
+      if (hasLogoJpeg) {
+        const logoDrawSize = headerBoxH - 12;
+        const logoX = MARGIN_X + (halfW - logoDrawSize) / 2;
+        const logoY = headerBottomY + 6;
+        curPage.ops.push(`q ${logoDrawSize.toFixed(2)} 0 0 ${logoDrawSize.toFixed(2)} ${logoX.toFixed(2)} ${logoY.toFixed(2)} cm /ImLogo Do Q`);
+      } else {
+        const leftCenter = MARGIN_X + halfW / 2;
+        pdfCenteredText('NATURE', leftCenter, cursorY - 30, 'F2', 18, 0.137, 0.122, 0.125);
+        pdfCenteredText('ADVISORS', leftCenter, cursorY - 56, 'F2', 17, 0.137, 0.122, 0.125);
+        pdfFillRect(leftCenter - 58, headerBottomY + 14, 116, 16, 0.345, 0.725, 0.855);
+        pdfCenteredText('BY DEEP ROOTS KC', leftCenter, headerBottomY + 19, 'F6', 8.5, 0.137, 0.122, 0.125);
+      }
+
+      const rightCenter = MARGIN_X + halfW + rightW / 2;
+      let infoY = cursorY - 18;
+      pdfCenteredText('Nature Advisors', rightCenter, infoY, 'F2', 14.5, 0, 0, 0);
+      infoY -= 15;
+      pdfCenteredText('Preliminary Site Visit Report', rightCenter, infoY, 'F2', 12.5, 0, 0, 0);
+      infoY -= 14;
+      pdfCenteredText(meta.name || 'Client Consultation', rightCenter, infoY, 'F2', 10, 0.05, 0.05, 0.05);
+      if (streetLine) {
+        infoY -= 11.5;
+        pdfCenteredText(streetLine, rightCenter, infoY, 'F1', 9.5, 0.1, 0.1, 0.1);
+      }
+      if (cityStateZipLine) {
+        infoY -= 11.5;
+        pdfCenteredText(cityStateZipLine, rightCenter, infoY, 'F1', 9.5, 0.1, 0.1, 0.1);
+      }
+      infoY -= 12.5;
+      pdfCenteredText(dateDisplay, rightCenter, infoY, 'F1', 9.5, 0.1, 0.1, 0.1);
+      infoY -= 12;
+      pdfCenteredText(`Nature Advisor(s): ${meta.advisor}`, rightCenter, infoY, 'F1', 9.5, 0.1, 0.1, 0.1);
+
+      cursorY = headerBottomY - 10;
+
+      // 2. Greeting & Visit Highlights
+      const greetingText = `${clientFirstName}, it was a pleasure visiting your property to talk about your goals for your home's ecosystem support. Below is your preliminary takeaway summarizing the garden areas we consulted on and the recommended native species suited to your site conditions, with clickable links to explore each plant.`;
+      const greetingLines = wrapPdfPlainLines(greetingText, CONTENT_W, 9.2, true, false);
+      for (const gl of greetingLines) {
+        pdfText(gl, MARGIN_X, cursorY - 8, 'F1', 9.2, 0.06, 0.06, 0.06);
+        cursorY -= 11.2;
+      }
+      cursorY -= 3;
+
+      if (meta.notes && meta.notes.trim()) {
+        const noteLines = wrapPdfPlainLines(`Visit Highlights & Strategy: ${meta.notes.trim()}`, CONTENT_W - 14, 8.8, true, false).slice(0, 3);
+        const noteBoxH = noteLines.length * 10.8 + 8;
+        pdfFillRect(MARGIN_X, cursorY - noteBoxH, CONTENT_W, noteBoxH, 0.961, 0.976, 0.933);
+        pdfFillRect(MARGIN_X, cursorY - noteBoxH, 3.2, noteBoxH, 0.608, 0.733, 0.349);
+        let ny = cursorY - 10;
+        for (const nl of noteLines) {
+          pdfText(nl, MARGIN_X + 8, ny, 'F3', 8.8, 0.12, 0.18, 0.08);
+          ny -= 10.8;
+        }
+        cursorY -= (noteBoxH + 5);
+      }
+
+      // 3. Official Deep Roots Olive-Meadow Section Banner (#9BBB59 -> RGB 0.608, 0.733, 0.349)
+      const bannerH = 18;
+      pdfFillRect(MARGIN_X, cursorY - bannerH, CONTENT_W, bannerH, 0.608, 0.733, 0.349);
+      pdfText('I. NATURESCAPING - PRELIMINARY PLANT RECOMMENDATIONS', MARGIN_X + 8, cursorY - 13, 'F4', 11, 0, 0, 0);
+      cursorY -= (bannerH + 6);
+
+      // Subheading + Quick Links Bar
+      pdfText('Plant Recommendations', MARGIN_X, cursorY - 9, 'F2', 10.5, 0, 0, 0, { underline: true });
+      let linkBarX = MARGIN_X + 125;
+      pdfText('Resources:', linkBarX, cursorY - 9, 'F6', 8, 0.2, 0.2, 0.2);
+      linkBarX += 46;
+      linkBarX += pdfText('KC Sweet 16 List', linkBarX, cursorY - 9, 'F5', 8, 0.067, 0.333, 0.800, { underline: true, url: 'https://deeproots.org/sweet-16/' }) + 10;
+      linkBarX += pdfText('Deep Roots Keystones', linkBarX, cursorY - 9, 'F5', 8, 0.067, 0.333, 0.800, { underline: true, url: 'https://deeproots.org/keystones-101/' }) + 10;
+      pdfText('Where to Buy Native Plants', linkBarX, cursorY - 9, 'F5', 8, 0.067, 0.333, 0.800, { underline: true, url: 'https://deeproots.org/where-to-buy-native-plants/' });
+      cursorY -= 15;
+
+      // 4. Consulted Garden Areas & 2-Column Plant Cards
+      const colGap = 8;
+      const colW = (CONTENT_W - colGap) / 2;
+
+      const buildCardSpec = (p) => {
+        const bloomStr = [
+          Array.isArray(p.bloomColors) && p.bloomColors.length ? p.bloomColors.slice(0, 2).join('/') : '',
+          Array.isArray(p.bloomSeasons) && p.bloomSeasons.length ? p.bloomSeasons.join(', ') : ''
+        ].filter(Boolean).join(', ');
+        const specLine = `Layer: ${p.layer} | Ht: ${p.height} | Sun: ${p.sun} | Moist: ${p.moisture}${bloomStr ? ' | Bloom: ' + bloomStr : ''}`;
+        const specLines = wrapPdfPlainLines(specLine, colW - 12, bodyFontSz - 0.6, false, false).slice(0, 2);
+
+        const descLines = wrapPdfRichMarkdownTokens(p.advisor_description || '', colW - 12, bodyFontSz, 'F1', 'F3', 'F2', p);
+        const noteLines = (p.custom_notes && p.custom_notes.trim())
+          ? wrapPdfPlainLines(`Note: ${p.custom_notes.trim()}`, colW - 12, bodyFontSz - 0.4, true, false)
+          : [];
+
+        const totalLinesCount = specLines.length + descLines.length + noteLines.length;
+        const cardH = 26 + totalLinesCount * bodyLineH + 12;
+        return { p, specLines, descLines, noteLines, cardH };
+      };
+
+      const renderCardAt = (cardSpec, x, topY, h) => {
+        const { p, specLines, descLines, noteLines } = cardSpec;
+        const bottomY = topY - h;
+        pdfFillRect(x, bottomY, colW, h, 0.996, 0.998, 0.992);
+        pdfStrokeRect(x, bottomY, colW, h, 0.72, 0.79, 0.59, 0.65);
+        pdfFillRect(x, bottomY, 3, h, 0.608, 0.733, 0.349);
+
+        let cy = topY - 11;
+        const innerX = x + 7;
+
+        let badgeRightX = x + colW - 5;
+        const qtyLabel = `Qty: ${p.quantity}`;
+        const qtyW = estimatePdfTextWidth(qtyLabel, 7.2, false, true) + 6;
+        badgeRightX -= qtyW;
+        pdfFillRect(badgeRightX, cy - 2, qtyW, 10, 0.345, 0.725, 0.855);
+        pdfText(qtyLabel, badgeRightX + 3, cy, 'F6', 7.2, 0.07, 0.1, 0.15);
+
+        if (p.kc_sweet_16) {
+          const s16Label = '* KC Sweet 16';
+          const s16W = estimatePdfTextWidth(s16Label, 7.0, false, true) + 6;
+          badgeRightX -= (s16W + 3);
+          pdfFillRect(badgeRightX, cy - 2, s16W, 10, 0.608, 0.733, 0.349);
+          pdfText(s16Label, badgeRightX + 3, cy, 'F6', 7.0, 0.08, 0.14, 0.03);
+        }
+
+        const nameW = pdfText(p.common_name, innerX, cy, 'F2', bodyFontSz + 1.2, 0.067, 0.333, 0.800, {
+          underline: true,
+          url: p.plant_url
+        });
+        const maxSciW = Math.max(20, badgeRightX - (innerX + nameW + 6));
+        const sciText = `(${p.scientific_name})`;
+        if (estimatePdfTextWidth(sciText, bodyFontSz, true, false) <= maxSciW) {
+          pdfText(sciText, innerX + nameW + 4, cy, 'F3', bodyFontSz, 0.22, 0.22, 0.22);
+        }
+
+        cy -= (bodyLineH + 1);
+        for (const sl of specLines) {
+          pdfText(sl, innerX, cy, 'F5', bodyFontSz - 0.7, 0.25, 0.29, 0.22);
+          cy -= (bodyLineH - 0.8);
+        }
+
+        for (const dl of descLines) {
+          pdfRichLine(dl, innerX, cy, bodyFontSz);
+          cy -= bodyLineH;
+        }
+
+        for (const nl of noteLines) {
+          pdfText(nl, innerX, cy, 'F3', bodyFontSz - 0.3, 0.12, 0.25, 0.08);
+          cy -= (bodyLineH - 0.4);
+        }
+
+        const footerLinkY = bottomY + 4;
+        pdfText('Grow Native! Plant Profile ->', innerX, footerLinkY, 'F6', 7.2, 0.067, 0.333, 0.800, {
+          underline: true,
+          url: p.plant_url
+        });
+      };
+
+      for (let aIdx = 0; aIdx < consultedAreas.length; aIdx++) {
+        const areaName = consultedAreas[aIdx];
+        const areaPlants = (groups[areaName] || []).map(p => resolveReportPlantRecord(p));
+        const prof = areaProfiles[areaName] || null;
+        const heading = (/^area\s*\d+[\s:–-]/i.test(areaName.trim()))
+          ? areaName.trim().replace(/^area\s*(\d+)\s*[:–-]\s*/i, 'Area $1 - ')
+          : `Area ${aIdx + 1} - ${areaName.trim()}`;
+
+        if (cursorY - 52 < FOOTER_TOP_Y) {
+          if (!startNewPage()) break;
+        }
+
+        pdfLine(MARGIN_X, cursorY - 15, MARGIN_X + CONTENT_W, cursorY - 15, 0.608, 0.733, 0.349, 0.8);
+        const hW = pdfText(heading, MARGIN_X, cursorY - 11, 'F2', 10.5, 0, 0, 0, { underline: true });
+
+        const condParts = [];
+        if (prof) {
+          if (Array.isArray(prof.sun) && prof.sun.length) condParts.push(`Sun: ${prof.sun.join('/')}`);
+          if (Array.isArray(prof.moisture) && prof.moisture.length) condParts.push(`Moisture: ${prof.moisture.join('/')}`);
+          if (prof.maxHeightFt && Number(prof.maxHeightFt) < 50) condParts.push(`Max Ht: ${prof.maxHeightFt}ft`);
+        }
+        condParts.push(`${areaPlants.length} Species`);
+        const condStr = condParts.join('  |  ');
+        pdfText(condStr, MARGIN_X + hW + 12, cursorY - 11, 'F5', 7.8, 0.2, 0.32, 0.12);
+        cursorY -= 19;
+
+        if (prof && prof.notes && prof.notes.trim()) {
+          const anLines = wrapPdfPlainLines(`Area Strategy: ${prof.notes.trim()}`, CONTENT_W, 8.3, true, false).slice(0, 2);
+          for (const al of anLines) {
+            pdfText(al, MARGIN_X, cursorY - 7, 'F3', 8.3, 0.15, 0.15, 0.15);
+            cursorY -= 10;
+          }
+          cursorY -= 2;
+        }
+
+        const cardSpecs = areaPlants.map(buildCardSpec);
+        for (let i = 0; i < cardSpecs.length; i += 2) {
+          const leftSpec = cardSpecs[i];
+          const rightSpec = cardSpecs[i + 1] || null;
+          const rowH = Math.max(leftSpec.cardH, rightSpec ? rightSpec.cardH : 0);
+
+          if (cursorY - rowH < FOOTER_TOP_Y) {
+            if (!startNewPage()) break;
+          }
+          renderCardAt(leftSpec, MARGIN_X, cursorY, rowH);
+          if (rightSpec) {
+            renderCardAt(rightSpec, MARGIN_X + colW + colGap, cursorY, rowH);
+          }
+          cursorY -= (rowH + 5);
+        }
+        cursorY -= 4;
+      }
+
+      if (hasInvasives && cursorY - 36 >= FOOTER_TOP_Y) {
+        pdfFillRect(MARGIN_X, cursorY - 16, CONTENT_W, 16, 0.608, 0.733, 0.349);
+        pdfText('II. NON-NATIVE, INVASIVE PLANTS & PROBLEMATIC PLANTS', MARGIN_X + 8, cursorY - 11.5, 'F4', 10, 0, 0, 0);
+        cursorY -= 20;
+        const invNames = stagedInvs.map(inv => `${inv.name || inv.common_name || 'Invasive'} (${inv.scientific || inv.scientific_name || ''})`).join(', ');
+        const invLines = wrapPdfPlainLines(`Observed on site (prompt removal recommended): ${invNames}`, CONTENT_W, 8.4, true, false).slice(0, 2);
+        for (const il of invLines) {
+          pdfText(il, MARGIN_X, cursorY - 7, 'F2', 8.4, 0.6, 0.1, 0.1);
+          cursorY -= 10;
+        }
+      }
+
+      const totalPages = pages.length;
+      for (let pIdx = 0; pIdx < totalPages; pIdx++) {
+        curPage = pages[pIdx];
+        const ruleY = hasFooterJpeg ? 94 : 36;
+        pdfLine(MARGIN_X, ruleY, PAGE_W - MARGIN_X, ruleY, 0.627, 0.627, 0.627, 0.6);
+        if (hasFooterJpeg) {
+          const bannerW = 450;
+          const bannerH = bannerW * (233 / 1692);
+          const bx = (PAGE_W - bannerW) / 2;
+          const by = 28;
+          curPage.ops.push(`q ${bannerW.toFixed(2)} 0 0 ${bannerH.toFixed(2)} ${bx.toFixed(2)} ${by.toFixed(2)} cm /ImFooter Do Q`);
+        }
+        const footerText = 'Deep Roots, PO Box 32131, Kansas City, MO 64171 | 816.301.7545 | Deeproots.org';
+        pdfCenteredText(footerText, PAGE_W / 2, 16, 'F1', 8.5, 0, 0, 0, {
+          url: 'https://deeproots.org'
+        });
+        pdfText(`Page ${pIdx + 1} of ${totalPages}`, PAGE_W - MARGIN_X - 48, 16, 'F1', 8.5, 0.2, 0.2, 0.2);
+      }
+
+      const chunks = [];
+      let byteLength = 0;
+      const encoder = new TextEncoder();
+
+      const pushStr = (s) => {
+        const b = encoder.encode(s);
+        chunks.push(b);
+        byteLength += b.length;
+      };
+      const pushBytes = (b) => {
+        chunks.push(b);
+        byteLength += b.length;
+      };
+
+      const offsets = [];
+      let objCount = 0;
+      const reserveObjId = () => ++objCount;
+      const startObj = (id) => {
+        offsets[id] = byteLength;
+        pushStr(`${id} 0 obj\n`);
+      };
+      const endObj = () => {
+        pushStr(`\nendobj\n`);
+      };
+
+      pushStr(`%PDF-1.4\n%\xFF\xFF\xFF\xFF\n`);
+
+      const catalogId = reserveObjId();
+      const pagesRootId = reserveObjId();
+      const fontIds = {
+        F1: reserveObjId(),
+        F2: reserveObjId(),
+        F3: reserveObjId(),
+        F4: reserveObjId(),
+        F5: reserveObjId(),
+        F6: reserveObjId()
+      };
+      const logoObjId = hasLogoJpeg ? reserveObjId() : null;
+      const footerObjId = hasFooterJpeg ? reserveObjId() : null;
+
+      const fontDefs = [
+        [fontIds.F1, 'Times-Roman'],
+        [fontIds.F2, 'Times-Bold'],
+        [fontIds.F3, 'Times-Italic'],
+        [fontIds.F4, 'Times-BoldItalic'],
+        [fontIds.F5, 'Helvetica'],
+        [fontIds.F6, 'Helvetica-Bold']
+      ];
+      for (const [fId, baseFont] of fontDefs) {
+        startObj(fId);
+        pushStr(`<< /Type /Font /Subtype /Type1 /BaseFont /${baseFont} /Encoding /WinAnsiEncoding >>`);
+        endObj();
+      }
+
+      if (hasLogoJpeg) {
+        const bytes = brandAssets.logoJpegBytes;
+        startObj(logoObjId);
+        pushStr(`<< /Type /XObject /Subtype /Image /Width ${brandAssets.logoWidth || 488} /Height ${brandAssets.logoHeight || 488} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.length} >>\nstream\n`);
+        pushBytes(bytes);
+        pushStr(`\nendstream`);
+        endObj();
+      }
+
+      if (hasFooterJpeg) {
+        const bytes = brandAssets.footerJpegBytes;
+        startObj(footerObjId);
+        pushStr(`<< /Type /XObject /Subtype /Image /Width ${brandAssets.footerWidth || 1692} /Height ${brandAssets.footerHeight || 233} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.length} >>\nstream\n`);
+        pushBytes(bytes);
+        pushStr(`\nendstream`);
+        endObj();
+      }
+
+      const pageObjIds = [];
+      for (const pg of pages) {
+        const pageId = reserveObjId();
+        const contentId = reserveObjId();
+        pageObjIds.push(pageId);
+
+        const annotIds = [];
+        for (const lnk of pg.links) {
+          const aId = reserveObjId();
+          annotIds.push(aId);
+          startObj(aId);
+          const safeUrl = escapePdfLiteralString(lnk.url);
+          pushStr(`<< /Type /Annot /Subtype /Link /Rect [${lnk.x1.toFixed(2)} ${lnk.y1.toFixed(2)} ${lnk.x2.toFixed(2)} ${lnk.y2.toFixed(2)}] /Border [0 0 0] /A << /Type /Action /S /URI /URI (${safeUrl}) >> >>`);
+          endObj();
+        }
+
+        const streamText = pg.ops.join('\n');
+        const streamBytes = encoder.encode(streamText);
+        startObj(contentId);
+        pushStr(`<< /Length ${streamBytes.length} >>\nstream\n`);
+        pushBytes(streamBytes);
+        pushStr(`\nendstream`);
+        endObj();
+
+        let xObjDict = '';
+        if (hasLogoJpeg || hasFooterJpeg) {
+          xObjDict = `/XObject << ${hasLogoJpeg ? `/ImLogo ${logoObjId} 0 R ` : ''}${hasFooterJpeg ? `/ImFooter ${footerObjId} 0 R` : ''} >>`;
+        }
+        const fontDict = `/Font << /F1 ${fontIds.F1} 0 R /F2 ${fontIds.F2} 0 R /F3 ${fontIds.F3} 0 R /F4 ${fontIds.F4} 0 R /F5 ${fontIds.F5} 0 R /F6 ${fontIds.F6} 0 R >>`;
+        const annotsEntry = annotIds.length > 0 ? `/Annots [${annotIds.map(id => `${id} 0 R`).join(' ')}]` : '';
+
+        startObj(pageId);
+        pushStr(`<< /Type /Page /Parent ${pagesRootId} 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] /Contents ${contentId} 0 R /Resources << ${fontDict} ${xObjDict} >> ${annotsEntry} >>`);
+        endObj();
+      }
+
+      startObj(pagesRootId);
+      pushStr(`<< /Type /Pages /Kids [${pageObjIds.map(id => `${id} 0 R`).join(' ')}] /Count ${pageObjIds.length} >>`);
+      endObj();
+
+      startObj(catalogId);
+      pushStr(`<< /Type /Catalog /Pages ${pagesRootId} 0 R >>`);
+      endObj();
+
+      const xrefOffset = byteLength;
+      pushStr(`xref\n0 ${objCount + 1}\n0000000000 65535 f \n`);
+      for (let i = 1; i <= objCount; i++) {
+        const off = String(offsets[i] || 0).padStart(10, '0');
+        pushStr(`${off} 00000 n \n`);
+      }
+      pushStr(`trailer\n<< /Size ${objCount + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`);
+
+      const out = new Uint8Array(byteLength);
+      let pos = 0;
+      for (const chunk of chunks) {
+        out.set(chunk, pos);
+        pos += chunk.length;
+      }
+      return out;
+    }
+
+    function generatePreliminaryReportPdfFile(customReport = null) {
+      const target = customReport || state.activePreliminaryReportTarget || null;
+      const meta = target ? {
+        name: target.clientName || target.client_name || 'Client'
+      } : (state.clientMeta || { name: 'Client' });
+      const sanitized = (meta.name || 'Client').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Client';
+      const filename = `DeepRoots_Preliminary_Report_${sanitized}.pdf`;
+      const pdfBytes = buildPreliminaryReportPdfBytes(target);
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      let file = null;
+      if (typeof File !== 'undefined') {
+        try {
+          file = new File([pdfBytes], filename, { type: 'application/pdf' });
+        } catch (e) {}
+      }
+      return { filename, pdfBytes, blob, file, clientName: meta.name || 'Client' };
+    }
+
+    async function downloadPreliminaryReportPdf(customReport = null) {
+      await ensureDeepRootsBrandAssets();
+      const { filename, blob } = generatePreliminaryReportPdfFile(customReport);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Downloaded Preliminary Report PDF: ${filename}`, 'success');
+    }
+
+    async function openPreliminaryReport(customReport = null) {
+      const stagedList = customReport
+        ? (customReport.stagedPlants || customReport.staged_plants || [])
+        : (state.stagedPlants || []);
+      if (stagedList.length === 0) {
+        showToast("Please add at least one plant recommendation to generate a Preliminary Report.", "warning");
+        return;
+      }
+      state.activePreliminaryReportTarget = customReport || null;
+      const modal = document.getElementById('preliminaryReportModal');
+      const frame = document.getElementById('preliminaryReportPreviewFrame');
+      if (modal && frame) {
+        const html = generatePreliminaryReportHtml(customReport, { standalone: false });
+        frame.srcdoc = html;
+        if (!modal.open) modal.showModal();
+        if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+        ensureDeepRootsBrandAssets().then((assets) => {
+          if (assets && assets.loaded && modal.open) {
+            frame.srcdoc = generatePreliminaryReportHtml(customReport, { standalone: false });
+          }
+          try {
+            state.cachedPreliminaryPdfPack = generatePreliminaryReportPdfFile(customReport);
+          } catch (e) {}
+        });
+      } else {
+        printPreliminaryReport(customReport);
+      }
+    }
+
+    function printPreliminaryReport(customReport = null) {
+      const target = customReport || state.activePreliminaryReportTarget || null;
+      const html = generatePreliminaryReportHtml(target, { standalone: false });
+      const frame = document.getElementById('preliminaryReportPreviewFrame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.focus();
+        frame.contentWindow.print();
+        return;
+      }
+      const printWin = window.open('', '_blank', 'width=900,height=800');
+      if (printWin) {
+        printWin.document.open();
+        printWin.document.write(html);
+        printWin.document.close();
+        setTimeout(() => {
+          printWin.focus();
+          printWin.print();
+        }, 350);
+      } else {
+        downloadPreliminaryReportPdf(target);
+      }
+    }
+
+    function downloadPreliminaryReportHtml(customReport = null) {
+      const target = customReport || state.activePreliminaryReportTarget || null;
+      const meta = target ? {
+        name: target.clientName || target.client_name || 'Client'
+      } : (state.clientMeta || { name: 'Client' });
+      const sanitized = (meta.name || 'Client').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Client';
+      const filename = `DeepRoots_Preliminary_Report_${sanitized}.html`;
+      const html = generatePreliminaryReportHtml(target, { standalone: true });
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Downloaded electronic Preliminary Report: ${filename}`, 'success');
+    }
+
+    async function sharePreliminaryReport(customReport = null) {
+      const target = customReport || state.activePreliminaryReportTarget || null;
+      // 1. Convert to PDF first (synchronously using pre-loaded brand assets so transient user activation is preserved for navigator.share)
+      const pdfPack = generatePreliminaryReportPdfFile(target);
+      const { filename, blob, file, clientName } = pdfPack;
+      const subject = `Deep Roots Preliminary Site Visit Report – ${clientName}`;
+      const bodyText = `Hello ${clientName},\n\nThank you for meeting with Deep Roots Nature Advisors! Attached is your Preliminary Site Visit Report (PDF) summarizing the garden areas we discussed and our native plant recommendations with clickable links.\n\nWarm regards,\nDeep Roots Nature Advisors\nhttps://deeproots.org`;
+
+      // 2. Bring up native share sheet with the generated PDF attached so it can be sent via Email
+      if (typeof navigator !== 'undefined' && navigator.share && file) {
+        try {
+          const canSharePdf = !navigator.canShare || navigator.canShare({ files: [file] });
+          if (canSharePdf) {
+            await navigator.share({
+              title: subject,
+              text: bodyText,
+              files: [file]
+            });
+            showToast(`Shared PDF report (${filename})!`, 'success');
+            return;
+          }
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
+      }
+
+      // Fallback for desktop browsers without file share sheet: download the PDF first, then open email client
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Converted to PDF (${filename}). Opening email draft...`, 'success');
+      try {
+        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + '\n\n(Please attach the downloaded PDF: ' + filename + ')')}`;
+        window.location.href = mailtoUrl;
+      } catch (e) {}
+    }
+
+    async function downloadDocxReport(customReport = null) {
+      const meta = customReport ? {
+        name: customReport.clientName || customReport.client_name || 'Client Consultation',
+        address: customReport.clientAddress || customReport.client_address || '',
+        date: customReport.consultationDate || customReport.consultation_date || '',
+        advisor: customReport.advisorName || customReport.advisor_name || customReport.username || (state.currentUser ? state.currentUser.name : 'Deep Roots Nature Advisor'),
+        notes: customReport.advisorNotes || customReport.advisor_notes || customReport.site_summary || ''
+      } : (state.clientMeta || {});
+      const clientName = meta.name || 'Client Consultation';
+      const clientFirstName = (clientName.trim().split(/[\s,]+/)[0] || clientName).trim();
+
+      // Parse address for street and city/state/zip
+      const fullAddress = (meta.address || '').trim();
+      let streetLine = fullAddress;
+      let cityStateZipLine = '';
+      if (fullAddress.includes('\n')) {
+        const lines = fullAddress.split('\n').map(l => l.trim()).filter(Boolean);
+        streetLine = lines[0] || fullAddress;
+        cityStateZipLine = lines.slice(1).join(', ');
+      } else if (fullAddress.includes(',')) {
+        const parts = fullAddress.split(',');
+        if (parts.length >= 2) {
+          streetLine = parts[0].trim();
+          cityStateZipLine = parts.slice(1).join(',').trim();
+        }
+      }
+
+      // Date formatting
+      let dateStr = meta.date || '';
+      try {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const parsed = new Date(y, m - 1, d);
+          dateStr = parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } else if (!dateStr) {
+          dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+      } catch (e) {
+        dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+
+      const currentUser = state.currentUser;
+      const advisorName = meta.advisor || (currentUser ? currentUser.name : 'Deep Roots Nature Advisor');
+
+      showToast(`Generating official Word document (.docx) for ${clientName}...`);
+
+      function escapeXml(text) {
+        if (!text) return '';
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      }
+
+      function findParagraphStart(xml, pos) {
+        const idx1 = xml.lastIndexOf('<w:p ', pos);
+        const idx2 = xml.lastIndexOf('<w:p>', pos);
+        return Math.max(idx1, idx2);
+      }
+
+      function findParagraphEnd(xml, pos) {
+        const idx = xml.indexOf('</w:p>', pos);
+        return idx !== -1 ? idx + 6 : -1;
+      }
+
+      // Check JSZip
+      if (!window.JSZip) {
+        showToast('Error: JSZip library not loaded. Please verify internet connection.');
+        return;
+      }
+
+      // 1. Fetch official report_template.docx
+      let templateBuffer = null;
+      const templateUrls = [
+        './report_template.docx',
+        'report_template.docx',
+        'https://bradlchr.github.io/report_template.docx',
+        'https://raw.githubusercontent.com/bradlchr/deep-roots-nature-advisors/main/report_template.docx'
+      ];
+
+      for (const u of templateUrls) {
+        try {
+          const resp = await fetch(u);
+          if (resp.ok) {
+            templateBuffer = await resp.arrayBuffer();
+            break;
+          }
+        } catch (fetchErr) {
+          // try next URL
+        }
+      }
+
+      const embeddedB64 = window.REPORT_TEMPLATE_BASE64 || window.EMBEDDED_REPORT_TEMPLATE_BASE64;
+      if (!templateBuffer && embeddedB64) {
+        try {
+          const binaryStr = atob(embeddedB64);
+          const len = binaryStr.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          templateBuffer = bytes.buffer;
+        } catch (b64Err) {
+          console.error('Base64 decode failed:', b64Err);
+        }
+      }
+
+      if (templateBuffer) {
+        try {
+          const zip = await JSZip.loadAsync(templateBuffer);
+          let docXml = await zip.file('word/document.xml').async('string');
+          let relsXml = await zip.file('word/_rels/document.xml.rels').async('string');
+
+          // Remove copy warning banner
+          const copyIdx = docXml.indexOf('PLEASE MAKE A COPY BEFORE YOU EDIT');
+          if (copyIdx !== -1) {
+            const pStart = findParagraphStart(docXml, copyIdx);
+            const pEnd = findParagraphEnd(docXml, copyIdx);
+            if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+              docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+            }
+          }
+
+          // Strip red and purple instructional colors from the first page (cover / letter) so text renders in black
+          const tocIdx = docXml.indexOf('Table of Contents');
+          if (tocIdx !== -1) {
+            const firstPageXml = docXml.slice(0, tocIdx);
+            const cleanFirstPageXml = firstPageXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
+            docXml = cleanFirstPageXml + docXml.slice(tocIdx);
+          }
+
+          // Header placeholders
+          docXml = docXml.replace(/\[Name of client\]/g, escapeXml(clientName));
+          docXml = docXml.replace(/\[Address\]/g, escapeXml(streetLine || 'Kansas City Region'));
+
+          if (cityStateZipLine) {
+            docXml = docXml.replace(/\[City, State ZIP\]/g, escapeXml(cityStateZipLine));
+          } else {
+            const cityIdx = docXml.indexOf('[City, State ZIP]');
+            if (cityIdx !== -1) {
+              const pStart = findParagraphStart(docXml, cityIdx);
+              const pEnd = findParagraphEnd(docXml, cityIdx);
+              if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+                docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+              }
+            }
+          }
+
+          docXml = docXml.replace(/\[Date of Visit\]/g, escapeXml(dateStr));
+          docXml = docXml.replace(/\[Nature Advisor Names\]/g, escapeXml(advisorName));
+          docXml = docXml.replace(/\[Nature Advisor\(s\) names\]/g, escapeXml(advisorName));
+          docXml = docXml.replace(/\[Client first name\]/g, escapeXml(clientFirstName));
+
+          // Introductory summary replacement
+          const introIdx = docXml.indexOf('Sample introductory letter:');
+          const fallbackIntroIdx = introIdx !== -1 ? introIdx : docXml.indexOf('introductory');
+          if (fallbackIntroIdx !== -1) {
+            const pStart = findParagraphStart(docXml, fallbackIntroIdx);
+            const pEnd = findParagraphEnd(docXml, fallbackIntroIdx);
+            if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+              const customIntro = (meta.notes && meta.notes.trim())
+                ? `It was such a pleasure to visit your property and discuss your goals for your home’s ecosystem support. ${meta.notes.trim()} The following is a detailed report of our conversation, highlights of your property’s existing nature-supporting qualities, and tailored native plant recommendations. We hope that the report provides you with more ideas to further your conservation and wildlife adventures.`
+                : `It was such a pleasure to visit your property and discuss your goals for your home’s ecosystem support. The following is a detailed report of our conversation, highlights of your property’s existing nature-supporting qualities, and tailored native plant recommendations. We hope that the report provides you with more ideas to further your conservation and wildlife adventures.`;
+              const newIntroPara = `<w:p>
+    <w:pPr><w:spacing w:after="160"/></w:pPr>
+    <w:r>
+        <w:rPr><w:rFonts w:cs="Times New Roman"/></w:rPr>
+        <w:t>${escapeXml(customIntro)}</w:t>
+    </w:r>
+</w:p>`;
+              docXml = docXml.slice(0, pStart) + newIntroPara + docXml.slice(pEnd);
+            }
+          }
+
+          // Group staged plants strictly by configured garden areas
+          const stagedList = customReport ? (customReport.stagedPlants || customReport.staged_plants || []) : (state.stagedPlants || []);
+          const definedAreas = customReport
+            ? ((customReport.gardenAreas && customReport.gardenAreas.length > 0) ? customReport.gardenAreas : (customReport.garden_areas && customReport.garden_areas.length > 0) ? customReport.garden_areas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden'])
+            : ((state.gardenAreas && state.gardenAreas.length > 0) ? state.gardenAreas : ['Area 1: Front Porch', 'Area 2: Front Sidewalk/Mailbox', 'Area 3: Backyard Shade Garden']);
+
+          function formatAreaHeadingLabel(idx, rawName) {
+            const trimmed = (rawName || '').trim();
+            if (/^area\s*\d+[\s:–-]/i.test(trimmed)) {
+              return trimmed;
+            }
+            return `Area ${idx + 1} – ${trimmed}`;
+          }
+
+          const groups = {};
+          definedAreas.forEach(a => { groups[a] = []; });
+
+          stagedList.forEach(p => {
+            let assigned = p.target_area || p.targetArea;
+            if (!assigned || !groups[assigned]) {
+              const match = definedAreas.find(a => a.toLowerCase().trim() === (assigned || '').toLowerCase().trim());
+              if (match) assigned = match;
+              else assigned = definedAreas[0];
+            }
+            if (!groups[assigned]) groups[assigned] = [];
+            groups[assigned].push(p);
+          });
+
+          // Replace Table of Contents placeholders
+          const area1Name = formatAreaHeadingLabel(0, definedAreas[0] || 'Front Porch');
+          const area2Name = definedAreas[1] ? formatAreaHeadingLabel(1, definedAreas[1]) : null;
+          const area3Name = definedAreas[2] ? formatAreaHeadingLabel(2, definedAreas[2]) : null;
+
+          docXml = docXml.replace("Area 1 – [Location – e.g., next to driveway] ([Front/Back/Side Yard])", area1Name);
+          if (area2Name) {
+            docXml = docXml.replace("Area 2 – [Location – e.g., west side of house] ([Front/Back/Side Yard])", area2Name);
+          } else {
+            const a2Idx = docXml.indexOf("Area 2 – [Location – e.g., west side of house]");
+            if (a2Idx !== -1) {
+              const pStart = findParagraphStart(docXml, a2Idx);
+              const pEnd = findParagraphEnd(docXml, a2Idx);
+              if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+                docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+              }
+            }
+          }
+          if (area3Name) {
+            docXml = docXml.replace("Area 3 – [Location – e.g., Hell strip along street] ([Front/Back/Side Yard])", area3Name);
+          } else {
+            const a3Idx = docXml.indexOf("Area 3 – [Location – e.g., Hell strip along street]");
+            if (a3Idx !== -1) {
+              const pStart = findParagraphStart(docXml, a3Idx);
+              const pEnd = findParagraphEnd(docXml, a3Idx);
+              if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+                docXml = docXml.slice(0, pStart) + docXml.slice(pEnd);
+              }
+            }
+          }
+
+          let newRels = '';
+          let plantBlocks = '';
+          let relCounter = 600;
+          const rIdMatches = relsXml.match(/Id="rId(\d+)"/g);
+          if (rIdMatches) {
+            const maxExisting = Math.max(...rIdMatches.map(m => parseInt(m.replace(/\D/g, ''), 10) || 0));
+            if (maxExisting >= relCounter) relCounter = maxExisting + 1;
+          }
+
+          const accessedDateFormatted = formatReportAccessedDate(meta.date);
+          let tempFnCounter = 1001;
+          const pendingPlantFootnotes = new Map();
+
+          function buildRichRunsXml(markdownText, plantRef = null) {
+            if (!markdownText) return '';
+            const segments = parseInlineMarkdownSegments(markdownText, plantRef);
+            let out = '';
+            for (const seg of segments) {
+              if (seg.type === 'link') {
+                const linkRId = `rId${relCounter++}`;
+                newRels += `<Relationship Id="${linkRId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(seg.url)}" TargetMode="External"/>`;
+                const tempFnId = tempFnCounter++;
+                pendingPlantFootnotes.set(String(tempFnId), {
+                  label: seg.text.replace(/\.+$/, '').trim(),
+                  url: seg.url
+                });
+                out += `<w:hyperlink r:id="${linkRId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${tempFnId}"/></w:r>`;
+              } else if (seg.type === 'italic') {
+                out += `<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
+              } else if (seg.text) {
+                out += `<w:r><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
+              }
+            }
+            return out;
+          }
+
+          if (stagedList.length > 0) {
+            let areaCounter = 0;
+            for (const area of definedAreas) {
+              const plants = groups[area] || [];
+              const areaTitle = formatAreaHeadingLabel(areaCounter++, area);
+              plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:pStyle w:val="Heading2"/>
+        <w:spacing w:before="240" w:after="120"/>
+    </w:pPr>
+    <w:r>
+        <w:rPr>
+            <w:b/>
+            <w:color w:val="2D5A27"/>
+            <w:sz w:val="28"/>
+        </w:rPr>
+        <w:t>${escapeXml(areaTitle)}</w:t>
+    </w:r>
+</w:p>`;
+
+              if (plants.length === 0) {
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="360"/>
+        <w:spacing w:before="60" w:after="120"/>
+    </w:pPr>
+    <w:r>
+        <w:rPr><w:i/><w:color w:val="718096"/></w:rPr>
+        <w:t>No plant species currently staged for this garden area.</w:t>
+    </w:r>
+</w:p>`;
+              }
+
+              for (const staged of plants) {
+                const resolved = resolveReportPlantRecord(staged);
+                const rId = `rId${relCounter++}`;
+                const targetUrl = resolved.plant_url || 'https://grownative.org';
+                newRels += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(targetUrl)}" TargetMode="External"/>`;
+
+                const commonName = resolved.common_name;
+                const sciName = resolved.scientific_name;
+                const desc = resolved.advisor_description;
+
+                const mainPlantFnId = tempFnCounter++;
+                pendingPlantFootnotes.set(String(mainPlantFnId), {
+                  label: `${commonName} (${sciName})`,
+                  url: targetUrl
+                });
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="360" w:hanging="360"/>
+        <w:spacing w:before="120" w:after="60"/>
+    </w:pPr>
+    <w:r>
+        <w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr>
+        <w:t>• </w:t>
+    </w:r>
+    <w:hyperlink r:id="${rId}" w:history="1">
+        <w:r>
+            <w:rPr>
+                <w:rStyle w:val="Hyperlink"/>
+                <w:b/>
+                <w:color w:val="1B6535"/>
+                <w:u w:val="single"/>
+            </w:rPr>
+            <w:t>${escapeXml(commonName)}</w:t>
+        </w:r>
+    </w:hyperlink>
+    <w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${mainPlantFnId}"/></w:r>
+    <w:r>
+        <w:rPr><w:i/></w:rPr>
+        <w:t xml:space="preserve"> (${escapeXml(sciName)}) – </w:t>
+    </w:r>
+    ${buildRichRunsXml(desc, resolved)}
+</w:p>`;
+
+                // Botanical bullet point 1: Quantity, Layer, Habitat, Height
+                const layer = resolved.layer || 'Landscape Bed';
+                const habitat = resolved.habitat || 'Garden / Native Landscape';
+                const height = resolved.height || 'Variable';
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="40"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Quantity: </w:t></w:r>
+    <w:r><w:t>${resolved.quantity || 1} specimen(s) | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Layer: </w:t></w:r>
+    <w:r><w:t>${escapeXml(layer)} | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Habitat: </w:t></w:r>
+    <w:r><w:t>${escapeXml(habitat)} | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Height: </w:t></w:r>
+    <w:r><w:t>${escapeXml(height)}</w:t></w:r>
+</w:p>`;
+
+                // Botanical bullet point 2: Bloom, Sun & Moisture
+                const bloomColors = resolved.bloomColors || [];
+                const bloomSeasons = resolved.bloomSeasons || [];
+                let bloomInfo = 'Seasonal interest';
+                if (bloomColors.length > 0 || bloomSeasons.length > 0) {
+                  bloomInfo = [bloomColors.join(', '), bloomSeasons.length ? `(${bloomSeasons.join(', ')})` : ''].filter(Boolean).join(' ');
+                }
+                const sunVal = resolved.sun || 'Sun to Part Sun';
+                const moistVal = resolved.moisture || 'Average';
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="40"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Bloom: </w:t></w:r>
+    <w:r><w:t>${escapeXml(bloomInfo)} | </w:t></w:r>
+    <w:r><w:rPr><w:b/></w:rPr><w:t>Sun/Moisture: </w:t></w:r>
+    <w:r><w:t>${escapeXml(sunVal)} / ${escapeXml(moistVal)}</w:t></w:r>
+</w:p>`;
+
+                // Botanical bullet point 3: Concise Maintenance Level & Actionable Timings (with clickable source links)
+                const reportMaintLvl = resolved.maintenance_level || 'Low';
+                const reportMaintSummary = formatConciseMaintenanceForReport(resolved);
+
+                plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="40"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t xml:space="preserve">Maintenance (${escapeXml(reportMaintLvl)}): </w:t></w:r>
+    ${buildRichRunsXml(reportMaintSummary, resolved)}
+</w:p>`;
+
+                // Botanical bullet point 4: Concise Wildlife & Host Insect Value (with clickable source links)
+                const wildlifeReportText = formatConciseWildlifeForReport(resolved);
+                if (wildlifeReportText) {
+                  plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="60"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t xml:space="preserve">Wildlife &amp; Host Value: </w:t></w:r>
+    ${buildRichRunsXml(wildlifeReportText, resolved)}
+</w:p>`;
+                }
+
+                // Botanical bullet point 5: Advisor notes
+                if (resolved.custom_notes && resolved.custom_notes.trim()) {
+                  plantBlocks += `
+<w:p>
+    <w:pPr>
+        <w:ind w:left="720" w:hanging="360"/>
+        <w:spacing w:after="100"/>
+    </w:pPr>
+    <w:r><w:t>• </w:t></w:r>
+    <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t xml:space="preserve">Advisor Notes: </w:t></w:r>
+    ${buildRichRunsXml(resolved.custom_notes.trim(), resolved)}
+</w:p>`;
+                }
+              }
+            }
+          } else {
+            plantBlocks += `
+<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr>
+    <w:r><w:rPr><w:i/></w:rPr><w:t>No species currently staged in this consultation report draft.</w:t></w:r>
+</w:p>`;
+          }
+
+          // Replace placeholder instructions block with active plant recommendations
+          const startMarker = "[INSTRUCTIONS: Divide up the areas";
+          const endMarker = "Basic Design Tips";
+          const startIdx = docXml.indexOf(startMarker);
+          const endIdx = docXml.indexOf(endMarker);
+
+          if (startIdx !== -1 && endIdx !== -1) {
+            const pStart = findParagraphStart(docXml, startIdx);
+            const pEnd = findParagraphStart(docXml, endIdx);
+            if (pStart !== -1 && pEnd !== -1 && pStart < pEnd) {
+              docXml = docXml.slice(0, pStart) + plantBlocks + docXml.slice(pEnd);
+            }
+          }
+
+          // Backwards Paragraph Replacement Pipeline for Invasives, Wildlife, and Stormwater
+          const pRegex = /<w:p[ >][\s\S]*?<\/w:p>/g;
+          const paras = [];
+          let pMatch;
+          while ((pMatch = pRegex.exec(docXml)) !== null) {
+            paras.push({
+              start: pMatch.index,
+              end: pMatch.index + pMatch[0].length,
+              xml: pMatch[0],
+              text: pMatch[0].replace(/<[^>]+>/g, '').trim()
+            });
+          }
+
+          const removals = [];
+
+          const reportOpts = customReport ? (customReport.reportOptions || customReport.report_options || {}) : (state.reportOptions || {});
+          // Read live checkbox states directly from DOM if not a custom report
+          const readCheck = (id, fallback) => {
+            if (customReport) return fallback;
+            const el = document.getElementById(id);
+            return el ? el.checked : fallback;
+          };
+
+          const opts = {
+            invasivePresent: readCheck('toggleInvasivePresent', Boolean(reportOpts.invasivePresent)),
+            birdNestBox: readCheck('toggleBirdNestBox', reportOpts.birdNestBox !== false),
+            birdBath: readCheck('toggleBirdBath', reportOpts.birdBath !== false),
+            batBox: readCheck('toggleBatBox', reportOpts.batBox === true),
+            beeHabitat: readCheck('toggleBeeHabitat', reportOpts.beeHabitat !== false),
+            johnsonCounty: readCheck('toggleJohnsonCounty', reportOpts.johnsonCounty === true),
+            wyandotteCounty: readCheck('toggleWyandotteCounty', reportOpts.wyandotteCounty === true),
+            rainwaterHarvesting: readCheck('toggleRainwaterHarvesting', reportOpts.rainwaterHarvesting !== false)
+          };
+
+          if (!customReport) {
+            state.reportOptions = { ...state.reportOptions, ...opts };
+            persistReportOptions();
+          }
+
+          const stagedInvs = customReport ? (customReport.stagedInvasives || customReport.staged_invasives || []) : (state.stagedInvasives || []);
+          const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+
+          // 1. Invasives Section
+          if (!hasInvasives) {
+            // Case A: Update Congratulations text with active MDC Field Guide links
+            for (const p of paras) {
+              if (p.text.includes("Congratulations on an invasive-free landscape!")) {
+                const rIdBush = `rId${relCounter++}`;
+                const rIdJap = `rId${relCounter++}`;
+                const rIdWint = `rId${relCounter++}`;
+                newRels += `<Relationship Id="${rIdBush}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles" TargetMode="External"/>`;
+                newRels += `<Relationship Id="${rIdJap}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle" TargetMode="External"/>`;
+                newRels += `<Relationship Id="${rIdWint}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus" TargetMode="External"/>`;
+
+                const congratsXml = `<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t>Congratulations on an invasive-free landscape!</w:t></w:r>
+    <w:r><w:t xml:space="preserve"> We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: </w:t></w:r>
+    <w:hyperlink r:id="${rIdBush}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>Bush Honeysuckle (Lonicera maackii)</w:t></w:r></w:hyperlink>
+    <w:r><w:t xml:space="preserve">, </w:t></w:r>
+    <w:hyperlink r:id="${rIdJap}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>Japanese Honeysuckle (Lonicera japonica)</w:t></w:r></w:hyperlink>
+    <w:r><w:t xml:space="preserve">, and </w:t></w:r>
+    <w:hyperlink r:id="${rIdWint}"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>Wintercreeper (Euonymus fortunei)</w:t></w:r></w:hyperlink>
+    <w:r><w:t xml:space="preserve">.</w:t></w:r>
+</w:p>`;
+                removals.push({ start: p.start, end: p.end, repl: congratsXml });
+                break;
+              }
+            }
+
+            // Remove Case B: from "We found the following..." until "Why We Care About Invasive Plants"
+            let inCaseB = false;
+            for (const p of paras) {
+              if (p.text.includes("We found the following invasive plants in your landscape")) {
+                inCaseB = true;
+              }
+              if (inCaseB) {
+                if (p.text.includes("Why We Care About Invasive Plants")) {
+                  inCaseB = false;
+                } else {
+                  removals.push({ start: p.start, end: p.end, repl: '' });
+                }
+              }
+            }
+          } else {
+            // Case B: Remove Case A text (from section heading down to "We found the following...")
+            let inCaseA = false;
+            for (const p of paras) {
+              if (p.text.includes("NON-NATIVE, INVASIVE PLANTS") && !p.text.includes("PAGEREF")) {
+                inCaseA = true;
+                continue;
+              }
+              if (inCaseA) {
+                if (p.text.includes("We found the following invasive plants in your landscape")) {
+                  inCaseA = false;
+                } else {
+                  removals.push({ start: p.start, end: p.end, repl: '' });
+                }
+              }
+            }
+
+            // Replace red instruction [keep the invasive plants found here...] with staged invasives!
+            let invXml = '';
+            for (const inv of stagedInvs) {
+              const invName = inv.name || inv.common_name || 'Invasive Species';
+              const invSci = inv.scientific || inv.scientific_name || '';
+              const catalogEntry = (state.invasivePlants || []).find(ip => ip.id === inv.id || ip.scientific_name === invSci || ip.common_name === invName);
+              const infoUrl = (catalogEntry && (catalogEntry.info_url || catalogEntry.ref_url)) || inv.ref_url || 'https://mdc.mo.gov';
+              const controlUrl = (catalogEntry && catalogEntry.control_url) || 'https://mdc.mo.gov/trees-plants/invasive-plants';
+              const invNotes = inv.notes || inv.removal_tips || (catalogEntry && catalogEntry.removal_tips) || 'High-threat non-native invasive. Prompt removal recommended.';
+
+              const rIdInfo = `rId${relCounter++}`;
+              const rIdCtrl = `rId${relCounter++}`;
+              newRels += `<Relationship Id="${rIdInfo}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(infoUrl)}" TargetMode="External"/>`;
+              newRels += `<Relationship Id="${rIdCtrl}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(controlUrl)}" TargetMode="External"/>`;
+
+              invXml += `
+<w:p>
+    <w:pPr><w:spacing w:before="120" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r>
+    <w:hyperlink r:id="${rIdInfo}">
+        <w:r>
+            <w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr>
+            <w:t>${escapeXml(invName)}</w:t>
+        </w:r>
+    </w:hyperlink>
+    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(invSci || (catalogEntry && catalogEntry.scientific_name) || '')})</w:t></w:r>
+    <w:r><w:t xml:space="preserve"> [</w:t></w:r>
+    <w:hyperlink r:id="${rIdCtrl}">
+        <w:r>
+            <w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="C00000"/><w:u w:val="single"/></w:rPr>
+            <w:t>Control Protocol</w:t>
+        </w:r>
+    </w:hyperlink>
+    <w:r><w:t xml:space="preserve">] – </w:t></w:r>
+    <w:r><w:t>${escapeXml(invNotes)}</w:t></w:r>
+</w:p>`;
+            }
+
+            const unobservedBigThree = getUnobservedBigThree(stagedInvs);
+            if (unobservedBigThree.length > 0) {
+              const otherNamesStr = unobservedBigThree.map(b => `${b.name} (${b.scientific})`).join(', ');
+              const moreInfoIntro = `More Information: Although not observed during our walkthrough, we also advise monitoring for other regional high-threat invasives including: ${otherNamesStr}.`;
+
+              invXml += `
+<w:p>
+    <w:pPr><w:spacing w:before="160" w:after="80"/></w:pPr>
+    <w:r><w:rPr><w:i/><w:color w:val="334155"/></w:rPr><w:t>${escapeXml(moreInfoIntro)}</w:t></w:r>
+</w:p>`;
+
+              for (const other of unobservedBigThree) {
+                const rIdOtherInfo = `rId${relCounter++}`;
+                const rIdOtherCtrl = `rId${relCounter++}`;
+                newRels += `<Relationship Id="${rIdOtherInfo}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.info_url)}" TargetMode="External"/>`;
+                newRels += `<Relationship Id="${rIdOtherCtrl}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(other.control_url)}" TargetMode="External"/>`;
+
+                invXml += `
+<w:p>
+    <w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r>
+    <w:hyperlink r:id="${rIdOtherInfo}">
+        <w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(other.name)}</w:t></w:r>
+    </w:hyperlink>
+    <w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(other.scientific)})</w:t></w:r>
+    <w:r><w:t xml:space="preserve"> [</w:t></w:r>
+    <w:hyperlink r:id="${rIdOtherCtrl}">
+        <w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="C00000"/><w:u w:val="single"/></w:rPr><w:t>Control Protocol</w:t></w:r>
+    </w:hyperlink>
+    <w:r><w:t xml:space="preserve">] – </w:t></w:r>
+    <w:r><w:t>${escapeXml(other.summary)}</w:t></w:r>
+</w:p>`;
+              }
+            }
+
+            for (const p of paras) {
+              if (p.text.toLowerCase().includes("keep the invasive plants")) {
+                removals.push({ start: p.start, end: p.end, repl: invXml });
+                break;
+              }
+            }
+
+            // Remove placeholder plants
+            for (const p of paras) {
+              const t = p.text;
+              if (t.startsWith("Bush Honeysuckle (Lonicera Maackii)") ||
+                  t.startsWith("Japanese Honeysuckle (Lonicera japonica)") ||
+                  t.startsWith("Wintercreeper (Euonymus fortunei)")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          // 2. Wildlife Stewardship toggles
+          if (opts.birdNestBox === false) {
+            let inNest = false;
+            for (const p of paras) {
+              if (p.text.includes("Bird Nest Box")) inNest = true;
+              else if (p.text.includes("Bird Bath")) inNest = false;
+              if (inNest) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.birdBath === false) {
+            let inBath = false;
+            for (const p of paras) {
+              if (p.text.includes("Bird Bath")) inBath = true;
+              else if (p.text.includes("Bat Box")) inBath = false;
+              if (inBath) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.batBox !== true) {
+            let inBat = false;
+            for (const p of paras) {
+              if (p.text.includes("Bat Box")) inBat = true;
+              else if (p.text.includes("Native Bee Habitat")) inBat = false;
+              if (inBat) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          } else {
+            for (const p of paras) {
+              if (p.text === "Bat Box (IF Discussed)") {
+                const cleanBat = `<w:p w:rsidR="00EB4026" w:rsidP="00EB4026" w:rsidRDefault="2BF76EF1"><w:pPr><w:pStyle w:val="Heading2"/><w:widowControl/><w:rPr><w:color w:val="000000"/></w:rPr></w:pPr><w:r><w:t>Bat Box</w:t></w:r></w:p>`;
+                removals.push({ start: p.start, end: p.end, repl: cleanBat });
+                break;
+              }
+            }
+          }
+
+          if (opts.beeHabitat === false) {
+            let inBee = false;
+            for (const p of paras) {
+              if (p.text.includes("Native Bee Habitat")) inBee = true;
+              else if (p.text.includes("STORMWATER MANAGEMENT")) inBee = false;
+              if (inBee) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          }
+
+          if (opts.birdNestBox === false && opts.birdBath === false && opts.batBox !== true && opts.beeHabitat === false) {
+            for (const p of paras) {
+              if (p.text.includes("WILDLIFE STEWARDSHIP STRUCTURES") && p.start > 25000) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          // 3. Stormwater County toggles
+          if (opts.johnsonCounty !== true) {
+            for (const p of paras) {
+              if (p.text.includes("Contain The Rain program in Johnson County")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          if (opts.wyandotteCounty !== true) {
+            for (const p of paras) {
+              if (p.text.includes("Unified Government Stormwater Quality Cost-Share Program in Wyandotte County")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          if (opts.johnsonCounty !== true && opts.wyandotteCounty !== true) {
+            for (const p of paras) {
+              if (p.text.includes("Cost-Share Reimbursement Programs for Residential Stormwater Solutions")) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+              }
+            }
+          }
+
+          // 4. Rainwater Harvesting
+          if (opts.rainwaterHarvesting === false) {
+            let inRain = false;
+            for (const p of paras) {
+              if (p.text.includes("Rainwater Harvesting")) inRain = true;
+              else if (p.text.includes("Why we care about stormwater management")) inRain = false;
+              if (inRain) removals.push({ start: p.start, end: p.end, repl: '' });
+            }
+          } else {
+            for (const p of paras) {
+              if (p.text === "Rainwater Harvesting (IF Discussed)") {
+                const cleanRain = `<w:p w:rsidRPr="00AA5BCC" w:rsidR="00567618" w:rsidP="007C29BE" w:rsidRDefault="2BF76EF1"><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:bookmarkStart w:name="_44sinio" w:id="61"/><w:bookmarkEnd w:id="61"/><w:r><w:t>Rainwater Harvesting</w:t></w:r></w:p>`;
+                removals.push({ start: p.start, end: p.end, repl: cleanRain });
+                break;
+              }
+            }
+          }
+
+          // 5. Red instruction removals
+          const redMarkers = [
+            "IF NO INVASIVE PLANTS WERE FOUND IN THE LANDSCAPE",
+            "IF INVASIVE PLANTS WERE FOUND IN THE LANDSCAPE",
+            "Attention, Nature Advisors:",
+            "There are four management practices listed below",
+            "*If they do not seem interested in incorporating these",
+            "Once you have completed this section, please return to this instruction",
+            "***(if in Johnson or Wyandotte County"
+          ];
+          for (const p of paras) {
+            for (const rm of redMarkers) {
+              if (p.text.includes(rm)) {
+                removals.push({ start: p.start, end: p.end, repl: '' });
+                break;
+              }
+            }
+          }
+
+          // 6. Deduplicate and execute replacements backwards
+          const removalsMap = new Map();
+          for (const item of removals) {
+            const key = `${item.start}:${item.end}`;
+            if (!removalsMap.has(key) || item.repl) {
+              removalsMap.set(key, item);
+            }
+          }
+
+          const sortedRemovalsList = Array.from(removalsMap.values()).sort((a, b) => b.start - a.start);
+          for (const item of sortedRemovalsList) {
+            docXml = docXml.slice(0, item.start) + (item.repl || '') + docXml.slice(item.end);
+          }
+
+          // 7. Post-splicing global cleanups (MUST run AFTER index-based slicing is complete)
+          docXml = docXml.replace(/<w:r [^>]*><w:rPr><w:color\s+w:val="(?:FF0000|C00000|red)"[^>]*\/><\/w:rPr><w:t[^>]*>\s*\(IF\s*<\/w:t>[\s\S]*?<\/w:r>/gi, '');
+          docXml = docXml.replace(/\(IF\s*Discussed\)/gi, '');
+          docXml = docXml.replace(/Bat Box \(IF Discussed\)/g, "Bat Box");
+          docXml = docXml.replace(/Rainwater Harvesting \(IF Discussed\)/g, "Rainwater Harvesting");
+
+          // Strip any stray red instructional colors across the document
+          docXml = docXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
+          docXml = docXml.replace(/You might be interested\/You also expressed interest/g, "You may also be interested");
+
+          // 8. Synchronize & Renumber All Document Footnotes Sequentially (1..M) in word/footnotes.xml
+          const fnFile = zip.file('word/footnotes.xml');
+          const fnRelsFile = zip.file('word/_rels/footnotes.xml.rels');
+          if (fnFile && fnRelsFile) {
+            let footnotesXml = await fnFile.async('string');
+            let footnotesRelsXml = await fnRelsFile.async('string');
+
+            // Parse existing footnotes from word/footnotes.xml
+            const existingFnMap = new Map();
+            let separatorFootnotesXml = '';
+            const fnBlockRegex = /<w:footnote\b[^>]*\bw:id="(-?\d+)"[^>]*>[\s\S]*?<\/w:footnote>/g;
+            let fnBlockMatch;
+            while ((fnBlockMatch = fnBlockRegex.exec(footnotesXml)) !== null) {
+              const fnId = fnBlockMatch[1];
+              if (fnId === '-1' || fnId === '0') {
+                separatorFootnotesXml += fnBlockMatch[0];
+              } else {
+                existingFnMap.set(fnId, fnBlockMatch[0]);
+              }
+            }
+
+            // Scan docXml in sequential document order for all <w:footnoteReference w:id="..."/>
+            const orderedOldIds = [];
+            const oldToNewId = new Map();
+            let fnSeq = 1;
+            docXml = docXml.replace(/<w:footnoteReference\b([^>]*?)\bw:id="(\d+)"([^>]*?)\/>/g, (full, pre, oldId, post) => {
+              let assignedId = oldToNewId.get(oldId);
+              if (!assignedId) {
+                assignedId = String(fnSeq++);
+                oldToNewId.set(oldId, assignedId);
+                orderedOldIds.push(oldId);
+              }
+              return `<w:footnoteReference${pre}w:id="${assignedId}"${post}/>`;
+            });
+
+            let fnRelCounter = 500;
+            const fnRelMatches = footnotesRelsXml.match(/Id="rId(\d+)"/g);
+            if (fnRelMatches) {
+              const maxFnRel = Math.max(...fnRelMatches.map(m => parseInt(m.replace(/\D/g, ''), 10) || 0));
+              if (maxFnRel >= fnRelCounter) fnRelCounter = maxFnRel + 1;
+            }
+
+            let newFnRels = '';
+            let rebuiltFootnotesBody = separatorFootnotesXml;
+
+            for (const oldId of orderedOldIds) {
+              const newId = oldToNewId.get(oldId);
+              if (pendingPlantFootnotes.has(oldId)) {
+                const info = pendingPlantFootnotes.get(oldId);
+                const fnRId = `rId${fnRelCounter++}`;
+                newFnRels += `<Relationship Id="${fnRId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(info.url)}" TargetMode="External"/>`;
+                rebuiltFootnotesBody += `<w:footnote w:id="${newId}"><w:p><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto" /><w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr></w:pPr><w:r><w:rPr><w:vertAlign w:val="superscript" /></w:rPr><w:footnoteRef /></w:r><w:r><w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr><w:t xml:space="preserve"> "${escapeXml(info.label)}." </w:t></w:r><w:hyperlink r:id="${fnRId}"><w:r><w:rPr><w:color w:val="1155CC" /><w:sz w:val="20" /><w:szCs w:val="20" /><w:u w:val="single" /></w:rPr><w:t>${escapeXml(info.url)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr><w:t>. Accessed ${escapeXml(accessedDateFormatted)}.</w:t></w:r></w:p></w:footnote>`;
+              } else if (existingFnMap.has(oldId)) {
+                const origBlock = existingFnMap.get(oldId);
+                const updatedBlock = origBlock.replace(/(<w:footnote\b[^>]*?\bw:id=")(\d+)(")/, `$1${newId}$3`);
+                rebuiltFootnotesBody += updatedBlock;
+              }
+            }
+
+            const fnHeaderMatch = footnotesXml.match(/^[\s\S]*?<w:footnotes\b[^>]*>/);
+            const fnOpenTag = fnHeaderMatch ? fnHeaderMatch[0] : `<?xml version="1.0" encoding="utf-8"?><w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`;
+            footnotesXml = `${fnOpenTag}${rebuiltFootnotesBody}</w:footnotes>`;
+
+            if (newFnRels.length > 0) {
+              footnotesRelsXml = footnotesRelsXml.replace('</Relationships>', `${newFnRels}</Relationships>`);
+            }
+
+            zip.file('word/footnotes.xml', footnotesXml);
+            zip.file('word/_rels/footnotes.xml.rels', footnotesRelsXml);
+          }
+
+          // Append hyperlink relationships
+          if (newRels.length > 0) {
+            relsXml = relsXml.replace("</Relationships>", newRels + "</Relationships>");
+          }
+
+          zip.file("word/document.xml", docXml);
+          zip.file("word/_rels/document.xml.rels", relsXml);
+
+          const docxBlob = await zip.generateAsync({
+            type: "blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            compression: "DEFLATE",
+            compressionOptions: { level: 6 }
+          });
+
+          const sanitized = (clientName || 'Client').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Client';
+          const filename = `DeepRoots_Consultation_Report_${sanitized}.docx`;
+
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(docxBlob);
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          showToast(`Downloaded official Word report: ${filename}`);
+          return;
+        } catch (genErr) {
+          console.error('Error modifying official template docx:', genErr);
+          showToast('Error modifying template report: ' + genErr.message, 'danger');
+          return;
+        }
+      } else {
+        showToast('Error: Official report_template.docx could not be loaded. Please ensure you are connected to the internet.', 'danger');
+        return;
+      }
+
+      // Fallback genuine OOXML generator (retained only if template unavailable)
+      try {
+        const zip = new JSZip();
+        zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`);
+
+        zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+
+        let miniRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
+        let miniRelsBody = '';
+        let relCounter = 10;
+        const collector = createCitationCollector(formatReportAccessedDate(meta.date));
+
+        const buildMiniRuns = (text, plantRef = null) => {
+          if (!text) return '';
+          return parseInlineMarkdownSegments(text, plantRef).map(seg => {
+            if (seg.type === 'link') {
+              const rId = `rId${relCounter++}`;
+              miniRelsBody += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(seg.url)}" TargetMode="External"/>`;
+              const citeNum = collector.addCitation(seg.text, seg.url);
+              return `<w:hyperlink r:id="${rId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>${citeNum}</w:t></w:r>`;
+            }
+            if (seg.type === 'italic') {
+              return `<w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
+            }
+            return `<w:r><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r>`;
+          }).join('');
+        };
+
+        let miniBody = `<w:p><w:pPr><w:pStyle w:val="Title"/><w:spacing w:after="160"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="48"/><w:color w:val="235C36"/></w:rPr><w:t>Deep Roots Nature Advisors</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="26"/><w:color w:val="3E5643"/></w:rPr><w:t>Native Plant Consultation Report</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Client: </w:t></w:r><w:r><w:t>${escapeXml(clientName)}</w:t></w:r></w:p>`;
+        if (fullAddress) miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Address: </w:t></w:r><w:r><w:t>${escapeXml(fullAddress)}</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Date: </w:t></w:r><w:r><w:t>${escapeXml(dateStr)}</w:t></w:r></w:p>`;
+        miniBody += `<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Advisor: </w:t></w:r><w:r><w:t>${escapeXml(advisorName)}</w:t></w:r></w:p>`;
+
+        if (meta.notes) {
+          miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="235C36"/></w:rPr><w:t>Site Analysis &amp; Ecological Strategy</w:t></w:r></w:p>`;
+          miniBody += `<w:p><w:pPr><w:spacing w:after="200"/></w:pPr><w:r><w:t>${escapeXml(meta.notes)}</w:t></w:r></w:p>`;
+        }
+
+        miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="235C36"/></w:rPr><w:t>Recommended Native Plant Palette</w:t></w:r></w:p>`;
+
+        (state.stagedPlants || []).forEach(rawP => {
+          const p = resolveReportPlantRecord(rawP);
+          const rId = `rId${relCounter++}`;
+          miniRelsBody += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(p.plant_url)}" TargetMode="External"/>`;
+          const mainCite = collector.addCitation(`${p.common_name} (${p.scientific_name})`, p.plant_url);
+
+          miniBody += `<w:p><w:pPr><w:spacing w:before="140" w:after="40"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t>• </w:t></w:r><w:hyperlink r:id="${rId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:b/><w:color w:val="1B6535"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(p.common_name)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>${mainCite}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(p.scientific_name)}) – </w:t></w:r>${buildMiniRuns(p.advisor_description, p)}</w:p>`;
+          miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:t>• Quantity: ${p.quantity} | Layer: ${escapeXml(p.layer)} | Height: ${escapeXml(p.height)}</w:t></w:r></w:p>`;
+          miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:t>• Sun/Moisture: ${escapeXml(p.sun)} / ${escapeXml(p.moisture)}</w:t></w:r></w:p>`;
+          const maintShort = formatConciseMaintenanceForReport(p);
+          if (maintShort) {
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">• Maintenance (${escapeXml(p.maintenance_level)}): </w:t></w:r>${buildMiniRuns(maintShort, p)}</w:p>`;
+          }
+          const wildlifeShort = formatConciseWildlifeForReport(p);
+          if (wildlifeShort) {
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="30"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">• Wildlife &amp; Host Value: </w:t></w:r>${buildMiniRuns(wildlifeShort, p)}</w:p>`;
+          }
+          if (p.custom_notes) {
+            miniBody += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="235C36"/></w:rPr><w:t xml:space="preserve">• Advisor Notes: </w:t></w:r>${buildMiniRuns(p.custom_notes, p)}</w:p>`;
+          }
+        });
+
+        // Invasives in fallback
+        const opts = state.reportOptions || {};
+        const stagedInvs = state.stagedInvasives || [];
+        const hasInvasives = Boolean(opts.invasivePresent) || (stagedInvs.length > 0);
+        miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="235C36"/></w:rPr><w:t>Non-Native, Invasive Plants &amp; Problematic Species</w:t></w:r></w:p>`;
+        if (!hasInvasives) {
+          miniBody += `<w:p><w:pPr><w:spacing w:after="100"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="2D5A27"/></w:rPr><w:t>Congratulations on an invasive-free landscape!</w:t></w:r><w:r><w:t xml:space="preserve"> We found no non-native invasive plant species in your landscape during our walkthrough. However, invasive species can pop up at any time. The following three are the most common invasive plants in the Kansas City region. We recommend keeping an eye out for them and removing them immediately if you see them: Bush Honeysuckle (Lonicera maackii), Japanese Honeysuckle (Lonicera japonica), and Wintercreeper (Euonymus fortunei).</w:t></w:r></w:p>`;
+        } else {
+          miniBody += `<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:t>We found the following invasive plants in your landscape during our visit:</w:t></w:r></w:p>`;
+          stagedInvs.forEach(inv => {
+            const invName = inv.name || inv.common_name || 'Invasive Species';
+            const invSci = inv.scientific || inv.scientific_name || '';
+            const invNotes = inv.notes || inv.removal_tips || 'High-threat invasive. Removal recommended.';
+            miniBody += `<w:p><w:pPr><w:spacing w:before="60" w:after="40"/><w:ind w:left="360" w:hanging="360"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="C00000"/></w:rPr><w:t>• </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>${escapeXml(invName)}</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve"> (${escapeXml(invSci)})</w:t></w:r><w:r><w:t> – ${escapeXml(invNotes)}</w:t></w:r></w:p>`;
+          });
+        }
+
+        if (collector.citations.length > 0) {
+          miniBody += `<w:p><w:pPr><w:spacing w:before="240" w:after="100"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="235C36"/></w:rPr><w:t>Sources Cited</w:t></w:r></w:p>`;
+          collector.citations.forEach(c => {
+            const cRId = `rId${relCounter++}`;
+            miniRelsBody += `<Relationship Id="${cRId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(c.url)}" TargetMode="External"/>`;
+            miniBody += `<w:p><w:pPr><w:spacing w:after="40"/></w:pPr><w:r><w:rPr><w:vertAlign w:val="superscript"/><w:sz w:val="20"/></w:rPr><w:t>${c.num}</w:t></w:r><w:r><w:rPr><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve"> "${escapeXml(c.label)}." </w:t></w:r><w:hyperlink r:id="${cRId}"><w:r><w:rPr><w:color w:val="1155CC"/><w:sz w:val="20"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(c.url)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:sz w:val="20"/></w:rPr><w:t>. Accessed ${escapeXml(c.accessed)}.</w:t></w:r></w:p>`;
+          });
+        }
+
+        miniRels += miniRelsBody + `</Relationships>`;
+        zip.file('word/_rels/document.xml.rels', miniRels);
+
+        const miniDocXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:body>
+    ${miniBody}
+  </w:body>
+</w:document>`;
+        zip.file('word/document.xml', miniDocXml);
+
+        const docxBlob = await zip.generateAsync({
+          type: 'blob',
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          compression: 'DEFLATE'
+        });
+
+        const sanitized = (clientName || 'Client').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^_+|_+$/g, '') || 'Client';
+        const filename = `DeepRoots_Consultation_Report_${sanitized}.docx`;
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(docxBlob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast(`Downloaded Word report: ${filename}`);
+      } catch (fallbackErr) {
+        console.error('Fallback DOCX generation failed:', fallbackErr);
+        copyMarkdownReport();
+        showToast('Could not build .docx binary. Markdown report copied to clipboard!');
+      }
+    }
+
+    // Setup Event Listeners

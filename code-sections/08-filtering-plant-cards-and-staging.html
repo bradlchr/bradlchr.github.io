@@ -1,0 +1,1862 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/08-filtering-plant-cards-and-staging.html
+  Title: Section 8: Faceted Search/Filter Engine, Plant Cards, Staging & Plant Approvals
+  Source Lines in index.html: Lines 9990 – 11842 (1853 lines)
+  Overview: Multi-criteria plant filtering (applyFilters) & sorting (sortPlants), plant card rendering (createPlantCard), staging drawer management, Plant Detail modal/gallery, and role-aware plant editing/approval inbox.
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+    function applyFilters() {
+      if (state.catalogMode === 'invasive') {
+        renderInvasiveGrid();
+        return;
+      }
+      const f = state.filters;
+      const search = f.search.toLowerCase().trim();
+
+      state.filteredPlants = state.allPlants.filter(p => {
+        // Search text
+        if (search) {
+          const matchCommon = (p.common_names || []).some(n => n.toLowerCase().includes(search));
+          const matchSci = (p.scientific_name || '').toLowerCase().includes(search);
+          const matchDesc = getPlantDesc(p).toLowerCase().includes(search);
+          const matchHabitat = (p.native_environment || '').toLowerCase().includes(search);
+          if (!matchCommon && !matchSci && !matchDesc && !matchHabitat) return false;
+        }
+
+        // Quick Toggles
+        if (f.sweet16 && !isSweet16(p)) return false;
+        if (f.keystone && !isKcKeystone(p)) return false;
+
+        // Habitat
+        if (f.habitat.size > 0) {
+          const pEnv = p.native_environment || '';
+          if (!f.habitat.has(pEnv)) return false;
+        }
+
+        // Light
+        if (f.light.size > 0) {
+          const lights = (p.light_requirements || []).map(l => l.toLowerCase());
+          const matches = Array.from(f.light).some(val => lights.some(l => l.includes(val.toLowerCase())));
+          if (!matches) return false;
+        }
+
+        // Moisture
+        if (f.moisture.size > 0) {
+          const moistures = (p.moisture_requirements || []).map(m => m.toLowerCase());
+          const matches = Array.from(f.moisture).some(val => moistures.some(m => m.includes(val.toLowerCase())));
+          if (!matches) return false;
+        }
+
+        // Plant Type
+        if (f.type.size > 0) {
+          const rawType = Array.isArray(p.plant_type) ? p.plant_type.join(' ') : (p.plant_type || '');
+          const matches = Array.from(f.type).some(val => rawType.toLowerCase().includes(val.toLowerCase()));
+          if (!matches) return false;
+        }
+
+        // Ecological / Garden Layer
+        if (f.layer.size > 0) {
+          const pLayer = getPlantLayer(p).toLowerCase();
+          const matches = Array.from(f.layer).some(val => pLayer.includes(val.toLowerCase()));
+          if (!matches) return false;
+        }
+
+        // Bloom Season
+        if (f.season.size > 0) {
+          const periods = (p.bloom_period || []).map(s => s.toLowerCase());
+          const matches = Array.from(f.season).some(s => periods.some(p => p.includes(s.toLowerCase())));
+          if (!matches) return false;
+        }
+
+        // Mature Height
+        if (f.height.size > 0) {
+          const minH = p.mature_height_min !== undefined && p.mature_height_min !== null
+            ? p.mature_height_min
+            : (p.mature_height?.min_ft ?? 0);
+          const maxH = p.mature_height_max !== undefined && p.mature_height_max !== null
+            ? p.mature_height_max
+            : (p.mature_height?.max_ft ?? (minH || 0));
+
+          const matches = Array.from(f.height).some(bracket => {
+            if (bracket === '< 1 ft') return minH <= 1.0;
+            if (bracket === '1 - 3 ft') return (maxH >= 1.0 && minH <= 3.0);
+            if (bracket === '3 - 6 ft') return (maxH >= 3.0 && minH <= 6.0);
+            if (bracket === '6 - 15 ft') return (maxH >= 6.0 && minH <= 15.0);
+            if (bracket === '15+ ft') return (maxH >= 15.0);
+            return false;
+          });
+          if (!matches) return false;
+        }
+
+        // Bloom Color
+        if (f.bloomColor.size > 0) {
+          const pColors = (p.bloom_color || p.bloomColor || []).map(c => String(c).toLowerCase().trim());
+          const matches = Array.from(f.bloomColor).some(sel => {
+            const s = sel.toLowerCase().trim();
+            if (s === 'greenish') return pColors.some(c => c === 'greenish' || c === 'green');
+            if (s === 'brown/tan') return pColors.some(c => c === 'brown/tan' || c === 'brown');
+            return pColors.includes(s);
+          });
+          if (!matches) return false;
+        }
+
+        // Sociability
+        if (f.sociability.size > 0) {
+          const soc = getPlantSociability(p).toLowerCase();
+          const matches = Array.from(f.sociability).some(s => soc.includes(s.toLowerCase()));
+          if (!matches) return false;
+        }
+
+        // Maintenance Level
+        if (f.maintenance && f.maintenance.size > 0) {
+          const maint = getPlantMaintenanceLevel(p).toLowerCase();
+          const matches = Array.from(f.maintenance).some(m => maint.includes(m.toLowerCase()));
+          if (!matches) return false;
+        }
+
+        return true;
+      });
+
+      sortPlants();
+      renderGrid();
+      renderActiveFilterTags();
+    }
+
+    function sortPlants() {
+      const order = state.sortOrder;
+      const showSciFirst = shouldShowScientificFirst();
+      state.filteredPlants.sort((a, b) => {
+        const sciA = a.scientific_name || '';
+        const sciB = b.scientific_name || '';
+        const commA = (a.common_names && a.common_names[0]) || sciA;
+        const commB = (b.common_names && b.common_names[0]) || sciB;
+        const nameA = showSciFirst ? sciA : commA;
+        const nameB = showSciFirst ? sciB : commB;
+        const hA = a.mature_height_max || 0;
+        const hB = b.mature_height_max || 0;
+
+        switch (order) {
+          case 'keystone_first': {
+            const keyA = (isKcKeystone(a) ? 2 : 0) + (isSweet16(a) ? 1 : 0);
+            const keyB = (isKcKeystone(b) ? 2 : 0) + (isSweet16(b) ? 1 : 0);
+            if (keyA !== keyB) return keyB - keyA;
+            return nameA.localeCompare(nameB);
+          }
+          case 'common_asc':
+            return commA.localeCompare(commB);
+          case 'common_desc':
+            return commB.localeCompare(commA);
+          case 'sci_asc':
+            return sciA.localeCompare(sciB);
+          case 'sci_desc':
+            return sciB.localeCompare(sciA);
+          case 'height_asc':
+            return (hA - hB) || nameA.localeCompare(nameB);
+          case 'height_desc':
+            return (hB - hA) || nameA.localeCompare(nameB);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    // Render Active Filter Tags
+    function renderActiveFilterTags() {
+      const bar = document.getElementById('activeFiltersBar');
+      bar.innerHTML = '';
+      let count = 0;
+
+      const addTag = (text, onRemove) => {
+        count++;
+        const tag = document.createElement('span');
+        tag.className = 'active-tag';
+        tag.innerHTML = `<span>${text}</span><button>&times;</button>`;
+        tag.querySelector('button').addEventListener('click', onRemove);
+        bar.appendChild(tag);
+      };
+
+      if (state.filters.sweet16) {
+        addTag('⭐ Sweet 16', () => {
+          state.filters.sweet16 = false;
+          document.getElementById('toggleSweet16Btn').classList.remove('active');
+          applyFilters();
+        });
+      }
+      if (state.filters.keystone) {
+        addTag('🌿 KC Keystone', () => {
+          state.filters.keystone = false;
+          document.getElementById('toggleKeystoneBtn').classList.remove('active');
+          applyFilters();
+        });
+      }
+
+      const groups = ['habitat', 'light', 'moisture', 'height', 'type', 'layer', 'season', 'bloomColor', 'sociability', 'maintenance'];
+      groups.forEach(g => {
+        state.filters[g].forEach(val => {
+          addTag(val, () => {
+            state.filters[g].delete(val);
+            const chip = document.querySelector(`.chip-filter[data-group="${g}"][data-val="${val}"]`);
+            if (chip) chip.classList.remove('active');
+            applyFilters();
+          });
+        });
+      });
+
+      if (count > 0) {
+        bar.style.display = 'flex';
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'clear-all-btn';
+        clearBtn.textContent = 'Clear All';
+        clearBtn.addEventListener('click', resetAllFilters);
+        bar.appendChild(clearBtn);
+      } else {
+        bar.style.display = 'none';
+      }
+
+      // Sync mobile filter badge count
+      const mobileBadge = document.getElementById('mobileFilterBadge');
+      if (mobileBadge) {
+        if (count > 0) {
+          mobileBadge.textContent = count;
+          mobileBadge.style.display = 'inline-block';
+        } else {
+          mobileBadge.style.display = 'none';
+        }
+      }
+    }
+
+    function resetAllFilters() {
+      state.filters.search = '';
+      const sInput = document.getElementById('searchInput');
+      if (sInput) sInput.value = '';
+      const sClear = document.getElementById('searchClearBtn');
+      if (sClear) sClear.style.display = 'none';
+
+      const msInput = document.getElementById('mobileSearchInput');
+      if (msInput) msInput.value = '';
+      const msClear = document.getElementById('mobileSearchClearBtn');
+      if (msClear) msClear.style.display = 'none';
+
+      state.filters.sweet16 = false;
+      const s16BtnEl = document.getElementById('toggleSweet16Btn');
+      if (s16BtnEl) {
+        s16BtnEl.classList.remove('active');
+        s16BtnEl.setAttribute('aria-checked', 'false');
+      }
+      state.filters.keystone = false;
+      const kstoneBtnEl = document.getElementById('toggleKeystoneBtn');
+      if (kstoneBtnEl) {
+        kstoneBtnEl.classList.remove('active');
+        kstoneBtnEl.setAttribute('aria-checked', 'false');
+      }
+      announceToScreenReader('All filters reset. Showing all Kansas City native plants.', true);
+      
+      const groups = ['habitat', 'light', 'moisture', 'height', 'type', 'layer', 'season', 'bloomColor', 'sociability', 'maintenance'];
+      groups.forEach(g => state.filters[g].clear());
+      document.querySelectorAll('.chip-filter.active').forEach(c => c.classList.remove('active'));
+
+      applyFilters();
+    }
+
+    // Render Grid
+    function renderGrid() {
+      if (state.catalogMode === 'invasive') {
+        renderInvasiveGrid();
+        return;
+      }
+      const grid = document.getElementById('plantsGrid');
+      const empty = document.getElementById('emptyState');
+      const countEl = document.getElementById('resultsCount');
+
+      countEl.innerHTML = `Showing <strong>${state.filteredPlants.length}</strong> of ${state.allPlants.length} Kansas City Native Plants`;
+      announceToScreenReader(`Showing ${state.filteredPlants.length} of ${state.allPlants.length} Kansas City native plants`);
+      const mobileFilteredCount = document.getElementById('mobileFilteredCount');
+      if (mobileFilteredCount) mobileFilteredCount.textContent = state.filteredPlants.length;
+
+      if (state.filteredPlants.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      empty.style.display = 'none';
+      grid.innerHTML = '';
+
+      state.filteredPlants.forEach(plant => {
+        const card = createPlantCard(plant);
+        grid.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function getBloomColorAccent(colorName, isDark) {
+      const c = (colorName || '').toLowerCase().trim();
+      if (isDark) {
+        switch (c) {
+          case 'yellow': return '#FFD54F';
+          case 'purple': return '#CE93D8';
+          case 'blue': return '#64B5F6';
+          case 'white': return '#ECEFF1';
+          case 'cream': return '#FFF59D';
+          case 'pink': return '#F48FB1';
+          case 'red': return '#EF5350';
+          case 'orange': return '#FFB74D';
+          case 'lavender': return '#B39DDB';
+          case 'greenish':
+          case 'green': return '#81C784';
+          case 'brown/tan':
+          case 'brown': return '#BCAAA4';
+          default: return '#81C784';
+        }
+      } else {
+        switch (c) {
+          case 'yellow': return '#E5A800';
+          case 'purple': return '#8E44AD';
+          case 'blue': return '#1E88E5';
+          case 'white': return '#78909C';
+          case 'cream': return '#D4AC0D';
+          case 'pink': return '#E91E63';
+          case 'red': return '#C0392B';
+          case 'orange': return '#E67E22';
+          case 'lavender': return '#9B59B6';
+          case 'greenish':
+          case 'green': return '#2E7D32';
+          case 'brown/tan':
+          case 'brown': return '#8D6E63';
+          default: return '#2E7D32';
+        }
+      }
+    }
+
+    function getBloomCardGradient(bloomColors, isDark) {
+      if (!Array.isArray(bloomColors) || bloomColors.length === 0) {
+        return isDark
+          ? 'linear-gradient(135deg, #133621 0%, #0A2214 100%)'
+          : 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)';
+      }
+
+      const colorMap = isDark ? {
+        'yellow': '#735100',
+        'purple': '#4A148C',
+        'blue': '#0D47A1',
+        'white': '#37474F',
+        'cream': '#6B5818',
+        'pink': '#880E4F',
+        'red': '#7F0000',
+        'orange': '#8A3800',
+        'lavender': '#4527A0',
+        'greenish': '#1B5E20',
+        'green': '#1B5E20',
+        'brown/tan': '#3E2723',
+        'brown': '#3E2723'
+      } : {
+        'yellow': '#FFB300',
+        'purple': '#8E24AA',
+        'blue': '#1E88E5',
+        'white': '#B0BEC5',
+        'cream': '#FFCA28',
+        'pink': '#D81B60',
+        'red': '#E53935',
+        'orange': '#FB8C00',
+        'lavender': '#7E57C2',
+        'greenish': '#43A047',
+        'green': '#43A047',
+        'brown/tan': '#8D6E63',
+        'brown': '#8D6E63'
+      };
+
+      const fallback = isDark ? '#133621' : '#2E7D32';
+      const resolved = bloomColors.map(c => colorMap[(c || '').toLowerCase().trim()] || fallback);
+
+      if (resolved.length === 1) {
+        const c = resolved[0];
+        return isDark
+          ? `linear-gradient(135deg, ${c} 0%, rgba(19, 54, 33, 0.95) 100%)`
+          : `linear-gradient(135deg, ${c} 0%, rgba(46, 125, 50, 0.75) 100%)`;
+      } else if (resolved.length === 2) {
+        return `linear-gradient(135deg, ${resolved[0]} 0%, ${resolved[1]} 100%)`;
+      } else {
+        // 3+ colors: Luminous multi-point mesh gradient matching Android app
+        return `radial-gradient(circle at 15% 15%, ${resolved[0]} 0%, transparent 65%), ` +
+               `radial-gradient(circle at 85% 85%, ${resolved[1]} 0%, transparent 65%), ` +
+               `linear-gradient(135deg, ${resolved[2] || resolved[0]}, ${resolved[0]})`;
+      }
+    }
+
+    // Create Plant Card
+    function createPlantCard(plant) {
+      const card = document.createElement('div');
+      card.className = 'plant-card';
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      const bloomColors = plant.bloom_color || plant.bloomColor || [];
+      card.style.background = getBloomCardGradient(bloomColors, isDark);
+
+      const showSciFirst = shouldShowScientificFirst();
+      const commonName = (plant.common_names && plant.common_names[0]) || plant.scientific_name;
+      const primaryName = showSciFirst ? (plant.scientific_name || commonName) : commonName;
+      const secondaryName = showSciFirst ? commonName : (plant.scientific_name || '');
+      const isStaged = state.stagedPlants.some(p => p.id === plant.id || p.scientific_name === plant.scientific_name);
+      const imgUrl = (plant.images && plant.images[0] && plant.images[0].url) || '';
+
+      const sunStr = (plant.light_requirements || []).join(', ') || 'Sun/Shade';
+      const moistStr = (plant.moisture_requirements || []).join(', ') || 'Medium';
+      const heightStr = getPlantHeight(plant);
+      const layerStr = getPlantLayer(plant);
+      const descStr = getPlantDesc(plant);
+      const maintLevel = getPlantMaintenanceLevel(plant);
+      const maintColor = maintLevel === 'Low' ? '#10b981' : (maintLevel === 'Medium' ? '#f59e0b' : '#ef4444');
+      const maintPillHtml = `<span class="meta-chip" style="border-left:2.5px solid ${maintColor};"><i data-lucide="wrench" style="width:11px;height:11px;color:${maintColor};"></i> <span>${maintLevel} Maint</span></span>`;
+
+      let bloomPillHtml = '';
+      if (Array.isArray(bloomColors) && bloomColors.length > 0) {
+        const dots = bloomColors.slice(0, 3).map(c => {
+          const col = getBloomColorAccent(c, isDark);
+          return `<span style="width:7px;height:7px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>`;
+        }).join('');
+        bloomPillHtml = `<span class="meta-chip" style="display:inline-flex;align-items:center;gap:4px;">${dots}<span>${bloomColors.join('/')}</span></span>`;
+      }
+
+      card.innerHTML = `
+        <div class="plant-card-inner">
+          <div class="card-media">
+            ${imgUrl ? `<img src="${imgUrl}" alt="${commonName}" loading="lazy" onerror="if(this.src.includes('images/plants/') && !this.src.startsWith('images/plants/')){ this.src='images/plants/' + this.src.split('images/plants/')[1]; } else { this.onerror=null; this.src='https://images.unsplash.com/photo-1598880940371-c756e015fea1?auto=format&fit=crop&w=600&q=80'; }">` : `
+              <div class="card-placeholder">
+                <i data-lucide="sprout" style="width:36px;height:36px;"></i>
+                <span style="font-size:11px;">Botanical Record</span>
+              </div>
+            `}
+            ${(plant.images && plant.images.length > 1) ? `
+              <span class="card-photo-count-badge" title="${plant.images.length} botanical photos · Click card to view high-resolution gallery and verified attribution">
+                <i data-lucide="camera" style="width:11px;height:11px;"></i>
+                <span>${plant.images.length}</span>
+              </span>
+            ` : ''}
+            <div class="card-badges">
+              ${(state.plantApprovals || []).some(a => a.status === 'pending' && (a.plant_id === plant.id || a.scientific_name === plant.scientific_name)) ? `
+                <span class="badge" style="background:#f59e0b;color:#1e293b;font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;box-shadow:0 2px 4px rgba(0,0,0,0.3);" title="Proposed edits are pending Administrator approval">
+                  <i data-lucide="clock" style="width:10px;height:10px;"></i>
+                  <span>Pending Review</span>
+                </span>
+              ` : ''}
+              ${isSweet16(plant) ? `<span class="badge-sweet16">⭐ Sweet 16</span>` : ''}
+              ${isKcKeystone(plant) ? `<span class="badge-keystone">🌿 Keystone</span>` : ''}
+            </div>
+            ${layerStr ? `<span class="badge-layer">${layerStr}</span>` : ''}
+          </div>
+          <div class="card-body">
+            <div class="card-title-group" tabindex="0" role="button" aria-label="View botanical details for ${escapeHtml(commonName)}">
+              <h3 class="card-common-name card-primary-name ${showSciFirst ? 'is-scientific' : ''}">${primaryName}</h3>
+              <p class="card-sci-name card-secondary-name ${!showSciFirst ? 'is-scientific' : ''}">${secondaryName}</p>
+            </div>
+            <div class="card-chips">
+              <span class="meta-chip"><i data-lucide="sun" style="width:12px;height:12px;"></i> ${sunStr}</span>
+              <span class="meta-chip"><i data-lucide="droplet" style="width:12px;height:12px;"></i> ${moistStr}</span>
+              <span class="meta-chip"><i data-lucide="ruler" style="width:12px;height:12px;"></i> ${heightStr}</span>
+              ${maintPillHtml}
+              ${bloomPillHtml}
+            </div>
+            <p class="card-desc">${renderRichMarkdownText(descStr, plant)}</p>
+          </div>
+          <div class="card-footer">
+            <button class="btn-copy-desc" title="Copy Advisor Description" aria-label="Copy description for ${escapeHtml(commonName)}">
+              <i data-lucide="copy" style="width:13px;height:13px;"></i>
+              <span>${state.currentUser ? 'Copy' : 'Copy Description'}</span>
+            </button>
+            ${state.currentUser ? `
+            <button class="btn-add-report ${isStaged ? 'staged' : ''}" aria-label="${isStaged ? 'Remove ' + escapeHtml(commonName) + ' from report' : 'Add ' + escapeHtml(commonName) + ' to consultation report'}">
+              <i data-lucide="${isStaged ? 'check' : 'plus'}" style="width:14px;height:14px;"></i>
+              <span>${isStaged ? 'In Report' : 'Add to Report'}</span>
+            </button>
+            ` : `
+            <button class="btn-card-detail" aria-label="View botanical details for ${escapeHtml(commonName)}">
+              <i data-lucide="info" style="width:13px;height:13px;"></i>
+              <span>Details</span>
+            </button>
+            `}
+          </div>
+        </div>
+      `;
+
+      // Event Listeners
+      card.querySelector('.card-media').addEventListener('click', () => openPlantDetail(plant));
+      const cardTitleGrp = card.querySelector('.card-title-group');
+      cardTitleGrp.addEventListener('click', () => openPlantDetail(plant));
+      cardTitleGrp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPlantDetail(plant);
+        }
+      });
+
+      card.querySelector('.btn-copy-desc').addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(descStr).then(() => {
+          showToast(`Copied description for ${commonName}!`);
+        });
+      });
+
+      const addBtn = card.querySelector('.btn-add-report');
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!state.currentUser) {
+            showToast("Please sign in as an advisor to stage plants for reports.", "warning");
+            openLoginModal();
+            return;
+          }
+          toggleStagedPlant(plant);
+        });
+      }
+
+      const detailBtn = card.querySelector('.btn-card-detail');
+      if (detailBtn) {
+        detailBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPlantDetail(plant);
+        });
+      }
+
+      return card;
+    }
+
+    // Staging Management
+    function toggleStagedPlant(plant) {
+      if (!state.currentUser) {
+        showToast("Please sign in as an advisor to stage plants for reports.", "warning");
+        openLoginModal();
+        return;
+      }
+      const idx = state.stagedPlants.findIndex(p => p.id === plant.id || p.scientific_name === plant.scientific_name);
+      if (idx >= 0) {
+        state.stagedPlants.splice(idx, 1);
+        showToast(`Removed ${plant.common_names?.[0] || plant.scientific_name} from report.`);
+      } else {
+        const defaultArea = (state.gardenAreas && state.gardenAreas.length > 0)
+          ? state.gardenAreas[0]
+          : 'Area 1: Front Porch';
+        state.stagedPlants.push({
+          id: plant.id || plant.scientific_name,
+          common_name: plant.common_names?.[0] || plant.scientific_name,
+          scientific_name: plant.scientific_name,
+          image_url: plant.images?.[0]?.url || '',
+          plant_url: getPlantUrl(plant),
+          advisor_description: getPlantDesc(plant),
+          quantity: 1,
+          custom_notes: '',
+          sun: (plant.light_requirements || []).join(', '),
+          moisture: (plant.moisture_requirements || []).join(', '),
+          height: getPlantHeight(plant),
+          layer: getPlantLayer(plant),
+          sociability: getPlantSociability(plant),
+          maintenance_level: getPlantMaintenanceLevel(plant),
+          maintenance_guide: getPlantMaintenanceGuide(plant),
+          environment: plant.native_environment || '',
+          target_area: defaultArea
+        });
+        showToast(`Added ${plant.common_names?.[0] || plant.scientific_name} to ${defaultArea}!`);
+      }
+      saveStaging();
+      renderStaging();
+      renderGrid();
+    }
+
+    function saveStaging() {
+      localStorage.setItem('dr_staged_plants', JSON.stringify(state.stagedPlants));
+      updateStagedBadge();
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.stagedPlants = JSON.parse(JSON.stringify(state.stagedPlants));
+          active.lastModified = Date.now();
+          persistConsultations();
+          updateConsultationOption(active);
+        }
+      }
+    }
+
+    function updateStagedBadge() {
+      const badge = document.getElementById('stagedBadge');
+      const count = state.stagedPlants.length;
+      document.getElementById('stagedCount').textContent = count;
+      if (count > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = count;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function renderStaging() {
+      const container = document.getElementById('stagedList');
+      updateStagedBadge();
+
+      const definedAreas = (state.gardenAreas && state.gardenAreas.length > 0)
+        ? state.gardenAreas
+        : ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+
+      if (state.stagedPlants.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:30px 10px;color:var(--text-muted);font-size:13px;">
+            No plants added to report yet.<br>Click <strong>+ Add to Report</strong> on any plant card.
+          </div>
+        `;
+        renderGardenAreasManager();
+        return;
+      }
+
+      container.innerHTML = '';
+      state.stagedPlants.forEach((item, index) => {
+        if (!item.target_area || !definedAreas.includes(item.target_area)) {
+          item.target_area = definedAreas[0];
+        }
+
+        const el = document.createElement('div');
+        el.className = 'staged-item';
+        el.innerHTML = `
+          <div class="staged-item-header">
+            ${item.image_url ? `<img src="${item.image_url}" class="staged-item-thumb" alt="${item.common_name}">` : `
+              <div class="staged-item-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+                <i data-lucide="sprout" style="width:20px;height:20px;"></i>
+              </div>
+            `}
+            <div class="staged-item-info">
+              <div class="staged-item-name">
+                <a href="${item.plant_url}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline; font-style: ${shouldShowScientificFirst() ? 'italic' : 'normal'};">
+                  ${shouldShowScientificFirst() ? item.scientific_name : item.common_name}
+                </a>
+              </div>
+              <div class="staged-item-sci" style="font-style: ${shouldShowScientificFirst() ? 'normal' : 'italic'};">${shouldShowScientificFirst() ? item.common_name : item.scientific_name}</div>
+            </div>
+            <div class="quantity-control">
+              <button class="qty-btn qty-minus" aria-label="Decrease quantity for ${escapeHtml(item.common_name || item.scientific_name)}">-</button>
+              <span class="qty-val">${item.quantity || 1}</span>
+              <button class="qty-btn qty-plus" aria-label="Increase quantity for ${escapeHtml(item.common_name || item.scientific_name)}">+</button>
+            </div>
+            <button class="btn-icon remove-btn" title="Remove plant" aria-label="Remove ${escapeHtml(item.common_name || item.scientific_name)} from report" style="color:var(--danger);padding:4px;">
+              <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+            </button>
+          </div>
+          <div class="staged-item-area-row">
+            <span style="font-size:11px;font-weight:700;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
+              <i data-lucide="map-pin" style="width:12px;height:12px;color:var(--primary);"></i> Area:
+            </span>
+            <select class="staged-area-select" title="Assign plant to garden area" aria-label="Assign ${escapeHtml(item.common_name || item.scientific_name)} to garden area">
+              ${definedAreas.map(a => `<option value="${escapeHtml(a)}" ${item.target_area === a ? 'selected' : ''}>${escapeHtml(a)}</option>`).join('')}
+            </select>
+          </div>
+          <input type="text" class="staged-item-note" aria-label="Planting notes for ${escapeHtml(item.common_name || item.scientific_name)}" placeholder="Specific location / planting notes for client..." value="${escapeHtml(item.custom_notes || '')}">
+        `;
+
+        // Stepper
+        el.querySelector('.qty-minus').addEventListener('click', () => {
+          if (item.quantity > 1) {
+            item.quantity--;
+            saveStaging();
+            renderStaging();
+          }
+        });
+        el.querySelector('.qty-plus').addEventListener('click', () => {
+          item.quantity = (item.quantity || 1) + 1;
+          saveStaging();
+          renderStaging();
+        });
+
+        // Area selector
+        el.querySelector('.staged-area-select').addEventListener('change', (e) => {
+          item.target_area = e.target.value;
+          saveStaging();
+          renderGardenAreasManager();
+        });
+
+        // Custom Note
+        el.querySelector('.staged-item-note').addEventListener('input', (e) => {
+          item.custom_notes = e.target.value;
+          saveStaging();
+        });
+
+        // Remove
+        el.querySelector('.remove-btn').addEventListener('click', () => {
+          state.stagedPlants.splice(index, 1);
+          saveStaging();
+          renderStaging();
+          renderGardenAreasManager();
+          renderGrid();
+        });
+
+        container.appendChild(el);
+      });
+
+      renderGardenAreasManager();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Botanical Multi-Image Gallery & Fullscreen Lightbox
+    function renderPlantGallery(plant) {
+      const container = document.getElementById('modalPlantGalleryContainer');
+      if (!container) return;
+
+      const images = (plant.images && Array.isArray(plant.images) && plant.images.length > 0) ? plant.images : [];
+      const plantfinderUrl = plant.plantfinder_url || (images[0] && images[0].source_url) || getPlantUrl(plant);
+
+      if (images.length === 0) {
+        container.innerHTML = `
+          <div style="background:var(--bg-base);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);padding:24px;text-align:center;margin-bottom:14px;">
+            <i data-lucide="sprout" style="width:36px;height:36px;color:var(--text-muted);margin:0 auto 8px auto;display:block;"></i>
+            <p style="font-size:13px;color:var(--text-muted);margin:0;">Botanical Record · No specimen imagery cataloged yet</p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      // Check image source types accurately
+      const allMobot = images.every(img => (img.source_name && img.source_name.includes('Missouri Botanical Garden')) || (img.url && img.url.includes('mobot.org')));
+      const allWikimedia = images.every(img => (img.source_name && img.source_name.includes('Wikimedia')) || (img.source_url && img.source_url.includes('commons.wikimedia.org')));
+
+      let headerCredit = 'Specimen Photo Gallery';
+      let headerUrl = plant.plantfinder_url || (images[0] && images[0].source_url) || getPlantUrl(plant);
+      let headerTitle = `View source information for ${escapeHtml(plant.scientific_name)}`;
+
+      if (allMobot) {
+        headerCredit = 'Courtesy Missouri Botanical Garden PlantFinder';
+        headerUrl = plant.plantfinder_url || images[0].source_url;
+        headerTitle = `Open Missouri Botanical Garden PlantFinder profile for ${escapeHtml(plant.scientific_name)}`;
+      } else if (allWikimedia) {
+        headerCredit = 'Courtesy Wikimedia Commons (Free Use Licenses)';
+        headerUrl = images[0].source_url || 'https://commons.wikimedia.org';
+        headerTitle = `View botanical media on Wikimedia Commons for ${escapeHtml(plant.scientific_name)}`;
+      } else {
+        const primarySource = images[0].source_name || (images[0].url.includes('mobot.org') ? 'Missouri Botanical Garden PlantFinder' : 'Wikimedia Commons');
+        headerCredit = `Source: ${primarySource}`;
+        headerUrl = images[0].source_url || plant.plantfinder_url || getPlantUrl(plant);
+        headerTitle = `View original botanical record for ${escapeHtml(plant.scientific_name)}`;
+      }
+
+      container.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="camera" style="width:14px;height:14px;color:var(--primary);"></i>
+              <span>Botanical Photo Gallery (${images.length})</span>
+            </div>
+            <a href="${headerUrl}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--primary);font-weight:600;text-transform:none;display:inline-flex;align-items:center;gap:4px;text-decoration:none;" title="${headerTitle}">
+              <span>${headerCredit}</span>
+              <i data-lucide="external-link" style="width:11px;height:11px;"></i>
+            </a>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
+            ${images.map((img, idx) => {
+              const thumbUrl = img.thumbnail_url || (img.url && img.url.includes('/large960/') ? img.url.replace('/large960/', '/small240/') : img.url);
+              const label = img.label || (idx === 0 ? 'Specimen' : `View ${idx + 1}`);
+              const credit = img.attribution || img.attribution_name || img.license || 'Botanical Specimen';
+              const sourceTitle = img.source_name || (img.url.includes('mobot.org') ? 'Missouri Botanical Garden PlantFinder' : 'Wikimedia Commons');
+              const linkUrl = img.source_url || plant.plantfinder_url || getPlantUrl(plant);
+
+              return `
+                <div class="native-gallery-photo-card" data-idx="${idx}" tabindex="0" role="button" aria-label="View photo ${idx + 1}: ${escapeHtml(label)} in full size" style="border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-subtle);background:var(--bg-base);cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;outline:none;" title="Click to view full-size photo">
+                  <div style="height:115px;overflow:hidden;background:#051b11;position:relative;">
+                    <img src="${thumbUrl}" alt="${escapeHtml(label)} - ${escapeHtml(plant.common_names?.[0] || plant.scientific_name)}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.2s;" onerror="if(this.src.includes('images/plants/') && !this.src.startsWith('images/plants/')){ this.src='images/plants/' + this.src.split('images/plants/')[1]; } else { this.onerror=null; this.src='https://images.unsplash.com/photo-1598880940371-c756e015fea1?auto=format&fit=crop&w=400&q=80'; }">
+                    <span style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.72);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px;display:flex;align-items:center;gap:3px;backdrop-filter:blur(2px);">
+                      <i data-lucide="maximize-2" style="width:10px;height:10px;"></i>
+                      <span>Full size</span>
+                    </span>
+                  </div>
+                  <div style="padding:7px 8px;">
+                    <span style="font-weight:700;font-size:11px;color:var(--primary);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(label)}</span>
+                    <div style="font-size:9px;color:var(--text-secondary);margin-top:4px;border-top:1px dashed var(--border-subtle);padding-top:4px;line-height:1.2;">
+                      <a href="${linkUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:2px;" title="View on ${escapeHtml(sourceTitle)}">
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;">${escapeHtml(credit)}</span>
+                        <i data-lucide="external-link" style="width:8px;height:8px;flex-shrink:0;"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      container.querySelectorAll('.native-gallery-photo-card').forEach(card => {
+        const handler = () => {
+          const idx = parseInt(card.getAttribute('data-idx'), 10) || 0;
+          openPlantLightbox(plant, idx);
+        };
+        card.addEventListener('click', handler);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handler();
+          }
+        });
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+    window.renderPlantGallery = renderPlantGallery;
+
+    function openPlantLightbox(plant, initialIdx = 0) {
+      let modal = document.getElementById('plantLightboxModal');
+      if (!modal) {
+        modal = document.createElement('dialog');
+        modal.id = 'plantLightboxModal';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-label', 'Full size botanical photo preview');
+        modal.className = 'lightbox-dialog';
+        modal.style.cssText = 'max-width: 95vw; width: 920px; max-height: 94vh; border: 1px solid rgba(255,255,255,0.18); border-radius: var(--radius-lg); padding: 0; box-shadow: 0 25px 60px rgba(0,0,0,0.85); background: #07130c; color: #f8fafc; overflow: hidden;';
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.close();
+        });
+      }
+
+      const images = (plant.images && plant.images.length > 0) ? plant.images : [{
+        url: 'https://images.unsplash.com/photo-1598880940371-c756e015fea1?auto=format&fit=crop&w=800&q=80',
+        label: 'Botanical Record',
+        caption: plant.common_names?.[0] || plant.scientific_name,
+        attribution: 'Botanical Record Photo',
+        attribution_name: 'Botanical Record Photo',
+        license: 'Educational Use',
+        source_name: 'Botanical Record',
+        source_url: plant.plantfinder_url || getPlantUrl(plant)
+      }];
+
+      let currentIdx = Math.max(0, Math.min(initialIdx, images.length - 1));
+
+      function renderSlide(idx) {
+        currentIdx = idx;
+        const img = images[currentIdx];
+        const hasPrev = images.length > 1;
+        const hasNext = images.length > 1;
+        const sourceUrl = img.source_url || plant.plantfinder_url || getPlantUrl(plant);
+        const credit = img.attribution || img.attribution_name || img.license || 'Botanical Specimen';
+        const sourceName = img.source_name || (img.url && img.url.includes('mobot.org') ? 'Missouri Botanical Garden PlantFinder' : 'Wikimedia Commons');
+        const licenseBadge = img.license || (img.url && img.url.includes('mobot.org') ? 'Educational Terms of Use' : 'Free License');
+        const label = img.label || (currentIdx === 0 ? 'Specimen' : `View ${currentIdx + 1}`);
+
+        let fullResUrl = img.url;
+        if (fullResUrl && fullResUrl.includes('/small240/')) {
+          fullResUrl = fullResUrl.replace('/small240/', '/large960/');
+        }
+
+        modal.innerHTML = `
+          <div style="padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: space-between; background: #0c1e13;">
+            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+              <span style="font-size: 16px;">🌿</span>
+              <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span style="font-weight: 800; font-size: 15px; color: #86efac;">${escapeHtml(plant.common_names?.[0] || plant.scientific_name)}</span>
+                <span style="font-style: italic; color: #a7f3d0; font-size: 12px; margin-left: 6px;">(${escapeHtml(plant.scientific_name)})</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #d1fae5; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 999px;">
+                Photo ${currentIdx + 1} of ${images.length}
+              </span>
+              <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #86efac; font-size: 11px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;" title="Open original photo source on ${escapeHtml(sourceName)}">
+                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+                <span class="hide-mobile">${escapeHtml(sourceName)}</span>
+              </a>
+              <button type="button" class="btn-icon" id="closePlantLightboxBtn" aria-label="Close photo preview" style="border: none; background: transparent; cursor: pointer; color: #cbd5e1; padding: 4px;" title="Close full size view">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="position: relative; background: #030a06; display: flex; align-items: center; justify-content: center; min-height: 320px; max-height: 62vh; padding: 12px; overflow: hidden;">
+            <img src="${fullResUrl}" alt="${escapeHtml(label)} - ${escapeHtml(plant.common_names?.[0] || plant.scientific_name)}" style="max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); user-select: none;" onerror="if(this.src.includes('images/plants/') && !this.src.startsWith('images/plants/')){ this.src='images/plants/' + this.src.split('images/plants/')[1]; } else { this.onerror=null; this.src='${img.url}'; }">
+
+            ${hasPrev ? `
+              <button type="button" id="plantLightboxPrevBtn" class="btn-icon" aria-label="Previous photo" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(12,30,19,0.85); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Previous Photo (Left Arrow)">
+                <i data-lucide="chevron-left" style="width: 22px; height: 22px;"></i>
+              </button>
+            ` : ''}
+
+            ${hasNext ? `
+              <button type="button" id="plantLightboxNextBtn" class="btn-icon" aria-label="Next photo" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(12,30,19,0.85); border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;" title="Next Photo (Right Arrow)">
+                <i data-lucide="chevron-right" style="width: 22px; height: 22px;"></i>
+              </button>
+            ` : ''}
+          </div>
+
+          <div style="padding: 12px 18px; border-top: 1px solid rgba(255,255,255,0.1); background: #0a1910; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="max-width: 65%;">
+              <span style="font-weight: 700; font-size: 13px; color: #f0fdf4;">${escapeHtml(label)}</span>
+              ${img.caption ? `<span style="font-size: 12px; color: #a7f3d0; margin-left: 6px;">· ${escapeHtml(img.caption)}</span>` : ''}
+              <div style="font-size: 11px; color: #86efac; margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span>Credit: ${escapeHtml(credit)}</span>
+                ${licenseBadge ? `<span style="background: rgba(16,185,129,0.18); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${escapeHtml(licenseBadge)}</span>` : ''}
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: #6ee7b7; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;" title="View on ${escapeHtml(sourceName)}">
+                <span>View on ${escapeHtml(sourceName)}</span>
+                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+              </a>
+              <button type="button" class="btn btn-secondary btn-sm" id="plantLightboxCloseBtn" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff;">Close</button>
+            </div>
+          </div>
+        `;
+
+        modal.querySelector('#closePlantLightboxBtn')?.addEventListener('click', () => modal.close());
+        modal.querySelector('#plantLightboxCloseBtn')?.addEventListener('click', () => modal.close());
+        modal.querySelector('#plantLightboxPrevBtn')?.addEventListener('click', () => {
+          renderSlide((currentIdx - 1 + images.length) % images.length);
+        });
+        modal.querySelector('#plantLightboxNextBtn')?.addEventListener('click', () => {
+          renderSlide((currentIdx + 1) % images.length);
+        });
+
+        if (window.lucide) lucide.createIcons();
+      }
+
+      const keyHandler = (e) => {
+        if (!modal.open) {
+          window.removeEventListener('keydown', keyHandler);
+          return;
+        }
+        if (e.key === 'ArrowLeft' && images.length > 1) {
+          renderSlide((currentIdx - 1 + images.length) % images.length);
+        } else if (e.key === 'ArrowRight' && images.length > 1) {
+          renderSlide((currentIdx + 1) % images.length);
+        } else if (e.key === 'Escape') {
+          modal.close();
+          window.removeEventListener('keydown', keyHandler);
+        }
+      };
+      window.addEventListener('keydown', keyHandler);
+      modal.addEventListener('close', () => window.removeEventListener('keydown', keyHandler), { once: true });
+
+      renderSlide(currentIdx);
+      modal.showModal();
+    }
+    window.openPlantLightbox = openPlantLightbox;
+
+    // Plant Detail Modal
+    function openPlantDetail(plant) {
+      state.activeModalPlant = plant;
+      const modal = document.getElementById('plantDetailModal');
+      const showSciFirst = shouldShowScientificFirst();
+      const commonName = (plant.common_names && plant.common_names[0]) || plant.scientific_name;
+      const primaryName = showSciFirst ? (plant.scientific_name || commonName) : commonName;
+      const secondaryName = showSciFirst ? commonName : (plant.scientific_name || '');
+
+      const modalCommon = document.getElementById('modalCommonName');
+      const modalSci = document.getElementById('modalSciName');
+      if (modalCommon) {
+        modalCommon.textContent = primaryName;
+        modalCommon.style.fontStyle = showSciFirst ? 'italic' : 'normal';
+      }
+      if (modalSci) {
+        modalSci.textContent = secondaryName;
+        modalSci.style.fontStyle = showSciFirst ? 'normal' : 'italic';
+      }
+      
+      const badgeContainer = document.getElementById('modalBadges');
+      if (badgeContainer) {
+        let bHtml = '';
+        if (isSweet16(plant)) bHtml += '<span class="badge-sweet16" style="font-size:11px;padding:3px 9px;">⭐ Deep Roots Sweet 16</span>';
+        if (isKcKeystone(plant)) bHtml += '<span class="badge-keystone" style="font-size:11px;padding:3px 9px;">🌿 KC Keystone Species</span>';
+        badgeContainer.innerHTML = bHtml;
+        badgeContainer.style.display = bHtml ? 'flex' : 'none';
+      }
+
+      // Check if there is an active pending approval for this plant
+      const pendingApproval = (state.plantApprovals || []).find(a => a.status === 'pending' && (a.plant_id === plant.id || a.scientific_name === plant.scientific_name));
+      const alertEl = document.getElementById('modalPendingApprovalAlert');
+      if (alertEl) {
+        if (pendingApproval) {
+          alertEl.style.display = 'block';
+          const txtEl = document.getElementById('modalPendingApprovalTxt');
+          if (txtEl) {
+            txtEl.textContent = `Proposed edits submitted by ${escapeHtml(pendingApproval.submitted_by_name || 'an advisor')} are pending Administrator review.`;
+          }
+        } else {
+          alertEl.style.display = 'none';
+        }
+      }
+
+      // Render Multi-Image Gallery Courtesy Missouri Botanical Garden PlantFinder
+      renderPlantGallery(plant);
+      const img = document.getElementById('modalImg');
+      if (img) img.style.display = 'none';
+      const imgAttr = document.getElementById('modalImgAttr');
+      if (imgAttr) imgAttr.style.display = 'none';
+
+      const officialLink = document.getElementById('modalOfficialUrl');
+      officialLink.href = getPlantUrl(plant);
+
+      document.getElementById('modalAdvisorDesc').innerHTML = renderRichMarkdownText(getPlantDesc(plant));
+      document.getElementById('modalLight').textContent = (plant.light_requirements || []).join(', ') || '-';
+      document.getElementById('modalMoisture').textContent = (plant.moisture_requirements || []).join(', ') || '-';
+      document.getElementById('modalHeight').textContent = getPlantHeight(plant);
+      document.getElementById('modalSoil').textContent = (plant.soil_requirements || []).join(', ') || '-';
+      document.getElementById('modalBloomPeriod').textContent = (plant.bloom_period || []).join(', ') || '-';
+      document.getElementById('modalBloomColor').textContent = (plant.bloom_color || plant.bloom_colors || []).join(', ') || '-';
+      document.getElementById('modalLayer').textContent = getPlantLayer(plant);
+      document.getElementById('modalSociability').textContent = getPlantSociability(plant);
+      document.getElementById('modalHabitat').textContent = plant.native_environment || '-';
+      document.getElementById('modalPlantType').textContent = Array.isArray(plant.plant_type) ? plant.plant_type.join(', ') : (plant.plant_type || '-');
+
+      const maintLvl = getPlantMaintenanceLevel(plant);
+      const maintGuide = getPlantMaintenanceGuide(plant);
+      const maintCol = maintLvl === 'Low' ? '#10b981' : (maintLvl === 'Medium' ? '#f59e0b' : '#ef4444');
+
+      const modalMaintLevel = document.getElementById('modalMaintenanceLevel');
+      if (modalMaintLevel) modalMaintLevel.textContent = maintLvl + ' Maintenance';
+
+      const modalMaintBadge = document.getElementById('modalMaintenanceBadge');
+      if (modalMaintBadge) {
+        modalMaintBadge.textContent = maintLvl + ' Maintenance';
+        modalMaintBadge.style.borderLeft = `3px solid ${maintCol}`;
+        modalMaintBadge.style.color = maintCol;
+      }
+
+      const modalMaintSummary = document.getElementById('modalMaintenanceSummary');
+      if (modalMaintSummary) modalMaintSummary.innerHTML = renderRichMarkdownText(maintGuide.summary || '');
+
+      // Dynamically render cards ONLY for seasons with actionable maintenance
+      const maintGrid = document.getElementById('modalMaintenanceGrid');
+      if (maintGrid) {
+        let gridHtml = '';
+        if (maintGuide.spring && maintGuide.spring.trim()) {
+          gridHtml += `
+            <div style="background:var(--bg-surface);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+              <strong style="font-size:12px;color:var(--primary);display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                <i data-lucide="flower" style="width:12px;height:12px;"></i> Spring
+              </strong>
+              <p style="font-size:12px;line-height:1.4;color:var(--text-secondary);margin:0;">${renderRichMarkdownText(maintGuide.spring)}</p>
+            </div>`;
+        }
+        if (maintGuide.summer && maintGuide.summer.trim()) {
+          gridHtml += `
+            <div style="background:var(--bg-surface);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+              <strong style="font-size:12px;color:#d97706;display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                <i data-lucide="sun" style="width:12px;height:12px;"></i> Summer
+              </strong>
+              <p style="font-size:12px;line-height:1.4;color:var(--text-secondary);margin:0;">${renderRichMarkdownText(maintGuide.summer)}</p>
+            </div>`;
+        }
+        if (maintGuide.fall && maintGuide.fall.trim()) {
+          gridHtml += `
+            <div style="background:var(--bg-surface);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+              <strong style="font-size:12px;color:#b45309;display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                <i data-lucide="leaf" style="width:12px;height:12px;"></i> Fall
+              </strong>
+              <p style="font-size:12px;line-height:1.4;color:var(--text-secondary);margin:0;">${renderRichMarkdownText(maintGuide.fall)}</p>
+            </div>`;
+        }
+        if (maintGuide.winter && maintGuide.winter.trim()) {
+          gridHtml += `
+            <div style="background:var(--bg-surface);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+              <strong style="font-size:12px;color:#2563eb;display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                <i data-lucide="snowflake" style="width:12px;height:12px;"></i> Winter
+              </strong>
+              <p style="font-size:12px;line-height:1.4;color:var(--text-secondary);margin:0;">${renderRichMarkdownText(maintGuide.winter)}</p>
+            </div>`;
+        }
+        maintGrid.innerHTML = gridHtml;
+      }
+
+      // Root Division Card
+      const divContainer = document.getElementById('modalDivisionContainer');
+      const modalMaintDivision = document.getElementById('modalMaintDivision');
+      if (divContainer && modalMaintDivision) {
+        if (maintGuide.division && maintGuide.division.trim()) {
+          divContainer.style.display = 'block';
+          modalMaintDivision.innerHTML = renderRichMarkdownText(maintGuide.division);
+        } else {
+          divContainer.style.display = 'none';
+        }
+      }
+
+      const modalMaintSources = document.getElementById('modalMaintSources');
+      if (modalMaintSources) modalMaintSources.innerHTML = renderRichMarkdownText(maintGuide.sources || 'Xerces Society, Grow Native!, Missouri Botanical Garden');
+
+      // Enhanced Wildlife and Ecological Value rendering
+      const modalWildlife = document.getElementById('modalWildlife');
+      if (modalWildlife) {
+        if (plant.wildlife_ecological_value) {
+          modalWildlife.innerHTML = renderRichMarkdownText(plant.wildlife_ecological_value);
+        } else if (plant.wildlife_detail && plant.wildlife_detail.host_insects) {
+          const wd = plant.wildlife_detail;
+          const wmd = `**Host Plant Value:** ${wd.host_insects}\n\n**Wildlife & Ecological Interactions:** ${wd.wildlife_users || 'Supports native pollinators and birds.'}\n\n**Scientific Sources:** ${wd.sources || '[Xerces Society](https://xerces.org), [MDC](https://mdc.mo.gov)'}`;
+          modalWildlife.innerHTML = renderRichMarkdownText(wmd);
+        } else {
+          modalWildlife.textContent = (plant.wildlife_ecosystem_benefits || plant.wildlife_benefits || []).join(' · ') || 'Provides nectar, pollen, and shelter for native pollinators and wildlife.';
+        }
+      }
+
+      // Author attribution
+      const author = plant.last_edited_by_user_name || plant.updated_by || 'Deep Roots Master Catalog';
+      const authorTxt = document.getElementById('modalAuthorTxt');
+      if (authorTxt) authorTxt.textContent = author;
+
+      // Edit record button visibility (read-only when signed out)
+      const editBtn = document.getElementById('modalEditBtn');
+      if (editBtn) editBtn.style.display = state.currentUser ? 'inline-flex' : 'none';
+
+      // Add to report button in modal (Advisors only)
+      const addBtn = document.getElementById('modalAddToReportBtn');
+      if (addBtn) {
+        if (!state.currentUser) {
+          addBtn.style.display = 'none';
+        } else {
+          const isStaged = state.stagedPlants.some(p => p.id === plant.id || p.scientific_name === plant.scientific_name);
+          addBtn.style.display = 'inline-flex';
+          addBtn.innerHTML = `<i data-lucide="${isStaged ? 'check' : 'plus'}"></i><span>${isStaged ? 'In Report' : 'Add to Report'}</span>`;
+          addBtn.onclick = () => {
+            toggleStagedPlant(plant);
+            openPlantDetail(plant);
+          };
+        }
+      }
+
+      if (editBtn) {
+        editBtn.onclick = () => {
+          modal.close();
+          openEditModal(plant);
+        };
+      }
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ==================== Plant Firestore & Approval Synchronization Engine ====================
+    async function syncPlantToFirestore(plant) {
+      try {
+        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+        let dId = localStorage.getItem('dr_firestore_database_id');
+        if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
+        const docId = encodeURIComponent(plant.id || plant.scientific_name);
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${docId}`;
+        
+        const docFields = {
+          scientific_name: { stringValue: plant.scientific_name || '' },
+          common_names: { arrayValue: { values: (plant.common_names || []).map(c => ({ stringValue: String(c) })) } },
+          plant_url: { stringValue: getPlantUrl(plant) },
+          advisor_description: { stringValue: getPlantDesc(plant) },
+          height_display: { stringValue: getPlantHeight(plant) },
+          bloom_color: { arrayValue: { values: (plant.bloom_color || plant.bloomColor || []).map(c => ({ stringValue: String(c) })) } },
+          bloom_period: { arrayValue: { values: (plant.bloom_period || plant.bloomSeason || []).map(s => ({ stringValue: String(s) })) } },
+          light_requirements: { arrayValue: { values: (plant.light_requirements || []).map(s => ({ stringValue: String(s) })) } },
+          moisture_requirements: { arrayValue: { values: (plant.moisture_requirements || []).map(s => ({ stringValue: String(s) })) } },
+          sociability: { stringValue: getPlantSociability(plant) },
+          last_edited_by_user_id: { stringValue: plant.last_edited_by_user_id || '' },
+          last_edited_by_user_name: { stringValue: plant.last_edited_by_user_name || '' },
+          last_edited_by_user_email: { stringValue: plant.last_edited_by_user_email || '' },
+          last_edited_timestamp: { stringValue: plant.last_edited_timestamp || new Date().toISOString() },
+          updated_at: { stringValue: plant.updated_at || new Date().toISOString() },
+          updated_by: { stringValue: plant.updated_by || 'Nature Advisor' }
+        };
+
+        if (plant.plantfinder_url) {
+          docFields.plantfinder_url = { stringValue: plant.plantfinder_url };
+        }
+        if (plant.native_environment) {
+          docFields.native_environment = { stringValue: plant.native_environment };
+        }
+        if (plant.architectural_layer) {
+          docFields.architectural_layer = { stringValue: plant.architectural_layer };
+        }
+        if (plant.plant_type) {
+          const pt = Array.isArray(plant.plant_type) ? plant.plant_type : [plant.plant_type];
+          docFields.plant_type = { arrayValue: { values: pt.map(t => ({ stringValue: String(t) })) } };
+        }
+        if (plant.images && Array.isArray(plant.images) && plant.images.length > 0) {
+          docFields.images = {
+            arrayValue: {
+              values: plant.images.slice(0, 15).map(img => ({
+                mapValue: {
+                  fields: {
+                    url: { stringValue: img.url || '' },
+                    thumbnail: { stringValue: img.thumbnail_url || img.thumbnail || '' },
+                    attribution_name: { stringValue: img.attribution_name || img.attribution || 'Courtesy Missouri Botanical Garden PlantFinder' },
+                    license: { stringValue: img.license || 'Courtesy Missouri Botanical Garden PlantFinder' },
+                    caption: { stringValue: img.caption || '' },
+                    attribution_url: { stringValue: img.source_url || plant.plantfinder_url || '' }
+                  }
+                }
+              }))
+            }
+          };
+        }
+
+        await fetch(firestoreUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: docFields })
+        });
+      } catch (err) {
+        console.warn('Firestore plant sync notice:', err);
+      }
+    }
+
+    async function savePlantApprovalToFirestore(approval) {
+      if (!approval || !approval.id) return;
+      try {
+        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+        let dId = localStorage.getItem('dr_firestore_database_id');
+        if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
+
+        const jsonPayload = JSON.stringify(approval);
+        const fields = {
+          id: { stringValue: approval.id },
+          type: { stringValue: approval.type || 'edit' },
+          status: { stringValue: approval.status || 'pending' },
+          plant_id: { stringValue: approval.plant_id || '' },
+          scientific_name: { stringValue: approval.scientific_name || '' },
+          common_name: { stringValue: approval.common_name || '' },
+          submitted_by_id: { stringValue: approval.submitted_by_id || '' },
+          submitted_by_name: { stringValue: approval.submitted_by_name || '' },
+          submitted_by_email: { stringValue: approval.submitted_by_email || '' },
+          submitted_at: { stringValue: approval.submitted_at || '' },
+          reviewed_by_id: { stringValue: approval.reviewed_by_id || '' },
+          reviewed_by_name: { stringValue: approval.reviewed_by_name || '' },
+          reviewed_at: { stringValue: approval.reviewed_at || '' },
+          raw_json: { stringValue: jsonPayload }
+        };
+
+        const primaryUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plant_approvals/${encodeURIComponent(approval.id)}`;
+        fetch(primaryUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields })
+        }).catch(() => {});
+
+        const fallbackUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/_approval_${encodeURIComponent(approval.id)}`;
+        fetch(fallbackUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              ...fields,
+              scientific_name: { stringValue: `_approval_${approval.id}` }
+            }
+          })
+        }).catch(() => {});
+      } catch (e) {
+        console.warn('savePlantApprovalToFirestore notice:', e);
+      }
+    }
+
+    async function fetchPlantApprovalsFromFirestore() {
+      const mergedMap = new Map();
+      (state.plantApprovals || []).forEach(a => {
+        if (a && a.id) mergedMap.set(a.id, a);
+      });
+
+      const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      let dId = localStorage.getItem('dr_firestore_database_id');
+      if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
+
+      try {
+        const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plant_approvals?pageSize=200`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const rawJson = doc.fields?.raw_json?.stringValue;
+            if (rawJson) {
+              try {
+                const parsed = JSON.parse(rawJson);
+                if (parsed && parsed.id) mergedMap.set(parsed.id, parsed);
+              } catch (e) {}
+            }
+          }
+        }
+      } catch (err) {}
+
+      try {
+        const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants?pageSize=300`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          for (const doc of data.documents || []) {
+            const docId = doc.name ? doc.name.split('/').pop() : '';
+            if (docId.startsWith('_approval_')) {
+              const rawJson = doc.fields?.raw_json?.stringValue;
+              if (rawJson) {
+                try {
+                  const parsed = JSON.parse(rawJson);
+                  if (parsed && parsed.id) mergedMap.set(parsed.id, parsed);
+                } catch (e) {}
+              }
+            }
+          }
+        }
+      } catch (err) {}
+
+      state.plantApprovals = Array.from(mergedMap.values()).sort((a, b) => {
+        return new Date(b.submitted_at || 0) - new Date(a.submitted_at || 0);
+      });
+      localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+      updateApprovalBadges();
+      return state.plantApprovals;
+    }
+
+    function updateApprovalBadges() {
+      const pendingCount = (state.plantApprovals || []).filter(a => a.status === 'pending').length;
+      const b1 = document.getElementById('adminApprovalsTabBadge');
+      if (b1) b1.textContent = pendingCount;
+      const b2 = document.getElementById('profileApprovalsCount');
+      if (b2) b2.textContent = pendingCount;
+    }
+
+    // ==================== Edit Plant Modal & Role-Aware Workflow ====================
+    function openEditModal(plant) {
+      if (!state.currentUser) {
+        showToast("Please sign in as an advisor to edit plant records.", "warning");
+        openLoginModal();
+        return;
+      }
+      document.getElementById('editPlantId').value = plant.id || plant.scientific_name;
+      document.getElementById('editCommonName').value = plant.common_names?.[0] || '';
+      document.getElementById('editSciName').value = plant.scientific_name || '';
+      document.getElementById('editOfficialUrl').value = getPlantUrl(plant);
+      document.getElementById('editAdvisorDesc').value = getPlantDesc(plant);
+      document.getElementById('editLight').value = (plant.light_requirements || []).join(', ');
+      document.getElementById('editMoisture').value = (plant.moisture_requirements || []).join(', ');
+      document.getElementById('editHeight').value = getPlantHeight(plant);
+      document.getElementById('editSociability').value = getPlantSociability(plant);
+      const editMaint = document.getElementById('editMaintenanceLevel');
+      if (editMaint) editMaint.value = getPlantMaintenanceLevel(plant);
+      const colors = plant.bloom_color || plant.bloomColor || plant.bloom_colors || [];
+      document.getElementById('editBloomColor').value = Array.isArray(colors) ? colors.join(', ') : String(colors || '');
+      const seasons = plant.bloom_period || plant.bloomSeason || plant.bloom_seasons || [];
+      document.getElementById('editBloomPeriod').value = Array.isArray(seasons) ? seasons.join(', ') : String(seasons || '');
+      document.getElementById('editImageUrl').value = plant.images?.[0]?.url || '';
+      document.getElementById('editImageAttr').value = plant.images?.[0]?.attribution_name || plant.images?.[0]?.license || 'Courtesy Missouri Botanical Garden PlantFinder';
+      
+      const notice = document.getElementById('editApprovalNotice');
+      const submitBtn = document.getElementById('editPlantSubmitBtn');
+      const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
+
+      if (notice) {
+        if (isAdmin) {
+          notice.style.background = 'rgba(21,128,61,0.1)';
+          notice.style.color = '#15803d';
+          notice.innerHTML = '🛡️ <strong>Administrator Mode:</strong> Edits saved here will immediately update the master database and synchronize across all devices.';
+        } else {
+          notice.style.background = 'var(--primary-subtle)';
+          notice.style.color = 'var(--primary-dark)';
+          notice.innerHTML = 'ℹ️ <strong>Advisor Mode:</strong> Edits will be submitted to the <strong>Admin Approval Inbox</strong> for review before being applied to the master catalog.';
+        }
+      }
+
+      if (submitBtn) {
+        submitBtn.textContent = isAdmin ? 'Save to Master Catalog' : 'Submit Changes for Approval';
+      }
+
+      document.getElementById('editPlantModal').showModal();
+    }
+
+    document.getElementById('editPlantForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.currentUser) {
+        showToast("Please sign in as an advisor to edit plant records.", "warning");
+        openLoginModal();
+        return;
+      }
+
+      const id = document.getElementById('editPlantId').value;
+      const plant = state.allPlants.find(p => p.id === id || p.scientific_name === id);
+      if (plant) {
+        const edits = {
+          common_names: [document.getElementById('editCommonName').value.trim()],
+          scientific_name: document.getElementById('editSciName').value.trim(),
+          plant_url: document.getElementById('editOfficialUrl').value.trim(),
+          advisor_description: document.getElementById('editAdvisorDesc').value.trim(),
+          light_requirements: document.getElementById('editLight').value.split(',').map(s => s.trim()).filter(Boolean),
+          moisture_requirements: document.getElementById('editMoisture').value.split(',').map(s => s.trim()).filter(Boolean),
+          height_display: document.getElementById('editHeight').value.trim(),
+          sociability: document.getElementById('editSociability').value,
+          maintenance_level: document.getElementById('editMaintenanceLevel')?.value || 'Low',
+          bloom_color: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
+          bloomColor: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
+          bloom_period: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
+          bloomSeason: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
+          last_edited_by_user_id: state.currentUser.id || state.currentUser.username,
+          last_edited_by_user_name: state.currentUser.name || `${state.currentUser.firstName} ${state.currentUser.lastName}`.trim() || state.currentUser.username,
+          last_edited_by_user_email: state.currentUser.email || '',
+          last_edited_timestamp: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          updated_by: state.currentUser.name || state.currentUser.username
+        };
+
+        const imgUrl = document.getElementById('editImageUrl').value.trim();
+        if (imgUrl) {
+          const imgAttr = document.getElementById('editImageAttr').value.trim() || 'Courtesy Missouri Botanical Garden PlantFinder';
+          const newImg = {
+            url: imgUrl,
+            thumbnail_url: imgUrl,
+            attribution_name: imgAttr,
+            license: 'Courtesy Missouri Botanical Garden PlantFinder',
+            caption: edits.scientific_name,
+            source_name: 'Missouri Botanical Garden PlantFinder',
+            source_url: edits.plant_url || plant.plantfinder_url || getPlantUrl(plant)
+          };
+          edits.images = [newImg, ...(plant.images || []).filter(im => im.url !== imgUrl)];
+        }
+
+        const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
+
+        if (isAdmin) {
+          Object.assign(plant, edits);
+          state.customPlants[id] = edits;
+          localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
+          syncPlantToFirestore(plant);
+          applyFilters();
+          updateHeaderInfo();
+          showToast(`Saved changes for ${plant.common_names[0]} to master catalog!`, "success");
+        } else {
+          const approval = {
+            id: 'appr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+            type: 'edit',
+            status: 'pending',
+            plant_id: plant.id || plant.scientific_name,
+            scientific_name: edits.scientific_name,
+            common_name: edits.common_names[0] || (plant.common_names && plant.common_names[0]) || edits.scientific_name,
+            submitted_by_id: state.currentUser.id || state.currentUser.username,
+            submitted_by_name: state.currentUser.name || state.currentUser.username,
+            submitted_by_email: state.currentUser.email || '',
+            submitted_at: new Date().toISOString(),
+            changes: edits,
+            original: {
+              scientific_name: plant.scientific_name,
+              common_names: plant.common_names || [],
+              plant_url: getPlantUrl(plant),
+              advisor_description: getPlantDesc(plant),
+              height_display: getPlantHeight(plant),
+              bloom_color: plant.bloom_color || plant.bloomColor || [],
+              bloom_period: plant.bloom_period || plant.bloomSeason || [],
+              light_requirements: plant.light_requirements || [],
+              moisture_requirements: plant.moisture_requirements || [],
+              sociability: getPlantSociability(plant),
+              images: plant.images || []
+            }
+          };
+
+          state.plantApprovals = state.plantApprovals || [];
+          state.plantApprovals.unshift(approval);
+          localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+          savePlantApprovalToFirestore(approval);
+          updateApprovalBadges();
+          applyFilters();
+          showToast(`Proposed edits for ${approval.common_name} submitted to Admin Approval Inbox!`, "success");
+        }
+      }
+      document.getElementById('editPlantModal').close();
+    });
+
+    // ==================== Add Plant Modal & Role-Aware Submission ====================
+    function openAddPlantModal() {
+      if (!state.currentUser) {
+        showToast("Please sign in as an advisor or administrator to contribute plant records.", "warning");
+        openLoginModal();
+        return;
+      }
+      const modal = document.getElementById('addPlantModal');
+      const form = document.getElementById('addPlantForm');
+      if (!modal || !form) return;
+      form.reset();
+
+      const notice = document.getElementById('addApprovalNotice');
+      const submitBtn = document.getElementById('addPlantSubmitBtn');
+      const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
+
+      if (notice) {
+        if (isAdmin) {
+          notice.style.background = 'rgba(21,128,61,0.1)';
+          notice.style.color = '#15803d';
+          notice.innerHTML = '🛡️ <strong>Administrator Mode:</strong> New species added here will be immediately published to the master catalog.';
+        } else {
+          notice.style.background = 'var(--primary-subtle)';
+          notice.style.color = 'var(--primary-dark)';
+          notice.innerHTML = 'ℹ️ <strong>Advisor Mode:</strong> Proposed species will be submitted to the <strong>Admin Approval Inbox</strong> for verification before landing in the master database.';
+        }
+      }
+
+      if (submitBtn) {
+        submitBtn.textContent = isAdmin ? 'Add to Master Catalog' : 'Submit for Approval';
+      }
+
+      modal.showModal();
+      if (window.lucide) lucide.createIcons();
+    }
+    window.openAddPlantModal = openAddPlantModal;
+
+    document.getElementById('addPlantForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.currentUser) {
+        showToast("Please sign in to contribute plants.", "warning");
+        openLoginModal();
+        return;
+      }
+
+      const commonName = document.getElementById('addCommonName').value.trim();
+      const sciName = document.getElementById('addSciName').value.trim();
+      if (!commonName || !sciName) {
+        showToast("Common name and Scientific name are required.", "warning");
+        return;
+      }
+
+      const plantType = document.getElementById('addPlantType').value;
+      const layer = document.getElementById('addLayer').value;
+      const habitat = document.getElementById('addHabitat').value;
+      const height = document.getElementById('addHeight').value.trim();
+      const light = document.getElementById('addLight').value.split(',').map(s => s.trim()).filter(Boolean);
+      const moisture = document.getElementById('addMoisture').value.split(',').map(s => s.trim()).filter(Boolean);
+      const soil = document.getElementById('addSoil').value.split(',').map(s => s.trim()).filter(Boolean);
+      const bloomColor = document.getElementById('addBloomColor').value.split(',').map(s => s.trim()).filter(Boolean);
+      const bloomPeriod = document.getElementById('addBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean);
+      const sociability = document.getElementById('addSociability').value;
+      const maintLevel = document.getElementById('addMaintenanceLevel')?.value || 'Low';
+      const wildlife = document.getElementById('addWildlife').value.split(',').map(s => s.trim()).filter(Boolean);
+      const plantUrl = document.getElementById('addPlantUrl').value.trim() || 'https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderSearch.aspx';
+      const imageUrl = document.getElementById('addImageUrl').value.trim();
+      const imageAttr = document.getElementById('addImageAttr').value.trim() || 'Courtesy Missouri Botanical Garden PlantFinder';
+      const advisorDesc = document.getElementById('addAdvisorDesc').value.trim();
+
+      const newId = 'dr-kc-custom-' + Date.now();
+      const images = [];
+      if (imageUrl) {
+        images.push({
+          url: imageUrl,
+          thumbnail_url: imageUrl,
+          attribution_name: imageAttr,
+          license: 'Courtesy Missouri Botanical Garden PlantFinder',
+          label: 'Specimen',
+          caption: `${sciName} (${commonName})`,
+          source_name: 'Missouri Botanical Garden PlantFinder',
+          source_url: plantUrl
+        });
+      }
+
+      const newPlant = {
+        id: newId,
+        scientific_name: sciName,
+        common_names: [commonName],
+        plant_type: [plantType],
+        architectural_layer: layer,
+        native_environment: habitat,
+        height_display: height || '2–4 ft',
+        light_requirements: light.length > 0 ? light : ['Full Sun', 'Part Sun'],
+        moisture_requirements: moisture.length > 0 ? moisture : ['Medium'],
+        soil_requirements: soil.length > 0 ? soil : ['Loam'],
+        bloom_color: bloomColor,
+        bloomColor: bloomColor,
+        bloom_period: bloomPeriod,
+        bloomSeason: bloomPeriod,
+        sociability: sociability,
+        maintenance_level: maintLevel,
+        maintenance_guide: {
+          summary: `${maintLevel} Maintenance native species.`,
+          level: maintLevel,
+          spring: 'Wait until daytime temperatures consistently exceed 50°F before cutting back dead foliage. Leave 8 to 18 inches of standing stems for native bee nesting.',
+          summer: 'Minimal irrigation required once established; monitor moisture during dry spells.',
+          fall: 'Leave standing stems and seedheads for overwintering birds and beneficial insects.',
+          winter: 'Preserve snow cover and natural leaf mulch around root zones.',
+          division: 'Divide in early spring if needed.',
+          sources: 'Xerces Society for Invertebrate Conservation, Grow Native! (Missouri Prairie Foundation), Missouri Botanical Garden'
+        },
+        wildlife_ecosystem_benefits: wildlife.length > 0 ? wildlife : ['Provides nectar and shelter for native wildlife.'],
+        plant_url: plantUrl,
+        plantfinder_url: plantUrl,
+        advisor_description: advisorDesc,
+        images: images,
+        is_sweet16: false,
+        is_kc_keystone: false,
+        created_at: new Date().toISOString(),
+        created_by: state.currentUser.name || state.currentUser.username,
+        last_edited_by_user_id: state.currentUser.id || state.currentUser.username,
+        last_edited_by_user_name: state.currentUser.name || state.currentUser.username,
+        last_edited_timestamp: new Date().toISOString()
+      };
+
+      const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
+
+      if (isAdmin) {
+        state.allPlants.push(newPlant);
+        state.customPlants[newId] = newPlant;
+        localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
+        syncPlantToFirestore(newPlant);
+        applyFilters();
+        updateHeaderInfo();
+        showToast(`Added ${commonName} directly to the master catalog!`, "success");
+      } else {
+        const approval = {
+          id: 'appr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+          type: 'add',
+          status: 'pending',
+          plant_id: newId,
+          scientific_name: sciName,
+          common_name: commonName,
+          submitted_by_id: state.currentUser.id || state.currentUser.username,
+          submitted_by_name: state.currentUser.name || state.currentUser.username,
+          submitted_by_email: state.currentUser.email || '',
+          submitted_at: new Date().toISOString(),
+          changes: newPlant
+        };
+
+        state.plantApprovals = state.plantApprovals || [];
+        state.plantApprovals.unshift(approval);
+        localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+        savePlantApprovalToFirestore(approval);
+        updateApprovalBadges();
+        showToast(`New plant proposal for ${commonName} submitted to Admin Approval Inbox!`, "success");
+      }
+
+      document.getElementById('addPlantModal').close();
+    });
+
+    // ==================== Admin Approval Inbox Panel & Review Actions ====================
+    function renderAdminApprovals(filterTerm = '') {
+      const container = document.getElementById('adminApprovalsList');
+      if (!container) return;
+
+      const term = (filterTerm || '').toLowerCase().trim();
+      let list = state.plantApprovals || [];
+
+      if (term) {
+        list = list.filter(item => {
+          const common = (item.common_name || '').toLowerCase();
+          const sci = (item.scientific_name || '').toLowerCase();
+          const author = (item.submitted_by_name || '').toLowerCase();
+          return common.includes(term) || sci.includes(term) || author.includes(term);
+        });
+      }
+
+      updateApprovalBadges();
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="background:var(--bg-base);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);padding:36px 20px;text-align:center;">
+            <i data-lucide="inbox" style="width:36px;height:36px;color:var(--text-muted);margin:0 auto 10px auto;display:block;"></i>
+            <h4 style="font-size:15px;font-weight:700;margin:0 0 4px 0;">All Clear! No Pending Approvals</h4>
+            <p style="font-size:12px;color:var(--text-muted);margin:0;">When advisors submit plant edits or new species, they will appear here for administrator review.</p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const isPending = item.status === 'pending';
+        const isEdit = item.type === 'edit';
+        const dateStr = item.submitted_at ? new Date(item.submitted_at).toLocaleString() : 'Recent';
+        
+        let statusBadge = '';
+        if (item.status === 'pending') {
+          statusBadge = '<span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;"><i data-lucide="clock" style="width:11px;height:11px;"></i> Pending Review</span>';
+        } else if (item.status === 'approved') {
+          statusBadge = '<span style="background:#dcfce7;color:#166534;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;"><i data-lucide="check-circle" style="width:11px;height:11px;"></i> Approved</span>';
+        } else {
+          statusBadge = '<span style="background:#fee2e2;color:#991b1b;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;"><i data-lucide="x-circle" style="width:11px;height:11px;"></i> Denied</span>';
+        }
+
+        const typeBadge = isEdit 
+          ? '<span style="background:var(--primary-subtle);color:var(--primary-dark);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">Edit Proposal</span>'
+          : '<span style="background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">New Plant Addition</span>';
+
+        let diffHtml = '';
+        if (isEdit && item.changes) {
+          const ch = item.changes;
+          const orig = item.original || {};
+          const rows = [];
+          
+          if (ch.common_names && JSON.stringify(ch.common_names) !== JSON.stringify(orig.common_names)) {
+            rows.push(`<div><strong>Common Name:</strong> <del style="color:var(--text-muted);">${escapeHtml((orig.common_names || []).join(', '))}</del> ➔ <span style="color:#15803d;font-weight:700;">${escapeHtml(ch.common_names.join(', '))}</span></div>`);
+          }
+          if (ch.scientific_name && ch.scientific_name !== orig.scientific_name) {
+            rows.push(`<div><strong>Scientific Name:</strong> <del style="color:var(--text-muted);">${escapeHtml(orig.scientific_name || '')}</del> ➔ <span style="color:#15803d;font-weight:700;">${escapeHtml(ch.scientific_name)}</span></div>`);
+          }
+          if (ch.advisor_description && ch.advisor_description !== orig.advisor_description) {
+            rows.push(`<div><strong>Advisor Description:</strong><div style="font-size:11px;color:#15803d;background:rgba(21,128,61,0.06);padding:6px;border-radius:4px;margin-top:2px;">${escapeHtml(ch.advisor_description)}</div></div>`);
+          }
+          if (ch.height_display && ch.height_display !== orig.height_display) {
+            rows.push(`<div><strong>Height:</strong> <del style="color:var(--text-muted);">${escapeHtml(orig.height_display || '-')}</del> ➔ <span style="color:#15803d;font-weight:700;">${escapeHtml(ch.height_display)}</span></div>`);
+          }
+          if (ch.light_requirements && JSON.stringify(ch.light_requirements) !== JSON.stringify(orig.light_requirements)) {
+            rows.push(`<div><strong>Light:</strong> <del style="color:var(--text-muted);">${escapeHtml((orig.light_requirements || []).join(', '))}</del> ➔ <span style="color:#15803d;font-weight:700;">${escapeHtml(ch.light_requirements.join(', '))}</span></div>`);
+          }
+          if (ch.moisture_requirements && JSON.stringify(ch.moisture_requirements) !== JSON.stringify(orig.moisture_requirements)) {
+            rows.push(`<div><strong>Moisture:</strong> <del style="color:var(--text-muted);">${escapeHtml((orig.moisture_requirements || []).join(', '))}</del> ➔ <span style="color:#15803d;font-weight:700;">${escapeHtml(ch.moisture_requirements.join(', '))}</span></div>`);
+          }
+          if (ch.bloom_color && JSON.stringify(ch.bloom_color) !== JSON.stringify(orig.bloom_color)) {
+            rows.push(`<div><strong>Bloom Color:</strong> <del style="color:var(--text-muted);">${escapeHtml((orig.bloom_color || []).join(', '))}</del> ➔ <span style="color:#15803d;font-weight:700;">${escapeHtml(ch.bloom_color.join(', '))}</span></div>`);
+          }
+          if (ch.images && ch.images[0] && ch.images[0].url) {
+            rows.push(`<div><strong>Photo:</strong> <a href="${ch.images[0].url}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:underline;">View Submitted Photo</a> · <span style="font-size:11px;color:var(--text-secondary);">${escapeHtml(ch.images[0].attribution_name || 'Credit')}</span></div>`);
+          }
+          diffHtml = rows.length > 0 ? rows.join('<div style="height:6px;"></div>') : '<p style="font-size:11px;color:var(--text-muted);margin:0;">General field edits</p>';
+        } else if (!isEdit && item.changes) {
+          const p = item.changes;
+          diffHtml = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:var(--text-main);">
+              <div><strong>Type:</strong> ${escapeHtml(Array.isArray(p.plant_type) ? p.plant_type.join(', ') : (p.plant_type || '-'))}</div>
+              <div><strong>Layer:</strong> ${escapeHtml(p.architectural_layer || '-')}</div>
+              <div><strong>Environment:</strong> ${escapeHtml(p.native_environment || '-')}</div>
+              <div><strong>Height:</strong> ${escapeHtml(p.height_display || '-')}</div>
+              <div><strong>Light:</strong> ${escapeHtml((p.light_requirements || []).join(', '))}</div>
+              <div><strong>Moisture:</strong> ${escapeHtml((p.moisture_requirements || []).join(', '))}</div>
+            </div>
+            ${p.advisor_description ? `<div style="font-size:11px;margin-top:6px;background:rgba(21,128,61,0.06);padding:6px;border-radius:4px;"><strong>Description:</strong> ${escapeHtml(p.advisor_description)}</div>` : ''}
+            ${p.images && p.images[0] ? `<div style="margin-top:6px;font-size:11px;"><a href="${p.images[0].url}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:underline;">View Attached Photo</a> (Credit: ${escapeHtml(p.images[0].attribution_name || 'Courtesy Missouri Botanical Garden PlantFinder')})</div>` : ''}
+          `;
+        }
+
+        return `
+          <div class="approval-card" style="border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-surface);padding:14px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  ${typeBadge}
+                  ${statusBadge}
+                  <h4 style="font-size:14px;font-weight:800;margin:0;color:var(--text-main);">${escapeHtml(item.common_name)}</h4>
+                  <span style="font-style:italic;color:var(--text-muted);font-size:12px;">(${escapeHtml(item.scientific_name)})</span>
+                </div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">
+                  Submitted by <strong>${escapeHtml(item.submitted_by_name || 'Advisor')}</strong> (${escapeHtml(item.submitted_by_email || 'No email')}) on ${dateStr}
+                </div>
+              </div>
+
+              ${isPending ? `
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="denyPlantChange('${item.id}')" style="color:#b91c1c;border-color:rgba(185,28,28,0.3);font-size:11px;padding:4px 10px;display:inline-flex;align-items:center;gap:4px;">
+                    <i data-lucide="x" style="width:12px;height:12px;"></i>
+                    <span>Deny</span>
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="approvePlantChange('${item.id}')" style="background:#15803d;border-color:#15803d;font-size:11px;padding:4px 12px;display:inline-flex;align-items:center;gap:4px;">
+                    <i data-lucide="check" style="width:12px;height:12px;"></i>
+                    <span>Approve &amp; Apply</span>
+                  </button>
+                </div>
+              ` : `
+                <div style="font-size:11px;color:var(--text-muted);">
+                  ${item.reviewed_by_name ? `Reviewed by ${escapeHtml(item.reviewed_by_name)} on ${new Date(item.reviewed_at).toLocaleDateString()}` : ''}
+                </div>
+              `}
+            </div>
+
+            <div style="background:var(--bg-base);border-radius:var(--radius-sm);padding:10px;font-size:12px;border-left:3px solid var(--primary);">
+              ${diffHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+    window.renderAdminApprovals = renderAdminApprovals;
+
+    async function approvePlantChange(approvalId) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast("Administrator privileges required to approve catalog changes.", "danger");
+        return;
+      }
+
+      const approval = (state.plantApprovals || []).find(a => a.id === approvalId);
+      if (!approval || approval.status !== 'pending') return;
+
+      const reviewerName = state.currentUser.name || state.currentUser.username;
+      approval.status = 'approved';
+      approval.reviewed_by_id = state.currentUser.id || state.currentUser.username;
+      approval.reviewed_by_name = reviewerName;
+      approval.reviewed_at = new Date().toISOString();
+
+      if (approval.type === 'edit') {
+        const targetPlant = state.allPlants.find(p => p.id === approval.plant_id || p.scientific_name === approval.scientific_name);
+        if (targetPlant && approval.changes) {
+          Object.assign(targetPlant, approval.changes);
+          targetPlant.updated_at = new Date().toISOString();
+          targetPlant.updated_by = `Approved by ${reviewerName} (Sub: ${approval.submitted_by_name})`;
+          
+          state.customPlants[targetPlant.id || targetPlant.scientific_name] = approval.changes;
+          localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
+          syncPlantToFirestore(targetPlant);
+        }
+      } else if (approval.type === 'add') {
+        const newPlant = approval.changes;
+        if (newPlant) {
+          newPlant.updated_by = `Approved by ${reviewerName} (Sub: ${approval.submitted_by_name})`;
+          state.allPlants.push(newPlant);
+          state.customPlants[newPlant.id] = newPlant;
+          localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
+          syncPlantToFirestore(newPlant);
+        }
+      }
+
+      localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+      savePlantApprovalToFirestore(approval);
+
+      renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
+      updateApprovalBadges();
+      applyFilters();
+      updateHeaderInfo();
+
+      showToast(`Approved changes for ${approval.common_name}! Catalog updated.`, "success");
+    }
+    window.approvePlantChange = approvePlantChange;
+
+    async function denyPlantChange(approvalId) {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        showToast("Administrator privileges required.", "danger");
+        return;
+      }
+
+      const approval = (state.plantApprovals || []).find(a => a.id === approvalId);
+      if (!approval || approval.status !== 'pending') return;
+
+      if (!confirm(`Are you sure you want to deny proposed changes for "${approval.common_name}"?`)) {
+        return;
+      }
+
+      approval.status = 'denied';
+      approval.reviewed_by_id = state.currentUser.id || state.currentUser.username;
+      approval.reviewed_by_name = state.currentUser.name || state.currentUser.username;
+      approval.reviewed_at = new Date().toISOString();
+
+      localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+      savePlantApprovalToFirestore(approval);
+
+      renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
+      updateApprovalBadges();
+      showToast(`Changes for ${approval.common_name} were denied.`, "info");
+    }
+    window.denyPlantChange = denyPlantChange;
+
+    // Canonical Big Three Invasive Species Reference Metadata
+    const BIG_THREE_DATA = {
+      bush_honeysuckle: {
+        id: 'inv-bush-honeysuckle',
+        name: 'Bush Honeysuckle',
+        scientific: 'Lonicera maackii',
+        info_url: 'https://mdc.mo.gov/discover-nature/field-guide/bush-honeysuckles',
+        control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/bush-honeysuckle-control',
+        summary: 'Dense deciduous arching shrub (6–18 ft) with opposite leaves, fragrant spring flowers, paired red autumn berries, and allelopathic roots that chemically inhibit native tree and wildflower regeneration.'
+      },
+      japanese_honeysuckle: {
+        id: 'inv-japanese-honeysuckle',
+        name: 'Japanese Honeysuckle',
+        scientific: 'Lonicera japonica',
+        info_url: 'https://mdc.mo.gov/discover-nature/field-guide/japanese-honeysuckle',
+        control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/japanese-honeysuckle-control',
+        summary: 'Vigorous twining woody vine with opposite leaves, fragrant white/yellow tubular flowers, and black berries. Stems twist clockwise around saplings, girdling young trees and smothering native understory shrubs.'
+      },
+      wintercreeper: {
+        id: 'inv-wintercreeper',
+        name: 'Wintercreeper',
+        scientific: 'Euonymus fortunei',
+        info_url: 'https://mdc.mo.gov/discover-nature/field-guide/wintercreeper-climbing-euonymus',
+        control_url: 'https://mdc.mo.gov/trees-plants/invasive-plants/wintercreeper-control',
+        summary: 'Aggressive evergreen groundcover and climbing vine with glossy, pale-veined opposite leaves. Forms dense carpets that choke out native spring ephemerals and climbs mature trees with aerial rootlets, increasing storm damage risk.'
+      }
+    };

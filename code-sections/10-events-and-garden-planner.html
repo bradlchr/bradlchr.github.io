@@ -1,0 +1,3228 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/10-events-and-garden-planner.html
+  Title: Section 10: Global Event Listeners & Guided Garden Area Planner Engine
+  Source Lines in index.html: Lines 15283 – 18501 (3219 lines)
+  Overview: DOM event listener wiring (setupEventListeners), ecological matrix layer metadata, 2-step Garden Planner Setup Wizard, weighted ecological plant scoring engine (getPlantRecommendationsForArea), and app initialization.
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+    function setupEventListeners() {
+      // Theme toggle
+      const themeBtn = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      const savedTheme = localStorage.getItem('dr_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.body.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+
+      themeBtn.addEventListener('click', () => {
+        const cur = document.body.getAttribute('data-theme');
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', next);
+        localStorage.setItem('dr_theme', next);
+        updateThemeIcon(next);
+        renderGrid();
+      });
+
+      function updateThemeIcon(t) {
+        themeIcon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+        themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        if (window.lucide) lucide.createIcons();
+      }
+
+      // Text Size Quick Button
+      document.getElementById('textSizeToggleBtn')?.addEventListener('click', () => {
+        openTextSizeModal();
+      });
+
+      // Segmented Text Size controls in Profile Modal
+      document.querySelectorAll('#profileTextSizeControls .text-size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const scale = btn.getAttribute('data-scale');
+          if (scale) setUserTextScale(scale);
+        });
+      });
+
+      // Option cards in Text Size Quick Modal
+      document.querySelectorAll('#textSizeModal .text-size-option-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const scale = card.getAttribute('data-scale');
+          if (scale) {
+            setUserTextScale(scale);
+            document.getElementById('textSizeModal')?.close();
+          }
+        });
+      });
+
+      // Drawer open/close
+      const drawer = document.getElementById('stagingDrawer');
+      const overlay = document.getElementById('drawerOverlay');
+      const reportDrawerBtn = document.getElementById('reportDrawerBtn');
+      const openDrawer = () => {
+        if (!state.currentUser) {
+          showToast("Consultation report staging is reserved for Nature Advisors. Please sign in to access reports.", "warning");
+          openLoginModal();
+          return;
+        }
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        if (reportDrawerBtn) reportDrawerBtn.setAttribute('aria-expanded', 'true');
+        setTimeout(() => {
+          document.getElementById('closeDrawerBtn')?.focus();
+        }, 50);
+      };
+      const closeDrawer = () => {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        if (reportDrawerBtn) {
+          reportDrawerBtn.setAttribute('aria-expanded', 'false');
+          reportDrawerBtn.focus();
+        }
+      };
+
+      document.getElementById('reportDrawerBtn')?.addEventListener('click', openDrawer);
+      document.getElementById('closeDrawerBtn')?.addEventListener('click', closeDrawer);
+      overlay.addEventListener('click', closeDrawer);
+
+      // Mobile Filter Sidebar Drawer
+      const filterSidebar = document.getElementById('filterSidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const openSidebarBtn = document.getElementById('openSidebarBtn');
+      const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+      const applyFiltersMobileBtn = document.getElementById('applyFiltersMobileBtn');
+      const resetAllFiltersMobileBtn = document.getElementById('resetAllFiltersMobileBtn');
+
+      const toggleSidebarDrawer = (open) => {
+        if (!filterSidebar || !sidebarOverlay) return;
+        if (open) {
+          filterSidebar.classList.add('open');
+          sidebarOverlay.classList.add('open');
+          document.body.style.overflow = 'hidden';
+          if (openSidebarBtn) openSidebarBtn.setAttribute('aria-expanded', 'true');
+          setTimeout(() => {
+            document.getElementById('closeSidebarBtn')?.focus();
+          }, 50);
+        } else {
+          filterSidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('open');
+          document.body.style.overflow = '';
+          if (openSidebarBtn) {
+            openSidebarBtn.setAttribute('aria-expanded', 'false');
+            openSidebarBtn.focus();
+          }
+        }
+      };
+
+      if (openSidebarBtn) openSidebarBtn.addEventListener('click', () => toggleSidebarDrawer(true));
+      if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => toggleSidebarDrawer(false));
+      if (sidebarOverlay) sidebarOverlay.addEventListener('click', () => toggleSidebarDrawer(false));
+      if (applyFiltersMobileBtn) applyFiltersMobileBtn.addEventListener('click', () => toggleSidebarDrawer(false));
+      if (resetAllFiltersMobileBtn) resetAllFiltersMobileBtn.addEventListener('click', resetAllFilters);
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          toggleSidebarDrawer(false);
+          closeDrawer();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+          if (filterSidebar && filterSidebar.classList.contains('open')) {
+            toggleSidebarDrawer(false);
+          }
+        }
+      });
+
+      // Search inputs (Dual desktop sidebar & mobile main content sync)
+      const searchInput = document.getElementById('searchInput');
+      const searchClear = document.getElementById('searchClearBtn');
+      const mobileSearchInput = document.getElementById('mobileSearchInput');
+      const mobileSearchClear = document.getElementById('mobileSearchClearBtn');
+      let searchTimeout = null;
+
+      const handleSearchInput = (val, sourceInput) => {
+        clearTimeout(searchTimeout);
+        if (searchInput && sourceInput !== searchInput) searchInput.value = val;
+        if (mobileSearchInput && sourceInput !== mobileSearchInput) mobileSearchInput.value = val;
+        if (searchClear) searchClear.style.display = val ? 'block' : 'none';
+        if (mobileSearchClear) mobileSearchClear.style.display = val ? 'block' : 'none';
+
+        searchTimeout = setTimeout(() => {
+          state.filters.search = val;
+          applyFilters();
+        }, 180);
+      };
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => handleSearchInput(e.target.value, searchInput));
+      }
+      if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', (e) => handleSearchInput(e.target.value, mobileSearchInput));
+      }
+
+      const handleSearchClear = () => {
+        if (searchInput) searchInput.value = '';
+        if (mobileSearchInput) mobileSearchInput.value = '';
+        if (searchClear) searchClear.style.display = 'none';
+        if (mobileSearchClear) mobileSearchClear.style.display = 'none';
+        state.filters.search = '';
+        applyFilters();
+      };
+
+      if (searchClear) searchClear.addEventListener('click', handleSearchClear);
+      if (mobileSearchClear) mobileSearchClear.addEventListener('click', handleSearchClear);
+
+      // Quick toggles
+      const sweet16Btn = document.getElementById('toggleSweet16Btn');
+      sweet16Btn.addEventListener('click', () => {
+        state.filters.sweet16 = !state.filters.sweet16;
+        sweet16Btn.classList.toggle('active', state.filters.sweet16);
+        sweet16Btn.setAttribute('aria-checked', state.filters.sweet16 ? 'true' : 'false');
+        announceToScreenReader(state.filters.sweet16 ? 'Deep Roots Sweet 16 filter activated.' : 'Sweet 16 filter deactivated.', true);
+        applyFilters();
+      });
+
+      const keystoneBtn = document.getElementById('toggleKeystoneBtn');
+      keystoneBtn.addEventListener('click', () => {
+        state.filters.keystone = !state.filters.keystone;
+        keystoneBtn.classList.toggle('active', state.filters.keystone);
+        keystoneBtn.setAttribute('aria-checked', state.filters.keystone ? 'true' : 'false');
+        announceToScreenReader(state.filters.keystone ? 'Kansas City Keystone species filter activated.' : 'Keystone species filter deactivated.', true);
+        applyFilters();
+      });
+
+      // Accordion headers
+      document.querySelectorAll('.accordion-header').forEach(hdr => {
+        hdr.addEventListener('click', () => {
+          const targetId = hdr.getAttribute('data-target');
+          const content = document.getElementById(targetId);
+          const icon = hdr.querySelector('i');
+          const isCurrentlyHidden = content.style.display === 'none';
+          if (isCurrentlyHidden) {
+            content.style.display = 'flex';
+            if (icon) icon.setAttribute('data-lucide', 'chevron-down');
+            hdr.setAttribute('aria-expanded', 'true');
+          } else {
+            content.style.display = 'none';
+            if (icon) icon.setAttribute('data-lucide', 'chevron-right');
+            hdr.setAttribute('aria-expanded', 'false');
+          }
+          if (window.lucide) lucide.createIcons();
+        });
+      });
+
+      // Chip filters
+      document.querySelectorAll('.chip-filter').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const group = chip.getAttribute('data-group');
+          const val = chip.getAttribute('data-val');
+          const set = state.filters[group];
+          if (set.has(val)) {
+            set.delete(val);
+            chip.classList.remove('active');
+          } else {
+            set.add(val);
+            chip.classList.add('active');
+          }
+          applyFilters();
+        });
+      });
+
+      // Reset buttons
+      document.getElementById('resetAllFiltersBtn').addEventListener('click', resetAllFilters);
+      document.getElementById('resetFiltersEmptyBtn').addEventListener('click', resetAllFilters);
+
+      // Sort select & Sidebar sort select
+      const sortSelect = document.getElementById('sortOrderSelect');
+      const sidebarSortSelect = document.getElementById('sidebarSortOrderSelect');
+      if (sortSelect) sortSelect.value = state.sortOrder;
+      if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+
+      const handleSortChange = (newOrder) => {
+        state.sortOrder = newOrder;
+        localStorage.setItem('dr_sort_order', state.sortOrder);
+        if (sortSelect) sortSelect.value = state.sortOrder;
+        if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+
+        // Auto-align default name display when explicitly sorting by scientific or common
+        if (newOrder === 'sci_asc' || newOrder === 'sci_desc') {
+          state.defaultNameDisplay = 'scientific_first';
+          localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
+          if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+          if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+        } else if (newOrder === 'common_asc' || newOrder === 'common_desc') {
+          state.defaultNameDisplay = 'common_first';
+          localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
+          if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+          if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+        }
+
+        sortPlants();
+        renderGrid();
+        renderStaging();
+      };
+
+      if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => handleSortChange(e.target.value));
+      }
+      if (sidebarSortSelect) {
+        sidebarSortSelect.addEventListener('change', (e) => handleSortChange(e.target.value));
+      }
+
+      // Default Name Display select & Sidebar select
+      const nameDisplaySelect = document.getElementById('defaultNameDisplaySelect');
+      const sidebarNameDisplaySelect = document.getElementById('sidebarNameDisplaySelect');
+      if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+      if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+
+      const handleNameDisplayChange = (newDisplay) => {
+        state.defaultNameDisplay = newDisplay;
+        localStorage.setItem('dr_default_name_display', state.defaultNameDisplay);
+        if (nameDisplaySelect) nameDisplaySelect.value = state.defaultNameDisplay;
+        if (sidebarNameDisplaySelect) sidebarNameDisplaySelect.value = state.defaultNameDisplay;
+
+        // If user changed to Scientific First and is sorting alphabetically, update sort to Scientific A-Z
+        if (newDisplay === 'scientific_first' && (state.sortOrder === 'common_asc' || state.sortOrder === 'common_desc')) {
+          state.sortOrder = 'sci_asc';
+          localStorage.setItem('dr_sort_order', state.sortOrder);
+          if (sortSelect) sortSelect.value = state.sortOrder;
+          if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+        } else if (newDisplay === 'common_first' && (state.sortOrder === 'sci_asc' || state.sortOrder === 'sci_desc')) {
+          state.sortOrder = 'common_asc';
+          localStorage.setItem('dr_sort_order', state.sortOrder);
+          if (sortSelect) sortSelect.value = state.sortOrder;
+          if (sidebarSortSelect) sidebarSortSelect.value = state.sortOrder;
+        }
+
+        sortPlants();
+        renderGrid();
+        renderStaging();
+      };
+
+      if (nameDisplaySelect) {
+        nameDisplaySelect.addEventListener('change', (e) => handleNameDisplayChange(e.target.value));
+      }
+      if (sidebarNameDisplaySelect) {
+        sidebarNameDisplaySelect.addEventListener('change', (e) => handleNameDisplayChange(e.target.value));
+      }
+
+      // Client Meta Inputs
+      const clientInputs = {
+        name: document.getElementById('clientNameInput'),
+        address: document.getElementById('projectAddressInput'),
+        date: document.getElementById('consultDateInput'),
+        advisor: document.getElementById('advisorNameInput'),
+        notes: document.getElementById('advisorNotesInput')
+      };
+
+      Object.keys(clientInputs).forEach(k => {
+        clientInputs[k].value = state.clientMeta[k] || '';
+        clientInputs[k].addEventListener('input', (e) => {
+          state.clientMeta[k] = e.target.value;
+          localStorage.setItem('dr_client_meta', JSON.stringify(state.clientMeta));
+
+          // Auto-sync into active consultation
+          if (state.activeConsultationId && state.consultations) {
+            const active = state.consultations.find(c => c.id === state.activeConsultationId);
+            if (active) {
+              if (k === 'name') active.clientName = e.target.value;
+              if (k === 'address') active.clientAddress = e.target.value;
+              if (k === 'date') active.consultationDate = e.target.value;
+              if (k === 'advisor') active.advisorName = e.target.value;
+              if (k === 'notes') active.advisorNotes = e.target.value;
+              active.lastModified = Date.now();
+              persistConsultations();
+              updateConsultationOption(active);
+            }
+          }
+        });
+      });
+
+      // Clear Staging
+      document.getElementById('clearAllStagedBtn').addEventListener('click', () => {
+        if (confirm("Remove all plants from staging?")) {
+          state.stagedPlants = [];
+          saveStaging();
+          renderStaging();
+          renderGrid();
+        }
+      });
+
+      // Copy Markdown Button
+      document.getElementById('copyMarkdownReportBtn').addEventListener('click', () => {
+        if (state.stagedPlants.length === 0) {
+          showToast("No plants in report to export.", "warning");
+          return;
+        }
+        const md = generateMarkdownReport();
+        navigator.clipboard.writeText(md).then(() => {
+          showToast("Copied Markdown report to clipboard!");
+        });
+      });
+
+      // Download Formatted Document Button
+      document.getElementById('downloadHtmlReportBtn').addEventListener('click', () => {
+        if (state.stagedPlants.length === 0) {
+          showToast("No plants in report to export.", "warning");
+          return;
+        }
+        downloadDocxReport();
+      });
+
+      // Preliminary Report (PDF / Electronic Client Takeaway) Buttons
+      document.getElementById('openPreliminaryReportBtn')?.addEventListener('click', () => {
+        openPreliminaryReport();
+      });
+      document.getElementById('prelimDownloadPdfBtn')?.addEventListener('click', () => {
+        downloadPreliminaryReportPdf();
+      });
+      document.getElementById('prelimPrintPdfBtn')?.addEventListener('click', () => {
+        printPreliminaryReport();
+      });
+      document.getElementById('prelimDownloadHtmlBtn')?.addEventListener('click', () => {
+        downloadPreliminaryReportHtml();
+      });
+      document.getElementById('prelimShareBtn')?.addEventListener('click', () => {
+        sharePreliminaryReport();
+      });
+
+      // Save Report to Advisor Profile (Cloud Sync)
+      document.getElementById('saveCloudReportBtn')?.addEventListener('click', () => {
+        saveCurrentReportToCloud();
+      });
+
+      // Consultation Switcher & Management Listeners
+      document.getElementById('consultationSelect')?.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val) switchActiveConsultation(val);
+      });
+
+      document.getElementById('newConsultationBtn')?.addEventListener('click', () => {
+        createNewConsultation();
+      });
+
+      document.getElementById('addGardenAreaBtn')?.addEventListener('click', () => {
+        if (!state.gardenAreas) state.gardenAreas = [];
+        const nextNum = state.gardenAreas.length + 1;
+        const defaultNames = [
+          "Front Porch",
+          "Front Sidewalk/Mailbox",
+          "Backyard Shade Garden",
+          "Patio & Sitting Area",
+          "Downspout Rain Garden",
+          "Woodland Edge",
+          "Driveway Border",
+          "Sunny Prairie Border"
+        ];
+        const suggested = defaultNames[nextNum - 1] || `Garden Zone ${nextNum}`;
+        state.gardenAreas.push(`Area ${nextNum}: ${suggested}`);
+        persistGardenAreas();
+        renderGardenAreasManager();
+        renderStaging();
+        showToast(`Added Area ${nextNum} to consultation.`);
+      });
+
+      document.getElementById('modalNewConsultationBtn')?.addEventListener('click', () => {
+        document.getElementById('consultationsModal')?.close();
+        createNewConsultation();
+      });
+
+      document.getElementById('openConsultationsManagerBtn')?.addEventListener('click', () => {
+        openConsultationsManagerModal();
+      });
+
+      document.getElementById('openUserConsultationsBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openConsultationsManagerModal();
+      });
+
+      // Profile Database Sync Button
+      document.getElementById('profileOpenSyncBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        document.getElementById('syncModal')?.showModal();
+        renderSyncModal();
+      });
+
+      document.getElementById('duplicateConsultationBtn')?.addEventListener('click', () => {
+        duplicateConsultation();
+      });
+
+      document.getElementById('deleteCurrentConsultationBtn')?.addEventListener('click', () => {
+        if (state.activeConsultationId) {
+          deleteConsultation(state.activeConsultationId);
+        }
+      });
+
+      document.getElementById('consultationSearchInput')?.addEventListener('input', (e) => {
+        renderConsultationsModalList(e.target.value);
+      });
+
+      // Sync Modal Controls
+      document.getElementById('syncModalBtn')?.addEventListener('click', () => {
+        renderSyncModal();
+        document.getElementById('syncModal')?.showModal();
+      });
+
+      document.getElementById('refreshFromDbBtn').addEventListener('click', async () => {
+        showToast("Synchronizing with shared Cloud Firestore master database...");
+        await tryLiveSyncFromDatabase(true);
+        applyFilters();
+        updateHeaderInfo();
+      });
+
+      // Upload / Seed Master Plants to Firestore (Admin Only)
+      document.getElementById('seedFirestoreBtn')?.addEventListener('click', async () => {
+        if (!state.currentUser || !state.currentUser.isAdmin) {
+          showToast("Administrator privileges required to upload master plant catalog to Firestore.", "danger");
+          return;
+        }
+        if (!confirm(`Upload all ${state.allPlants.length} species directly to Cloud Firestore collection 'plants'?`)) return;
+
+        showToast("Starting Cloud Firestore batch upload...", "info");
+        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+        let dId = localStorage.getItem('dr_firestore_database_id') || 'deep-roots-nature-advisors';
+        if (dId === '(default)') dId = 'deep-roots-nature-advisors';
+        
+        let uploaded = 0;
+        for (const p of state.allPlants) {
+          const docId = encodeURIComponent(p.id || p.scientific_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+          const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${docId}`;
+          
+          const body = {
+            fields: {
+              scientific_name: { stringValue: p.scientific_name || '' },
+              common_names: { arrayValue: { values: (p.common_names || []).map(n => ({ stringValue: String(n) })) } },
+              native_environment: { stringValue: p.native_environment || 'Forest' },
+              plant_type: { arrayValue: { values: (Array.isArray(p.plant_type) ? p.plant_type : [p.plant_type || 'Wildflower']).map(t => ({ stringValue: String(t) })) } },
+              mature_height: {
+                mapValue: {
+                  fields: {
+                    min_ft: { doubleValue: Number(p.mature_height_min || 1) },
+                    max_ft: { doubleValue: Number(p.mature_height_max || 3) },
+                    display: { stringValue: p.height_display || '1–3 ft' }
+                  }
+                }
+              },
+              plant_url: { stringValue: getPlantUrl(p) },
+              advisor_description: { stringValue: getPlantDesc(p) },
+              sociability: { stringValue: getPlantSociability(p) },
+              soil_requirements: { arrayValue: { values: (p.soil_requirements || []).map(s => ({ stringValue: String(s) })) } },
+              moisture_requirements: { arrayValue: { values: (p.moisture_requirements || []).map(m => ({ stringValue: String(m) })) } },
+              light_requirements: { arrayValue: { values: (p.light_requirements || []).map(l => ({ stringValue: String(l) })) } },
+              wildlife_ecosystem_benefits: { arrayValue: { values: (p.wildlife_ecosystem_benefits || []).map(w => ({ stringValue: String(w) })) } },
+              images: {
+                arrayValue: {
+                  values: (p.images || []).map(img => ({
+                    mapValue: {
+                      fields: {
+                        url: { stringValue: img.url || '' },
+                        caption: { stringValue: img.caption || '' },
+                        attribution_name: { stringValue: img.attribution_name || 'Grow Native!' }
+                      }
+                    }
+                  }))
+                }
+              }
+            }
+          };
+
+          try {
+            await fetch(url, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+            });
+            uploaded++;
+          } catch (e) {
+            console.error("Upload error for plant:", p.scientific_name, e);
+          }
+        }
+        showToast(`Uploaded ${uploaded} plants to Cloud Firestore!`, 'success');
+        tryLiveSyncFromDatabase(true);
+      });
+
+      // Reset Local Edits to Clean Master Catalog (Admin Only)
+      document.getElementById('resetCustomEditsBtn')?.addEventListener('click', () => {
+        if (!state.currentUser || !state.currentUser.isAdmin) {
+          showToast("Administrator privileges required to reset master catalog.", "danger");
+          return;
+        }
+        if (confirm("Reset all local edits back to authoritative master catalog?")) {
+          state.customPlants = {};
+          localStorage.removeItem('dr_custom_plants');
+          loadMasterPlants();
+          showToast("Reset to pristine shared master catalog.");
+        }
+      });
+
+      // Import Plants JSON (e.g. from Android backup) (Admin Only)
+      document.getElementById('importJsonFileInput')?.addEventListener('change', async (e) => {
+        if (!state.currentUser || !state.currentUser.isAdmin) {
+          showToast("Administrator privileges required to import plant JSON backups.", "danger");
+          e.target.value = '';
+          return;
+        }
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const imported = JSON.parse(text);
+          if (Array.isArray(imported) && imported.length > 0) {
+            replaceWithRemotePlants(imported);
+            state.lastSyncTime = new Date().toLocaleTimeString();
+            updateHeaderInfo();
+            showToast(`Imported ${imported.length} plants from file!`, 'success');
+            if (confirm(`Successfully imported ${imported.length} plants! Would you like to upload them directly to Cloud Firestore now?`)) {
+              document.getElementById('seedFirestoreBtn')?.click();
+            }
+          } else {
+            showToast("Invalid plant JSON file.", "danger");
+          }
+        } catch (err) {
+          showToast(`Failed to parse JSON: ${err.message}`, "danger");
+        }
+      });
+
+      // Advisor Login Form Listener
+      document.getElementById('advisorLoginForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('loginUsernameInput').value;
+        const password = document.getElementById('loginPasswordInput').value;
+        const banner = document.getElementById('loginErrorBanner');
+        const submitBtn = document.getElementById('submitLoginBtn');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Signing in...</span>`;
+
+        try {
+          const res = await loginAdvisor(username, password);
+          if (res.success) {
+            document.getElementById('advisorLoginModal').close();
+            showToast(`Welcome back, ${res.user.name}!`);
+          } else {
+            if (banner) {
+              banner.textContent = res.error || "Login failed. Please check your credentials.";
+              banner.style.display = 'block';
+            }
+          }
+        } catch (err) {
+          if (banner) {
+            banner.textContent = err.message || "An unexpected error occurred.";
+            banner.style.display = 'block';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="log-in"></i><span>Sign In as Nature Advisor</span>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+
+      // Toggle Login Password Visibility
+      document.getElementById('toggleLoginPasswordBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('loginPasswordInput');
+        if (!input) return;
+        const isPw = input.type === 'password';
+        input.type = isPw ? 'text' : 'password';
+      });
+
+      // Profile Actions
+      document.getElementById('openEditSelfBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal').close();
+        if (state.currentUser) openEditUserModal(state.currentUser.username);
+      });
+
+      document.getElementById('openAdminConsoleBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal').close();
+        openAdminConsoleModal();
+      });
+
+      document.getElementById('openChangePasswordBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal').close();
+        openChangePasswordModal(false);
+      });
+
+      document.getElementById('signOutAdvisorBtn')?.addEventListener('click', () => {
+        signOutAdvisor();
+      });
+
+      // Change Password Form
+      const newPwInput = document.getElementById('newPasswordInput');
+      if (newPwInput) {
+        newPwInput.addEventListener('input', (e) => {
+          updatePasswordStrengthUI(e.target.value);
+        });
+      }
+
+      document.getElementById('toggleNewPasswordBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('newPasswordInput');
+        if (!input) return;
+        const isPw = input.type === 'password';
+        input.type = isPw ? 'text' : 'password';
+      });
+
+      document.getElementById('changePasswordForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPw = document.getElementById('newPasswordInput').value;
+        const confirmPw = document.getElementById('confirmPasswordInput').value;
+        const banner = document.getElementById('changePasswordErrorBanner');
+
+        if (newPw !== confirmPw) {
+          if (banner) {
+            banner.textContent = "Passwords do not match. Please re-enter.";
+            banner.style.display = 'block';
+          }
+          return;
+        }
+
+        const res = await changeAdvisorPassword(newPw);
+        if (res.success) {
+          document.getElementById('changePasswordModal').close();
+          showToast("Password updated successfully!", "success");
+        } else {
+          if (banner) {
+            banner.textContent = res.error || "Failed to update password.";
+            banner.style.display = 'block';
+          }
+        }
+      });
+
+      // Admin Management Tabs & Actions
+      document.getElementById('adminRosterTabBtn')?.addEventListener('click', () => switchAdminTab('roster'));
+      document.getElementById('adminProvisionTabBtn')?.addEventListener('click', () => switchAdminTab('provision'));
+      document.getElementById('adminReportsTabBtn')?.addEventListener('click', () => switchAdminTab('reports'));
+      document.getElementById('adminApprovalsTabBtn')?.addEventListener('click', () => switchAdminTab('approvals'));
+
+      document.getElementById('adminApprovalsSearchInput')?.addEventListener('input', (e) => {
+        renderAdminApprovals(e.target.value);
+      });
+
+      document.getElementById('adminApprovalsRefreshBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('adminApprovalsRefreshBtn');
+        const icon = btn?.querySelector('i');
+        if (icon) icon.classList.add('spin');
+        try {
+          await fetchPlantApprovalsFromFirestore();
+          renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
+          showToast('Approval inbox refreshed from cloud!', 'success');
+        } catch (err) {
+          showToast(`Refresh error: ${err.message}`, 'danger');
+        } finally {
+          if (icon) icon.classList.remove('spin');
+        }
+      });
+
+      document.getElementById('openAdminApprovalsBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openAdminConsoleModal('approvals');
+      });
+
+      document.getElementById('openAddPlantBtn')?.addEventListener('click', () => {
+        openAddPlantModal();
+      });
+
+      document.getElementById('profileAddPlantBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openAddPlantModal();
+      });
+
+      document.getElementById('adminRosterSearchInput')?.addEventListener('input', (e) => {
+        renderAdminRoster(e.target.value);
+      });
+
+      // Admin Consultation Repository Search & Filters
+      document.getElementById('adminReportsSearchInput')?.addEventListener('input', (e) => {
+        renderAdminReportsRepository(
+          e.target.value,
+          document.getElementById('adminReportsAdvisorFilter')?.value || '',
+          document.getElementById('adminReportsSortSelect')?.value || 'newest'
+        );
+      });
+
+      document.getElementById('adminReportsAdvisorFilter')?.addEventListener('change', (e) => {
+        renderAdminReportsRepository(
+          document.getElementById('adminReportsSearchInput')?.value || '',
+          e.target.value,
+          document.getElementById('adminReportsSortSelect')?.value || 'newest'
+        );
+      });
+
+      document.getElementById('adminReportsSortSelect')?.addEventListener('change', (e) => {
+        renderAdminReportsRepository(
+          document.getElementById('adminReportsSearchInput')?.value || '',
+          document.getElementById('adminReportsAdvisorFilter')?.value || '',
+          e.target.value
+        );
+      });
+
+      // Admin Repository Refresh Button
+      document.getElementById('adminReportsRefreshBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('adminReportsRefreshBtn');
+        const icon = btn?.querySelector('i');
+        if (icon) icon.classList.add('spin');
+        try {
+          await fetchAllAdvisorReports();
+          renderAdminReportsRepository(
+            document.getElementById('adminReportsSearchInput')?.value || '',
+            document.getElementById('adminReportsAdvisorFilter')?.value || '',
+            document.getElementById('adminReportsSortSelect')?.value || 'newest'
+          );
+          showToast('Consultation repository refreshed from cloud!', 'success');
+        } catch (err) {
+          showToast(`Refresh error: ${err.message}`, 'danger');
+        } finally {
+          if (icon) icon.classList.remove('spin');
+        }
+      });
+
+      // Quick Access to Admin Repository from User Profile & Consultations Modal
+      document.getElementById('openAdminReportsBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openAdminConsoleModal('reports');
+      });
+
+      document.getElementById('consultationsOpenAdminRepoBtn')?.addEventListener('click', () => {
+        document.getElementById('consultationsModal')?.close();
+        openAdminConsoleModal('reports');
+      });
+
+      // Admin Report Inspection Modal Actions
+      document.getElementById('adminDetailPreliminaryBtn')?.addEventListener('click', () => {
+        if (!state.currentViewingReport) return;
+        openPreliminaryReport(state.currentViewingReport);
+      });
+
+      document.getElementById('adminDetailRegenerateDocxBtn')?.addEventListener('click', async () => {
+        if (!state.currentViewingReport) return;
+        const btn = document.getElementById('adminDetailRegenerateDocxBtn');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="spin"></i> <span>Regenerating...</span>`;
+        if (window.lucide) lucide.createIcons();
+        try {
+          await downloadDocxReport(state.currentViewingReport);
+        } catch (err) {
+          showToast(`Error: ${err.message}`, 'danger');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+
+      document.getElementById('adminDetailLoadToEditorBtn')?.addEventListener('click', () => {
+        if (state.currentViewingReport) {
+          loadReportIntoWorkspace(state.currentViewingReport);
+        }
+      });
+
+      document.getElementById('adminDetailDeleteReportBtn')?.addEventListener('click', () => {
+        if (state.currentViewingReport) {
+          adminDeleteConsultationReport(state.currentViewingReport);
+        }
+      });
+
+      // Live Canonical Username Preview in Provision Form
+      document.getElementById('provisionFirstName')?.addEventListener('input', updateCanonicalPreview);
+      document.getElementById('provisionLastName')?.addEventListener('input', updateCanonicalPreview);
+
+      // Provision Form Submit
+      document.getElementById('adminProvisionForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fName = document.getElementById('provisionFirstName').value;
+        const lName = document.getElementById('provisionLastName').value;
+        const email = document.getElementById('provisionEmail').value;
+        const phone = document.getElementById('provisionPhone').value;
+        const advType = document.getElementById('provisionAdvisorType').value;
+        const role = document.getElementById('provisionRole').value;
+
+        const res = await provisionAdvisor(fName, lName, email, phone, advType, role);
+        if (res.success) {
+          const banner = document.getElementById('provisionSuccessBanner');
+          if (banner) {
+            document.getElementById('bannerCreatedUsername').textContent = `@${res.newUser.username}`;
+            document.getElementById('bannerCreatedPassword').textContent = res.tempPassword;
+            banner.style.display = 'block';
+
+            document.getElementById('copyCreatedCredentialsBtn').onclick = () => {
+              const credText = `Deep Roots Nature Advisor Credentials:\nUsername: ${res.newUser.username}\nTemporary Password: ${res.tempPassword}\nRole: ${res.newUser.role}`;
+              navigator.clipboard.writeText(credText).then(() => {
+                showToast("Copied advisor credentials to clipboard!");
+              });
+            };
+          }
+
+          showToast(`Advisor @${res.newUser.username} provisioned successfully!`, "success");
+          document.getElementById('provisionFirstName').value = '';
+          document.getElementById('provisionLastName').value = '';
+          document.getElementById('provisionEmail').value = '';
+          document.getElementById('provisionPhone').value = '';
+          updateCanonicalPreview();
+        } else {
+          showToast(res.error || "Failed to provision advisor", "danger");
+        }
+      });
+
+      // Edit User Form Live Moniker & Role Preview
+      const updateEditMonikerPreview = () => {
+        const fn = document.getElementById('editUserFirstName')?.value || '';
+        const ln = document.getElementById('editUserLastName')?.value || '';
+        const mon = document.getElementById('editUserMonikerPreview');
+        if (mon) mon.textContent = getUserInitials({ firstName: fn, lastName: ln });
+      };
+      document.getElementById('editUserFirstName')?.addEventListener('input', updateEditMonikerPreview);
+      document.getElementById('editUserLastName')?.addEventListener('input', updateEditMonikerPreview);
+
+      document.getElementById('editUserRole')?.addEventListener('change', (e) => {
+        const tag = document.getElementById('editUserRoleTag');
+        if (tag) {
+          const isAdmin = e.target.value === 'admin';
+          tag.className = `role-badge ${isAdmin ? 'admin' : 'user'}`;
+          tag.textContent = isAdmin ? 'Admin' : 'User';
+        }
+      });
+
+      // Edit User Form Submit
+      document.getElementById('editUserForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('editUserUsername').value;
+        const firstName = document.getElementById('editUserFirstName').value.trim();
+        const lastName = document.getElementById('editUserLastName').value.trim();
+        const email = document.getElementById('editUserEmail').value.trim();
+        const phoneNumber = document.getElementById('editUserPhone').value.trim();
+        const advisorType = document.getElementById('editUserAdvisorType').value;
+        const role = document.getElementById('editUserRole').value;
+        const textSize = document.getElementById('editUserTextSize')?.value || 'standard';
+        const banner = document.getElementById('editUserErrorBanner');
+        const submitBtn = document.getElementById('submitEditUserBtn');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Saving...</span>`;
+
+        try {
+          const res = await updateAdvisorUser(username, {
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            advisorType,
+            role,
+            textSize
+          });
+
+          if (res.success) {
+            document.getElementById('editUserModal').close();
+            showToast(`Advisor @${username} updated successfully!`, 'success');
+            renderAdminRoster(document.getElementById('adminRosterSearchInput')?.value || '');
+            const profModal = document.getElementById('userProfileModal');
+            if (profModal && profModal.open && state.currentUser && state.currentUser.username === username) {
+              openUserProfileModal();
+            }
+          } else {
+            if (banner) {
+              banner.textContent = res.error || "Failed to update advisor record.";
+              banner.style.display = 'block';
+            } else {
+              showToast(res.error || "Failed to update advisor record.", "danger");
+            }
+          }
+        } catch (err) {
+          if (banner) {
+            banner.textContent = err.message || "An unexpected error occurred.";
+            banner.style.display = 'block';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="check"></i> <span>Save Changes</span>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+
+      // Catalog Mode Switcher Listeners (Desktop & Mobile)
+      ['catalogNativeBtn', 'mobileCatalogNativeBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setCatalogMode('native');
+          });
+        }
+      });
+
+      ['catalogInvasiveBtn', 'mobileCatalogInvasiveBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setCatalogMode('invasive');
+          });
+        }
+      });
+
+      // Garden Area Planner Triggers
+      document.getElementById('gardenPlannerHeaderBtn')?.addEventListener('click', () => openGardenPlanner());
+      document.getElementById('openPlannerFromStagingBtn')?.addEventListener('click', () => {
+        closeDrawer();
+        openGardenPlanner();
+      });
+      document.getElementById('profileOpenPlannerBtn')?.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.close();
+        openGardenPlanner();
+      });
+      document.getElementById('guestGateSignInBtn')?.addEventListener('click', () => {
+        document.getElementById('plannerGuestModal')?.close();
+        openLoginModal();
+      });
+      document.getElementById('plannerOpenDrawerBtn')?.addEventListener('click', () => {
+        document.getElementById('gardenPlannerModal')?.close();
+        document.getElementById('stagingDrawer')?.classList.add('open');
+        document.getElementById('drawerOverlay')?.classList.add('open');
+      });
+      document.getElementById('plannerFinishAndStageBtn')?.addEventListener('click', () => {
+        document.getElementById('gardenPlannerModal')?.close();
+        document.getElementById('stagingDrawer')?.classList.add('open');
+        document.getElementById('drawerOverlay')?.classList.add('open');
+      });
+      // Guided Planner Workflow Event Listeners
+      const proceedToRecommendationsFromWizard = () => {
+        initGardenAreaProfiles();
+        const wf = getPlannerWorkflowState();
+        wf.status = 'review_areas';
+        wf.currentStepAreaIdx = 0;
+        state.activePlannerAreaIdx = 0;
+        persistPlannerWorkflowState(wf);
+        renderGardenPlannerUI();
+        const modal = document.getElementById('gardenPlannerModal');
+        if (modal) modal.scrollTop = 0;
+        const mainLayout = document.getElementById('plannerMainLayout');
+        if (mainLayout) mainLayout.scrollTop = 0;
+        const recList = document.getElementById('plannerRecommendationsList');
+        if (recList) recList.scrollTop = 0;
+        const areaName = state.gardenAreas[0] || 'Area 1';
+        showToast(`Step 2: Reviewing recommendations for ${areaName}`, 'success');
+      };
+      document.getElementById('plannerWizardProceedBtn')?.addEventListener('click', proceedToRecommendationsFromWizard);
+      document.getElementById('plannerWizardProceedBottomBtn')?.addEventListener('click', proceedToRecommendationsFromWizard);
+
+      document.getElementById('plannerWizardAddAreaBtn')?.addEventListener('click', () => {
+        const nextNum = state.gardenAreas.length + 1;
+        const newAreaName = `Area ${nextNum}: New Planting Zone`;
+        state.gardenAreas.push(newAreaName);
+        persistGardenAreas();
+        initGardenAreaProfiles();
+        state.activePlannerAreaIdx = state.gardenAreas.length - 1;
+        renderPlannerSetupWizard();
+        showToast(`Added ${newAreaName}! Customize its conditions below.`);
+      });
+
+      document.getElementById('plannerRestartWizardBtn')?.addEventListener('click', () => {
+        if (confirm("Restart Guided Area Setup? You can re-configure all property zones before proceeding to recommendations.")) {
+          const wf = getPlannerWorkflowState();
+          wf.status = 'setup_areas';
+          wf.currentStepAreaIdx = 0;
+          state.activePlannerAreaIdx = 0;
+          persistPlannerWorkflowState(wf);
+          renderGardenPlannerUI();
+          showToast("Switched to Area Setup Wizard mode.");
+        }
+      });
+
+      document.getElementById('plannerAddAreaBtn')?.addEventListener('click', () => {
+        const nextNum = state.gardenAreas.length + 1;
+        const newAreaName = `Area ${nextNum}: New Planting Zone`;
+        state.gardenAreas.push(newAreaName);
+        persistGardenAreas();
+        initGardenAreaProfiles();
+        state.activePlannerAreaIdx = state.gardenAreas.length - 1;
+        renderGardenAreasManager();
+        renderGardenPlannerUI();
+        openAreaConditionsModal(state.activePlannerAreaIdx);
+        showToast(`Added ${newAreaName}! Customize its conditions.`);
+      });
+      document.getElementById('plannerAddAllToConsultationBtn')?.addEventListener('click', () => {
+        addTopRecommendedToConsultation();
+      });
+      document.getElementById('plannerSortBySelect')?.addEventListener('change', () => {
+        renderAreaRecommendations();
+      });
+      document.getElementById('plannerLayerSelect')?.addEventListener('change', (e) => {
+        state.activePlannerLayer = e.target.value;
+        renderAreaRecommendations();
+      });
+      document.getElementById('plannerAnyColorBtn')?.addEventListener('click', () => {
+        const prof = getActivePlannerProfile();
+        if (prof) {
+          prof.bloomColors = ['Any'];
+          persistGardenAreaProfiles();
+          renderPlannerConditionsForm(prof);
+          renderAreaRecommendations();
+        }
+      });
+      document.getElementById('plannerSelectAllLayersBtn')?.addEventListener('click', () => {
+        const prof = getActivePlannerProfile();
+        if (prof) {
+          prof.structuralLayers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer', 'Understory', 'Canopy', 'Vine'];
+          persistGardenAreaProfiles();
+          renderPlannerConditionsForm(prof);
+          renderAreaRecommendations();
+        }
+      });
+
+      // Ensure mouse wheel anywhere over the recommendations pane scrolls the list
+      const plannerContentEl = document.getElementById('plannerContentPane');
+      const plannerRecsEl = document.getElementById('plannerRecommendationsList');
+      if (plannerContentEl && plannerRecsEl) {
+        plannerContentEl.addEventListener('wheel', (e) => {
+          if (e.target !== plannerRecsEl && !plannerRecsEl.contains(e.target)) {
+            plannerRecsEl.scrollTop += e.deltaY;
+          }
+        }, { passive: true });
+      }
+
+      // Browse Invasives Button inside Consultation Drawer
+      document.getElementById('browseInvasivesBtn')?.addEventListener('click', () => {
+        setCatalogMode('invasive');
+        closeDrawer();
+      });
+
+      // Vetted Contractors Button inside Consultation Drawer
+      document.getElementById('sidebarContractorsBtn')?.addEventListener('click', () => {
+        openContractorsModal();
+      });
+
+      // Report Section & Stewardship Checkbox Listeners
+      const reportTogglesList = [
+        ['toggleInvasivePresent', 'invasivePresent'],
+        ['toggleBirdNestBox', 'birdNestBox'],
+        ['toggleBirdBath', 'birdBath'],
+        ['toggleBatBox', 'batBox'],
+        ['toggleBeeHabitat', 'beeHabitat'],
+        ['toggleJohnsonCounty', 'johnsonCounty'],
+        ['toggleWyandotteCounty', 'wyandotteCounty'],
+        ['toggleRainwaterHarvesting', 'rainwaterHarvesting']
+      ];
+
+      reportTogglesList.forEach(([elemId, propKey]) => {
+        const inputEl = document.getElementById(elemId);
+        if (inputEl) {
+          inputEl.addEventListener('change', (e) => {
+            state.reportOptions[propKey] = e.target.checked;
+            persistReportOptions();
+            if (propKey === 'invasivePresent') {
+              renderStagedInvasives();
+            }
+          });
+        }
+      });
+    }
+
+    // ==================== Garden Area Planner & Ecological Recommendation Engine ====================
+    const PLANNER_LAYER_METADATA = {
+      'Groundcover': {
+        title: 'Ground Layer / Living Matrix',
+        subtitle: 'Sedges, low grasses & creeping groundcovers (< 1.5 ft)',
+        desc: 'Suppresses weeds, cools soil, retains moisture, and eliminates the need for repeated wood mulch application.',
+        icon: 'sprout',
+        color: '#059669',
+        badgeBg: 'rgba(5, 150, 105, 0.12)'
+      },
+      'Seasonal/Herbaceous Layer': {
+        title: 'Seasonal & Mid-Layer Forbs',
+        subtitle: 'Mid-height wildflowers & blooming perennials (1.5 – 3.5 ft)',
+        desc: 'Provides continuous floral succession, nectar, and pollen resources for butterflies, native bees, and hummingbirds.',
+        icon: 'flower',
+        color: '#ec4899',
+        badgeBg: 'rgba(236, 72, 153, 0.12)'
+      },
+      'Structural Layer': {
+        title: 'Structural Perennials & Architectural Grasses',
+        subtitle: 'Tall focal flowers & warm-season bunchgrasses (3 – 6+ ft)',
+        desc: 'Anchors the bed with architectural form, autumn color, winter interest, and high-value seedheads for songbirds.',
+        icon: 'wheat',
+        color: '#d97706',
+        badgeBg: 'rgba(217, 119, 6, 0.12)'
+      },
+      'Understory': {
+        title: 'Understory Trees & Large Shrubs',
+        subtitle: 'Mid-story woody structure & flowering shrubs (< 25 ft)',
+        desc: 'Provides critical wildlife nesting cover, structural wind protection, rich berry production, and dappled shade.',
+        icon: 'trees',
+        color: '#2563eb',
+        badgeBg: 'rgba(37, 99, 235, 0.12)'
+      },
+      'Canopy': {
+        title: 'Canopy & Shade Trees',
+        subtitle: 'Overstory keystone trees (> 25 ft)',
+        desc: 'Top-tier ecological keystone giants that host hundreds of native caterpillar species, provide cooling shade, and sequester carbon.',
+        icon: 'tree-pine',
+        color: '#15803d',
+        badgeBg: 'rgba(21, 128, 61, 0.12)'
+      },
+      'Vine': {
+        title: 'Native Climbers & Vines',
+        subtitle: 'Vertical trellis, fence & wall habitat',
+        desc: 'Maximizes vertical biodiversity and wall coverage in compact residential footprints.',
+        icon: 'grape',
+        color: '#7c3aed',
+        badgeBg: 'rgba(124, 58, 237, 0.12)'
+      }
+    };
+
+    // ==================== Guided Garden Planner Workflow & Engine ====================
+    function getPlannerWorkflowState() {
+      if (!state.plannerWorkflow) {
+        state.plannerWorkflow = { status: 'setup_areas', currentStepAreaIdx: 0 };
+      }
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active && active.plannerWorkflow) {
+          state.plannerWorkflow = active.plannerWorkflow;
+        }
+      }
+      if (!state.plannerWorkflow.status) {
+        const hasStaged = (state.stagedPlants || []).length > 0;
+        state.plannerWorkflow.status = hasStaged ? 'completed' : 'setup_areas';
+      }
+      if (typeof state.plannerWorkflow.currentStepAreaIdx !== 'number' || isNaN(state.plannerWorkflow.currentStepAreaIdx)) {
+        state.plannerWorkflow.currentStepAreaIdx = 0;
+      }
+      return state.plannerWorkflow;
+    }
+    window.getPlannerWorkflowState = getPlannerWorkflowState;
+
+    function persistPlannerWorkflowState(wf) {
+      if (wf) {
+        state.plannerWorkflow = JSON.parse(JSON.stringify(wf));
+      }
+      localStorage.setItem('dr_planner_workflow', JSON.stringify(state.plannerWorkflow));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.plannerWorkflow = JSON.parse(JSON.stringify(state.plannerWorkflow));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+    window.persistPlannerWorkflowState = persistPlannerWorkflowState;
+
+    function openGardenPlanner(targetAreaIdx = null) {
+      try {
+        state.lastActiveElement = document.activeElement;
+        // Access Control: Anyone except guest
+        const u = state.currentUser;
+        const isGuest = !u || !u.name || (u.username === 'guest');
+        if (isGuest) {
+          openPlannerGuestGatewayModal();
+          return;
+        }
+
+        initGardenAreaProfiles();
+        const wf = getPlannerWorkflowState();
+
+        if (targetAreaIdx !== null && targetAreaIdx >= 0 && targetAreaIdx < state.gardenAreas.length) {
+          state.activePlannerAreaIdx = targetAreaIdx;
+          if (wf.status === 'review_areas') {
+            wf.currentStepAreaIdx = targetAreaIdx;
+            persistPlannerWorkflowState(wf);
+          }
+        } else {
+          if (wf.status === 'review_areas') {
+            const stepIdx = Math.max(0, Math.min(wf.currentStepAreaIdx || 0, state.gardenAreas.length - 1));
+            state.activePlannerAreaIdx = stepIdx;
+          } else {
+            if (state.activePlannerAreaIdx >= state.gardenAreas.length || state.activePlannerAreaIdx < 0) {
+              state.activePlannerAreaIdx = 0;
+            }
+          }
+        }
+
+        renderGardenPlannerUI();
+
+        const modal = document.getElementById('gardenPlannerModal');
+        if (modal) {
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          if (window.lucide) lucide.createIcons();
+
+          modal.scrollTop = 0;
+          const recList = document.getElementById('plannerRecommendationsList');
+          if (recList) recList.scrollTop = 0;
+          const sidebar = document.getElementById('plannerSidebarPane');
+          if (sidebar) sidebar.scrollTop = 0;
+
+          modal.onclose = () => {
+            if (state.lastActiveElement && typeof state.lastActiveElement.focus === 'function') {
+              state.lastActiveElement.focus();
+            }
+          };
+        }
+      } catch (err) {
+        console.error("Error opening garden planner:", err);
+        showToast("Error opening Garden Planner: " + err.message, "danger");
+      }
+    }
+    window.openGardenPlanner = openGardenPlanner;
+
+    function openPlannerGuestGatewayModal() {
+      try {
+        const modal = document.getElementById('plannerGuestModal');
+        if (modal) {
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          if (window.lucide) lucide.createIcons();
+        } else {
+          openLoginModal();
+        }
+      } catch (err) {
+        console.error("Error opening guest gateway modal:", err);
+        openLoginModal();
+      }
+    }
+    window.openPlannerGuestGatewayModal = openPlannerGuestGatewayModal;
+
+    function initGardenAreaProfiles() {
+      if (!state.gardenAreas || state.gardenAreas.length === 0) {
+        state.gardenAreas = ["Area 1: Front Porch", "Area 2: Front Sidewalk/Mailbox", "Area 3: Backyard Shade Garden"];
+      }
+
+      if (!state.gardenAreaProfiles || !Array.isArray(state.gardenAreaProfiles)) {
+        state.gardenAreaProfiles = [];
+      }
+
+      // Ensure every area in state.gardenAreas has a profile
+      state.gardenAreas.forEach((areaName, idx) => {
+        let profile = state.gardenAreaProfiles.find(p => p.name === areaName);
+        if (!profile) {
+          const lower = areaName.toLowerCase();
+          let sun = 'Full Sun';
+          let moist = 'Medium';
+          let layers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
+          let maint = 'Low';
+
+          if (lower.includes('shade') || lower.includes('woodland') || lower.includes('tree')) {
+            sun = 'Full Shade';
+            moist = 'Medium';
+            layers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Understory'];
+          } else if (lower.includes('rain') || lower.includes('bioswale') || lower.includes('wet') || lower.includes('drain')) {
+            sun = 'Full Sun';
+            moist = 'Wet';
+            layers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
+          } else if (lower.includes('sidewalk') || lower.includes('mailbox') || lower.includes('street') || lower.includes('parkway') || lower.includes('hellstrip')) {
+            sun = 'Full Sun';
+            moist = 'Dry';
+            layers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
+            maint = 'Low';
+          }
+
+          profile = {
+            id: 'area-prof-' + idx + '-' + Date.now(),
+            name: areaName,
+            sunlight: sun,
+            moisture: moist,
+            soilTexture: 'Any',
+            maintenance: maint,
+            bloomColors: ['Any'],
+            structuralLayers: layers,
+            notes: '',
+            sqft: ''
+          };
+          state.gardenAreaProfiles.push(profile);
+        }
+      });
+
+      // Filter out stale profiles
+      state.gardenAreaProfiles = state.gardenAreaProfiles.filter(p => state.gardenAreas.includes(p.name));
+      persistGardenAreaProfiles();
+    }
+
+    function persistGardenAreaProfiles() {
+      localStorage.setItem('dr_garden_area_profiles', JSON.stringify(state.gardenAreaProfiles));
+      if (state.activeConsultationId && state.consultations) {
+        const active = state.consultations.find(c => c.id === state.activeConsultationId);
+        if (active) {
+          active.gardenAreaProfiles = JSON.parse(JSON.stringify(state.gardenAreaProfiles));
+          active.lastModified = Date.now();
+          persistConsultations();
+        }
+      }
+    }
+
+    function getActivePlannerProfile() {
+      initGardenAreaProfiles();
+      const areaName = state.gardenAreas[state.activePlannerAreaIdx] || state.gardenAreas[0];
+      let prof = state.gardenAreaProfiles.find(p => p.name === areaName);
+      if (!prof) {
+        prof = state.gardenAreaProfiles[0];
+      }
+      return prof;
+    }
+
+    function renderGardenPlannerUI() {
+      initGardenAreaProfiles();
+      const wf = getPlannerWorkflowState();
+      const wizardView = document.getElementById('plannerSetupWizardView');
+      const mainLayout = document.getElementById('plannerMainLayout');
+
+      // Update Header Badges
+      const consultBadge = document.getElementById('plannerActiveConsultationName');
+      if (consultBadge) {
+        const clientName = state.clientMeta?.name?.trim();
+        consultBadge.textContent = clientName ? `Client: ${clientName}` : 'Active Consultation';
+      }
+
+      updatePlannerStagedBadges();
+
+      if (wf.status === 'setup_areas') {
+        if (wizardView) wizardView.style.display = 'flex';
+        if (mainLayout) mainLayout.style.display = 'none';
+        renderPlannerSetupWizard();
+      } else {
+        if (wizardView) wizardView.style.display = 'none';
+        if (mainLayout) mainLayout.style.display = 'grid';
+        renderPlannerAreasRoster();
+        const activeProf = getActivePlannerProfile();
+        renderPlannerConditionsForm(activeProf);
+        renderAreaRecommendations();
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+    window.renderGardenPlannerUI = renderGardenPlannerUI;
+
+    function renderPlannerSetupWizard() {
+      const areasListEl = document.getElementById('plannerWizardAreasList');
+      const conditionsPane = document.getElementById('plannerWizardConditionsPane');
+      const countBadge = document.getElementById('plannerWizardAreaCountBadge');
+      if (!areasListEl || !conditionsPane) return;
+
+      if (countBadge) {
+        countBadge.textContent = `${state.gardenAreas.length} Area${state.gardenAreas.length === 1 ? '' : 's'} Configured`;
+      }
+
+      if (state.activePlannerAreaIdx >= state.gardenAreas.length || state.activePlannerAreaIdx < 0) {
+        state.activePlannerAreaIdx = 0;
+      }
+
+      // 1. Populate Areas List on Left
+      areasListEl.innerHTML = '';
+      state.gardenAreas.forEach((areaName, idx) => {
+        const prof = state.gardenAreaProfiles.find(p => p.name === areaName) || {};
+        const isActive = idx === state.activePlannerAreaIdx;
+
+        const item = document.createElement('div');
+        item.className = `planner-wizard-area-card ${isActive ? 'active' : ''}`;
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        item.setAttribute('aria-label', `${areaName}, ${prof.sunlight || 'Sun'}, ${prof.moisture || 'Moist'}${isActive ? ', active area' : ''}`);
+
+        item.innerHTML = `
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:0.88rem;font-weight:${isActive ? '800' : '600'};color:var(--text-main);line-height:1.25;overflow-wrap:break-word;">
+              ${escapeHtml(areaName)}
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;">
+              <span>☀️ ${escapeHtml(prof.sunlight || 'Sun')}</span> &bull; <span>💧 ${escapeHtml(prof.moisture || 'Moist')}</span>
+            </div>
+          </div>
+          ${state.gardenAreas.length > 1 ? `
+            <button type="button" class="btn-icon planner-wizard-del-btn" style="color:var(--danger);min-width:1.75rem;min-height:1.75rem;width:1.75rem;height:1.75rem;padding:4px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);flex-shrink:0;" title="Remove this area" aria-label="Remove ${escapeHtml(areaName)}">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
+          ` : ''}
+        `;
+
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.planner-wizard-del-btn')) return;
+          if (state.activePlannerAreaIdx !== idx) {
+            state.activePlannerAreaIdx = idx;
+            renderPlannerSetupWizard();
+          }
+        });
+
+        item.addEventListener('keydown', (e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.planner-wizard-del-btn')) {
+            e.preventDefault();
+            if (state.activePlannerAreaIdx !== idx) {
+              state.activePlannerAreaIdx = idx;
+              renderPlannerSetupWizard();
+            }
+          }
+        });
+
+        item.querySelector('.planner-wizard-del-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Remove "${areaName}"?`)) {
+            state.gardenAreas.splice(idx, 1);
+            state.gardenAreaProfiles = state.gardenAreaProfiles.filter(p => p.name !== areaName);
+            if (state.activePlannerAreaIdx >= state.gardenAreas.length) {
+              state.activePlannerAreaIdx = Math.max(0, state.gardenAreas.length - 1);
+            }
+            persistGardenAreas();
+            persistGardenAreaProfiles();
+            renderPlannerSetupWizard();
+          }
+        });
+
+        areasListEl.appendChild(item);
+      });
+
+      const activeWizardCard = areasListEl.querySelector('.planner-wizard-area-card.active');
+      if (activeWizardCard && typeof activeWizardCard.scrollIntoView === 'function') {
+        try { activeWizardCard.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
+      }
+
+      // 2. Populate Selected Area Conditions on Right
+      const profile = getActivePlannerProfile();
+      if (!profile) return;
+
+      conditionsPane.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--border-subtle);padding-bottom:12px;flex-wrap:wrap;">
+          <div>
+            <h5 style="font-size:1.1rem;font-weight:800;margin:0;color:var(--text-main);">
+              Zone ${state.activePlannerAreaIdx + 1} Characteristics: ${escapeHtml(profile.name)}
+            </h5>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;">
+              Specify light exposure, soil moisture, maintenance, and structural matrix layers for this zone.
+            </p>
+          </div>
+          <span class="badge" style="background:var(--primary-light);color:var(--primary);font-weight:800;font-size:0.75rem;border:1px solid var(--primary-border);">
+            Zone ${state.activePlannerAreaIdx + 1} of ${state.gardenAreas.length}
+          </span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;max-width:680px;">
+          <!-- Area Name -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="wizardAreaNameInput" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:4px;color:var(--text-main);">
+              Area Name / Zone Identifier
+            </label>
+            <input type="text" id="wizardAreaNameInput" value="${escapeHtml(profile.name)}" placeholder="e.g. Area 1: Front Porch & Walkway" style="font-size:0.88rem;min-height:38px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-main);width:100%;box-sizing:border-box;">
+          </div>
+
+          <!-- Sunlight -->
+          <div>
+            <label style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+              <i data-lucide="sun" style="width:13px;height:13px;color:#d97706;vertical-align:-1px;"></i>
+              Sunlight Exposure
+            </label>
+            <div class="planner-chips-grid" id="wizardSunChips" role="group">
+              <button type="button" class="planner-chip ${profile.sunlight === 'Full Sun' ? 'active' : ''}" data-val="Full Sun">☀️ Full Sun (6+ hrs)</button>
+              <button type="button" class="planner-chip ${profile.sunlight === 'Part Sun / Part Shade' ? 'active' : ''}" data-val="Part Sun / Part Shade">⛅ Part Sun / Shade</button>
+              <button type="button" class="planner-chip ${profile.sunlight === 'Full Shade' ? 'active' : ''}" data-val="Full Shade">🌲 Full Shade (&lt;3 hrs)</button>
+              <button type="button" class="planner-chip ${profile.sunlight === 'Any' ? 'active' : ''}" data-val="Any">🔄 Any Sunlight</button>
+            </div>
+          </div>
+
+          <!-- Moisture -->
+          <div>
+            <label style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+              <i data-lucide="droplets" style="width:13px;height:13px;color:#0284c7;vertical-align:-1px;"></i>
+              Soil Moisture &amp; Drainage
+            </label>
+            <div class="planner-chips-grid" id="wizardMoistChips" role="group">
+              <button type="button" class="planner-chip ${profile.moisture === 'Dry' ? 'active' : ''}" data-val="Dry">🏜️ Dry (Xeric / Fast)</button>
+              <button type="button" class="planner-chip ${profile.moisture === 'Medium' ? 'active' : ''}" data-val="Medium">💧 Medium (Mesic / Avg)</button>
+              <button type="button" class="planner-chip ${profile.moisture === 'Wet' ? 'active' : ''}" data-val="Wet">🌊 Wet (Rain Garden / Moist)</button>
+              <button type="button" class="planner-chip ${profile.moisture === 'Any' ? 'active' : ''}" data-val="Any">🔄 Any Moisture</button>
+            </div>
+          </div>
+
+          <!-- Soil Texture -->
+          <div>
+            <label for="wizardSoilTextureSelect" style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+              <i data-lucide="layers" style="width:13px;height:13px;color:#b45309;vertical-align:-1px;"></i>
+              Soil Texture
+            </label>
+            <select id="wizardSoilTextureSelect" style="width:100%;font-size:0.85rem;min-height:38px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-main);">
+              <option value="Any" ${profile.soilTexture === 'Any' ? 'selected' : ''}>Any / Typical Garden Soil</option>
+              <option value="Clay" ${profile.soilTexture === 'Clay' ? 'selected' : ''}>Heavy Clay (Slow drainage)</option>
+              <option value="Loam" ${profile.soilTexture === 'Loam' ? 'selected' : ''}>Rich Loam (Fertile &amp; Organic)</option>
+              <option value="Sandy" ${profile.soilTexture === 'Sandy' ? 'selected' : ''}>Sandy / Gravelly (Fast draining)</option>
+              <option value="Rocky" ${profile.soilTexture === 'Rocky' ? 'selected' : ''}>Rocky / Limestone Glade</option>
+            </select>
+          </div>
+
+          <!-- Maintenance Level -->
+          <div>
+            <label style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+              <i data-lucide="wrench" style="width:13px;height:13px;color:var(--primary);vertical-align:-1px;"></i>
+              Maintenance Level Desired
+            </label>
+            <div class="planner-chips-grid" id="wizardMaintChips" role="group">
+              <button type="button" class="planner-chip ${profile.maintenance === 'Low' ? 'active' : ''}" data-val="Low">🟢 Low (Tough &amp; Self-reliant)</button>
+              <button type="button" class="planner-chip ${profile.maintenance === 'Medium' ? 'active' : ''}" data-val="Medium">🟡 Medium (Occasional care)</button>
+              <button type="button" class="planner-chip ${profile.maintenance === 'Any' ? 'active' : ''}" data-val="Any">🔄 Any Maintenance</button>
+            </div>
+          </div>
+
+          <!-- Bloom Color Preferences -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <label style="font-size:0.82rem;font-weight:700;margin:0;color:var(--text-main);">
+                <i data-lucide="palette" style="width:13px;height:13px;color:#ec4899;vertical-align:-1px;"></i>
+                Bloom Color Preferences
+              </label>
+              <button type="button" id="wizardResetColorsBtn" style="background:transparent;border:none;color:var(--primary);font-size:0.78rem;cursor:pointer;font-weight:700;min-height:28px;">Reset to Any</button>
+            </div>
+            <div class="planner-color-chips" id="wizardColorChips" role="group">
+              ${['Any', 'Yellow', 'Purple', 'White', 'Pink', 'Red', 'Orange'].map(col => {
+                const isActive = (profile.bloomColors || ['Any']).includes(col);
+                const dotColor = col === 'Yellow' ? '#eab308' : (col === 'Purple' ? '#a855f7' : (col === 'White' ? '#ffffff' : (col === 'Pink' ? '#ec4899' : (col === 'Red' ? '#ef4444' : (col === 'Orange' ? '#f97316' : '')))));
+                return `
+                  <button type="button" class="planner-color-chip ${isActive ? 'active' : ''}" data-val="${col}">
+                    ${dotColor ? `<span class="color-dot" style="background:${dotColor};${col === 'White' ? 'border:1px solid #cbd5e1;' : ''}"></span>` : ''}
+                    ${col === 'Purple' ? 'Purple / Blue' : (col === 'Any' ? 'Any Color' : col)}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Structural Layers Needed -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <label style="font-size:0.82rem;font-weight:700;margin:0;color:var(--text-main);">
+                <i data-lucide="layers" style="width:13px;height:13px;color:var(--primary);vertical-align:-1px;"></i>
+                Structural Layers Needed (Ecological Matrix)
+              </label>
+              <button type="button" id="wizardSelectAllLayersBtn" style="background:transparent;border:none;color:var(--primary);font-size:0.78rem;cursor:pointer;font-weight:700;min-height:28px;">All Layers</button>
+            </div>
+            <div class="planner-layer-checkboxes" id="wizardLayerCheckboxes" role="group">
+              ${[
+                { key: 'Groundcover', label: 'Groundcover / Living Matrix', desc: 'Sedges, creeping forbs <1.5 ft' },
+                { key: 'Seasonal/Herbaceous Layer', label: 'Seasonal & Mid-Layer Blooms', desc: 'Wildflowers 1.5–3.5 ft' },
+                { key: 'Structural Layer', label: 'Structural Perennials & Grasses', desc: 'Backbone 3–6 ft' },
+                { key: 'Understory', label: 'Understory Trees & Large Shrubs', desc: 'Mid-story <25 ft' },
+                { key: 'Canopy', label: 'Canopy / Shade Trees', desc: 'Overstory trees >25 ft' },
+                { key: 'Vine', label: 'Native Climbers & Vines', desc: 'Vertical trellis & wall habitat' }
+              ].map(l => {
+                const isChecked = (profile.structuralLayers || []).includes(l.key);
+                return `
+                  <label class="planner-checkbox-label">
+                    <input type="checkbox" data-layer="${l.key}" ${isChecked ? 'checked' : ''}>
+                    <span><strong>${escapeHtml(l.label)}</strong> (${escapeHtml(l.desc)})</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Area Notes -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="wizardAreaNotesInput" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:4px;color:var(--text-main);">
+              Area Notes &amp; Ecological Strategy
+            </label>
+            <textarea id="wizardAreaNotesInput" rows="2" placeholder="e.g. Near street, receives roof runoff, needs winter interest..." style="font-size:0.85rem;min-height:48px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-main);line-height:1.4;width:100%;box-sizing:border-box;">${escapeHtml(profile.notes || '')}</textarea>
+          </div>
+        </div>
+      `;
+
+      // Wire interactive controls inside the wizard right pane:
+      const nameInput = document.getElementById('wizardAreaNameInput');
+      if (nameInput) {
+        nameInput.onchange = (e) => {
+          const newName = (e.target.value || '').trim() || `Area ${state.activePlannerAreaIdx + 1}`;
+          const oldName = profile.name;
+          if (newName !== oldName) {
+            profile.name = newName;
+            state.gardenAreas[state.activePlannerAreaIdx] = newName;
+            (state.stagedPlants || []).forEach(p => {
+              if (p.target_area === oldName) p.target_area = newName;
+            });
+            persistGardenAreas();
+            persistGardenAreaProfiles();
+            saveStaging();
+            renderPlannerSetupWizard();
+          }
+        };
+      }
+
+      // Sunlight
+      document.querySelectorAll('#wizardSunChips .planner-chip').forEach(btn => {
+        btn.onclick = () => {
+          profile.sunlight = btn.getAttribute('data-val');
+          persistGardenAreaProfiles();
+          renderPlannerSetupWizard();
+        };
+      });
+
+      // Moisture
+      document.querySelectorAll('#wizardMoistChips .planner-chip').forEach(btn => {
+        btn.onclick = () => {
+          profile.moisture = btn.getAttribute('data-val');
+          persistGardenAreaProfiles();
+          renderPlannerSetupWizard();
+        };
+      });
+
+      // Soil
+      const soilSel = document.getElementById('wizardSoilTextureSelect');
+      if (soilSel) {
+        soilSel.onchange = (e) => {
+          profile.soilTexture = e.target.value;
+          persistGardenAreaProfiles();
+        };
+      }
+
+      // Maintenance
+      document.querySelectorAll('#wizardMaintChips .planner-chip').forEach(btn => {
+        btn.onclick = () => {
+          profile.maintenance = btn.getAttribute('data-val');
+          persistGardenAreaProfiles();
+          renderPlannerSetupWizard();
+        };
+      });
+
+      // Color chips
+      document.querySelectorAll('#wizardColorChips .planner-color-chip').forEach(btn => {
+        btn.onclick = () => {
+          const val = btn.getAttribute('data-val');
+          const cur = profile.bloomColors || ['Any'];
+          if (val === 'Any') {
+            profile.bloomColors = ['Any'];
+          } else {
+            let next = cur.filter(c => c !== 'Any');
+            if (next.includes(val)) {
+              next = next.filter(c => c !== val);
+            } else {
+              next.push(val);
+            }
+            profile.bloomColors = next.length > 0 ? next : ['Any'];
+          }
+          persistGardenAreaProfiles();
+          renderPlannerSetupWizard();
+        };
+      });
+
+      document.getElementById('wizardResetColorsBtn')?.addEventListener('click', () => {
+        profile.bloomColors = ['Any'];
+        persistGardenAreaProfiles();
+        renderPlannerSetupWizard();
+      });
+
+      // Layers
+      document.querySelectorAll('#wizardLayerCheckboxes input[type="checkbox"]').forEach(box => {
+        box.onchange = (e) => {
+          const lKey = box.getAttribute('data-layer');
+          let cur = profile.structuralLayers || ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
+          if (e.target.checked) {
+            if (!cur.includes(lKey)) cur.push(lKey);
+          } else {
+            cur = cur.filter(l => l !== lKey);
+          }
+          profile.structuralLayers = cur;
+          persistGardenAreaProfiles();
+        };
+      });
+
+      document.getElementById('wizardSelectAllLayersBtn')?.addEventListener('click', () => {
+        profile.structuralLayers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer', 'Understory', 'Canopy', 'Vine'];
+        persistGardenAreaProfiles();
+        renderPlannerSetupWizard();
+      });
+
+      // Notes
+      const notesEl = document.getElementById('wizardAreaNotesInput');
+      if (notesEl) {
+        notesEl.oninput = (e) => {
+          profile.notes = e.target.value;
+          persistGardenAreaProfiles();
+        };
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+    window.renderPlannerSetupWizard = renderPlannerSetupWizard;
+
+    function openAreaConditionsModal(areaIdx) {
+      if (typeof areaIdx !== 'number' || areaIdx < 0 || areaIdx >= state.gardenAreas.length) {
+        areaIdx = state.activePlannerAreaIdx || 0;
+      }
+      initGardenAreaProfiles();
+      const targetAreaName = state.gardenAreas[areaIdx];
+      const prof = state.gardenAreaProfiles.find(p => p.name === targetAreaName) || state.gardenAreaProfiles[areaIdx] || {};
+
+      const modalTitle = document.getElementById('plannerAreaConditionsModalTitle');
+      if (modalTitle) {
+        modalTitle.textContent = `Edit Conditions: ${prof.name || targetAreaName}`;
+      }
+
+      const bodyEl = document.getElementById('plannerAreaConditionsModalBody');
+      if (!bodyEl) return;
+
+      // Draft state for modal
+      let draftSun = prof.sunlight || 'Full Sun';
+      let draftMoist = prof.moisture || 'Medium';
+      let draftTexture = prof.soilTexture || 'Any';
+      let draftMaint = prof.maintenance || 'Low';
+      let draftColors = Array.isArray(prof.bloomColors) ? [...prof.bloomColors] : ['Any'];
+      let draftLayers = Array.isArray(prof.structuralLayers) ? [...prof.structuralLayers] : ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
+      let draftNotes = prof.notes || '';
+
+      bodyEl.innerHTML = `
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="modalAreaNameInput" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:4px;color:var(--text-main);">
+            Area Name / Zone Identifier
+          </label>
+          <input type="text" id="modalAreaNameInput" value="${escapeHtml(prof.name || targetAreaName)}" placeholder="e.g. Area 1: Front Porch & Walkway" style="font-size:0.88rem;min-height:38px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);width:100%;box-sizing:border-box;">
+        </div>
+
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+            <i data-lucide="sun" style="width:13px;height:13px;color:#d97706;vertical-align:-1px;"></i>
+            Sunlight Exposure
+          </label>
+          <div class="planner-chips-grid" id="modalSunChips" role="group">
+            <button type="button" class="planner-chip ${draftSun === 'Full Sun' ? 'active' : ''}" data-val="Full Sun">☀️ Full Sun (6+ hrs)</button>
+            <button type="button" class="planner-chip ${draftSun === 'Part Sun / Part Shade' ? 'active' : ''}" data-val="Part Sun / Part Shade">⛅ Part Sun / Shade</button>
+            <button type="button" class="planner-chip ${draftSun === 'Full Shade' ? 'active' : ''}" data-val="Full Shade">🌲 Full Shade (&lt;3 hrs)</button>
+            <button type="button" class="planner-chip ${draftSun === 'Any' ? 'active' : ''}" data-val="Any">🔄 Any Sunlight</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+            <i data-lucide="droplets" style="width:13px;height:13px;color:#0284c7;vertical-align:-1px;"></i>
+            Soil Moisture &amp; Drainage
+          </label>
+          <div class="planner-chips-grid" id="modalMoistChips" role="group">
+            <button type="button" class="planner-chip ${draftMoist === 'Dry' ? 'active' : ''}" data-val="Dry">🏜️ Dry (Xeric / Fast)</button>
+            <button type="button" class="planner-chip ${draftMoist === 'Medium' ? 'active' : ''}" data-val="Medium">💧 Medium (Mesic / Avg)</button>
+            <button type="button" class="planner-chip ${draftMoist === 'Wet' ? 'active' : ''}" data-val="Wet">🌊 Wet (Rain Garden / Moist)</button>
+            <button type="button" class="planner-chip ${draftMoist === 'Any' ? 'active' : ''}" data-val="Any">🔄 Any Moisture</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="modalSoilTextureSelect" style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+            <i data-lucide="layers" style="width:13px;height:13px;color:#b45309;vertical-align:-1px;"></i>
+            Soil Texture
+          </label>
+          <select id="modalSoilTextureSelect" style="width:100%;font-size:0.85rem;min-height:38px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);">
+            <option value="Any" ${draftTexture === 'Any' ? 'selected' : ''}>Any / Typical Garden Soil</option>
+            <option value="Clay" ${draftTexture === 'Clay' ? 'selected' : ''}>Heavy Clay (Slow drainage)</option>
+            <option value="Loam" ${draftTexture === 'Loam' ? 'selected' : ''}>Rich Loam (Fertile &amp; Organic)</option>
+            <option value="Sandy" ${draftTexture === 'Sandy' ? 'selected' : ''}>Sandy / Gravelly (Fast draining)</option>
+            <option value="Rocky" ${draftTexture === 'Rocky' ? 'selected' : ''}>Rocky / Limestone Glade</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;margin-bottom:6px;display:block;color:var(--text-main);">
+            <i data-lucide="wrench" style="width:13px;height:13px;color:var(--primary);vertical-align:-1px;"></i>
+            Maintenance Level Desired
+          </label>
+          <div class="planner-chips-grid" id="modalMaintChips" role="group">
+            <button type="button" class="planner-chip ${draftMaint === 'Low' ? 'active' : ''}" data-val="Low">🟢 Low (Tough &amp; Self-reliant)</button>
+            <button type="button" class="planner-chip ${draftMaint === 'Medium' ? 'active' : ''}" data-val="Medium">🟡 Medium (Occasional care)</button>
+            <button type="button" class="planner-chip ${draftMaint === 'Any' ? 'active' : ''}" data-val="Any">🔄 Any Maintenance</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <label style="font-size:0.82rem;font-weight:700;margin:0;color:var(--text-main);">
+              <i data-lucide="palette" style="width:13px;height:13px;color:#ec4899;vertical-align:-1px;"></i>
+              Bloom Color Preferences
+            </label>
+            <button type="button" id="modalResetColorsBtn" style="background:transparent;border:none;color:var(--primary);font-size:0.78rem;cursor:pointer;font-weight:700;">Reset to Any</button>
+          </div>
+          <div class="planner-color-chips" id="modalColorChips" role="group">
+            ${['Any', 'Yellow', 'Purple', 'White', 'Pink', 'Red', 'Orange'].map(col => {
+              const isActive = draftColors.includes(col);
+              const dotColor = col === 'Yellow' ? '#eab308' : (col === 'Purple' ? '#a855f7' : (col === 'White' ? '#ffffff' : (col === 'Pink' ? '#ec4899' : (col === 'Red' ? '#ef4444' : (col === 'Orange' ? '#f97316' : '')))));
+              return `
+                <button type="button" class="planner-color-chip ${isActive ? 'active' : ''}" data-val="${col}">
+                  ${dotColor ? `<span class="color-dot" style="background:${dotColor};${col === 'White' ? 'border:1px solid #cbd5e1;' : ''}"></span>` : ''}
+                  ${col === 'Purple' ? 'Purple / Blue' : (col === 'Any' ? 'Any Color' : col)}
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <label style="font-size:0.82rem;font-weight:700;margin:0;color:var(--text-main);">
+              <i data-lucide="layers" style="width:13px;height:13px;color:var(--primary);vertical-align:-1px;"></i>
+              Structural Layers Needed (Ecological Matrix)
+            </label>
+            <button type="button" id="modalSelectAllLayersBtn" style="background:transparent;border:none;color:var(--primary);font-size:0.78rem;cursor:pointer;font-weight:700;">All Layers</button>
+          </div>
+          <div class="planner-layer-checkboxes" id="modalLayerCheckboxes" role="group">
+            ${[
+              { key: 'Groundcover', label: 'Groundcover / Living Matrix', desc: 'Sedges, creeping forbs <1.5 ft' },
+              { key: 'Seasonal/Herbaceous Layer', label: 'Seasonal & Mid-Layer Blooms', desc: 'Wildflowers 1.5–3.5 ft' },
+              { key: 'Structural Layer', label: 'Structural Perennials & Grasses', desc: 'Backbone 3–6 ft' },
+              { key: 'Understory', label: 'Understory Trees & Large Shrubs', desc: 'Mid-story <25 ft' },
+              { key: 'Canopy', label: 'Canopy / Shade Trees', desc: 'Overstory trees >25 ft' },
+              { key: 'Vine', label: 'Native Climbers & Vines', desc: 'Vertical trellis & wall habitat' }
+            ].map(l => {
+              const isChecked = draftLayers.includes(l.key);
+              return `
+                <label class="planner-checkbox-label">
+                  <input type="checkbox" data-layer="${l.key}" ${isChecked ? 'checked' : ''}>
+                  <span><strong>${escapeHtml(l.label)}</strong> (${escapeHtml(l.desc)})</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="modalAreaNotesInput" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:4px;color:var(--text-main);">
+            Area Notes &amp; Ecological Strategy
+          </label>
+          <textarea id="modalAreaNotesInput" rows="2" placeholder="e.g. Near street, receives roof runoff, needs winter interest..." style="font-size:0.85rem;min-height:48px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);line-height:1.4;width:100%;box-sizing:border-box;">${escapeHtml(draftNotes)}</textarea>
+        </div>
+      `;
+
+      // Wire interactive chips in modal:
+      bodyEl.querySelectorAll('#modalSunChips .planner-chip').forEach(btn => {
+        btn.onclick = () => {
+          draftSun = btn.getAttribute('data-val');
+          bodyEl.querySelectorAll('#modalSunChips .planner-chip').forEach(b => b.classList.toggle('active', b === btn));
+        };
+      });
+
+      bodyEl.querySelectorAll('#modalMoistChips .planner-chip').forEach(btn => {
+        btn.onclick = () => {
+          draftMoist = btn.getAttribute('data-val');
+          bodyEl.querySelectorAll('#modalMoistChips .planner-chip').forEach(b => b.classList.toggle('active', b === btn));
+        };
+      });
+
+      bodyEl.querySelectorAll('#modalMaintChips .planner-chip').forEach(btn => {
+        btn.onclick = () => {
+          draftMaint = btn.getAttribute('data-val');
+          bodyEl.querySelectorAll('#modalMaintChips .planner-chip').forEach(b => b.classList.toggle('active', b === btn));
+        };
+      });
+
+      bodyEl.querySelectorAll('#modalColorChips .planner-color-chip').forEach(btn => {
+        btn.onclick = () => {
+          const val = btn.getAttribute('data-val');
+          if (val === 'Any') {
+            draftColors = ['Any'];
+          } else {
+            let next = draftColors.filter(c => c !== 'Any');
+            if (next.includes(val)) {
+              next = next.filter(c => c !== val);
+            } else {
+              next.push(val);
+            }
+            draftColors = next.length > 0 ? next : ['Any'];
+          }
+          bodyEl.querySelectorAll('#modalColorChips .planner-color-chip').forEach(b => {
+            b.classList.toggle('active', draftColors.includes(b.getAttribute('data-val')));
+          });
+        };
+      });
+
+      document.getElementById('modalResetColorsBtn')?.addEventListener('click', () => {
+        draftColors = ['Any'];
+        bodyEl.querySelectorAll('#modalColorChips .planner-color-chip').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-val') === 'Any');
+        });
+      });
+
+      bodyEl.querySelectorAll('#modalLayerCheckboxes input[type="checkbox"]').forEach(box => {
+        box.onchange = (e) => {
+          const lKey = box.getAttribute('data-layer');
+          if (e.target.checked) {
+            if (!draftLayers.includes(lKey)) draftLayers.push(lKey);
+          } else {
+            draftLayers = draftLayers.filter(l => l !== lKey);
+          }
+        };
+      });
+
+      document.getElementById('modalSelectAllLayersBtn')?.addEventListener('click', () => {
+        draftLayers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer', 'Understory', 'Canopy', 'Vine'];
+        bodyEl.querySelectorAll('#modalLayerCheckboxes input[type="checkbox"]').forEach(box => {
+          box.checked = true;
+        });
+      });
+
+      // Delete area option
+      const delWrap = document.getElementById('plannerAreaModalDeleteWrap');
+      if (delWrap) {
+        if (state.gardenAreas.length > 1) {
+          delWrap.innerHTML = `
+            <button type="button" class="btn-text-action" style="color:var(--danger);font-size:0.8rem;font-weight:700;">
+              Delete Area
+            </button>
+          `;
+          delWrap.querySelector('button')?.addEventListener('click', () => {
+            const removingName = prof.name;
+            if (confirm(`Remove "${removingName}"? Staged plants will be reassigned to the first remaining area.`)) {
+              state.gardenAreas.splice(areaIdx, 1);
+              state.gardenAreaProfiles = state.gardenAreaProfiles.filter(p => p.name !== removingName);
+              const fallbackArea = state.gardenAreas[0];
+              (state.stagedPlants || []).forEach(p => {
+                if (p.target_area === removingName) p.target_area = fallbackArea;
+              });
+              state.activePlannerAreaIdx = 0;
+              saveStaging();
+              persistGardenAreas();
+              persistGardenAreaProfiles();
+              document.getElementById('plannerAreaConditionsModal')?.close();
+              renderGardenAreasManager();
+              renderGardenPlannerUI();
+              showToast(`Removed "${removingName}".`);
+            }
+          });
+        } else {
+          delWrap.innerHTML = '';
+        }
+      }
+
+      // Save button
+      const saveBtn = document.getElementById('plannerAreaModalSaveBtn');
+      if (saveBtn) {
+        saveBtn.onclick = () => {
+          const nameInput = document.getElementById('modalAreaNameInput');
+          const newName = (nameInput ? nameInput.value : '').trim() || prof.name;
+          const oldName = prof.name;
+
+          if (newName !== oldName) {
+            prof.name = newName;
+            state.gardenAreas[areaIdx] = newName;
+            (state.stagedPlants || []).forEach(p => {
+              if (p.target_area === oldName) p.target_area = newName;
+            });
+            saveStaging();
+            persistGardenAreas();
+          }
+
+          prof.sunlight = draftSun;
+          prof.moisture = draftMoist;
+          const soilSel = document.getElementById('modalSoilTextureSelect');
+          if (soilSel) prof.soilTexture = soilSel.value;
+          prof.maintenance = draftMaint;
+          prof.bloomColors = draftColors;
+          prof.structuralLayers = draftLayers;
+          const notesEl = document.getElementById('modalAreaNotesInput');
+          if (notesEl) prof.notes = notesEl.value;
+
+          persistGardenAreaProfiles();
+          document.getElementById('plannerAreaConditionsModal')?.close();
+          renderGardenAreasManager();
+          renderGardenPlannerUI();
+          showToast(`Saved conditions for ${prof.name}!`, 'success');
+        };
+      }
+
+      const modal = document.getElementById('plannerAreaConditionsModal');
+      if (modal) {
+        if (typeof modal.showModal === 'function') {
+          modal.showModal();
+        } else {
+          modal.setAttribute('open', '');
+        }
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+    window.openAreaConditionsModal = openAreaConditionsModal;
+
+    function updatePlannerStagedBadges() {
+      const activeProf = getActivePlannerProfile();
+      const currentAreaName = activeProf ? activeProf.name : '';
+      const stagedList = state.stagedPlants || [];
+      const totalStaged = stagedList.length;
+      const currentAreaStaged = stagedList.filter(p => (p.target_area || state.gardenAreas[0]) === currentAreaName).length;
+
+      const badgeHeader = document.getElementById('plannerStagedCountBadge');
+      if (badgeHeader) badgeHeader.textContent = totalStaged;
+
+      const badgeFooterArea = document.getElementById('plannerCurrentAreaStagedCount');
+      if (badgeFooterArea) badgeFooterArea.textContent = currentAreaStaged;
+
+      const badgeFooterTotal = document.getElementById('plannerTotalStagedCount');
+      if (badgeFooterTotal) badgeFooterTotal.textContent = totalStaged;
+    }
+
+    function renderPlannerAreasRoster() {
+      const roster = document.getElementById('plannerAreasRoster');
+      const countEl = document.getElementById('plannerAreasCount');
+      if (!roster) return;
+
+      const wf = getPlannerWorkflowState();
+      countEl.textContent = state.gardenAreas.length;
+      roster.innerHTML = '';
+
+      const restartBtn = document.getElementById('plannerRestartWizardBtn');
+      if (restartBtn) {
+        restartBtn.style.display = wf.status === 'completed' ? 'inline-block' : 'none';
+      }
+
+      state.gardenAreas.forEach((areaName, idx) => {
+        const prof = state.gardenAreaProfiles.find(p => p.name === areaName) || {};
+        const plantCount = (state.stagedPlants || []).filter(p => (p.target_area || state.gardenAreas[0]) === areaName).length;
+        const isActive = idx === state.activePlannerAreaIdx;
+
+        const card = document.createElement('div');
+        card.className = `planner-area-card ${isActive ? 'active' : ''}`;
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        card.setAttribute('aria-label', `${areaName}, ${prof.sunlight || 'Sun'}, ${prof.moisture || 'Moist'}, ${plantCount} plants staged${isActive ? ', active area' : ''}`);
+
+        let stepIcon = 'map-pin';
+        if (wf.status === 'review_areas') {
+          if (idx < wf.currentStepAreaIdx) stepIcon = 'check-circle-2';
+          else if (idx === wf.currentStepAreaIdx) stepIcon = 'play-circle';
+          else stepIcon = 'circle';
+        }
+
+        card.innerHTML = `
+          <div class="planner-area-card-main" style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer;">
+            <div style="width:28px;height:28px;border-radius:var(--radius-sm);background:${isActive ? 'var(--primary)' : 'var(--bg-surface-elevated)'};color:${isActive ? '#fff' : 'var(--text-muted)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="${stepIcon}" style="width:14px;height:14px;"></i>
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:0.86rem;font-weight:${isActive ? '800' : '600'};color:var(--text-main);overflow-wrap:break-word;line-height:1.25;">
+                ${escapeHtml(areaName)}
+              </div>
+              <div style="font-size:0.74rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-top:2px;flex-wrap:wrap;">
+                <span>${escapeHtml(prof.sunlight || 'Sun')}</span> &bull; <span>${escapeHtml(prof.moisture || 'Moist')}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <button type="button" class="btn btn-secondary btn-xs planner-area-edit-btn" data-idx="${idx}" style="font-size:0.74rem;min-height:28px;padding:3px 8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Edit conditions for ${escapeHtml(areaName)}" aria-label="Edit conditions for ${escapeHtml(areaName)}">
+              <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+              <span>Edit</span>
+            </button>
+            ${plantCount > 0 ? `
+              <span class="badge" style="background:${isActive ? 'var(--primary)' : 'var(--primary-light)'};color:${isActive ? '#fff' : 'var(--primary)'};font-size:0.74rem;font-weight:800;padding:2px 7px;border-radius:12px;" title="${plantCount} plants staged in consultation">
+                ${plantCount}
+              </span>
+            ` : ''}
+          </div>
+        `;
+
+        // Card click / selection
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.planner-area-edit-btn')) return;
+          if (state.activePlannerAreaIdx !== idx) {
+            state.activePlannerAreaIdx = idx;
+            if (wf.status === 'review_areas') {
+              wf.currentStepAreaIdx = idx;
+              persistPlannerWorkflowState(wf);
+            }
+            renderGardenPlannerUI();
+          }
+        });
+
+        // Keyboard navigation
+        card.addEventListener('keydown', (e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.planner-area-edit-btn')) {
+            e.preventDefault();
+            if (state.activePlannerAreaIdx !== idx) {
+              state.activePlannerAreaIdx = idx;
+              if (wf.status === 'review_areas') {
+                wf.currentStepAreaIdx = idx;
+                persistPlannerWorkflowState(wf);
+              }
+              renderGardenPlannerUI();
+            }
+          }
+        });
+
+        // Edit button click -> opens conditions modal
+        card.querySelector('.planner-area-edit-btn')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          openAreaConditionsModal(idx);
+        });
+
+        roster.appendChild(card);
+      });
+
+      const activeAreaCard = roster.querySelector('.planner-area-card.active');
+      if (activeAreaCard && typeof activeAreaCard.scrollIntoView === 'function') {
+        try { activeAreaCard.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderPlannerConditionsForm(profile) {
+      if (!profile) return;
+      // All conditions are managed via Area Conditions Modal or Setup Wizard.
+      // Guarded against legacy callers if sidebar inputs are absent.
+      const nameInput = document.getElementById('plannerAreaNameInput');
+      if (nameInput) nameInput.value = profile.name || '';
+    }
+
+    // Calculate weighted match percentage with +10% margin for qualifying KC Sweet 16 species
+    const SWEET_16_MATCH_MARGIN_PCT = 10;
+
+    function getRecommendationWeightedMatchPct(rec) {
+      if (!rec) return 0;
+      const baseMatchPct = typeof rec.matchPct === 'number'
+        ? rec.matchPct
+        : Math.min(100, Math.round(((rec.score || 0) / 135) * 100));
+      const plantIsSweet16 = Boolean(rec.isSweet16 !== undefined ? rec.isSweet16 : (rec.plant && isSweet16(rec.plant)));
+      const qualifies = rec.matchesCriteria !== false;
+      return baseMatchPct + ((plantIsSweet16 && qualifies) ? SWEET_16_MATCH_MARGIN_PCT : 0);
+    }
+
+    function comparePlannerRecommendations(a, b) {
+      const aWeightedPct = getRecommendationWeightedMatchPct(a);
+      const bWeightedPct = getRecommendationWeightedMatchPct(b);
+      if (bWeightedPct !== aWeightedPct) return bWeightedPct - aWeightedPct;
+
+      const aQualifies = a.matchesCriteria !== false;
+      const bQualifies = b.matchesCriteria !== false;
+      if (aQualifies !== bQualifies) return bQualifies ? 1 : -1;
+
+      const aSweet = Boolean(a.isSweet16 !== undefined ? a.isSweet16 : (a.plant && isSweet16(a.plant))) && aQualifies;
+      const bSweet = Boolean(b.isSweet16 !== undefined ? b.isSweet16 : (b.plant && isSweet16(b.plant))) && bQualifies;
+      if (aSweet !== bSweet) return bSweet ? 1 : -1;
+
+      const aMatchPct = typeof a.matchPct === 'number' ? a.matchPct : 0;
+      const bMatchPct = typeof b.matchPct === 'number' ? b.matchPct : 0;
+      if (bMatchPct !== aMatchPct) return bMatchPct - aMatchPct;
+
+      if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+
+      const aKey = (a.plant && isKcKeystone(a.plant)) ? 1 : 0;
+      const bKey = (b.plant && isKcKeystone(b.plant)) ? 1 : 0;
+      return bKey - aKey;
+    }
+
+    // Calculate Ecological Native Recommendations
+    function getPlantRecommendationsForArea(profile) {
+      if (!profile) return [];
+      const allPlants = (state.allPlants && state.allPlants.length > 0) ? state.allPlants : (window.embeddedMasterPlants || []);
+
+      const toList = (v) => {
+        if (!v) return [];
+        if (Array.isArray(v)) return v.map(x => String(x).trim()).filter(Boolean);
+        return String(v).split(',').map(x => x.trim()).filter(Boolean);
+      };
+
+      const areaSun = profile.sunlight || 'Any';
+      const areaMoist = profile.moisture || 'Any';
+      const areaTexture = (profile.soilTexture || 'Any').toLowerCase();
+      const areaMaint = profile.maintenance || 'Any';
+      const areaColors = (profile.bloomColors && profile.bloomColors.length > 0) ? profile.bloomColors.map(c => c.toLowerCase()) : ['any'];
+      const hasExplicitLayers = Array.isArray(profile.structuralLayers);
+      const areaLayers = hasExplicitLayers ? profile.structuralLayers : [];
+      if (hasExplicitLayers && areaLayers.length === 0) return [];
+
+      const results = [];
+
+      allPlants.forEach(plant => {
+        if (plant.is_invasive === true) return;
+
+        let score = 0;
+        const reasons = [];
+        let isDisqualified = false;
+        let matchesCriteria = true;
+
+        // 1. Sunlight Compatibility (Max 35 pts)
+        const plantSun = toList(plant.light_requirements || plant.sun_exposure).map(s => s.toLowerCase());
+        const plantDescLower = String(plant.advisor_description || '').toLowerCase();
+        if (areaSun === 'Full Sun') {
+          if (plantSun[0] && plantSun[0].includes('full sun')) {
+            score += 35;
+            reasons.push('☀️ Full Sun Match');
+          } else if (plantSun.some(s => s.includes('full sun'))) {
+            score += 30;
+            reasons.push('☀️ Full Sun Match');
+          } else if (plantSun.some(s => s.includes('part sun'))) {
+            score += 18;
+            reasons.push('⛅ Tolerates Part Sun');
+          } else if (plantSun.every(s => s.includes('shade'))) {
+            isDisqualified = true;
+          } else {
+            score += 10;
+          }
+        } else if (areaSun === 'Part Sun / Part Shade' || areaSun === 'Part Sun' || areaSun === 'Part Shade') {
+          if (plantSun.some(s => s.includes('part')) || plantDescLower.includes('part shade') || plantDescLower.includes('partial shade') || plantDescLower.includes('part sun')) {
+            score += 35;
+            reasons.push('⛅ Part Sun/Shade Optimal');
+          } else if (plantSun.some(s => s.includes('full sun') || s.includes('shade'))) {
+            score += 22;
+            reasons.push('🔄 Flexible Sun Tolerance');
+          }
+        } else if (areaSun === 'Full Shade') {
+          if (plantSun.some(s => s.includes('full shade') || s.includes('shade'))) {
+            score += 35;
+            reasons.push('🌲 Shade Adapted');
+          } else if (plantSun.some(s => s.includes('part'))) {
+            score += 20;
+            reasons.push('⛅ Part Shade Tolerant');
+          } else if (plantSun.some(s => s.includes('full sun') && !s.includes('part'))) {
+            isDisqualified = true;
+          }
+        } else {
+          score += 30; // Any sun
+        }
+
+        if (isDisqualified) return;
+
+        // 2. Moisture Compatibility (Max 30 pts)
+        const plantMoist = toList(plant.moisture_requirements || plant.moisture || plant.soil_moisture).map(m => m.toLowerCase());
+        if (areaMoist === 'Dry') {
+          if (plantMoist.some(m => m.includes('dry'))) {
+            score += 30;
+            reasons.push('🏜️ Drought Hardy / Dry Soil');
+          } else if (plantMoist.some(m => m.includes('medium') && !m.includes('wet'))) {
+            score += 15;
+          } else if (plantMoist.every(m => m.includes('wet'))) {
+            isDisqualified = true;
+          }
+        } else if (areaMoist === 'Medium') {
+          if (plantMoist.some(m => m === 'medium' || m === 'moist' || m === 'average')) {
+            score += 30;
+            reasons.push('💧 Mesic / Average Soil');
+          } else if (plantMoist.some(m => m.includes('medium'))) {
+            score += 18;
+            reasons.push('💧 Mesic / Average Soil');
+          } else if (plantMoist.some(m => m.includes('dry') || m.includes('wet'))) {
+            score += 15;
+          }
+        } else if (areaMoist === 'Wet') {
+          if (plantMoist.some(m => m.includes('wet'))) {
+            score += 30;
+            reasons.push('🌊 Wet Soil / Rain Garden');
+          } else if (plantMoist.some(m => m.includes('medium-wet') || m.includes('moist'))) {
+            score += 25;
+          } else if (plantMoist.every(m => m.includes('dry') && !m.includes('medium'))) {
+            isDisqualified = true;
+          }
+        } else {
+          score += 25; // Any moisture
+        }
+
+        if (isDisqualified) return;
+
+        // Soil texture bonus
+        if (areaTexture !== 'any') {
+          const plantSoil = String(plant.soil_requirements || '').toLowerCase();
+          if (plantSoil.includes(areaTexture)) {
+            score += 6;
+            reasons.push(`🌱 Thrives in ${areaTexture}`);
+          }
+        }
+
+        // 3. Structural Layer Match (Max 25 pts) — strictly enforce selected areaLayers
+        const plantLayer = plant.architectural_layer || getPlantLayer(plant) || 'Seasonal/Herbaceous Layer';
+        const plantTypes = toList(plant.plant_type).map(t => t.toLowerCase());
+
+        let effectiveLayer = plantLayer;
+        if (plantTypes.includes('tree')) {
+          const maxH = parseFloat(plant.mature_height_max) || 0;
+          effectiveLayer = maxH > 25 ? 'Canopy' : 'Understory';
+        } else if (plantTypes.includes('shrub')) {
+          effectiveLayer = (plantLayer === 'Structural Layer' || plantLayer === 'Groundcover') ? plantLayer : 'Understory';
+        } else if (plantTypes.includes('sedge') || (plantTypes.includes('grass') && (parseFloat(plant.mature_height_max) || 0) < 2.5)) {
+          effectiveLayer = 'Groundcover';
+        } else if (plantTypes.includes('grass') && (parseFloat(plant.mature_height_max) || 0) >= 2.5) {
+          effectiveLayer = 'Structural Layer';
+        } else if (plantTypes.includes('wildflower')) {
+          const maxH = parseFloat(plant.mature_height_max) || 0;
+          if (plantLayer === 'Groundcover' || maxH < 1.5 || String(plant.growth_habit || '').toLowerCase().includes('groundcover')) {
+            effectiveLayer = 'Groundcover';
+          } else if (maxH >= 3.5) {
+            effectiveLayer = 'Structural Layer';
+          } else {
+            effectiveLayer = 'Seasonal/Herbaceous Layer';
+          }
+        } else if (plantTypes.includes('vine')) {
+          effectiveLayer = 'Vine';
+        }
+
+        if (areaLayers.length > 0) {
+          if (areaLayers.includes(effectiveLayer)) {
+            score += 25;
+            reasons.push(`🌿 ${effectiveLayer}`);
+          } else {
+            isDisqualified = true;
+          }
+        } else {
+          score += 15;
+        }
+
+        if (isDisqualified) return;
+
+        // 4. Maintenance Match (Max 15 pts)
+        const plantMaint = (plant.maintenance_level || getPlantMaintenanceLevel(plant) || 'Low').toLowerCase();
+        if (areaMaint === 'Low') {
+          if (plantMaint.includes('low')) {
+            score += 15;
+            reasons.push('🟢 Low Maintenance');
+          } else if (plantMaint.includes('medium')) {
+            score += 5;
+          } else {
+            score -= 15;
+            matchesCriteria = false;
+          }
+        } else if (areaMaint === 'Medium') {
+          if (plantMaint.includes('low') || plantMaint.includes('medium')) {
+            score += 15;
+          } else {
+            score += 5;
+          }
+        } else {
+          score += 12;
+        }
+
+        // 5. Bloom Color Match (Max 15 pts)
+        const plantColors = toList(plant.bloom_color || plant.flower_color).map(c => c.toLowerCase());
+        const isFoliage = plantTypes.some(t => ['grass', 'sedge', 'fern'].includes(t));
+        if (areaColors.includes('any')) {
+          score += 15;
+        } else if (isFoliage) {
+          score += 12;
+          reasons.push('🌾 Living Matrix Foliage');
+        } else if (plantColors.some(pc => areaColors.some(ac => pc.includes(ac)))) {
+          score += 15;
+          reasons.push('🌸 Color Match');
+        } else {
+          score += 4;
+          matchesCriteria = false;
+        }
+
+        // 6. Ecological Superchargers (Bonus 0 - 20 pts)
+        const plantIsSweet16 = isSweet16(plant);
+        if (plantIsSweet16) {
+          score += 12;
+          reasons.push('🏆 Sweet 16');
+        }
+        if (isKcKeystone(plant)) {
+          score += 8;
+          reasons.push('⭐ Keystone Species');
+        }
+
+        if (score >= 50) {
+          const matchPct = Math.min(100, Math.round((score / 135) * 100));
+          const weightedMatchPct = matchPct + ((plantIsSweet16 && matchesCriteria) ? SWEET_16_MATCH_MARGIN_PCT : 0);
+          results.push({
+            plant,
+            score,
+            matchPct,
+            weightedMatchPct,
+            isSweet16: plantIsSweet16,
+            matchesCriteria,
+            reasons: Array.from(new Set(reasons)),
+            effectiveLayer: effectiveLayer || 'Seasonal/Herbaceous Layer'
+          });
+        }
+      });
+
+      results.sort(comparePlannerRecommendations);
+      return results;
+    }
+
+    function renderAreaRecommendations() {
+      const listContainer = document.getElementById('plannerRecommendationsList');
+      const profile = getActivePlannerProfile();
+      if (!listContainer || !profile) return;
+
+      // Update Area Title & Criteria Badges
+      const titleEl = document.getElementById('plannerAreaDisplayTitle');
+      if (titleEl) titleEl.textContent = profile.name;
+
+      const criteriaPills = document.getElementById('plannerCriteriaPills');
+      if (criteriaPills) {
+        const layersCount = (profile.structuralLayers || []).length;
+        criteriaPills.innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-secondary);">
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">☀️ ${escapeHtml(profile.sunlight || 'Any Sun')}</span>
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">💧 ${escapeHtml(profile.moisture || 'Any Moisture')}</span>
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">🟢 ${escapeHtml(profile.maintenance || 'Any')} Maint</span>
+            <span class="badge" style="background:var(--bg-surface-elevated);color:var(--text-main);border:1px solid var(--border-subtle);font-size:0.75rem;">🌿 ${layersCount} Layer${layersCount === 1 ? '' : 's'}</span>
+            <button type="button" id="plannerHeaderEditBtn" class="btn btn-secondary btn-xs" style="font-size:0.74rem;min-height:26px;padding:2px 8px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Edit conditions for this zone" aria-label="Edit conditions for ${escapeHtml(profile.name)}">
+              <i data-lucide="sliders-horizontal" style="width:11px;height:11px;"></i>
+              <span>Edit Conditions</span>
+            </button>
+          </div>
+        `;
+        criteriaPills.querySelector('#plannerHeaderEditBtn')?.addEventListener('click', () => {
+          openAreaConditionsModal(state.activePlannerAreaIdx);
+        });
+      }
+
+      // Workflow Banner (review_areas vs completed)
+      const wf = getPlannerWorkflowState();
+      const bannerWrap = document.getElementById('plannerWorkflowBannerWrap');
+      if (bannerWrap) {
+        if (wf.status === 'review_areas') {
+          bannerWrap.style.display = 'block';
+          bannerWrap.innerHTML = `
+            <div style="background:linear-gradient(135deg, rgba(35,92,54,0.08), rgba(5,150,105,0.04));border:1px solid rgba(35,92,54,0.2);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                <span class="badge" style="background:var(--primary);color:#fff;font-size:0.75rem;font-weight:800;padding:3px 8px;border-radius:6px;flex-shrink:0;">
+                  Step ${wf.currentStepAreaIdx + 1} of ${state.gardenAreas.length}
+                </span>
+                <div style="font-size:0.86rem;color:var(--text-main);font-weight:700;">
+                  Reviewing Recommendations: <span style="color:var(--primary);">${escapeHtml(profile.name)}</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button type="button" class="btn btn-ghost btn-xs" id="plannerReviewBackToSetupBtn" style="font-size:0.75rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;" title="Return to Area Setup Wizard">
+                  <i data-lucide="undo-2" style="width:12px;height:12px;"></i>
+                  <span>Back to Setup</span>
+                </button>
+              </div>
+            </div>
+          `;
+          bannerWrap.querySelector('#plannerReviewBackToSetupBtn')?.addEventListener('click', () => {
+            wf.status = 'setup_areas';
+            persistPlannerWorkflowState(wf);
+            renderGardenPlannerUI();
+          });
+        } else {
+          bannerWrap.style.display = 'none';
+          bannerWrap.innerHTML = '';
+        }
+      }
+
+      // Calculate recommendations
+      let recommendations = getPlantRecommendationsForArea(profile);
+
+      // Sort
+      const sortBy = document.getElementById('plannerSortBySelect')?.value || 'score';
+      if (sortBy === 'score') {
+        recommendations.sort(comparePlannerRecommendations);
+      } else if (sortBy === 'keystone') {
+        recommendations.sort((a, b) => {
+          const aKey = isKcKeystone(a.plant) ? 1 : 0;
+          const bKey = isKcKeystone(b.plant) ? 1 : 0;
+          return (bKey - aKey) || comparePlannerRecommendations(a, b);
+        });
+      } else if (sortBy === 'sweet16') {
+        recommendations.sort((a, b) => {
+          const aSw = isSweet16(a.plant) ? 1 : 0;
+          const bSw = isSweet16(b.plant) ? 1 : 0;
+          return (bSw - aSw) || comparePlannerRecommendations(a, b);
+        });
+      } else if (sortBy === 'common') {
+        recommendations.sort((a, b) => {
+          const aName = a.plant.common_names?.[0] || a.plant.scientific_name;
+          const bName = b.plant.common_names?.[0] || b.plant.scientific_name;
+          return aName.localeCompare(bName);
+        });
+      } else if (sortBy === 'height') {
+        recommendations.sort((a, b) => {
+          const aH = parseFloat(a.plant.mature_height_max) || 0;
+          const bH = parseFloat(b.plant.mature_height_max) || 0;
+          return aH - bH;
+        });
+      }
+
+      const layerSelect = document.getElementById('plannerLayerSelect');
+      const matchBadge = document.getElementById('plannerMatchCountBadge');
+      const addAllBtnText = document.getElementById('plannerAddAllBtnText');
+
+      if (recommendations.length === 0) {
+        if (layerSelect) {
+          layerSelect.innerHTML = '<option value="all">No layers available</option>';
+        }
+        if (matchBadge) matchBadge.textContent = '0 Recommended Species';
+        if (addAllBtnText) addAllBtnText.textContent = 'Add Top Recommended to Report';
+        listContainer.innerHTML = `
+          <div style="text-align:center;padding:40px 20px;color:var(--text-muted);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);">
+            <i data-lucide="sprout" style="width:36px;height:36px;color:var(--text-muted);margin-bottom:10px;"></i>
+            <h5 style="font-size:1rem;font-weight:700;margin:0 0 8px 0;color:var(--text-main);">No Exact Matches for this Criteria Combination</h5>
+            <p style="font-size:0.85rem;max-width:440px;margin:0 auto 16px auto;line-height:1.45;">
+              Try setting Sunlight or Moisture to <em>Any</em>, or selecting additional structural layers in <em>Edit Conditions</em>.
+            </p>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetPlannerFiltersToBroad()" style="font-size:0.82rem;min-height:36px;padding:8px 14px;">
+              Broaden Area Conditions
+            </button>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      // Group recommendations by Layer — only include layers selected in area setup
+      const layerOrder = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer', 'Understory', 'Canopy', 'Vine'];
+      const selectedLayers = Array.isArray(profile.structuralLayers) ? profile.structuralLayers : layerOrder;
+      const grouped = {};
+      layerOrder.forEach(l => { grouped[l] = []; });
+
+      recommendations.forEach(rec => {
+        const lKey = rec.effectiveLayer || 'Seasonal/Herbaceous Layer';
+        if (!selectedLayers.includes(lKey)) return;
+        if (!grouped[lKey]) grouped[lKey] = [];
+        grouped[lKey].push(rec);
+      });
+
+      // Filter to selected layers that have recommendations
+      const availableLayers = layerOrder.filter(l => selectedLayers.includes(l) && (grouped[l] || []).length > 0);
+
+      // Total count across all available layers (each capped to top 6)
+      let totalRecommendedCount = 0;
+      availableLayers.forEach(l => {
+        totalRecommendedCount += Math.min(grouped[l].length, 6);
+      });
+
+      // Populate or update the Layer dropdown
+      if (layerSelect) {
+        const previousVal = state.activePlannerLayer || layerSelect.value;
+        layerSelect.innerHTML = '';
+
+        availableLayers.forEach(l => {
+          const count = Math.min(grouped[l].length, 6);
+          const meta = PLANNER_LAYER_METADATA[l] || {};
+          const opt = document.createElement('option');
+          opt.value = l;
+          opt.textContent = `${meta.title || l} (${count} species)`;
+          layerSelect.appendChild(opt);
+        });
+
+        // Add 'All Architecture Layers' option
+        const allOpt = document.createElement('option');
+        allOpt.value = 'all';
+        allOpt.textContent = `All Architecture Layers (${totalRecommendedCount} species)`;
+        layerSelect.appendChild(allOpt);
+
+        // Determine selection:
+        // If state.activePlannerLayer matches an available layer or 'all', use it.
+        // Otherwise default to the first available layer to avoid scrolling.
+        if (state.activePlannerLayer && (availableLayers.includes(state.activePlannerLayer) || state.activePlannerLayer === 'all')) {
+          layerSelect.value = state.activePlannerLayer;
+        } else if (previousVal && (availableLayers.includes(previousVal) || previousVal === 'all')) {
+          layerSelect.value = previousVal;
+          state.activePlannerLayer = previousVal;
+        } else if (availableLayers.length > 0) {
+          layerSelect.value = availableLayers[0];
+          state.activePlannerLayer = availableLayers[0];
+        } else {
+          layerSelect.value = 'all';
+          state.activePlannerLayer = 'all';
+        }
+      }
+
+      const currentSelection = (layerSelect ? layerSelect.value : state.activePlannerLayer) || (availableLayers[0] || 'all');
+      const layersToRender = (currentSelection === 'all')
+        ? availableLayers
+        : availableLayers.filter(l => l === currentSelection);
+
+      // Header match badge
+      if (matchBadge) {
+        if (currentSelection === 'all') {
+          matchBadge.textContent = `${totalRecommendedCount} Species (Top 6 / Layer)`;
+        } else {
+          const currentCount = Math.min((grouped[currentSelection] || []).length, 6);
+          const meta = PLANNER_LAYER_METADATA[currentSelection] || {};
+          matchBadge.textContent = `${currentCount} Species in ${meta.title?.split('/')[0]?.trim() || currentSelection}`;
+        }
+      }
+
+      // Add Top button text
+      if (addAllBtnText) {
+        if (currentSelection === 'all') {
+          addAllBtnText.textContent = 'Add Top 6 / Layer to Report';
+        } else {
+          const currentCount = Math.min((grouped[currentSelection] || []).length, 6);
+          addAllBtnText.textContent = `Add Top ${currentCount} to Report`;
+        }
+      }
+
+      listContainer.innerHTML = '';
+
+      layersToRender.forEach(layerKey => {
+        const allItems = grouped[layerKey];
+        if (!allItems || allItems.length === 0) return;
+
+        // Strictly recommend top 6 species for each architecture layer
+        const items = allItems.slice(0, 6);
+
+        const meta = PLANNER_LAYER_METADATA[layerKey] || {
+          title: layerKey,
+          subtitle: 'Ecological Planting Layer',
+          desc: 'Complementary planting matrix layer.',
+          icon: 'layers',
+          color: 'var(--primary)',
+          badgeBg: 'rgba(35, 92, 54, 0.12)'
+        };
+
+        const layerBox = document.createElement('div');
+        layerBox.className = 'planner-layer-box';
+
+        layerBox.innerHTML = `
+          <div class="planner-layer-header">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+              <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:${meta.badgeBg};color:${meta.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i data-lucide="${meta.icon}" style="width:16px;height:16px;"></i>
+              </div>
+              <div style="min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:0.92rem;font-weight:800;color:var(--text-main);">${escapeHtml(meta.title)}</span>
+                  <span class="badge" style="background:${meta.badgeBg};color:${meta.color};font-size:0.72rem;font-weight:700;">
+                    Top ${items.length}
+                  </span>
+                </div>
+                <div style="font-size:0.76rem;color:var(--text-muted);margin-top:1px;">
+                  ${escapeHtml(meta.subtitle || meta.desc)}
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm planner-batch-layer-btn" data-layer="${layerKey}" style="font-size:0.78rem;min-height:32px;padding:4px 11px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" aria-label="Add top ${items.length} recommended to report">
+              <i data-lucide="plus" style="width:12px;height:12px;"></i>
+              <span>Add Layer (${items.length})</span>
+            </button>
+          </div>
+          <div class="planner-layer-cards-grid" id="plannerGrid_${layerKey.replace(/[^a-zA-Z0-9_-]/g, '_')}">
+            <!-- Plant Cards -->
+          </div>
+        `;
+
+        const grid = layerBox.querySelector('.planner-layer-cards-grid');
+        items.forEach(rec => {
+          const card = createPlannerPlantCard(rec, profile);
+          grid.appendChild(card);
+        });
+
+        // Batch Add for Layer (Top 6)
+        layerBox.querySelector('.planner-batch-layer-btn')?.addEventListener('click', () => {
+          addAllLayerToConsultation(layerKey, profile.name);
+        });
+
+        listContainer.appendChild(layerBox);
+      });
+
+      // Quick layer navigation footer if single layer selected and multiple available
+      if (currentSelection !== 'all' && availableLayers.length > 1) {
+        const curIdx = availableLayers.indexOf(currentSelection);
+        if (curIdx >= 0) {
+          const prevLayer = curIdx > 0 ? availableLayers[curIdx - 1] : null;
+          const nextLayer = curIdx < availableLayers.length - 1 ? availableLayers[curIdx + 1] : null;
+          const prevMeta = prevLayer ? (PLANNER_LAYER_METADATA[prevLayer] || {}) : null;
+          const nextMeta = nextLayer ? (PLANNER_LAYER_METADATA[nextLayer] || {}) : null;
+
+          const navBox = document.createElement('div');
+          navBox.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);flex-wrap:wrap;gap:10px;';
+
+          navBox.innerHTML = `
+            <div>
+              ${prevLayer ? `
+                <button type="button" class="btn btn-secondary btn-sm" id="plannerPrevLayerBtn" style="font-size:0.8rem;min-height:32px;display:inline-flex;align-items:center;gap:6px;">
+                  <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+                  <span>${escapeHtml(prevMeta?.title?.split('/')[0]?.trim() || prevLayer)}</span>
+                </button>
+              ` : '<div style="width:1px;"></div>'}
+            </div>
+            <div style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+              <span>Layer ${curIdx + 1} of ${availableLayers.length}</span>
+              <button type="button" id="plannerViewAllLayersBtn" class="btn btn-ghost btn-xs" style="font-size:0.75rem;padding:2px 8px;text-decoration:underline;">View All Layers</button>
+            </div>
+            <div>
+              ${nextLayer ? `
+                <button type="button" class="btn btn-secondary btn-sm" id="plannerNextLayerBtn" style="font-size:0.8rem;min-height:32px;display:inline-flex;align-items:center;gap:6px;">
+                  <span>${escapeHtml(nextMeta?.title?.split('/')[0]?.trim() || nextLayer)}</span>
+                  <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
+                </button>
+              ` : '<div style="width:1px;"></div>'}
+            </div>
+          `;
+
+          const resetPlannerScrollTop = () => {
+            const modal = document.getElementById('gardenPlannerModal');
+            if (modal) modal.scrollTop = 0;
+            const mainLayout = document.getElementById('plannerMainLayout');
+            if (mainLayout) mainLayout.scrollTop = 0;
+            const recList = document.getElementById('plannerRecommendationsList');
+            if (recList) recList.scrollTop = 0;
+          };
+
+          if (prevLayer) {
+            navBox.querySelector('#plannerPrevLayerBtn')?.addEventListener('click', () => {
+              state.activePlannerLayer = prevLayer;
+              if (layerSelect) layerSelect.value = prevLayer;
+              renderAreaRecommendations();
+              resetPlannerScrollTop();
+            });
+          }
+          if (nextLayer) {
+            navBox.querySelector('#plannerNextLayerBtn')?.addEventListener('click', () => {
+              state.activePlannerLayer = nextLayer;
+              if (layerSelect) layerSelect.value = nextLayer;
+              renderAreaRecommendations();
+              resetPlannerScrollTop();
+            });
+          }
+          navBox.querySelector('#plannerViewAllLayersBtn')?.addEventListener('click', () => {
+            state.activePlannerLayer = 'all';
+            if (layerSelect) layerSelect.value = 'all';
+            renderAreaRecommendations();
+            resetPlannerScrollTop();
+          });
+
+          listContainer.appendChild(navBox);
+        }
+      }
+
+      // Render Content Footer Bar (Step Navigation vs Report Drawer)
+      const footerEl = document.getElementById('plannerContentFooter');
+      if (footerEl) {
+        const totalAreas = state.gardenAreas.length;
+        const curStep = wf.currentStepAreaIdx || 0;
+        const activeAreaName = profile.name;
+        const stagedList = state.stagedPlants || [];
+        const currentAreaStaged = stagedList.filter(p => (p.target_area || state.gardenAreas[0]) === activeAreaName).length;
+        const totalStaged = stagedList.length;
+
+        if (wf.status === 'review_areas') {
+          const prevAreaName = curStep > 0 ? state.gardenAreas[curStep - 1] : null;
+          const nextAreaName = curStep < totalAreas - 1 ? state.gardenAreas[curStep + 1] : null;
+          const isLastStep = curStep >= totalAreas - 1;
+
+          footerEl.innerHTML = `
+            <div class="planner-footer-status" style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
+              <i data-lucide="clipboard-check" style="width:15px;height:15px;color:var(--primary);flex-shrink:0;"></i>
+              <span>Staged for ${escapeHtml(activeAreaName)}: <strong style="color:var(--primary);">${currentAreaStaged}</strong> (${totalStaged} total staged)</span>
+            </div>
+            <div class="planner-footer-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" id="plannerWfPreliminaryBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;color:var(--primary);border-color:var(--primary-border);display:inline-flex;align-items:center;gap:5px;">
+                <i data-lucide="file-check-2" style="width:14px;height:14px;flex-shrink:0;"></i>
+                <span>Preliminary Report (PDF)</span>
+              </button>
+              ${prevAreaName ? `
+                <button type="button" id="plannerWfPrevBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;display:inline-flex;align-items:center;gap:5px;">
+                  <i data-lucide="arrow-left" style="width:14px;height:14px;flex-shrink:0;"></i>
+                  <span>Previous Area</span>
+                </button>
+              ` : ''}
+              ${!isLastStep ? `
+                <button type="button" id="plannerWfNextBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+                  <span>Continue to Next Area: ${escapeHtml(nextAreaName)}</span>
+                  <i data-lucide="arrow-right" style="width:14px;height:14px;flex-shrink:0;"></i>
+                </button>
+              ` : `
+                <button type="button" id="plannerWfFinishBtn" class="btn btn-primary btn-sm" style="background:#059669;border-color:#059669;font-size:0.82rem;min-height:2.25rem;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+                  <i data-lucide="check-circle-2" style="width:14px;height:14px;flex-shrink:0;"></i>
+                  <span>Finish Guided Setup &amp; View Dashboard</span>
+                </button>
+              `}
+            </div>
+          `;
+
+          footerEl.querySelector('#plannerWfPreliminaryBtn')?.addEventListener('click', () => {
+            openPreliminaryReport();
+          });
+
+          footerEl.querySelector('#plannerWfPrevBtn')?.addEventListener('click', () => {
+            wf.currentStepAreaIdx = Math.max(0, (wf.currentStepAreaIdx || 0) - 1);
+            state.activePlannerAreaIdx = wf.currentStepAreaIdx;
+            persistPlannerWorkflowState(wf);
+            renderGardenPlannerUI();
+            const modal = document.getElementById('gardenPlannerModal');
+            if (modal) modal.scrollTop = 0;
+            const mainLayout = document.getElementById('plannerMainLayout');
+            if (mainLayout) mainLayout.scrollTop = 0;
+            const recList = document.getElementById('plannerRecommendationsList');
+            if (recList) recList.scrollTop = 0;
+          });
+
+          footerEl.querySelector('#plannerWfNextBtn')?.addEventListener('click', () => {
+            wf.currentStepAreaIdx = Math.min(state.gardenAreas.length - 1, (wf.currentStepAreaIdx || 0) + 1);
+            state.activePlannerAreaIdx = wf.currentStepAreaIdx;
+            persistPlannerWorkflowState(wf);
+            renderGardenPlannerUI();
+            const modal = document.getElementById('gardenPlannerModal');
+            if (modal) modal.scrollTop = 0;
+            const mainLayout = document.getElementById('plannerMainLayout');
+            if (mainLayout) mainLayout.scrollTop = 0;
+            const recList = document.getElementById('plannerRecommendationsList');
+            if (recList) recList.scrollTop = 0;
+          });
+
+          footerEl.querySelector('#plannerWfFinishBtn')?.addEventListener('click', () => {
+            wf.status = 'completed';
+            persistPlannerWorkflowState(wf);
+            renderGardenPlannerUI();
+            showToast("Garden Planner setup complete! All garden areas are now accessible.", "success");
+            announceToScreenReader("Garden Planner setup complete. You are now viewing the full area dashboard.");
+          });
+
+        } else {
+          // Completed mode
+          footerEl.innerHTML = `
+            <div class="planner-footer-status" style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
+              <i data-lucide="clipboard-check" style="width:15px;height:15px;color:var(--primary);flex-shrink:0;"></i>
+              <span>Consultation Staging: <strong id="plannerCurrentAreaStagedCount" style="color:var(--primary);">${currentAreaStaged}</strong> plants assigned to this area (<span id="plannerTotalStagedCount">${totalStaged}</span> total staged)</span>
+            </div>
+            <div class="planner-footer-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" id="plannerOpenPreliminaryBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                <i data-lucide="file-check-2" style="width:14px;height:14px;flex-shrink:0;"></i>
+                <span>Preliminary Report (PDF)</span>
+              </button>
+              <button type="button" id="plannerFinishAndStageBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;">
+                <span>Review Consultation Report Drawer &rarr;</span>
+              </button>
+            </div>
+          `;
+
+          footerEl.querySelector('#plannerOpenPreliminaryBtn')?.addEventListener('click', () => {
+            openPreliminaryReport();
+          });
+
+          footerEl.querySelector('#plannerFinishAndStageBtn')?.addEventListener('click', () => {
+            document.getElementById('gardenPlannerModal')?.close();
+            document.getElementById('stagingDrawer')?.classList.add('open');
+            document.getElementById('drawerOverlay')?.classList.add('open');
+          });
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function createPlannerPlantCard(rec, profile) {
+      const plant = rec.plant;
+      const commonName = plant.common_names?.[0] || plant.scientific_name;
+      const sciName = plant.scientific_name;
+      const img = plant.images?.[0] || {};
+      const imgUrl = img.url || '';
+      const thumbUrl = img.thumbnail || imgUrl || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23235c36" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+
+      const isStagedInArea = (state.stagedPlants || []).some(p => 
+        (p.id === plant.id || p.scientific_name === sciName) && 
+        (p.target_area || state.gardenAreas[0]) === profile.name
+      );
+
+      const stagedItem = isStagedInArea ? (state.stagedPlants || []).find(p => (p.id === plant.id || p.scientific_name === sciName) && (p.target_area || state.gardenAreas[0]) === profile.name) : null;
+      const quantity = stagedItem ? (stagedItem.quantity || 1) : 0;
+
+      const card = document.createElement('div');
+      card.className = `planner-plant-card ${isStagedInArea ? 'is-staged' : ''}`;
+
+      // Pick high-value highlights (Keystone, Sweet 16, Soil texture, Drought, Rain garden, Shade)
+      const priorityHighlights = (rec.reasons || []).filter(r => 
+        r.includes('Keystone') || 
+        r.includes('Sweet 16') || 
+        r.includes('Thrives in') || 
+        r.includes('Rain Garden') || 
+        r.includes('Drought Hardy') ||
+        r.includes('Shade Adapted')
+      );
+      const fallbackHighlights = (rec.reasons || []).filter(r => !priorityHighlights.includes(r));
+      const displayHighlights = [...priorityHighlights, ...fallbackHighlights].slice(0, 2);
+
+      card.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:4.25rem;height:4.25rem;min-width:4.25rem;border-radius:var(--radius-md);overflow:hidden;flex-shrink:0;background:#030a06;position:relative;">
+            <img src="${thumbUrl}" alt="${escapeHtml(commonName)}" style="width:100%;height:100%;object-fit:cover;" onerror="if(this.src.includes('images/plants/') && !this.src.startsWith('images/plants/')){ this.src='images/plants/' + this.src.split('images/plants/')[1]; } else { this.onerror=null; this.src='${imgUrl}'; }">
+            <span class="planner-match-pill" aria-label="${rec.matchPct} percent ecological match">
+              ${rec.matchPct}%
+            </span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <h5 style="font-size:0.92rem;font-weight:800;margin:0;color:var(--text-main);line-height:1.25;overflow-wrap:break-word;">
+              ${escapeHtml(commonName)}
+            </h5>
+            <div style="font-size:0.78rem;font-style:italic;color:var(--text-muted);overflow-wrap:break-word;line-height:1.2;margin-top:2px;">
+              ${escapeHtml(sciName)}
+            </div>
+            ${displayHighlights.length > 0 ? `
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+                ${displayHighlights.map(r => {
+                  let badgeStyle = 'background:var(--bg-surface-elevated);color:var(--text-secondary);border:1px solid var(--border-subtle);';
+                  if (r.includes('Keystone')) {
+                    badgeStyle = 'background:rgba(217,119,6,0.12);color:#b45309;border:1px solid rgba(217,119,6,0.3);font-weight:700;';
+                  } else if (r.includes('Sweet 16')) {
+                    badgeStyle = 'background:rgba(35,92,54,0.12);color:var(--primary);border:1px solid rgba(35,92,54,0.3);font-weight:700;';
+                  }
+                  return `<span class="badge" style="font-size:0.7rem;padding:1px 6px;border-radius:10px;${badgeStyle}">${escapeHtml(r)}</span>`;
+                }).join('')}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <div style="font-size:0.76rem;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border-subtle);padding-top:7px;margin-top:2px;">
+          <span style="display:inline-flex;align-items:center;gap:5px;">
+            <span>📏 ${escapeHtml(getPlantHeight(plant) || 'Var')}</span>
+            <span style="color:var(--text-muted);">&bull;</span>
+            <span>🌸 ${escapeHtml(plant.bloom_period || 'Seasonal')}</span>
+          </span>
+          <button type="button" class="btn-text-action btn-inspect-plant" style="font-size:0.76rem;color:var(--primary);font-weight:700;min-height:24px;padding:0 2px;" aria-label="View botanical details for ${escapeHtml(commonName)}">Details &rarr;</button>
+        </div>
+
+        <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
+          ${isStagedInArea ? `
+            <button type="button" class="btn btn-sm btn-primary planner-toggle-btn" style="flex:1;font-size:0.8rem;min-height:34px;padding:6px 10px;gap:5px;background:var(--primary);border-color:var(--primary);" title="In Consultation for this area. Click to increase quantity." aria-label="In report for ${escapeHtml(profile.name)}: ${quantity}. Click to increase quantity.">
+              <i data-lucide="check" style="width:13px;height:13px;"></i>
+              <span>In Report (${quantity}x)</span>
+            </button>
+            <button type="button" class="btn-icon planner-remove-btn" title="Remove from this area" aria-label="Remove ${escapeHtml(commonName)} from ${escapeHtml(profile.name)}" style="color:var(--danger);min-width:34px;min-height:34px;padding:6px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-base);">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
+          ` : `
+            <button type="button" class="btn btn-sm btn-secondary planner-toggle-btn" style="flex:1;font-size:0.8rem;min-height:34px;padding:6px 12px;gap:5px;font-weight:700;" aria-label="Add ${escapeHtml(commonName)} to consultation for ${escapeHtml(profile.name)}">
+              <i data-lucide="plus" style="width:13px;height:13px;"></i>
+              <span>Add to Report</span>
+            </button>
+          `}
+        </div>
+      `;
+
+      card.querySelector('.btn-inspect-plant')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openPlantDetail(plant);
+      });
+
+      card.querySelector('.planner-toggle-btn')?.addEventListener('click', () => {
+        addPlantToAreaConsultation(plant, profile.name, rec.effectiveLayer);
+      });
+
+      card.querySelector('.planner-remove-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePlantFromAreaConsultation(plant, profile.name);
+      });
+
+      return card;
+    }
+
+    function addPlantToAreaConsultation(plant, areaName, layerName) {
+      if (!state.currentUser) {
+        showToast("Please sign in as an advisor to stage plants for reports.", "warning");
+        openLoginModal();
+        return;
+      }
+
+      const existing = (state.stagedPlants || []).find(p => 
+        (p.id === plant.id || p.scientific_name === plant.scientific_name) && 
+        (p.target_area || state.gardenAreas[0]) === areaName
+      );
+
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+        const msg = `Increased ${plant.common_names?.[0] || plant.scientific_name} quantity to ${existing.quantity} for ${areaName}!`;
+        showToast(msg);
+        announceToScreenReader(msg);
+      } else {
+        const meta = PLANNER_LAYER_METADATA[layerName] || {};
+        state.stagedPlants.push({
+          id: plant.id || plant.scientific_name,
+          common_name: plant.common_names?.[0] || plant.scientific_name,
+          scientific_name: plant.scientific_name,
+          image_url: plant.images?.[0]?.url || '',
+          plant_url: getPlantUrl(plant),
+          advisor_description: getPlantDesc(plant),
+          quantity: 1,
+          custom_notes: `Recommended ${meta.title || layerName} for ${areaName}`,
+          sun: (plant.light_requirements || []).join(', '),
+          moisture: (plant.moisture_requirements || []).join(', '),
+          height: getPlantHeight(plant),
+          layer: meta.title || getPlantLayer(plant),
+          sociability: getPlantSociability(plant),
+          maintenance_level: getPlantMaintenanceLevel(plant),
+          maintenance_guide: getPlantMaintenanceGuide(plant),
+          environment: plant.native_environment || '',
+          target_area: areaName
+        });
+        const msg = `Added ${plant.common_names?.[0] || plant.scientific_name} to ${areaName}!`;
+        showToast(msg);
+        announceToScreenReader(msg);
+      }
+
+      saveStaging();
+      renderStaging();
+      renderGrid();
+      updatePlannerStagedBadges();
+      renderAreaRecommendations();
+    }
+
+    function removePlantFromAreaConsultation(plant, areaName) {
+      const idx = (state.stagedPlants || []).findIndex(p => 
+        (p.id === plant.id || p.scientific_name === plant.scientific_name) && 
+        (p.target_area || state.gardenAreas[0]) === areaName
+      );
+      if (idx >= 0) {
+        const removed = state.stagedPlants.splice(idx, 1)[0];
+        const msg = `Removed ${removed.common_name} from ${areaName}.`;
+        showToast(msg);
+        announceToScreenReader(msg);
+        saveStaging();
+        renderStaging();
+        renderGrid();
+        updatePlannerStagedBadges();
+        renderAreaRecommendations();
+      }
+    }
+
+    function addAllLayerToConsultation(layerKey, areaName) {
+      const profile = getActivePlannerProfile();
+      const recs = getPlantRecommendationsForArea(profile).filter(r => r.effectiveLayer === layerKey).slice(0, 6);
+      let added = 0;
+
+      recs.forEach(({ plant }) => {
+        const isStaged = (state.stagedPlants || []).some(p => 
+          (p.id === plant.id || p.scientific_name === plant.scientific_name) && 
+          (p.target_area || state.gardenAreas[0]) === areaName
+        );
+        if (!isStaged) {
+          const meta = PLANNER_LAYER_METADATA[layerKey] || {};
+          state.stagedPlants.push({
+            id: plant.id || plant.scientific_name,
+            common_name: plant.common_names?.[0] || plant.scientific_name,
+            scientific_name: plant.scientific_name,
+            image_url: plant.images?.[0]?.url || '',
+            plant_url: getPlantUrl(plant),
+            advisor_description: getPlantDesc(plant),
+            quantity: 1,
+            custom_notes: `Recommended ${meta.title || layerKey} for ${areaName}`,
+            sun: (plant.light_requirements || []).join(', '),
+            moisture: (plant.moisture_requirements || []).join(', '),
+            height: getPlantHeight(plant),
+            layer: meta.title || getPlantLayer(plant),
+            sociability: getPlantSociability(plant),
+            maintenance_level: getPlantMaintenanceLevel(plant),
+            maintenance_guide: getPlantMaintenanceGuide(plant),
+            environment: plant.native_environment || '',
+            target_area: areaName
+          });
+          added++;
+        }
+      });
+
+      if (added > 0) {
+        saveStaging();
+        renderStaging();
+        renderGrid();
+        updatePlannerStagedBadges();
+        renderAreaRecommendations();
+        const msg = `Added ${added} native plants to ${areaName}!`;
+        showToast(msg, 'success');
+        announceToScreenReader(msg);
+      } else {
+        const msg = `All top 6 recommended species in this layer are already staged for ${areaName}.`;
+        showToast(msg);
+        announceToScreenReader(msg);
+      }
+    }
+
+    function addTopRecommendedToConsultation() {
+      const profile = getActivePlannerProfile();
+      if (!profile) return;
+
+      const layerSelect = document.getElementById('plannerLayerSelect');
+      const activeLayer = (layerSelect ? layerSelect.value : state.activePlannerLayer) || 'all';
+      if (activeLayer !== 'all') {
+        addAllLayerToConsultation(activeLayer, profile.name);
+        return;
+      }
+
+      const recs = getPlantRecommendationsForArea(profile);
+      if (recs.length === 0) {
+        showToast("No recommendations available to add.", "warning");
+        return;
+      }
+
+      // Add top 6 species across layers
+      const topRecs = recs.slice(0, 6);
+      let added = 0;
+      topRecs.forEach(({ plant, effectiveLayer }) => {
+        const isStaged = (state.stagedPlants || []).some(p => 
+          (p.id === plant.id || p.scientific_name === plant.scientific_name) && 
+          (p.target_area || state.gardenAreas[0]) === profile.name
+        );
+        if (!isStaged) {
+          const meta = PLANNER_LAYER_METADATA[effectiveLayer] || {};
+          state.stagedPlants.push({
+            id: plant.id || plant.scientific_name,
+            common_name: plant.common_names?.[0] || plant.scientific_name,
+            scientific_name: plant.scientific_name,
+            image_url: plant.images?.[0]?.url || '',
+            plant_url: getPlantUrl(plant),
+            advisor_description: getPlantDesc(plant),
+            quantity: 1,
+            custom_notes: `Recommended ${meta.title || effectiveLayer} for ${profile.name}`,
+            sun: (plant.light_requirements || []).join(', '),
+            moisture: (plant.moisture_requirements || []).join(', '),
+            height: getPlantHeight(plant),
+            layer: meta.title || getPlantLayer(plant),
+            sociability: getPlantSociability(plant),
+            maintenance_level: getPlantMaintenanceLevel(plant),
+            maintenance_guide: getPlantMaintenanceGuide(plant),
+            environment: plant.native_environment || '',
+            target_area: profile.name
+          });
+          added++;
+        }
+      });
+
+      saveStaging();
+      renderStaging();
+      renderGrid();
+      updatePlannerStagedBadges();
+      renderAreaRecommendations();
+      const msg = `Staged ${added} top recommended native plants for ${profile.name}!`;
+      showToast(msg, 'success');
+      announceToScreenReader(msg);
+    }
+
+    function resetPlannerFiltersToBroad() {
+      const profile = getActivePlannerProfile();
+      if (!profile) return;
+      profile.sunlight = 'Any';
+      profile.moisture = 'Any';
+      profile.maintenance = 'Any';
+      profile.bloomColors = ['Any'];
+      profile.structuralLayers = ['Groundcover', 'Seasonal/Herbaceous Layer', 'Structural Layer'];
+      persistGardenAreaProfiles();
+      renderPlannerConditionsForm(profile);
+      renderAreaRecommendations();
+      showToast("Conditions broadened to Any Sunlight & Any Moisture.");
+    }
+    window.resetPlannerFiltersToBroad = resetPlannerFiltersToBroad;
+    window.addTopRecommendedToConsultation = addTopRecommendedToConsultation;
+    window.addAllLayerToConsultation = addAllLayerToConsultation;
+    window.addPlantToAreaConsultation = addPlantToAreaConsultation;
+    window.removePlantFromAreaConsultation = removePlantFromAreaConsultation;
+    window.getPlantRecommendationsForArea = getPlantRecommendationsForArea;
+    window.comparePlannerRecommendations = comparePlannerRecommendations;
+    window.getRecommendationWeightedMatchPct = getRecommendationWeightedMatchPct;
+    window.openPreliminaryReport = openPreliminaryReport;
+    window.printPreliminaryReport = printPreliminaryReport;
+    window.downloadPreliminaryReportPdf = downloadPreliminaryReportPdf;
+    window.downloadPreliminaryReportHtml = downloadPreliminaryReportHtml;
+    window.sharePreliminaryReport = sharePreliminaryReport;
+    window.buildPreliminaryReportPdfBytes = buildPreliminaryReportPdfBytes;
+    window.generatePreliminaryReportPdfFile = generatePreliminaryReportPdfFile;
+    window.ensureDeepRootsBrandAssets = ensureDeepRootsBrandAssets;
+
+    // App Initialization
+    function initializeApplication() {
+      try { loadMasterPlants(); } catch(e) { console.error('loadMasterPlants error:', e); }
+      try { setupEventListeners(); } catch(e) { console.error('setupEventListeners error:', e); }
+      try { initAdvisorAuth(); } catch(e) { console.error('initAdvisorAuth error:', e); }
+      try { renderGardenAreasManager(); } catch(e) { console.error('renderGardenAreasManager error:', e); }
+      try { renderStagedInvasives(); } catch(e) { console.error('renderStagedInvasives error:', e); }
+      try { renderStaging(); } catch(e) { console.error('renderStaging error:', e); }
+      try { syncReportOptionsUI(); } catch(e) { console.error('syncReportOptionsUI error:', e); }
+      try { ensureDeepRootsBrandAssets(); } catch(e) {}
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch(e) {}
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initializeApplication);
+    } else {
+      initializeApplication();
+    }
+  </script>
+</body>
+</html>

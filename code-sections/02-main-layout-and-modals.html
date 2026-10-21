@@ -1,0 +1,2178 @@
+<!-- ============================================================================
+  DEEP ROOTS NATURE ADVISORS — MODULAR CODE SECTION
+  File: code-sections/02-main-layout-and-modals.html
+  Title: Section 2: Application Body, Filter Sidebar, Drawers & Modal Dialogs
+  Source Lines in index.html: Lines 3250 – 5405 (2156 lines)
+  Overview: Semantic HTML5 structure: Header bar, Faceted Filter Sidebar, Plant Catalog Grid, Consultation Staging Drawer, Garden Planner Modal (#gardenPlannerModal), Admin Console, and Plant Detail/Edit dialogs.
+  NOTE: After editing any file in code-sections/, run:
+        node code-sections/rebuild-index.js
+        to automatically reassemble index.html, test.html, and test/index.html.
+============================================================================ -->
+<body data-theme="light">
+  <!-- Accessible Skip Navigation Link (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA Live Region for Screen Reader Announcements (WCAG 4.1.3) -->
+  <div id="a11yAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-brand">
+      <div class="brand-logo" title="Deep Roots Kansas City">🌱</div>
+      <div class="brand-text">
+        <h1 title="Deep Roots Nature Advisors">
+          <span class="brand-title-full">Deep Roots Nature Advisors</span>
+          <span class="brand-title-short">Deep Roots</span>
+        </h1>
+        <p>Kansas City Native Plant Database</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Theme Toggle -->
+      <button id="themeToggleBtn" class="btn btn-icon" title="Toggle Dark/Light Mode" aria-label="Switch to dark mode">
+        <i data-lucide="moon" id="themeIcon"></i>
+      </button>
+
+      <!-- Text Size Quick Toggle -->
+      <button id="textSizeToggleBtn" class="btn btn-icon" title="Adjust Text &amp; Display Size" aria-label="Adjust Text and Display Size" onclick="openTextSizeModal()">
+        <span style="font-size:13px;font-weight:800;letter-spacing:-0.5px;line-height:1;">Aa</span>
+      </button>
+
+      <!-- Advisor Auth Container -->
+      <div id="authContainer">
+        <button id="headerSignInBtn" class="btn btn-secondary" style="font-weight:700;" title="Advisor Sign In" aria-label="Advisor Sign In">
+          <i data-lucide="user-check"></i>
+          <span class="btn-text-long">Advisor Sign In</span>
+          <span class="btn-text-short">Sign In</span>
+        </button>
+      </div>
+
+      <!-- Sync / Database Info -->
+      <button id="syncModalBtn" class="btn btn-icon" title="Database Sync & Master DB Status" aria-label="Shared Database Sync and Master Catalog Status">
+        <i data-lucide="cloud-cog"></i>
+      </button>
+
+      <!-- Catalog Mode Switcher (Native vs Invasive) -->
+      <div class="catalog-mode-switcher" id="catalogModeSwitcher" title="Switch between Native Plant Palette and Invasive Species Field Guide">
+        <button type="button" id="catalogNativeBtn" class="catalog-mode-btn active" onclick="setCatalogMode('native')">
+          <i data-lucide="sprout" style="width:14px;height:14px;"></i>
+          <span>Native Plants (<span id="nativeCountHeader">185</span>)</span>
+        </button>
+        <button type="button" id="catalogInvasiveBtn" class="catalog-mode-btn" onclick="setCatalogMode('invasive')">
+          <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
+          <span>Invasive Species (10)</span>
+        </button>
+      </div>
+
+      <!-- Consultation Report Drawer Toggle (Advisors only) -->
+            <!-- Garden Area Planner & Recommendation Suite Trigger (All users except guest) -->
+      <button id="gardenPlannerHeaderBtn" type="button" class="btn btn-planner" onclick="openGardenPlanner()" aria-label="Garden Area Planner & Ecological Plant Recommendations" title="Garden Area Planner & Plant Recommendations">
+        <i data-lucide="layout-grid"></i>
+        <span class="btn-text-long">Garden Planner</span>
+        <span class="btn-text-short">Planner</span>
+      </button>
+
+      <button id="reportDrawerBtn" class="btn btn-report hidden" aria-label="View staged plant consultation report" aria-expanded="false" aria-controls="stagingDrawer" style="display:none;">
+        <i data-lucide="clipboard-list"></i>
+        <span class="btn-text-long">Report Staging</span>
+        <span class="btn-text-short">Report</span>
+        <span id="stagedBadge" class="badge-count" style="display:none;">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Layout -->
+  <div class="app-layout">
+    
+    <!-- Filter Sidebar Overlay (for mobile drawer) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Filter Sidebar -->
+    <aside class="filter-sidebar" id="filterSidebar">
+      
+      <!-- Mobile Drawer Header -->
+      <div class="sidebar-mobile-header">
+        <div class="sidebar-mobile-title">
+          <i data-lucide="sliders-horizontal" style="width:16px;height:16px;"></i>
+          <span>Filter &amp; Sort</span>
+        </div>
+        <button id="closeSidebarBtn" class="btn-icon" aria-label="Close filters">
+          <i data-lucide="x" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-scroll-area">
+        <!-- Search Card -->
+        <div class="filter-card">
+        <div class="search-box">
+          <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search Kansas City natives..." aria-label="Search Kansas City native plants by common or scientific name">
+          <button id="searchClearBtn" class="search-clear" aria-label="Clear search input">
+            <i data-lucide="x" style="width:14px;height:14px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Toggles -->
+      <div class="filter-card quick-filters">
+        <button class="quick-toggle-btn sweet16" id="toggleSweet16Btn" role="switch" aria-checked="false" aria-label="Filter by Deep Roots Sweet 16 species">
+          <span>⭐ Deep Roots Sweet 16</span>
+          <span class="badge-count" style="background:var(--accent-gold);">16</span>
+        </button>
+        <button class="quick-toggle-btn keystone" id="toggleKeystoneBtn" role="switch" aria-checked="false" aria-label="Filter by Kansas City Keystone species">
+          <span>🌿 KC Keystone Species</span>
+          <span class="badge-count" style="background:var(--accent-keystone);">25</span>
+        </button>
+      </div>
+
+      <!-- Faceted Filters -->
+      <div class="filter-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <span style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">Filters</span>
+          <button id="resetAllFiltersBtn" class="clear-all-btn" style="margin-left:auto;">Reset All</button>
+        </div>
+
+        <!-- Card Display & Sort Settings -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="sortDisplayFilterContent" aria-expanded="true" aria-controls="sortDisplayFilterContent">
+            <span>Card Display &amp; Sort</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="sortDisplayFilterContent" style="display:flex;flex-direction:column;gap:10px;padding-top:6px;">
+            <div>
+              <label for="sidebarNameDisplaySelect" style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Default Name Display:</label>
+              <select id="sidebarNameDisplaySelect" class="sort-select" style="width:100%;" aria-label="Default Name Display">
+                <option value="common_first">Common Name First</option>
+                <option value="scientific_first">Scientific Name First</option>
+              </select>
+            </div>
+            <div>
+              <label for="sidebarSortOrderSelect" style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">Sort By:</label>
+              <select id="sidebarSortOrderSelect" class="sort-select" style="width:100%;" aria-label="Sort plant cards by">
+                <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
+                <option value="common_asc">Common Name (A to Z)</option>
+                <option value="common_desc">Common Name (Z to A)</option>
+                <option value="sci_asc">Scientific Name (A to Z)</option>
+                <option value="sci_desc">Scientific Name (Z to A)</option>
+                <option value="height_asc">Mature Height (Low to High)</option>
+                <option value="height_desc">Mature Height (High to Low)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Habitat / Environment -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="habitatFilterContent" aria-expanded="true" aria-controls="habitatFilterContent">
+            <span>Native Environment</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="habitatFilterContent">
+            <span class="chip-filter" data-group="habitat" data-val="Prairie">Prairie</span>
+            <span class="chip-filter" data-group="habitat" data-val="Savannah/Woodland">Savannah / Woodland</span>
+            <span class="chip-filter" data-group="habitat" data-val="Forest">Forest</span>
+            <span class="chip-filter" data-group="habitat" data-val="Cliff/Glade">Cliff / Glade</span>
+            <span class="chip-filter" data-group="habitat" data-val="Stream Edge/Wetland">Stream Edge / Wetland</span>
+          </div>
+        </div>
+
+        <!-- Light Requirements -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="lightFilterContent" aria-expanded="true" aria-controls="lightFilterContent">
+            <span>Light Requirements</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="lightFilterContent">
+            <span class="chip-filter" data-group="light" data-val="Full Sun">Full Sun</span>
+            <span class="chip-filter" data-group="light" data-val="Part Sun">Part Sun</span>
+            <span class="chip-filter" data-group="light" data-val="Part Shade">Part Shade</span>
+            <span class="chip-filter" data-group="light" data-val="Full Shade">Full Shade</span>
+          </div>
+        </div>
+
+        <!-- Soil Moisture -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="moistureFilterContent" aria-expanded="true" aria-controls="moistureFilterContent">
+            <span>Soil Moisture</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="moistureFilterContent">
+            <span class="chip-filter" data-group="moisture" data-val="Dry">Dry</span>
+            <span class="chip-filter" data-group="moisture" data-val="Medium-Dry">Medium-Dry</span>
+            <span class="chip-filter" data-group="moisture" data-val="Medium">Medium</span>
+            <span class="chip-filter" data-group="moisture" data-val="Medium-Wet">Medium-Wet</span>
+            <span class="chip-filter" data-group="moisture" data-val="Wet">Wet</span>
+          </div>
+        </div>
+
+        <!-- Mature Height -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="heightFilterContent" aria-expanded="true" aria-controls="heightFilterContent">
+            <span>Mature Height</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="heightFilterContent">
+            <span class="chip-filter" data-group="height" data-val="< 1 ft">&lt; 1 ft (Groundcover)</span>
+            <span class="chip-filter" data-group="height" data-val="1 - 3 ft">1 – 3 ft (Low)</span>
+            <span class="chip-filter" data-group="height" data-val="3 - 6 ft">3 – 6 ft (Medium)</span>
+            <span class="chip-filter" data-group="height" data-val="6 - 15 ft">6 – 15 ft (Tall/Shrub)</span>
+            <span class="chip-filter" data-group="height" data-val="15+ ft">15+ ft (Tree/Large Shrub)</span>
+          </div>
+        </div>
+
+        <!-- Plant Type -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="typeFilterContent" aria-expanded="true" aria-controls="typeFilterContent">
+            <span>Plant Type</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="typeFilterContent">
+            <span class="chip-filter" data-group="type" data-val="Wildflower">Wildflower / Forb</span>
+            <span class="chip-filter" data-group="type" data-val="Grass">Grass</span>
+            <span class="chip-filter" data-group="type" data-val="Sedge">Sedge</span>
+            <span class="chip-filter" data-group="type" data-val="Tree">Tree</span>
+            <span class="chip-filter" data-group="type" data-val="Shrub">Shrub</span>
+            <span class="chip-filter" data-group="type" data-val="Vine">Vine</span>
+            <span class="chip-filter" data-group="type" data-val="Fern">Fern</span>
+          </div>
+        </div>
+
+        <!-- Ecological Layer -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="layerFilterContent" aria-expanded="true" aria-controls="layerFilterContent">
+            <span>Garden / Forest Layer</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="layerFilterContent">
+            <span class="chip-filter" data-group="layer" data-val="Canopy">Canopy</span>
+            <span class="chip-filter" data-group="layer" data-val="Understory">Understory</span>
+            <span class="chip-filter" data-group="layer" data-val="Structural">Structural Layer</span>
+            <span class="chip-filter" data-group="layer" data-val="Herbaceous">Herbaceous Layer</span>
+            <span class="chip-filter" data-group="layer" data-val="Groundcover">Groundcover</span>
+          </div>
+        </div>
+
+        <!-- Bloom Season -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="bloomFilterContent" aria-expanded="true" aria-controls="bloomFilterContent">
+            <span>Bloom Season</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="bloomFilterContent">
+            <span class="chip-filter" data-group="season" data-val="Spring">Spring</span>
+            <span class="chip-filter" data-group="season" data-val="Early Summer">Early Summer</span>
+            <span class="chip-filter" data-group="season" data-val="Summer">Summer</span>
+            <span class="chip-filter" data-group="season" data-val="Late Summer">Late Summer</span>
+            <span class="chip-filter" data-group="season" data-val="Fall">Fall</span>
+          </div>
+        </div>
+
+        <!-- Bloom Color -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="bloomColorFilterContent" aria-expanded="true" aria-controls="bloomColorFilterContent">
+            <span>Bloom Color</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="bloomColorFilterContent">
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Yellow"><span class="color-dot" style="background:#FFB300;"></span>Yellow</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="White"><span class="color-dot" style="background:#B0BEC5;"></span>White</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Purple"><span class="color-dot" style="background:#8E24AA;"></span>Purple</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Pink"><span class="color-dot" style="background:#D81B60;"></span>Pink</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Blue"><span class="color-dot" style="background:#1E88E5;"></span>Blue</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Orange"><span class="color-dot" style="background:#FB8C00;"></span>Orange</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Red"><span class="color-dot" style="background:#E53935;"></span>Red</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Lavender"><span class="color-dot" style="background:#7E57C2;"></span>Lavender</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Cream"><span class="color-dot" style="background:#FFCA28;"></span>Cream</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Greenish"><span class="color-dot" style="background:#43A047;"></span>Greenish</span>
+            <span class="chip-filter color-chip" data-group="bloomColor" data-val="Brown/Tan"><span class="color-dot" style="background:#8D6E63;"></span>Brown/Tan</span>
+          </div>
+        </div>
+
+        <!-- Plant Sociability -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="sociabilityFilterContent" aria-expanded="true" aria-controls="sociabilityFilterContent">
+            <span>Plant Sociability</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="sociabilityFilterContent">
+            <span class="chip-filter" data-group="sociability" data-val="Solitary">Less Social / Solitary</span>
+            <span class="chip-filter" data-group="sociability" data-val="Moderate">Medium / Moderate Spreader</span>
+            <span class="chip-filter" data-group="sociability" data-val="Gregarious">Highly Social / Gregarious</span>
+          </div>
+        </div>
+
+        <!-- Maintenance Level -->
+        <div class="accordion">
+          <button class="accordion-header" data-target="maintenanceFilterContent" aria-expanded="true" aria-controls="maintenanceFilterContent">
+            <span>Maintenance Level</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="accordion-content" id="maintenanceFilterContent">
+            <span class="chip-filter" data-group="maintenance" data-val="Low">Low Maintenance</span>
+            <span class="chip-filter" data-group="maintenance" data-val="Medium">Medium Maintenance</span>
+            <span class="chip-filter" data-group="maintenance" data-val="High">High Maintenance</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mobile Drawer Footer -->
+      <div class="sidebar-mobile-footer">
+        <button id="resetAllFiltersMobileBtn" class="btn btn-secondary">Reset</button>
+        <button id="applyFiltersMobileBtn" class="btn btn-primary" style="flex:1;">
+          View <span id="mobileFilteredCount">184</span> Plants
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- Main Content Grid -->
+    <main class="main-content" id="main-content" tabindex="-1">
+      
+      <!-- Mobile Search Bar (prominent on mobile / <= 1024px) -->
+      <div class="mobile-search-bar">
+        <div class="search-box">
+          <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
+          <input type="text" id="mobileSearchInput" class="search-input" placeholder="Search Kansas City natives..." aria-label="Search Kansas City native plants by common or scientific name">
+          <button id="mobileSearchClearBtn" class="search-clear" aria-label="Clear search input">
+            <i data-lucide="x" style="width:14px;height:14px;"></i>
+          </button>
+        </div>
+      <!-- Mobile Catalog Switcher (prominent on mobile / <= 768px) -->
+      <div class="mobile-catalog-bar" id="mobileCatalogBar">
+        <div class="catalog-mode-switcher mobile-switcher">
+          <button type="button" class="catalog-mode-btn active" id="mobileCatalogNativeBtn" onclick="setCatalogMode('native')">
+            <i data-lucide="sprout" style="width:14px;height:14px;"></i>
+            <span>Native Plants (<span id="nativeCountMobile">185</span>)</span>
+          </button>
+          <button type="button" class="catalog-mode-btn" id="mobileCatalogInvasiveBtn" onclick="setCatalogMode('invasive')">
+            <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
+            <span>Invasive Species (10)</span>
+          </button>
+        </div>
+      </div>
+
+      </div>
+
+      <!-- Controls Bar -->
+      <div class="controls-bar">
+        <div class="results-and-mobile-filter">
+          <button id="openSidebarBtn" class="btn btn-filter-toggle" aria-label="Toggle search and filter options" aria-expanded="false" aria-controls="filterSidebar">
+            <i data-lucide="sliders-horizontal" style="width:15px;height:15px;"></i>
+            <span>Filters</span>
+            <span id="mobileFilterBadge" class="filter-count-badge" style="display:none;">0</span>
+          </button>
+          <div class="results-count" id="resultsCount">
+            Showing <strong>185</strong> Kansas City Native Plants
+          </div>
+          <button id="openAddPlantBtn" class="btn btn-secondary" style="font-size:12px;padding:4px 10px;display:none;align-items:center;gap:5px;border-color:var(--primary-border);color:var(--primary);cursor:pointer;" title="Contribute a new native plant record">
+            <i data-lucide="plus-circle" style="width:14px;height:14px;"></i>
+            <span>Add Plant</span>
+          </button>
+        </div>
+
+        <div class="controls-actions" style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div class="sort-control">
+            <label for="defaultNameDisplaySelect">Default Title:</label>
+            <select id="defaultNameDisplaySelect" class="sort-select" title="Default name shown first when sorting by criteria other than name" aria-label="Default Title Name Display">
+              <option value="common_first">Common Name First</option>
+              <option value="scientific_first">Scientific Name First</option>
+            </select>
+          </div>
+
+          <div class="sort-control">
+            <label for="sortOrderSelect">Sort by:</label>
+            <select id="sortOrderSelect" class="sort-select" aria-label="Sort plant cards by">
+              <option value="keystone_first">KC Keystones &amp; Sweet 16 First</option>
+              <option value="common_asc">Common Name (A to Z)</option>
+              <option value="common_desc">Common Name (Z to A)</option>
+              <option value="sci_asc">Scientific Name (A to Z)</option>
+              <option value="sci_desc">Scientific Name (Z to A)</option>
+              <option value="height_asc">Mature Height (Low to High)</option>
+              <option value="height_desc">Mature Height (High to Low)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filters Tag Bar -->
+      <div id="activeFiltersBar" class="active-filters-bar" style="display:none;"></div>
+
+      <!-- Plants Grid -->
+      <div id="plantsGrid" class="plants-grid"></div>
+
+      <!-- Empty State -->
+      <div id="emptyState" style="display:none;text-align:center;padding:60px 20px;background:var(--bg-surface);border-radius:var(--radius-lg);border:1px solid var(--border-subtle);">
+        <div style="font-size:48px;margin-bottom:12px;">🍃</div>
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:6px;">No Kansas City native plants match your filters</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Try adjusting your light, moisture, or habitat criteria</p>
+        <button id="resetFiltersEmptyBtn" class="btn btn-secondary">Reset All Filters</button>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Staging Drawer & Overlay -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="staging-drawer" id="stagingDrawer">
+    <div class="drawer-header">
+      <h2>
+        <i data-lucide="clipboard-check" style="color:var(--primary);"></i>
+        <span>Consultation Report</span>
+      </h2>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button type="button" id="drawerHeaderPreliminaryBtn" onclick="openPreliminaryReport()" class="btn btn-primary btn-sm" style="background:linear-gradient(135deg,#1b5e38,#276741);border-color:#155e33;color:#ffffff;font-size:12px;font-weight:700;padding:6px 10px;display:inline-flex;align-items:center;gap:5px;" title="Generate Preliminary Report (PDF / Client Takeaway)">
+          <i data-lucide="file-check-2" style="width:14px;height:14px;"></i>
+          <span>Preliminary Report</span>
+        </button>
+        <button id="closeDrawerBtn" class="btn-icon" aria-label="Close consultation report drawer">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Consultation Switcher Panel -->
+      <div class="consultation-switcher-panel">
+        <div class="consultation-switcher-header">
+          <div class="consultation-active-label">
+            <i data-lucide="folder-kanban" style="width:15px;height:15px;color:var(--primary);"></i>
+            <span>Active Consultation</span>
+          </div>
+          <button type="button" id="openConsultationsManagerBtn" class="btn-text-action" title="View and switch between all consultations">
+            <i data-lucide="list" style="width:13px;height:13px;"></i>
+            <span>All Consultations (<span id="consultationCountBadge">0</span>)</span>
+          </button>
+        </div>
+
+        <div class="consultation-select-container">
+          <div class="consultation-select-wrapper">
+            <select id="consultationSelect" class="consultation-select" aria-label="Switch Consultation">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <button type="button" id="newConsultationBtn" class="btn btn-secondary" style="padding:6px 10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Start a New Consultation">
+            <i data-lucide="plus" style="width:14px;height:14px;"></i>
+            <span>New</span>
+          </button>
+        </div>
+
+        <div class="consultation-meta-bar">
+          <div class="consultation-status-indicator">
+            <span id="consultationSavedDot" class="status-dot"></span>
+            <span id="consultationStatusText" style="font-size:11px;color:var(--text-muted);">Saved locally</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" id="duplicateConsultationBtn" class="btn-sm-icon" title="Duplicate this consultation" aria-label="Duplicate this consultation">
+              <i data-lucide="copy" style="width:13px;height:13px;"></i>
+            </button>
+            <button type="button" id="deleteCurrentConsultationBtn" class="btn-sm-icon text-danger" title="Delete this consultation" aria-label="Delete this consultation">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Metadata Form -->
+      <div class="client-meta-form">
+        <div class="form-group">
+          <label for="clientNameInput">Client Name</label>
+          <input type="text" id="clientNameInput" placeholder="e.g. Eleanor Vance">
+        </div>
+        <div class="form-group">
+          <label for="projectAddressInput">Project Address / Location</label>
+          <input type="text" id="projectAddressInput" placeholder="e.g. 4520 Rockhill Rd, Kansas City, MO">
+        </div>
+        <div class="form-group">
+          <label for="consultDateInput">Consultation Date</label>
+          <input type="date" id="consultDateInput">
+        </div>
+        <div class="form-group">
+          <label for="advisorNameInput">Nature Advisor Name</label>
+          <input type="text" id="advisorNameInput" placeholder="Sign in as Advisor to auto-fill">
+        </div>
+        <div class="form-group">
+          <label for="advisorNotesInput">Advisor Overview & Site Strategy</label>
+          <textarea id="advisorNotesInput" rows="3" placeholder="Summary of soil, sun microclimates, and ecological goals..."></textarea>
+        </div>
+      </div>
+
+      <!-- Garden Areas / Planting Zones Configuration -->
+      <div class="garden-areas-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--primary);"></i>
+            <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
+              Garden Areas (<span id="gardenAreasCountBadge">3</span>)
+            </span>
+          </div>
+          <button type="button" id="openPlannerFromStagingBtn" onclick="closeDrawer(); openGardenPlanner();" class="btn-text-action" style="font-size:11px;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:3px;margin-right:6px;" title="Open Garden Area Planner and get plant recommendations for this property">
+            <i data-lucide="sparkles" style="width:12px;height:12px;"></i>
+            <span>Recommend Plants</span>
+          </button>
+          <button type="button" id="addGardenAreaBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:3px;" title="Add a new garden planting zone">
+            <i data-lucide="plus" style="width:12px;height:12px;"></i>
+            <span>Add Area</span>
+          </button>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 0;line-height:1.4;">
+          Set up property zones (e.g. <em>Area 1: Front Porch</em>, <em>Area 2: Front Sidewalk/Mailbox</em>, <em>Area 3: Backyard Shade Garden</em>). Selected plants can be assigned to these areas and will group under them in your final Word .docx report.
+        </p>
+        <div id="gardenAreasList" style="display:flex;flex-direction:column;gap:6px;">
+          <!-- Dynamically populated garden area input rows -->
+        </div>
+      </div>
+
+      <!-- Staged Plants List -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
+            Selected Plants (<span id="stagedCount">0</span>)
+          </span>
+          <button id="clearAllStagedBtn" class="clear-all-btn">Clear All</button>
+        </div>
+        <div id="stagedList" class="staged-list">
+          <div style="text-align:center;padding:30px 10px;color:var(--text-muted);font-size:13px;">
+            No plants added to report yet.<br>Click <strong>+ Add to Report</strong> on any plant card.
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Invasive Plants Section in Consultation -->
+      <div class="stewardship-panel" style="border-left: 3px solid #dc2626;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i data-lucide="alert-triangle" style="width:15px;height:15px;color:#dc2626;"></i>
+            <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#dc2626;">
+              Invasive Species (<span id="stagedInvasivesCountBadge">0</span>)
+            </span>
+          </div>
+          <label for="toggleInvasivePresent" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;">
+            <input type="checkbox" id="toggleInvasivePresent" style="width:15px;height:15px;accent-color:#dc2626;" aria-label="Invasive species found on site">
+            <span>Found on site</span>
+          </label>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 8px 0;line-height:1.4;" id="invasiveStatusSummary">
+          🌿 Landscape is currently clean. Report will include the Big Three vigilance warning.
+        </p>
+        <div id="stagedInvasivesList" style="display:none;flex-direction:column;gap:6px;margin-top:8px;">
+          <!-- Dynamically populated invasive cards -->
+        </div>
+        <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+          <button type="button" id="browseInvasivesBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:#dc2626;display:inline-flex;align-items:center;gap:4px;">
+            <i data-lucide="search" style="width:12px;height:12px;"></i>
+            <span>Browse & Add Invasives from Catalog</span>
+          </button>
+          <button type="button" id="sidebarContractorsBtn" class="btn-text-action" style="font-size:11px;font-weight:700;color:#991b1b;display:inline-flex;align-items:center;gap:4px;">
+            <i data-lucide="phone-call" style="width:12px;height:12px;"></i>
+            <span>View Vetted Removal Contractors (10)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Report Sections & Stewardship Toggles -->
+      <div class="stewardship-panel">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i data-lucide="sliders" style="width:14px;height:14px;color:var(--primary);"></i>
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);">
+            Report Section Toggles
+          </span>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 0;line-height:1.4;">
+          Select which wildlife stewardship and municipal cost-share sections to include in the client’s Word report.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label for="toggleBirdNestBox" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="box" style="width:13px;height:13px;color:var(--primary);"></i> Bird Nest Box Section</span>
+            <input type="checkbox" id="toggleBirdNestBox" checked aria-label="Include Bird Nest Box Section in report">
+          </label>
+          <label for="toggleBirdBath" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="droplet" style="width:13px;height:13px;color:var(--primary);"></i> Bird Bath Section</span>
+            <input type="checkbox" id="toggleBirdBath" checked aria-label="Include Bird Bath Section in report">
+          </label>
+          <label for="toggleBatBox" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="moon" style="width:13px;height:13px;color:var(--primary);"></i> Bat Box Section (If Discussed)</span>
+            <input type="checkbox" id="toggleBatBox" aria-label="Include Bat Box Section in report">
+          </label>
+          <label for="toggleBeeHabitat" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="flower-2" style="width:13px;height:13px;color:var(--primary);"></i> Native Bee Habitat Section</span>
+            <input type="checkbox" id="toggleBeeHabitat" checked aria-label="Include Native Bee Habitat Section in report">
+          </label>
+          <label for="toggleJohnsonCounty" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="map" style="width:13px;height:13px;color:#d97706;"></i> Johnson County (Contain The Rain)</span>
+            <input type="checkbox" id="toggleJohnsonCounty" aria-label="Include Johnson County Contain The Rain Program">
+          </label>
+          <label for="toggleWyandotteCounty" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="map" style="width:13px;height:13px;color:#d97706;"></i> Wyandotte County (UG Stormwater Cost-Share)</span>
+            <input type="checkbox" id="toggleWyandotteCounty" aria-label="Include Wyandotte County UG Stormwater Cost-Share Program">
+          </label>
+          <label for="toggleRainwaterHarvesting" class="toggle-row">
+            <span class="toggle-label"><i data-lucide="cloud-rain" style="width:13px;height:13px;color:var(--primary);"></i> Rainwater Harvesting Section</span>
+            <input type="checkbox" id="toggleRainwaterHarvesting" checked aria-label="Include Rainwater Harvesting Section in report">
+          </label>
+        </div>
+      </div>
+
+            
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="drawer-footer">
+      <button id="saveCloudReportBtn" class="btn btn-primary" style="width:100%;">
+        <i data-lucide="cloud"></i>
+        <span>Save Report to Advisor Profile</span>
+      </button>
+      <button id="openPreliminaryReportBtn" class="btn btn-secondary" style="width:100%;background:linear-gradient(135deg,#1b5e38,#276741);color:#ffffff;border-color:#155e33;font-weight:700;">
+        <i data-lucide="file-check-2"></i>
+        <span>Preliminary Report (PDF / Client Takeaway)</span>
+      </button>
+      <button id="copyMarkdownReportBtn" class="btn btn-secondary" style="width:100%;">
+        <i data-lucide="copy"></i>
+        <span>Copy Formatted Markdown Report</span>
+      </button>
+      <button id="downloadHtmlReportBtn" class="btn btn-secondary" style="width:100%;">
+        <i data-lucide="download"></i>
+        <span>Download Official Word Document (.docx)</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Nature Advisor Sign In Modal -->
+  <dialog id="advisorLoginModal" aria-modal="true" aria-labelledby="advisorLoginTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="shield-check" style="color:var(--primary);width:24px;height:24px;"></i>
+        <div>
+          <h3 id="advisorLoginTitle" style="font-size:17px;font-weight:800;">Nature Advisor Sign In</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Deep Roots Nature Advisors Portal</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('advisorLoginModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="advisorLoginForm" class="dialog-body">
+      <div id="loginErrorBanner" style="display:none;background:var(--danger-bg);color:var(--danger);border:1px solid rgba(211,47,47,0.3);padding:10px 12px;border-radius:var(--radius-md);font-size:12px;margin-bottom:14px;line-height:1.4;"></div>
+
+      <div class="form-group">
+        <label for="loginUsernameInput">Username or Email</label>
+        <input type="text" id="loginUsernameInput" placeholder="e.g. chris.bradley or ctbbradley@gmail.com" required autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="loginPasswordInput">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="loginPasswordInput" placeholder="Enter advisor password" required autocomplete="current-password" style="padding-right:40px;width:100%;box-sizing:border-box;">
+          <button type="button" id="toggleLoginPasswordBtn" class="btn-icon" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);border:none;background:transparent;cursor:pointer;" title="Show/Hide Password" aria-label="Toggle password visibility">
+            <i data-lucide="eye" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
+        <button type="submit" id="submitLoginBtn" class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;font-weight:700;">
+          <i data-lucide="log-in"></i>
+          <span>Sign In as Nature Advisor</span>
+        </button>
+      </div>
+
+      <div style="background:var(--bg-base);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);margin-top:14px;font-size:11px;color:var(--text-muted);line-height:1.5;">
+        <strong style="color:var(--text-main);">Advisor Access Note:</strong> Advisor and administrator accounts are provisioned by Deep Roots coordinators. Unauthenticated users have full read-only catalog access.
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Display & Text Size Quick Dialog -->
+  <dialog id="textSizeModal" style="max-width:480px;width:95%;" aria-modal="true" aria-labelledby="textSizeTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i data-lucide="type" style="color:var(--primary);width:20px;height:20px;"></i>
+        <h3 id="textSizeTitle" style="font-size:16px;font-weight:800;margin:0;">Display &amp; Text Size</h3>
+      </div>
+      <button onclick="document.getElementById('textSizeModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <p style="font-size:12px;color:var(--text-secondary);margin:0 0 14px 0;line-height:1.5;">
+        Select your preferred font and display size. Cards, buttons, forms, and plant descriptions dynamically adapt to ensure optimal readability.
+      </p>
+
+      <div class="text-size-options-list" style="display:flex;flex-direction:column;gap:8px;">
+        <button type="button" class="text-size-option-card" data-scale="standard" onclick="setUserTextScale('standard'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Standard (100%)</div>
+              <div class="opt-desc">Default font size and compact layout</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:13px;font-weight:800;">Aa</span>
+        </button>
+
+        <button type="button" class="text-size-option-card" data-scale="comfortable" onclick="setUserTextScale('comfortable'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Comfortable (110%)</div>
+              <div class="opt-desc">Enhanced readability for laptops and tablets</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:14.5px;font-weight:800;">Aa</span>
+        </button>
+
+        <button type="button" class="text-size-option-card" data-scale="large" onclick="setUserTextScale('large'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Large (125%)</div>
+              <div class="opt-desc">High visibility for outdoor field consultations</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:16.5px;font-weight:800;">Aa</span>
+        </button>
+
+        <button type="button" class="text-size-option-card" data-scale="extra-large" onclick="setUserTextScale('extra-large'); document.getElementById('textSizeModal').close();">
+          <div class="opt-left">
+            <span class="opt-indicator"></span>
+            <div>
+              <div class="opt-title">Extra Large (140%)</div>
+              <div class="opt-desc">Maximum legibility and larger tap targets</div>
+            </div>
+          </div>
+          <span class="opt-sample" style="font-size:19px;font-weight:800;">Aa</span>
+        </button>
+      </div>
+
+      <div style="margin-top:14px;padding:10px 12px;background:var(--primary-light);border:1px solid var(--primary-border);border-radius:var(--radius-md);display:flex;align-items:center;gap:8px;">
+        <i data-lucide="info" style="color:var(--primary);width:16px;height:16px;flex-shrink:0;"></i>
+        <span style="font-size:11.5px;color:var(--primary);line-height:1.4;">
+          Your text size preference is saved automatically to your profile and remembered across devices.
+        </span>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- User Profile & Administration Modal -->
+  <dialog id="userProfileModal" aria-modal="true" aria-labelledby="userProfileTitle" style="max-width:540px;width:calc(100% - 24px);">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i data-lucide="user" style="color:var(--primary);width:20px;height:20px;"></i>
+        <h3 id="userProfileTitle" style="font-size:16px;font-weight:800;">Advisor Profile</h3>
+      </div>
+      <button onclick="document.getElementById('userProfileModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="text-align:center;">
+      <div id="profileAvatarContainer" style="margin:0 auto 10px;width:60px;height:60px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:2px solid var(--primary-border);">CB</div>
+      <h4 id="profileNameTxt" style="font-size:17px;font-weight:800;color:var(--text-main);margin:0 0 2px 0;">Chris Bradley</h4>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 8px 0;"><span style="font-family:monospace;font-weight:700;" id="profileUsernameTxt">chris.bradley</span></p>
+      
+      <div style="display:inline-flex;align-items:center;margin-bottom:14px;">
+        <span id="profileRoleBadge" class="role-badge admin">
+          <i data-lucide="shield" style="width:12px;height:12px;"></i>
+          <span id="profileRoleTxt">Admin</span>
+        </span>
+      </div>
+
+      <!-- Advisor Details Card with Inline Edit Button -->
+      <div style="background:var(--bg-base);padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;font-size:12px;color:var(--text-secondary);margin-bottom:14px;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-subtle);padding-bottom:6px;margin-bottom:2px;">
+          <span style="font-weight:700;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;">Advisor Details</span>
+          <button id="openEditSelfBtn" type="button" class="btn btn-secondary" style="display:none;padding:2px 8px;font-size:11px;height:24px;border-radius:var(--radius-sm);color:var(--primary);border-color:var(--primary-border);gap:4px;" title="Edit your advisor details">
+            <i data-lucide="user-cog" style="width:12px;height:12px;"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span>Advisor Type:</span>
+          <strong id="profileAdvisorTypeTxt" style="color:var(--text-main);">Advisor in Training</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span>Email:</span>
+          <strong id="profileEmailTxt" style="color:var(--text-main);">ctbbradley@gmail.com</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span>Phone:</span>
+          <strong id="profilePhoneTxt" style="color:var(--text-main);">913-424-2205</strong>
+        </div>
+      </div>
+
+      <!-- Display & Text Size Preferences -->
+      <div style="background:var(--bg-base);padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);text-align:left;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-main);">
+            <i data-lucide="type" style="width:14px;height:14px;color:var(--primary);"></i>
+            <span>Display &amp; Text Size</span>
+          </div>
+          <span id="profileTextSizeActiveLabel" style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 8px;border-radius:var(--radius-full);border:1px solid var(--primary-border);">Standard (100%)</span>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 0;line-height:1.4;">
+          Personalize interface and font scaling for your comfort across all devices.
+        </p>
+        
+        <div class="text-size-segmented-control" id="profileTextSizeControls" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;">
+          <button type="button" class="text-size-btn" data-scale="standard" onclick="setUserTextScale('standard')" title="Standard (100%)">
+            <span class="text-size-preview" style="font-size:12px;font-weight:800;">Aa</span>
+            <span class="text-size-name">100%</span>
+          </button>
+          <button type="button" class="text-size-btn" data-scale="comfortable" onclick="setUserTextScale('comfortable')" title="Comfortable (110%)">
+            <span class="text-size-preview" style="font-size:14px;font-weight:800;">Aa</span>
+            <span class="text-size-name">110%</span>
+          </button>
+          <button type="button" class="text-size-btn" data-scale="large" onclick="setUserTextScale('large')" title="Large (125%)">
+            <span class="text-size-preview" style="font-size:16px;font-weight:800;">Aa</span>
+            <span class="text-size-name">125%</span>
+          </button>
+          <button type="button" class="text-size-btn" data-scale="extra-large" onclick="setUserTextScale('extra-large')" title="Extra Large (140%)">
+            <span class="text-size-preview" style="font-size:18px;font-weight:800;">Aa</span>
+            <span class="text-size-name">140%</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Advisor Workspace Tools (2-Column Action Tiles Grid) -->
+      <div class="profile-section-title">
+        <i data-lucide="compass" style="width:13px;height:13px;color:var(--primary);"></i>
+        <span>Advisor Tools</span>
+      </div>
+      <div class="profile-action-grid">
+        <button id="openUserConsultationsBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(35, 92, 54, 0.1);color:var(--primary);">
+            <i data-lucide="folder-kanban" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Consultations</span>
+              <span class="badge" style="background:var(--primary);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;" id="profileConsultationsCount">0</span>
+            </div>
+            <div class="profile-tile-desc">Client plans &amp; reports</div>
+          </div>
+        </button>
+
+        <button id="profileOpenPlannerBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(16, 185, 129, 0.1);color:#059669;">
+            <i data-lucide="layout-grid" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Garden Planner</span>
+            </div>
+            <div class="profile-tile-desc">Area recommendations</div>
+          </div>
+        </button>
+
+        <button id="profileOpenSyncBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(2, 132, 199, 0.1);color:#0284c7;">
+            <i data-lucide="cloud-cog" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Cloud Sync</span>
+            </div>
+            <div class="profile-tile-desc">Status &amp; backups</div>
+          </div>
+        </button>
+
+        <button id="profileAddPlantBtn" type="button" class="profile-tile-btn">
+          <div class="profile-tile-icon" style="background:rgba(35, 92, 54, 0.1);color:var(--primary);">
+            <i data-lucide="plus-circle" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Contribute</span>
+            </div>
+            <div class="profile-tile-desc">Add native species</div>
+          </div>
+        </button>
+
+        <a href="./docs.html" target="_blank" rel="noopener noreferrer" class="profile-tile-btn" style="text-decoration:none;" title="Open interactive architecture and code manual">
+          <div class="profile-tile-icon" style="background:rgba(124, 58, 237, 0.1);color:#7c3aed;">
+            <i data-lucide="book-open" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Code Manual</span>
+              <i data-lucide="external-link" style="width:12px;height:12px;color:var(--text-muted);"></i>
+            </div>
+            <div class="profile-tile-desc">Docs &amp; architecture</div>
+          </div>
+        </a>
+
+        <a href="./training.html" target="_blank" rel="noopener noreferrer" class="profile-tile-btn" style="text-decoration:none;" title="Open interactive code walkthrough and quiz academy">
+          <div class="profile-tile-icon" style="background:rgba(13, 148, 136, 0.12);color:#0d9488;">
+            <i data-lucide="graduation-cap" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="profile-tile-content">
+            <div class="profile-tile-title">
+              <span>Code Academy</span>
+              <i data-lucide="external-link" style="width:12px;height:12px;color:var(--text-muted);"></i>
+            </div>
+            <div class="profile-tile-desc">Interactive training &amp; quizzes</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Administrator Tools Card (Privileged, Auto-hidden for Non-Admins) -->
+      <div id="profileAdminSection" class="profile-admin-card" style="display:none;">
+        <div class="profile-admin-header">
+          <div class="profile-admin-title">
+            <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+            <span>Administrator Operations</span>
+          </div>
+          <span class="role-badge admin" style="font-size:10px;padding:1px 6px;">Privileged</span>
+        </div>
+        <div class="profile-admin-list">
+          <button id="openAdminApprovalsBtn" type="button" class="profile-admin-item-btn">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="inbox" style="width:16px;height:16px;color:#d97706;"></i>
+              <span>Plant Approval Inbox</span>
+            </div>
+            <span class="badge" style="background:#d97706;color:#fff;font-size:10.5px;padding:1px 7px;border-radius:10px;font-weight:700;" id="profileApprovalsCount">0</span>
+          </button>
+
+          <button id="openAdminReportsBtn" type="button" class="profile-admin-item-btn">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="folder-git-2" style="width:16px;height:16px;color:var(--primary);"></i>
+              <span>Consultation Reports Repository</span>
+            </div>
+            <span class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:10.5px;padding:1px 7px;border-radius:10px;font-weight:700;" id="profileReportsRepoCount">0</span>
+          </button>
+
+          <button id="openAdminConsoleBtn" type="button" class="profile-admin-item-btn">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="shield" style="width:16px;height:16px;color:var(--accent-gold);"></i>
+              <span>Advisor Administration Console</span>
+            </div>
+            <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--text-muted);"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Account Actions Footer -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;">
+        <button id="openChangePasswordBtn" type="button" class="btn btn-secondary" style="font-size:12px;padding:9px 12px;justify-content:center;">
+          <i data-lucide="key-round" style="width:14px;height:14px;"></i>
+          <span>Password</span>
+        </button>
+        <button id="signOutAdvisorBtn" type="button" class="btn btn-secondary" style="font-size:12px;padding:9px 12px;justify-content:center;color:var(--danger);border-color:rgba(220,38,38,0.3);">
+          <i data-lucide="log-out" style="width:14px;height:14px;"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+    <!-- Garden Planner Guest Access Gate Dialog -->
+  <dialog id="plannerGuestModal" aria-modal="true" aria-labelledby="plannerGuestTitle" style="max-width:500px;width:92%;border-radius:var(--radius-lg);padding:0;overflow:hidden;border:1px solid var(--border-subtle);box-shadow:0 24px 48px rgba(0,0,0,0.35);background:var(--bg-surface);">
+    <div style="background:linear-gradient(135deg, rgba(27,67,50,0.96), rgba(13,40,24,0.98));padding:26px 22px;color:#fff;text-align:center;position:relative;">
+      <button onclick="document.getElementById('plannerGuestModal').close()" class="btn-icon" aria-label="Close dialog" style="position:absolute;top:12px;right:12px;color:rgba(255,255,255,0.75);background:transparent;border:none;cursor:pointer;padding:4px;">
+        <i data-lucide="x" style="width:18px;height:18px;"></i>
+      </button>
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px auto;border:1px solid rgba(255,255,255,0.2);">
+        <i data-lucide="layout-grid" style="width:26px;height:26px;color:#6ee7b7;"></i>
+      </div>
+      <h3 id="plannerGuestTitle" style="font-size:18px;font-weight:800;margin:0 0 6px 0;letter-spacing:-0.02em;">Nature Advisor Access Required</h3>
+      <p style="font-size:12.5px;color:#d1fae5;margin:0;line-height:1.45;">
+        Garden Area Planning &amp; Ecological Recommendation Suite
+      </p>
+    </div>
+    <div style="padding:22px 24px;color:var(--text-main);">
+      <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.55;margin:0 0 16px 0;">
+        The <strong>Garden Area Planner</strong> enables Deep Roots Nature Advisors to configure multi-zone residential and commercial planting areas. Based on each zone's specific sunlight, soil moisture, maintenance goals, and structural matrix layers, it automatically calculates and recommends optimal native plant communities.
+      </p>
+      <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text-muted);">
+        <i data-lucide="lock" style="width:16px;height:16px;color:var(--accent-gold);flex-shrink:0;margin-top:2px;"></i>
+        <span>Please sign in with your Nature Advisor account to access this feature and stage plant recommendations into client reports.</span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+        <button type="button" onclick="document.getElementById('plannerGuestModal').close()" class="btn btn-secondary" style="font-size:13px;">
+          Browse Public Catalog
+        </button>
+        <button type="button" id="guestGateSignInBtn" class="btn btn-primary" style="font-size:13px;font-weight:700;">
+          <i data-lucide="user-check"></i>
+          <span>Advisor Sign In</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Garden Planner Modal -->
+  <dialog id="gardenPlannerModal" aria-modal="true" aria-labelledby="gardenPlannerTitle">
+    <div class="planner-modal-body">
+      <!-- Modal Header -->
+      <div class="planner-modal-header">
+        <div class="planner-header-brand" style="display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;">
+          <div class="planner-header-icon" style="width:2.25rem;height:2.25rem;border-radius:var(--radius-md);background:var(--primary-light);border:1px solid var(--primary-border);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;">
+            <i data-lucide="layout-grid" style="width:1.25rem;height:1.25rem;"></i>
+          </div>
+          <div style="min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <h3 id="gardenPlannerTitle" style="font-size:1.15rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.02em;">
+                Garden Planner
+              </h3>
+              <span class="badge planner-version-badge" style="background:var(--bg-surface-elevated);color:var(--text-muted);font-size:0.7rem;font-weight:700;border:1px solid var(--border-subtle);" title="Build 3.0: Mobile-Optimized Garden Planner">v3.0</span>
+              <span id="plannerConsultationBadge" class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:0.75rem;font-weight:700;">
+                <i data-lucide="folder-kanban" style="width:11px;height:11px;vertical-align:-1px;"></i>
+                <span id="plannerActiveConsultationName">Active Consultation</span>
+              </span>
+            </div>
+            <p class="planner-header-subtitle" style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
+              Tailored ecological plant recommendations organized by property zone and structural planting matrix.
+            </p>
+          </div>
+        </div>
+        <div class="planner-header-actions" style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;">
+          <button type="button" id="plannerHeaderPreliminaryBtn" onclick="openPreliminaryReport()" class="btn btn-primary btn-sm" title="Generate Preliminary Report (PDF / Client Takeaway)" aria-label="Generate Preliminary Report" style="font-size:0.82rem;min-height:2.25rem;gap:5px;background:linear-gradient(135deg,#1b5e38,#276741);border-color:#155e33;color:#ffffff;font-weight:700;">
+            <i data-lucide="file-check-2" style="width:14px;height:14px;flex-shrink:0;"></i>
+            <span>Preliminary Report</span>
+          </button>
+          <button type="button" id="plannerOpenDrawerBtn" class="btn btn-secondary btn-sm" title="View Staged Consultation Report" aria-label="View staged consultation report" style="font-size:0.82rem;min-height:2.25rem;gap:5px;">
+            <i data-lucide="clipboard-list" style="width:14px;height:14px;flex-shrink:0;"></i>
+            <span>Staging (<span id="plannerStagedCountBadge">0</span>)</span>
+          </button>
+          <button type="button" onclick="document.getElementById('gardenPlannerModal').close()" class="btn-icon" aria-label="Close Garden Planner" style="min-width:2.25rem;min-height:2.25rem;">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Phase 1: Guided Area Setup Wizard View -->
+      <div id="plannerSetupWizardView" style="display:none;flex-direction:column;flex:1 1 0%;min-height:0;overflow:hidden;background:var(--bg-base);">
+        
+        <!-- Wizard Header Banner -->
+        <div class="planner-wizard-banner" style="padding:14px 20px;border-bottom:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex-shrink:0;">
+          <div style="min-width:0;flex:1 1 240px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+              <span class="badge" style="background:var(--primary-light);color:var(--primary);font-size:0.75rem;font-weight:800;border:1px solid var(--primary-border);">
+                Step 1 of 2: Area Characterization
+              </span>
+              <span id="plannerWizardAreaCountBadge" class="badge" style="background:var(--bg-surface-elevated);color:var(--text-secondary);font-size:0.75rem;font-weight:700;border:1px solid var(--border-subtle);">
+                3 Areas Configured
+              </span>
+            </div>
+            <h4 style="font-size:1.05rem;font-weight:800;margin:0;color:var(--text-main);letter-spacing:-0.01em;">
+              Define Property Planting Zones &amp; Conditions
+            </h4>
+            <p class="planner-wizard-subtitle" style="font-size:0.8rem;color:var(--text-muted);margin:2px 0 0 0;line-height:1.35;">
+              Add each distinct planting zone on this property and customize its sun, moisture, and layer requirements.
+            </p>
+          </div>
+          <div class="planner-wizard-top-cta" style="display:flex;align-items:center;gap:8px;">
+            <button type="button" id="plannerWizardProceedBtn" class="btn btn-primary" style="font-size:0.85rem;min-height:2.375rem;padding:7px 16px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+              <span>Proceed to Plant Recommendations</span>
+              <i data-lucide="arrow-right" style="width:15px;height:15px;flex-shrink:0;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Wizard Main Body (Split Left: Area Zones List, Right: Selected Zone Conditions) -->
+        <div class="planner-wizard-split" style="display:grid;grid-template-columns:minmax(280px, 340px) minmax(0, 1fr);flex:1 1 0%;min-height:0;overflow:hidden;">
+          
+          <!-- Left: Area Zones List -->
+          <div class="planner-wizard-zones-pane" style="border-right:1px solid var(--border-subtle);background:var(--bg-surface);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;touch-action:pan-y;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">
+                Property Planting Zones
+              </span>
+              <button type="button" id="plannerWizardAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;min-height:1.875rem;padding:4px 9px;">
+                <i data-lucide="plus" style="width:13px;height:13px;flex-shrink:0;"></i>
+                <span>Add Zone</span>
+              </button>
+            </div>
+            <div id="plannerWizardAreasList" style="display:flex;flex-direction:column;gap:6px;" role="group" aria-label="Garden Areas List">
+              <!-- Dynamically populated wizard area items -->
+            </div>
+          </div>
+
+          <!-- Right: Conditions Form for Selected Zone -->
+          <div id="plannerWizardConditionsPane" style="overflow-y:auto;padding:20px 24px;background:var(--bg-base);touch-action:pan-y;">
+            <!-- Live conditions form rendered dynamically -->
+          </div>
+
+        </div>
+
+        <!-- Wizard Sticky Bottom Action Bar -->
+        <div class="planner-wizard-footer" style="padding:10px 20px;border-top:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;flex-shrink:0;">
+          <div class="planner-wizard-footer-hint" style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <i data-lucide="info" style="width:14px;height:14px;color:var(--primary);flex-shrink:0;"></i>
+            <span>Recommendations are generated dynamically based on each zone's specific criteria.</span>
+          </div>
+          <div class="planner-wizard-footer-cta" style="display:flex;align-items:center;gap:8px;">
+            <button type="button" id="plannerWizardProceedBottomBtn" class="btn btn-primary" style="font-size:0.85rem;min-height:2.375rem;padding:7px 16px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+              <span>Proceed to Plant Recommendations</span>
+              <i data-lucide="arrow-right" style="width:15px;height:15px;flex-shrink:0;"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Body (Two-Column Layout for Review & Dashboard) -->
+      <div class="planner-layout" id="plannerMainLayout">
+        
+        <!-- Left Column: Garden Areas Selector & Active Area Conditions -->
+        <div class="planner-sidebar" id="plannerSidebarPane" tabindex="-1">
+          
+          <!-- Area Selector Section -->
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;">
+                  Garden Areas
+                </span>
+                <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;">
+                  <span id="plannerAreasCount">3</span> zones configured
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <button type="button" id="plannerRestartWizardBtn" class="btn btn-ghost btn-xs" style="font-size:0.75rem;color:var(--text-muted);display:none;padding:3px 7px;" title="Restart Guided Area Setup Workflow">↺ Setup</button>
+                <button type="button" id="plannerAddAreaBtn" class="btn btn-secondary btn-sm" style="font-size:0.78rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px;min-height:1.875rem;padding:3px 9px;" title="Add new planting area" aria-label="Add new garden area">
+                  <i data-lucide="plus" style="width:13px;height:13px;flex-shrink:0;"></i>
+                  <span>Add Area</span>
+                </button>
+              </div>
+            </div>
+            <div id="plannerAreasRoster" style="display:flex;flex-direction:column;gap:8px;" role="group" aria-label="Garden Areas List">
+              <!-- Dynamically populated area cards -->
+            </div>
+          </div>
+
+          <!-- Helpful Bottom Tip Card -->
+          <div class="planner-sidebar-tip" style="margin-top:auto;padding:12px 14px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);font-size:0.78rem;color:var(--text-muted);line-height:1.45;">
+            <div style="display:flex;align-items:center;gap:6px;font-weight:700;color:var(--text-main);margin-bottom:4px;">
+              <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--primary);flex-shrink:0;"></i>
+              <span>Zone Recommendations</span>
+            </div>
+            <span>Select any zone above to view tailored native recommendations. Tap <strong>Edit</strong> on a zone to adjust sun, moisture, and layer criteria.</span>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Recommendations Review & Batch Add Pane -->
+        <div class="planner-content" id="plannerContentPane">
+          
+          <!-- Optional Workflow Progress Banner (shown in review_areas step) -->
+          <div id="plannerWorkflowBannerWrap" style="display:none;"></div>
+
+          <!-- Recommendations Header Bar -->
+          <div class="planner-content-header">
+            <div style="min-width:0;flex:1 1 220px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h4 id="plannerAreaDisplayTitle" style="font-size:1.05rem;font-weight:800;margin:0;color:var(--text-main);overflow-wrap:break-word;">
+                  Area 1: Front Porch &amp; Walkway
+                </h4>
+                <span id="plannerMatchCountBadge" class="badge" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:0.75rem;font-weight:700;">
+                  0 Recommendations
+                </span>
+              </div>
+              <div id="plannerCriteriaPills" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">
+                <!-- Live criteria badges -->
+              </div>
+            </div>
+
+            <div class="planner-controls-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="planner-layer-select-wrap" style="display:flex;align-items:center;gap:6px;min-width:0;">
+                <label for="plannerLayerSelect" style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;">
+                  <i data-lucide="layers" style="width:14px;height:14px;color:var(--primary);"></i> Layer:
+                </label>
+                <select id="plannerLayerSelect" style="font-size:0.82rem;min-height:2.25rem;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-weight:600;max-width:260px;min-width:0;" aria-label="Select Architecture Layer">
+                  <option value="all">All Architecture Layers</option>
+                </select>
+              </div>
+              <select id="plannerSortBySelect" style="font-size:0.82rem;min-height:2.25rem;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);min-width:0;" aria-label="Sort recommendations">
+                <option value="score">Sort: Best Match Score</option>
+                <option value="keystone">Sort: Keystone Species First</option>
+                <option value="sweet16">Sort: Sweet 16 First</option>
+                <option value="common">Sort: Common Name A-Z</option>
+                <option value="height">Sort: Height Low to High</option>
+              </select>
+              <button type="button" id="plannerAddAllToConsultationBtn" class="btn btn-primary" style="font-size:0.82rem;min-height:2.25rem;padding:7px 12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;">
+                <i data-lucide="plus-circle" style="width:14px;height:14px;flex-shrink:0;"></i>
+                <span id="plannerAddAllBtnText">Add Top Recommended to Report</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Recommendations Body Container -->
+          <div id="plannerRecommendationsList" tabindex="0" role="region" aria-label="Ecological Plant Recommendations">
+            <!-- Dynamically populated layer groups and plant cards -->
+          </div>
+
+          <!-- Bottom Summary Footer Bar -->
+          <div class="planner-content-footer" id="plannerContentFooter">
+            <div class="planner-footer-status" style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:0.82rem;">
+              <i data-lucide="clipboard-check" style="width:15px;height:15px;color:var(--primary);flex-shrink:0;"></i>
+              <span>Consultation Staging: <strong id="plannerCurrentAreaStagedCount" style="color:var(--primary);">0</strong> plants assigned to this area (<span id="plannerTotalStagedCount">0</span> total staged)</span>
+            </div>
+            <div class="planner-footer-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" id="plannerFinishAndStageBtn" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;font-weight:700;">
+                <span>Review Consultation Report Drawer &rarr;</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Garden Area Conditions Editor Modal -->
+  <dialog id="plannerAreaConditionsModal" aria-modal="true" aria-labelledby="plannerAreaConditionsModalTitle" style="padding:0;border:none;background:transparent;max-width:640px;width:95vw;">
+    <div class="planner-conditions-dialog-box" style="border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-xl);display:flex;flex-direction:column;max-height:90vh;">
+      
+      <!-- Modal Header -->
+      <div style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border-subtle);background:var(--bg-frosted);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="sliders-horizontal" style="width:1rem;height:1rem;"></i>
+          </div>
+          <h4 id="plannerAreaConditionsModalTitle" style="font-size:1rem;font-weight:800;margin:0;color:var(--text-main);overflow-wrap:break-word;">
+            Edit Area Conditions
+          </h4>
+        </div>
+        <button type="button" onclick="document.getElementById('plannerAreaConditionsModal').close()" class="btn-icon" aria-label="Close conditions editor" style="min-width:2.125rem;min-height:2.125rem;">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable conditions form) -->
+      <div id="plannerAreaConditionsModalBody" style="padding:1.125rem 1.375rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.875rem;touch-action:pan-y;">
+        <!-- Form inputs dynamically injected -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding:0.75rem 1.25rem;border-top:1px solid var(--border-subtle);background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;flex-wrap:wrap;">
+        <div id="plannerAreaModalDeleteWrap"></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto;">
+          <button type="button" onclick="document.getElementById('plannerAreaConditionsModal').close()" class="btn btn-secondary btn-sm" style="font-size:0.82rem;min-height:2.25rem;padding:6px 14px;">
+            Cancel
+          </button>
+          <button type="button" id="plannerAreaModalSaveBtn" class="btn btn-primary btn-sm" style="font-size:0.82rem;min-height:2.25rem;padding:6px 18px;font-weight:800;">
+            Save &amp; Apply Changes
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </dialog>
+
+  <!-- Change / Set Strong Password Dialog -->
+  <dialog id="changePasswordModal" aria-modal="true" aria-labelledby="changePasswordTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i data-lucide="lock" style="color:var(--primary);width:20px;height:20px;"></i>
+        <h3 id="changePasswordTitle" style="font-size:16px;font-weight:800;">Set Strong Password</h3>
+      </div>
+      <button onclick="document.getElementById('changePasswordModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="changePasswordForm" class="dialog-body">
+      <p id="changePasswordNotice" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px 0;line-height:1.5;">
+        Please set a permanent strong password to protect your advisor record and consultations.
+      </p>
+
+      <div id="changePasswordErrorBanner" style="display:none;background:var(--danger-bg);color:var(--danger);border:1px solid rgba(211,47,47,0.3);padding:8px 12px;border-radius:var(--radius-md);font-size:12px;margin-bottom:12px;"></div>
+
+      <div class="form-group">
+        <label for="newPasswordInput">New Password</label>
+        <div style="position:relative;">
+          <input type="password" id="newPasswordInput" placeholder="Enter new strong password" required autocomplete="new-password" style="padding-right:40px;width:100%;box-sizing:border-box;">
+          <button type="button" id="toggleNewPasswordBtn" class="btn-icon" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-muted);border:none;background:transparent;cursor:pointer;" title="Show/Hide Password" aria-label="Toggle password visibility">
+            <i data-lucide="eye" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Password Requirements Live Checklist -->
+      <div class="req-list">
+        <div class="req-item" id="reqMinLength"><i data-lucide="circle" style="width:12px;height:12px;"></i> 8+ characters</div>
+        <div class="req-item" id="reqUppercase"><i data-lucide="circle" style="width:12px;height:12px;"></i> 1 uppercase letter</div>
+        <div class="req-item" id="reqLowercase"><i data-lucide="circle" style="width:12px;height:12px;"></i> 1 lowercase letter</div>
+        <div class="req-item" id="reqDigit"><i data-lucide="circle" style="width:12px;height:12px;"></i> 1 number</div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label for="confirmPasswordInput">Confirm New Password</label>
+        <input type="password" id="confirmPasswordInput" placeholder="Re-enter new password" required autocomplete="new-password">
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" onclick="document.getElementById('changePasswordModal').close()" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="submitChangePasswordBtn" class="btn btn-primary">Save &amp; Continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Advisor Administration Console Modal (Admin Only) -->
+  <dialog id="adminManagementModal" style="max-width:860px;width:95%;" aria-modal="true" aria-labelledby="adminManagementTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="shield" style="color:var(--accent-gold);width:24px;height:24px;"></i>
+        <div>
+          <h3 id="adminManagementTitle" style="font-size:17px;font-weight:800;">Advisor Administration Console</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Deep Roots Nature Advisors &bull; Administrator Privileges</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('adminManagementModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <!-- Tabs -->
+      <div class="dialog-tabs">
+        <button type="button" class="dialog-tab active" id="adminRosterTabBtn">
+          <i data-lucide="users" style="width:14px;height:14px;"></i>
+          <span>Advisor Roster</span>
+        </button>
+        <button type="button" class="dialog-tab" id="adminProvisionTabBtn">
+          <i data-lucide="user-plus" style="width:14px;height:14px;"></i>
+          <span>Provision New Advisor</span>
+        </button>
+        <button type="button" class="dialog-tab" id="adminReportsTabBtn">
+          <i data-lucide="folder-git-2" style="width:14px;height:14px;"></i>
+          <span>Consultation Repository (<span id="adminReportsTabBadge">0</span>)</span>
+        </button>
+        <button type="button" class="dialog-tab" id="adminApprovalsTabBtn">
+          <i data-lucide="inbox" style="width:14px;height:14px;"></i>
+          <span>Approval Inbox (<span id="adminApprovalsTabBadge">0</span>)</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Advisor Roster Panel -->
+      <div id="adminRosterPanel">
+        <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <input type="text" id="adminRosterSearchInput" placeholder="Search advisors by name, username, email..." style="width:100%;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:13px;" aria-label="Search advisors by name, username, or email">
+        </div>
+        <div id="adminRosterList" style="display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto;padding-right:4px;">
+          <!-- Dynamically populated roster cards -->
+        </div>
+      </div>
+
+      <!-- Tab 2: Provision New Advisor Panel -->
+      <div id="adminProvisionPanel" style="display:none;">
+        <form id="adminProvisionForm" style="display:flex;flex-direction:column;gap:12px;">
+          <div id="provisionSuccessBanner" style="display:none;background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);padding:14px;border-radius:var(--radius-md);font-size:13px;line-height:1.5;">
+            <div style="font-weight:800;font-size:14px;margin-bottom:6px;">🎉 Advisor Provisioned Successfully!</div>
+            <div><strong>Username:</strong> <code id="bannerCreatedUsername" style="font-size:13px;padding:2px 6px;background:rgba(0,0,0,0.06);border-radius:4px;"></code></div>
+            <div><strong>Temporary Password:</strong> <code id="bannerCreatedPassword" style="font-size:14px;font-weight:800;color:var(--primary);padding:2px 6px;background:rgba(0,0,0,0.06);border-radius:4px;"></code></div>
+            <div style="margin-top:8px;display:flex;gap:8px;">
+              <button type="button" id="copyCreatedCredentialsBtn" class="btn btn-secondary" style="font-size:12px;padding:4px 10px;">
+                <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                <span>Copy Credentials</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label for="provisionFirstName">First Name</label>
+              <input type="text" id="provisionFirstName" placeholder="e.g. Chris" required>
+            </div>
+            <div class="form-group">
+              <label for="provisionLastName">Last Name</label>
+              <input type="text" id="provisionLastName" placeholder="e.g. Bradley" required>
+            </div>
+          </div>
+
+          <!-- Canonical username live preview -->
+          <div style="background:var(--bg-base);padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);font-size:12px;display:flex;align-items:center;gap:6px;">
+            <i data-lucide="at-sign" style="width:14px;height:14px;color:var(--primary);"></i>
+            <span>Canonical Username:</span>
+            <strong id="provisionUsernamePreview" style="font-family:monospace;color:var(--primary);">advisor.name</strong>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label for="provisionEmail">Email Address</label>
+              <input type="email" id="provisionEmail" placeholder="e.g. advisor@deeproots.org" required>
+            </div>
+            <div class="form-group">
+              <label for="provisionPhone">Phone Number</label>
+              <input type="tel" id="provisionPhone" placeholder="e.g. 913-424-2205">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="form-group">
+              <label for="provisionAdvisorType">Advisor Type</label>
+              <select id="provisionAdvisorType">
+                <option value="Advisor in Training">Advisor in Training</option>
+                <option value="Advisor">Advisor</option>
+                <option value="Senior Advisor">Senior Advisor</option>
+                <option value="Program Manager">Program Manager</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="provisionRole">System Role</label>
+              <select id="provisionRole">
+                <option value="user">User (Standard Nature Advisor)</option>
+                <option value="admin">Admin (Full Administrative Privileges)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+            <button type="reset" class="btn btn-secondary">Clear</button>
+            <button type="submit" id="submitProvisionBtn" class="btn btn-primary">
+              <i data-lucide="user-plus"></i>
+              <span>Provision Advisor &amp; Generate Temp Password</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tab 3: Consultation Repository Panel (All Advisors) -->
+      <div id="adminReportsPanel" style="display:none;">
+        <!-- Search, Filter & Action Bar -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;">
+          <div style="position:relative;flex:1;min-width:220px;">
+            <input type="text" id="adminReportsSearchInput" placeholder="Search by client, advisor, address, plant, notes..." style="width:100%;padding:8px 12px 8px 34px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:13px;" aria-label="Search all consultation reports across all advisors">
+            <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);"></i>
+          </div>
+          <select id="adminReportsAdvisorFilter" style="padding:8px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:12px;font-weight:600;" aria-label="Filter reports by advisor">
+            <option value="">All Advisors</option>
+          </select>
+          <select id="adminReportsSortSelect" style="padding:8px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:12px;" aria-label="Sort consultation reports">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="client">Client Name A–Z</option>
+            <option value="plants">Most Staged Plants</option>
+          </select>
+          <button type="button" id="adminReportsRefreshBtn" class="btn btn-secondary" style="font-size:12px;padding:8px 12px;" title="Refresh Reports from Cloud">
+            <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <!-- Summary Stats Bar -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-bottom:14px;">
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 12px;text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--primary);" id="adminStatTotalReports">0</div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Total Reports</div>
+          </div>
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 12px;text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--accent-gold);" id="adminStatTotalAdvisors">0</div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Active Advisors</div>
+          </div>
+          <div style="background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 12px;text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--primary-dark);" id="adminStatTotalPlants">0</div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Plants Staged</div>
+          </div>
+        </div>
+
+        <!-- Reports Cards List -->
+        <div id="adminReportsList" style="display:flex;flex-direction:column;gap:12px;max-height:480px;overflow-y:auto;padding-right:4px;">
+          <!-- Dynamically populated with all consultation report cards -->
+        </div>
+      </div>
+
+      <!-- Tab 4: Plant Approval Inbox Panel -->
+      <div id="adminApprovalsPanel" style="display:none;">
+        <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <input type="text" id="adminApprovalsSearchInput" placeholder="Search pending changes by plant name, scientific name, or advisor..." style="flex:1;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--bg-base);color:var(--text-main);font-size:13px;" aria-label="Search pending approvals">
+          <button type="button" id="adminApprovalsRefreshBtn" class="btn btn-secondary" style="font-size:12px;padding:8px 12px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;" title="Refresh approvals from Cloud">
+            <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+        <div id="adminApprovalsList" style="display:flex;flex-direction:column;gap:12px;max-height:480px;overflow-y:auto;padding-right:4px;">
+          <!-- Dynamically populated with pending changes -->
+        </div>
+      </div>
+
+    </div>
+  </dialog>
+
+  <!-- Admin Consultation Report Detail & Inspection Dialog -->
+  <dialog id="adminReportDetailModal" style="max-width:760px;width:95%;" aria-modal="true" aria-labelledby="adminDetailClientTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="file-text" style="color:var(--primary);width:22px;height:22px;"></i>
+        <div>
+          <h3 id="adminDetailClientTitle" style="font-size:17px;font-weight:800;margin:0;">Consultation Details</h3>
+          <p id="adminDetailAdvisorMeta" style="font-size:11px;color:var(--text-muted);margin:0;">Advisor Consultation Report</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('adminReportDetailModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="padding:16px 20px;max-height:600px;overflow-y:auto;">
+      <div id="adminDetailContent">
+        <!-- Rendered with full breakdown: site info, areas, plants, invasives, options -->
+      </div>
+    </div>
+    <div class="dialog-footer" style="padding:12px 20px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg-base);">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button type="button" id="adminDetailLoadToEditorBtn" class="btn btn-secondary" style="font-size:12px;">
+          <i data-lucide="folder-input"></i>
+          <span>Load into Workspace</span>
+        </button>
+        <button type="button" id="adminDetailDeleteReportBtn" class="btn btn-secondary" style="font-size:12px;color:var(--danger);border-color:rgba(220,38,38,0.35);" title="Permanently delete this consultation report">
+          <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+          <span>Delete Report</span>
+        </button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" onclick="document.getElementById('adminReportDetailModal').close()" class="btn btn-secondary" style="font-size:12px;">Close</button>
+        <button type="button" id="adminDetailPreliminaryBtn" class="btn btn-secondary" style="font-size:12px;font-weight:700;border-color:var(--primary);color:var(--primary);">
+          <i data-lucide="file-check-2"></i>
+          <span>Preliminary Report (PDF)</span>
+        </button>
+        <button type="button" id="adminDetailRegenerateDocxBtn" class="btn btn-primary" style="font-size:12px;font-weight:700;">
+          <i data-lucide="file-down"></i>
+          <span>Regenerate Word Report (.docx)</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Preliminary Consultation Report (PDF / Electronic Takeaway) Preview Modal -->
+  <dialog id="preliminaryReportModal" style="max-width:960px;width:96%;padding:0;border:none;border-radius:14px;overflow:hidden;" aria-modal="true" aria-labelledby="preliminaryReportModalTitle">
+    <div class="dialog-header" style="padding:12px 16px;background:#231F20;color:#ffffff;border-bottom:4px solid #9BBB59;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(155,187,89,0.2);border:1.5px solid #9BBB59;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="file-check-2" style="color:#9BBB59;width:20px;height:20px;"></i>
+        </div>
+        <div style="min-width:0;">
+          <h3 id="preliminaryReportModalTitle" style="font-size:15px;font-weight:800;margin:0;color:#ffffff;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Preliminary Site Visit Report (Client Takeaway)</h3>
+          <p style="font-size:11px;color:#d8e8b8;margin:2px 0 0 0;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Deep Roots KC branded ≤ 3-page PDF takeaway with clickable plant &amp; source links</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <button type="button" id="prelimShareBtn" class="btn btn-primary btn-sm" style="background:#9BBB59;color:#162208;border:1px solid #b5d576;font-weight:800;font-size:12px;padding:7px 12px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;" title="Convert to PDF and open share sheet to send via email">
+            <i data-lucide="send" style="width:14px;height:14px;"></i>
+            <span>Send to Client (PDF)</span>
+          </button>
+          <button type="button" id="prelimDownloadPdfBtn" class="btn btn-secondary btn-sm" style="background:#58B9DA;color:#0c2530;border:1px solid #7ecee8;font-weight:800;font-size:12px;padding:7px 12px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;" title="Download Preliminary Report as PDF">
+            <i data-lucide="file-down" style="width:14px;height:14px;"></i>
+            <span>Download PDF</span>
+          </button>
+          <button type="button" id="prelimPrintPdfBtn" class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.12);color:#ffffff;border:1px solid rgba(255,255,255,0.28);font-weight:700;font-size:12px;padding:7px 10px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;" title="Print Preliminary Report">
+            <i data-lucide="printer" style="width:14px;height:14px;"></i>
+            <span>Print</span>
+          </button>
+          <button type="button" id="prelimDownloadHtmlBtn" class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.12);color:#ffffff;border:1px solid rgba(255,255,255,0.28);font-weight:700;font-size:12px;padding:7px 10px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;" title="Download interactive HTML file">
+            <i data-lucide="code" style="width:14px;height:14px;"></i>
+            <span>.HTML</span>
+          </button>
+        </div>
+        <button type="button" id="prelimCloseModalBtn" onclick="document.getElementById('preliminaryReportModal').close()" aria-label="Close Preliminary Report dialog" title="Close Preliminary Report" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.14);color:#ffffff;border:1px solid rgba(255,255,255,0.35);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:4px;padding:0;align-self:flex-start;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div class="dialog-body" style="padding:12px;background:#e5e9df;max-height:78vh;overflow-y:auto;">
+      <iframe id="preliminaryReportPreviewFrame" title="Preliminary Consultation Report Preview" style="width:100%;height:72vh;border:1px solid #b8c79d;border-radius:6px;background:#ffffff;box-shadow:0 6px 20px rgba(0,0,0,0.12);"></iframe>
+    </div>
+  </dialog>
+
+  <!-- Edit Advisor Record Modal (Admin Only) -->
+  <dialog id="editUserModal" style="max-width:580px;width:95%;" aria-modal="true" aria-labelledby="editUserTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="user-cog" style="color:var(--primary);width:22px;height:22px;"></i>
+        <div>
+          <h3 id="editUserTitle" style="font-size:16px;font-weight:800;margin:0;">Edit Advisor Record</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Modify profile details, contact information, and security permissions</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('editUserModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="editUserForm" class="dialog-body" style="display:flex;flex-direction:column;gap:12px;">
+      <div id="editUserErrorBanner" style="display:none;background:var(--danger-bg);color:var(--danger);border:1px solid rgba(211,47,47,0.3);padding:8px 12px;border-radius:var(--radius-md);font-size:12px;"></div>
+
+      <input type="hidden" id="editUserUsername">
+
+      <!-- Moniker Profile Circle & Username Badge -->
+      <div style="background:var(--bg-base);padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="editUserMonikerPreview" style="width:42px;height:42px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:2px solid var(--primary-border);flex-shrink:0;">
+            CB
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.04em;">Username (Immutable ID)</div>
+            <strong id="editUserUsernameDisplay" style="font-family:monospace;color:var(--text-main);font-size:14px;">@chris.bradley</strong>
+          </div>
+        </div>
+        <span id="editUserRoleTag" class="role-badge admin">Admin</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editUserFirstName">First Name</label>
+          <input type="text" id="editUserFirstName" required placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label for="editUserLastName">Last Name</label>
+          <input type="text" id="editUserLastName" required placeholder="Last name">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editUserEmail">Email Address</label>
+          <input type="email" id="editUserEmail" required placeholder="Email address">
+        </div>
+        <div class="form-group">
+          <label for="editUserPhone">Phone Number</label>
+          <input type="tel" id="editUserPhone" placeholder="e.g. 913-424-2205">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editUserAdvisorType">Advisor Type</label>
+          <select id="editUserAdvisorType">
+            <option value="Advisor in Training">Advisor in Training</option>
+            <option value="Advisor">Advisor</option>
+            <option value="Senior Advisor">Senior Advisor</option>
+            <option value="Program Manager">Program Manager</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editUserRole">Security Role</label>
+          <select id="editUserRole">
+            <option value="user">User (Standard Nature Advisor)</option>
+            <option value="admin">Admin (Full Administrative Privileges)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="editUserTextSize">Display &amp; Text Size Preference</label>
+        <select id="editUserTextSize">
+          <option value="standard">Standard (100%)</option>
+          <option value="comfortable">Comfortable (110%)</option>
+          <option value="large">Large (125%)</option>
+          <option value="extra-large">Extra Large (140%)</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button type="button" onclick="document.getElementById('editUserModal').close()" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="submitEditUserBtn" class="btn btn-primary">
+          <i data-lucide="check"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Consultation Manager Dialog -->
+  <dialog id="consultationsModal" style="max-width:700px;width:95%;" aria-modal="true" aria-labelledby="consultationsTitle">
+    <div class="dialog-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i data-lucide="folder-kanban" style="color:var(--primary);width:24px;height:24px;"></i>
+        <div>
+          <h3 id="consultationsTitle" style="font-size:17px;font-weight:800;margin:0;">My Consultations</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Manage and switch between your client consultation reports</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('consultationsModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="padding:16px 20px;">
+      <div id="adminConsultationsRepoNotice" style="display:none;margin-bottom:12px;padding:10px 14px;background:var(--primary-light);border:1px solid var(--primary-border);border-radius:var(--radius-md);align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--primary-dark);font-weight:600;">
+          👑 <strong>Administrator Mode:</strong> You have access to all advisor consultation reports across the organization.
+        </span>
+        <button type="button" id="consultationsOpenAdminRepoBtn" class="btn btn-primary" style="font-size:11px;padding:5px 12px;white-space:nowrap;font-weight:700;">
+          <span>Open Full Repository &rarr;</span>
+        </button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+        <div style="position:relative;flex:1;min-width:200px;">
+          <input type="text" id="consultationSearchInput" placeholder="Search consultations by client, location, date..." style="width:100%;padding:9px 12px 9px 34px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-main);font-size:13px;box-sizing:border-box;" aria-label="Search consultations by client name, project address, or date">
+          <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted);"></i>
+        </div>
+        <button type="button" id="modalNewConsultationBtn" class="btn btn-primary" style="white-space:nowrap;padding:9px 14px;font-size:13px;font-weight:700;">
+          <i data-lucide="plus"></i>
+          <span>New Consultation</span>
+        </button>
+      </div>
+
+      <div id="consultationsListContainer" style="display:flex;flex-direction:column;gap:10px;max-height:440px;overflow-y:auto;padding-right:4px;">
+        <!-- Populated dynamically with consultation cards -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Plant Detail Dialog -->
+  <dialog id="plantDetailModal" aria-modal="true" aria-labelledby="modalCommonName">
+    <div class="dialog-header">
+      <div>
+        <h3 id="modalCommonName" style="font-size:18px;font-weight:800;line-height:1.2;"></h3>
+        <p id="modalSciName" style="font-family:var(--font-serif);font-style:italic;font-size:13px;color:var(--text-muted);"></p>
+        <div id="modalBadges" style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;"></div>
+        <div id="modalPendingApprovalAlert" style="display:none;margin-top:8px;background:#fef3c7;border-left:3px solid #d97706;padding:6px 10px;border-radius:4px;font-size:11px;color:#92400e;">
+          <i data-lucide="clock" style="width:13px;height:13px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>
+          <span id="modalPendingApprovalTxt">Proposed edits pending Administrator approval.</span>
+        </div>
+      </div>
+      <button onclick="document.getElementById('plantDetailModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <!-- Botanical Photo Gallery Container -->
+      <div id="modalPlantGalleryContainer"></div>
+      <img id="modalImg" src="" alt="" style="display:none;">
+      <div id="modalImgAttr" style="display:none;"></div>
+
+      <!-- Action bar in modal -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <a id="modalOfficialUrl" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="font-size:12px;">
+          <i data-lucide="external-link"></i>
+          <span>Official Plant Profile</span>
+        </a>
+        <button id="modalAddToReportBtn" class="btn btn-primary" style="font-size:12px;margin-left:auto;">
+          <i data-lucide="plus"></i>
+          <span>Add to Report</span>
+        </button>
+        <button id="modalEditBtn" class="btn btn-secondary" style="font-size:12px;">
+          <i data-lucide="edit-3"></i>
+          <span>Edit Record</span>
+        </button>
+      </div>
+
+      <!-- Advisor Description -->
+      <div style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);border-left:4px solid var(--primary);">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">Advisor Description</div>
+        <p id="modalAdvisorDesc" style="font-size:13px;line-height:1.5;color:var(--text-main);"></p>
+      </div>
+
+      <!-- Specifications Grid -->
+      <div class="specs-grid">
+        <div class="spec-item">
+          <span class="spec-label">Light</span>
+          <span class="spec-value" id="modalLight">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Moisture</span>
+          <span class="spec-value" id="modalMoisture">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Mature Height</span>
+          <span class="spec-value" id="modalHeight">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Soil Types</span>
+          <span class="spec-value" id="modalSoil">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Bloom Period</span>
+          <span class="spec-value" id="modalBloomPeriod">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Bloom Color</span>
+          <span class="spec-value" id="modalBloomColor">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Garden Layer</span>
+          <span class="spec-value" id="modalLayer">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Plant Sociability</span>
+          <span class="spec-value" id="modalSociability">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Native Habitat</span>
+          <span class="spec-value" id="modalHabitat">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Plant Type</span>
+          <span class="spec-value" id="modalPlantType">-</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Maintenance Level</span>
+          <span class="spec-value" id="modalMaintenanceLevel">-</span>
+        </div>
+      </div>
+
+      <!-- Wildlife & Keystone Interactions -->
+      <div style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent-keystone);margin-bottom:6px;">Wildlife &amp; Ecological Value</div>
+        <div id="modalWildlife" style="font-size:13px;line-height:1.6;color:var(--text-secondary);"></div>
+      </div>
+
+      <!-- Seasonal Maintenance & Conservation Care -->
+      <div id="modalMaintenanceContainer" style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);border-left:4px solid var(--accent-keystone);margin-top:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--primary);display:flex;align-items:center;gap:6px;">
+            <i data-lucide="wrench" style="width:14px;height:14px;"></i>
+            <span>Maintenance &amp; Ecological Care Guide</span>
+          </div>
+          <span id="modalMaintenanceBadge" class="meta-chip" style="font-weight:700;font-size:11px;">Low Maintenance</span>
+        </div>
+        <p id="modalMaintenanceSummary" style="font-size:13px;line-height:1.5;color:var(--text-main);margin-bottom:10px;"></p>
+        
+        <div id="modalMaintenanceGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;margin-top:10px;">
+          <!-- Dynamically injected season cards only when actions exist -->
+        </div>
+
+        <div id="modalDivisionContainer" style="background:var(--bg-surface);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);margin-top:10px;">
+          <strong style="font-size:12px;color:var(--text-main);display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+            <i data-lucide="git-branch" style="width:12px;height:12px;"></i> Root Division &amp; Propagation
+          </strong>
+          <p id="modalMaintDivision" style="font-size:12px;line-height:1.4;color:var(--text-secondary);margin:0;"></p>
+        </div>
+
+        <div style="margin-top:10px;font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
+          <i data-lucide="shield-check" style="width:13px;height:13px;color:var(--primary);"></i>
+          <span>Conservation Standards: <strong id="modalMaintSources">Xerces Society, Grow Native!, Missouri Botanical Garden</strong></span>
+        </div>
+      </div>
+
+      <!-- Author Attribution -->
+      <div id="modalAuthorAttribution" style="background:var(--bg-base);padding:10px 14px;border-radius:var(--radius-md);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);border:1px solid var(--border-subtle);margin-top:12px;">
+        <i data-lucide="user-check" style="width:16px;height:16px;color:var(--primary);"></i>
+        <span>Last edited by: <strong id="modalAuthorTxt" style="color:var(--text-main);">Deep Roots Master Catalog</strong></span>
+      </div>
+
+    </div>
+  </dialog>
+
+  <!-- Edit Plant Dialog -->
+  <dialog id="editPlantModal" aria-modal="true" aria-labelledby="editPlantTitle">
+    <div class="dialog-header">
+      <h3 id="editPlantTitle" style="font-size:16px;font-weight:800;">Edit Plant Record</h3>
+      <button onclick="document.getElementById('editPlantModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="editPlantForm" class="dialog-body">
+      <input type="hidden" id="editPlantId">
+      <div class="form-group">
+        <label for="editCommonName">Common Name</label>
+        <input type="text" id="editCommonName" required>
+      </div>
+      <div class="form-group">
+        <label for="editSciName">Scientific Name</label>
+        <input type="text" id="editSciName" required>
+      </div>
+      <div class="form-group">
+        <label for="editOfficialUrl">Official Plant Profile URL</label>
+        <input type="url" id="editOfficialUrl" placeholder="https://grownative.org/native_plants/...">
+      </div>
+      <div class="form-group">
+        <label for="editAdvisorDesc">Advisor Description</label>
+        <textarea id="editAdvisorDesc" rows="3" required></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editLight">Light Requirements</label>
+          <input type="text" id="editLight">
+        </div>
+        <div class="form-group">
+          <label for="editMoisture">Moisture</label>
+          <input type="text" id="editMoisture">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editHeight">Mature Height</label>
+          <input type="text" id="editHeight">
+        </div>
+        <div class="form-group">
+          <label for="editSociability">Plant Sociability</label>
+          <input type="text" id="editSociability">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="editMaintenanceLevel">Maintenance Level</label>
+        <select id="editMaintenanceLevel" style="width:100%;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-main);">
+          <option value="Low">Low Maintenance</option>
+          <option value="Medium">Medium Maintenance</option>
+          <option value="High">High Maintenance</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="editBloomColor">Bloom Colors</label>
+          <input type="text" id="editBloomColor" placeholder="e.g. Purple, Yellow, White">
+        </div>
+        <div class="form-group">
+          <label for="editBloomPeriod">Bloom Season</label>
+          <input type="text" id="editBloomPeriod" placeholder="e.g. Summer, Fall">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="editImageUrl">Image URL</label>
+        <input type="url" id="editImageUrl">
+      </div>
+      <div class="form-group">
+        <label for="editImageAttr">Photographer / Attribution</label>
+        <input type="text" id="editImageAttr">
+      </div>
+      <p id="editApprovalNotice" style="font-size:12px;background:var(--primary-subtle);color:var(--primary-dark);padding:8px 12px;border-radius:var(--radius-sm);margin:10px 0 0 0;line-height:1.4;display:none;">
+        ℹ️ Proposed edits will be submitted to the <strong>Admin Approval Inbox</strong> for review before updating the master database.
+      </p>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+        <button type="button" onclick="document.getElementById('editPlantModal').close()" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="editPlantSubmitBtn" class="btn btn-primary">Save Changes to Local &amp; Shared Database</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add New Plant Record Dialog -->
+  <dialog id="addPlantModal" aria-modal="true" aria-labelledby="addPlantTitle" style="max-width:680px;width:95%;">
+    <div class="dialog-header">
+      <div>
+        <h3 id="addPlantTitle" style="font-size:16px;font-weight:800;margin:0;">Add New Kansas City Native Plant Record</h3>
+        <p id="addPlantSubtitle" style="font-size:11px;color:var(--text-muted);margin:2px 0 0 0;">Contribute a verified indigenous species to the botanical catalog</p>
+      </div>
+      <button onclick="document.getElementById('addPlantModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <form id="addPlantForm" class="dialog-body" style="max-height:75vh;overflow-y:auto;">
+      <p id="addApprovalNotice" style="font-size:12px;background:var(--primary-subtle);color:var(--primary-dark);padding:8px 12px;border-radius:var(--radius-sm);margin:0 0 14px 0;line-height:1.4;">
+        ℹ️ Proposed species will be submitted to the <strong>Admin Approval Inbox</strong> for verification before landing in the master database.
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="addCommonName">Common Name *</label>
+          <input type="text" id="addCommonName" required placeholder="e.g. Purple Coneflower">
+        </div>
+        <div class="form-group">
+          <label for="addSciName">Scientific Name *</label>
+          <input type="text" id="addSciName" required placeholder="e.g. Echinacea purpurea">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="addPlantType">Plant Type *</label>
+          <select id="addPlantType" required class="sort-select" style="width:100%;">
+            <option value="Wildflower">Wildflower</option>
+            <option value="Grass">Grass</option>
+            <option value="Sedge">Sedge</option>
+            <option value="Shrub">Shrub</option>
+            <option value="Tree">Tree</option>
+            <option value="Vine">Vine</option>
+            <option value="Fern">Fern</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="addLayer">Architectural Layer *</label>
+          <select id="addLayer" required class="sort-select" style="width:100%;">
+            <option value="Seasonal/Herbaceous Layer">Seasonal/Herbaceous Layer</option>
+            <option value="Ground Cover">Ground Cover</option>
+            <option value="Shrub Layer">Shrub Layer</option>
+            <option value="Understory/Small Tree">Understory/Small Tree</option>
+            <option value="Canopy">Canopy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="addHabitat">Native Environment *</label>
+          <select id="addHabitat" required class="sort-select" style="width:100%;">
+            <option value="Prairie">Prairie</option>
+            <option value="Savannah/Woodland">Savannah/Woodland</option>
+            <option value="Forest">Forest</option>
+            <option value="Stream Edge/Wetland">Stream Edge/Wetland</option>
+            <option value="Cliff/Glade">Cliff/Glade</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="addHeight">Mature Height</label>
+          <input type="text" id="addHeight" placeholder="e.g. 2–4 ft">
+        </div>
+        <div class="form-group">
+          <label for="addLight">Light Requirements</label>
+          <input type="text" id="addLight" placeholder="e.g. Full Sun, Part Sun">
+        </div>
+        <div class="form-group">
+          <label for="addMoisture">Moisture Requirements</label>
+          <input type="text" id="addMoisture" placeholder="e.g. Medium, Medium-Dry">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="addSoil">Soil Requirements</label>
+          <input type="text" id="addSoil" placeholder="e.g. Loam, Clay, Sand">
+        </div>
+        <div class="form-group">
+          <label for="addBloomColor">Bloom Colors</label>
+          <input type="text" id="addBloomColor" placeholder="e.g. Purple, Pink">
+        </div>
+        <div class="form-group">
+          <label for="addBloomPeriod">Bloom Season</label>
+          <input type="text" id="addBloomPeriod" placeholder="e.g. Summer, Fall">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="addSociability">Plant Sociability</label>
+          <select id="addSociability" class="sort-select" style="width:100%;">
+            <option value="Moderately Social">Moderately Social</option>
+            <option value="Highly Social / Gregarious">Highly Social / Gregarious</option>
+            <option value="Less Social / Solitary">Less Social / Solitary</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="addMaintenanceLevel">Maintenance Level</label>
+          <select id="addMaintenanceLevel" class="sort-select" style="width:100%;">
+            <option value="Low">Low Maintenance</option>
+            <option value="Medium">Medium Maintenance</option>
+            <option value="High">High Maintenance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="addWildlife">Wildlife Benefits</label>
+          <input type="text" id="addWildlife" placeholder="e.g. Pollinator Magnet, Songbird Seeds">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="addPlantUrl">Missouri Botanical Garden PlantFinder URL</label>
+        <input type="url" id="addPlantUrl" placeholder="https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=...">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label for="addImageUrl">Specimen Image URL</label>
+          <input type="url" id="addImageUrl" placeholder="https://images.mobot.org/...">
+        </div>
+        <div class="form-group">
+          <label for="addImageAttr">Image Credit / Attribution</label>
+          <input type="text" id="addImageAttr" value="Courtesy Missouri Botanical Garden PlantFinder">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="addAdvisorDesc">Advisor Field Description *</label>
+        <textarea id="addAdvisorDesc" rows="3" required placeholder="Concise landscape notes for homeowners and nature advisors..."></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;border-top:1px solid var(--border-subtle);padding-top:12px;">
+        <button type="button" onclick="document.getElementById('addPlantModal').close()" class="btn btn-secondary">Cancel</button>
+        <button type="submit" id="addPlantSubmitBtn" class="btn btn-primary">Submit for Approval</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Database Sync & Admin Dialog -->
+  <dialog id="syncModal" aria-modal="true" aria-labelledby="syncModalTitle">
+    <div class="dialog-header">
+      <h3 id="syncModalTitle" style="font-size:16px;font-weight:800;">Shared Master Database Status</h3>
+      <button onclick="document.getElementById('syncModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <div style="background:var(--bg-base);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span>Database Engine:</span>
+          <strong id="dbEngineTxt" style="color:var(--primary);">Active Shared Master Catalog</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span>Master Plants Count:</span>
+          <strong id="dbCountTxt">185 Species</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span>Last Synchronized:</span>
+          <strong id="dbLastSyncTxt">Just now</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span>Custom Local Edits:</span>
+          <strong id="dbCustomCountTxt">0 Modified</strong>
+        </div>
+      </div>
+
+      <!-- Cloud Target Status Badge -->
+      <div style="background:var(--bg-base);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i data-lucide="cloud" style="width:16px;height:16px;color:var(--primary);"></i>
+          <div>
+            <div style="font-weight:700;color:var(--text-main);">Google Cloud Firestore</div>
+            <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">deep-roots-nature-advisors</div>
+          </div>
+        </div>
+        <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(46,125,50,0.12);color:var(--primary);border:1px solid rgba(46,125,50,0.25);">Connected</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button id="refreshFromDbBtn" class="btn btn-primary" style="width:100%;font-size:13px;">
+          <i data-lucide="refresh-cw"></i>
+          <span>Pull Fresh Data from Master Database</span>
+        </button>
+
+        <!-- Admin-Only Master Catalog Operations -->
+        <div id="syncAdminOptions" style="display:none;flex-direction:column;gap:10px;border-top:1px solid var(--border-subtle);padding-top:10px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:flex;align-items:center;gap:6px;">
+            <i data-lucide="shield" style="width:13px;height:13px;color:var(--primary);"></i>
+            <span>Administrator Controls</span>
+          </div>
+          <button id="seedFirestoreBtn" type="button" class="btn btn-secondary" style="width:100%;font-size:12px;color:var(--primary);">
+            <i data-lucide="upload-cloud"></i>
+            <span>Upload Master Plant Catalog to Firestore</span>
+          </button>
+          <button id="resetCustomEditsBtn" type="button" class="btn btn-secondary" style="width:100%;font-size:12px;color:var(--danger);">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Reset Local Edits to Clean Master Catalog</span>
+          </button>
+          <div>
+            <label class="btn btn-secondary" style="width:100%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;">
+              <i data-lucide="file-up"></i>
+              <span>Import Plants JSON (Android Backup)</span>
+              <input type="file" id="importJsonFileInput" accept=".json" style="display:none;" aria-label="Import plant database JSON file">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Invasive Removal Professionals Modal -->
+  <dialog id="contractorsModal" style="max-width: 680px; width: 92vw; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 0; box-shadow: var(--shadow-xl); background: var(--bg-surface); color: var(--text-main);" aria-modal="true" aria-labelledby="contractorsModalTitle">
+    <div class="dialog-header" style="background: var(--bg-surface-elevated, #fff1f2); border-bottom: 1px solid var(--border-subtle); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 22px;">🚜</span>
+        <div>
+          <h3 id="contractorsModalTitle" style="font-size: 16px; font-weight: 800; color: #dc2626; margin: 0;">Invasive Removal &amp; Natural Resource Contractors</h3>
+          <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Vetted local ecological contractors from official Deep Roots Nature Advisor templates</p>
+        </div>
+      </div>
+      <button type="button" id="closeContractorsModalBtn" onclick="document.getElementById('contractorsModal').close()" class="btn-icon" aria-label="Close dialog">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="padding: 16px 18px; max-height: 70vh; overflow-y: auto;">
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
+        The following vetted contractors specialize in invasive plant removal, forestry mulching, cut-stump herbicide treatments, and ecological restoration in the Greater Kansas City metropolitan area:
+      </p>
+      <div id="contractorsList" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Populated dynamically via JS -->
+      </div>
+      <div style="margin-top: 14px; padding: 12px; background: var(--bg-base); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-size: 12px; line-height: 1.5;">
+        <strong style="color: var(--text-main);">Looking for more native landscaping or design help?</strong> Visit the <a href="https://grownative.org/resource-guide/" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Grow Native! Professional Resource Guide</a> for a full regional directory of native nurseries, seed suppliers, and certified landscape designers.
+      </div>
+    </div>
+    <div class="dialog-footer" style="padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; background: var(--bg-surface-elevated, transparent);">
+      <button type="button" class="btn btn-secondary" id="closeContractorsModalFooterBtn" onclick="document.getElementById('contractorsModal').close()">Close</button>
+    </div>
+  </dialog>
+
+
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
