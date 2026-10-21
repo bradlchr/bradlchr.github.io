@@ -10,12 +10,9 @@
       --surface: #ffffff;
       --primary: #235c36;
       --primary-dark: #184226;
-      --primary-light: #e8f3eb;
       --text: #1c2921;
       --muted: #5a6d60;
       --border: #d5e0d7;
-      --success: #15803d;
-      --warn: #b45309;
     }
     * { box-sizing: border-box; }
     body {
@@ -148,21 +145,21 @@
     <div class="header">
       <div class="title-group">
         <h1>⚡ Deep Roots Modular Index Builder</h1>
-        <p>Combines all 10 files in <code class="mono">code-sections/</code> into <code class="mono">index.html</code>, <code class="mono">test.html</code>, and <code class="mono">test/index.html</code></p>
+        <p>100% standalone browser tool — combines all 10 files in <code class="mono">code-sections/</code> into <code class="mono">index.html</code>, <code class="mono">test.html</code>, and <code class="mono">test/index.html</code></p>
       </div>
-      <a href="./index.html" class="btn-link">🌱 Open Rebuilt App</a>
+      <a href="./index.html" class="btn-link">🌱 Open App</a>
     </div>
 
     <div id="statusBanner" class="status-banner">
-      <div id="statusIcon">⏳</div>
-      <div id="statusText">Running automatic rebuild from <code class="mono">code-sections/</code>...</div>
+      <div id="statusIcon">📂</div>
+      <div id="statusText">Ready to rebuild <code class="mono">index.html</code> from <code class="mono">code-sections/</code> (no background process required).</div>
     </div>
 
     <div class="btn-row">
-      <button id="rebuildNowBtn" class="primary" type="button">🔄 Rebuild Now</button>
-      <button id="pickFolderBtn" type="button" title="Select project folder to rebuild directly in the browser without Node.js">📂 Select Project Folder (Browser Mode)</button>
+      <button id="rebuildNowBtn" class="primary" type="button">🔄 Rebuild index.html Now</button>
+      <button id="changeFolderBtn" type="button">📂 Choose Project Folder</button>
       <label class="btn-link" style="cursor:pointer;">
-        📥 Load <code class="mono">code-sections/</code> &amp; Download
+        📥 Select <code class="mono">code-sections/</code> &amp; Download
         <input id="fallbackFolderInput" type="file" webkitdirectory multiple style="display:none;" />
       </label>
       <a href="./training.html" class="btn-link">🎓 Open Code Academy</a>
@@ -184,7 +181,7 @@
     </div>
 
     <div class="footer-note">
-      <strong>Tip:</strong> While the Linux VM helper is running, simply opening or refreshing this file (or saving any file in <code class="mono">code-sections/</code>) automatically rebuilds <code class="mono">index.html</code> on disk. You can also double-click <code class="mono">Rebuild-Index.bat</code> (Windows), <code class="mono">Rebuild-Index.command</code> (Mac), or <code class="mono">Rebuild-Index.sh</code> (Linux).
+      <strong>Zero Background Processes:</strong> This tool runs purely on demand when you click Rebuild. On desktop OSes with Node.js installed, you can also double-click <code class="mono">Rebuild-Index.bat</code> (Windows), <code class="mono">Rebuild-Index.command</code> (macOS), or <code class="mono">Rebuild-Index.sh</code> (Linux).
     </div>
   </div>
 
@@ -237,106 +234,126 @@
       `;
     }
 
-    // 1. Try instant local daemon trigger on 127.0.0.1:18514
-    async function tryLocalDaemonRebuild() {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 1800);
-        const res = await fetch("http://127.0.0.1:18514/rebuild", {
-          method: "POST",
-          signal: controller.signal
-        });
-        clearTimeout(timer);
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        if (data && data.ok) {
-          const timeStr = new Date(data.timestamp).toLocaleTimeString();
-          setStatus(
-            "success",
-            "✅",
-            `<strong>Rebuilt automatically on disk at ${timeStr}!</strong><br>` +
-            `Updated <code class="mono">${data.targets.join(", ")}</code> (${data.totalLines.toLocaleString()} lines, ${(data.totalBytes / 1024).toFixed(1)} KB in ${data.elapsedMs}ms).`
-          );
-          renderReport(data.sections, data.totalLines, data.totalBytes);
-          return true;
-        }
-      } catch (e) {
-        return false;
-      }
-      return false;
+    // IndexedDB helper to remember the selected directory handle across sessions
+    function openHandleDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open("DeepRootsBuilderDB", 1);
+        req.onupgradeneeded = () => {
+          req.result.createObjectStore("handles");
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
     }
 
-    // 2. Browser File System Access API (in-place write)
-    async function rebuildWithDirectoryPicker() {
+    async function getSavedDirHandle() {
+      try {
+        const db = await openHandleDB();
+        return await new Promise((resolve) => {
+          const tx = db.transaction("handles", "readonly");
+          const req = tx.objectStore("handles").get("projectDir");
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function saveDirHandle(handle) {
+      try {
+        const db = await openHandleDB();
+        await new Promise((resolve) => {
+          const tx = db.transaction("handles", "readwrite");
+          tx.objectStore("handles").put(handle, "projectDir");
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        });
+      } catch (_) {}
+    }
+
+    async function rebuildFromDirectoryHandle(dirHandle) {
+      const perm = await dirHandle.requestPermission({ mode: "readwrite" });
+      if (perm !== "granted") {
+        throw new Error("Write permission was not granted for the selected folder.");
+      }
+
+      let sectionsDirHandle = dirHandle;
+      let rootDirHandle = null;
+      try {
+        sectionsDirHandle = await dirHandle.getDirectoryHandle("code-sections");
+        rootDirHandle = dirHandle;
+      } catch (_) {
+        sectionsDirHandle = dirHandle;
+      }
+
+      const parts = [];
+      const sectionsReport = [];
+      for (const fileName of SECTION_FILES) {
+        const fileHandle = await sectionsDirHandle.getFileHandle(fileName);
+        const file = await fileHandle.getFile();
+        const raw = await file.text();
+        const stripped = stripSectionHeader(raw);
+        parts.push(stripped);
+        sectionsReport.push({
+          file: fileName,
+          lines: stripped.split("\n").length,
+          bytes: new Blob([stripped]).size
+        });
+      }
+
+      const combined = parts.join("\n");
+      const totalLines = combined.split("\n").length;
+      const totalBytes = new Blob([combined]).size;
+
+      if (rootDirHandle) {
+        for (const targetName of ["index.html", "test.html"]) {
+          const outHandle = await rootDirHandle.getFileHandle(targetName, { create: true });
+          const writable = await outHandle.createWritable();
+          await writable.write(combined);
+          await writable.close();
+        }
+        try {
+          const testDir = await rootDirHandle.getDirectoryHandle("test");
+          const testIdxHandle = await testDir.getFileHandle("index.html", { create: true });
+          const writable = await testIdxHandle.createWritable();
+          await writable.write(combined);
+          await writable.close();
+        } catch (_) {}
+
+        setStatus(
+          "success",
+          "✅",
+          `<strong>Rebuilt directly in project folder at ${new Date().toLocaleTimeString()}!</strong><br>` +
+          `Updated <code class="mono">index.html</code>, <code class="mono">test.html</code>, and <code class="mono">test/index.html</code> (${totalLines.toLocaleString()} lines, ${(totalBytes / 1024).toFixed(1)} KB).`
+        );
+      } else {
+        downloadCombinedIndex(combined);
+        setStatus(
+          "success",
+          "✅",
+          `<strong>Assembled all 10 sections (${totalLines.toLocaleString()} lines) and started download of <code class="mono">index.html</code>!</strong>`
+        );
+      }
+      renderReport(sectionsReport, totalLines, totalBytes);
+    }
+
+    async function pickAndRebuild(forcePick) {
       if (!window.showDirectoryPicker) {
-        alert("Your browser does not support direct folder writing. Please use the 'Load code-sections/ & Download' button instead.");
+        document.getElementById("fallbackFolderInput").click();
         return;
       }
       try {
-        const dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
-        // Check if user picked the root project directory or code-sections itself
-        let sectionsDirHandle = dirHandle;
-        let rootDirHandle = null;
-        try {
-          sectionsDirHandle = await dirHandle.getDirectoryHandle("code-sections");
-          rootDirHandle = dirHandle;
-        } catch (_) {
-          // User picked code-sections directly
-          sectionsDirHandle = dirHandle;
+        let dirHandle = forcePick ? null : await getSavedDirHandle();
+        if (!dirHandle) {
+          dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+          await saveDirHandle(dirHandle);
         }
-
-        const parts = [];
-        const sectionsReport = [];
-        for (const fileName of SECTION_FILES) {
-          const fileHandle = await sectionsDirHandle.getFileHandle(fileName);
-          const file = await fileHandle.getFile();
-          const raw = await file.text();
-          const stripped = stripSectionHeader(raw);
-          parts.push(stripped);
-          sectionsReport.push({
-            file: fileName,
-            lines: stripped.split("\n").length,
-            bytes: new Blob([stripped]).size
-          });
-        }
-
-        const combined = parts.join("\n");
-        const totalLines = combined.split("\n").length;
-        const totalBytes = new Blob([combined]).size;
-
-        if (rootDirHandle) {
-          for (const targetName of ["index.html", "test.html"]) {
-            const outHandle = await rootDirHandle.getFileHandle(targetName, { create: true });
-            const writable = await outHandle.createWritable();
-            await writable.write(combined);
-            await writable.close();
-          }
-          try {
-            const testDir = await rootDirHandle.getDirectoryHandle("test");
-            const testIdxHandle = await testDir.getFileHandle("index.html", { create: true });
-            const writable = await testIdxHandle.createWritable();
-            await writable.write(combined);
-            await writable.close();
-          } catch (_) {}
-
-          setStatus(
-            "success",
-            "✅",
-            `<strong>Rebuilt directly to project folder!</strong><br>` +
-            `Wrote <code class="mono">index.html</code>, <code class="mono">test.html</code>, and <code class="mono">test/index.html</code> (${totalLines.toLocaleString()} lines).`
-          );
-        } else {
-          downloadCombinedIndex(combined);
-          setStatus(
-            "success",
-            "✅",
-            `<strong>Assembled all 10 sections (${totalLines.toLocaleString()} lines) and started download of <code class="mono">index.html</code>!</strong>`
-          );
-        }
-        renderReport(sectionsReport, totalLines, totalBytes);
+        setStatus("", "⏳", "Reading <code class='mono'>code-sections/</code> and writing <code class='mono'>index.html</code>...");
+        await rebuildFromDirectoryHandle(dirHandle);
       } catch (err) {
         if (err.name !== "AbortError") {
-          setStatus("warn", "⚠️", `Could not rebuild via folder picker: ${err.message}`);
+          setStatus("warn", "⚠️", `Could not rebuild: ${err.message}. Click <strong>"Choose Project Folder"</strong> to re-select the project directory.`);
         }
       }
     }
@@ -353,7 +370,6 @@
       setTimeout(() => URL.revokeObjectURL(url), 5000);
     }
 
-    // 3. Universal <input type="file" webkitdirectory> fallback
     document.getElementById("fallbackFolderInput").addEventListener("change", async (e) => {
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
@@ -390,24 +406,17 @@
       renderReport(sectionsReport, totalLines, totalBytes);
     });
 
-    document.getElementById("rebuildNowBtn").addEventListener("click", async () => {
-      setStatus("", "⏳", "Rebuilding <code class='mono'>index.html</code>...");
-      const ok = await tryLocalDaemonRebuild();
-      if (!ok) {
-        await rebuildWithDirectoryPicker();
-      }
-    });
+    document.getElementById("rebuildNowBtn").addEventListener("click", () => pickAndRebuild(false));
+    document.getElementById("changeFolderBtn").addEventListener("click", () => pickAndRebuild(true));
 
-    document.getElementById("pickFolderBtn").addEventListener("click", rebuildWithDirectoryPicker);
-
-    // Run automatically when double-clicked / opened!
+    // Check if we already have a saved directory handle from a previous run
     (async () => {
-      const ok = await tryLocalDaemonRebuild();
-      if (!ok) {
+      const saved = await getSavedDirHandle();
+      if (saved) {
         setStatus(
-          "warn",
-          "📂",
-          `<strong>Ready to rebuild in Browser Mode:</strong> Click <strong>"Select Project Folder (Browser Mode)"</strong> below and select the <code class="mono">Native Plant Database</code> folder to overwrite <code class="mono">index.html</code> in place.`
+          "",
+          "✅",
+          `Saved project folder (<code class="mono">${saved.name}</code>) is ready. Click <strong>"🔄 Rebuild index.html Now"</strong> above to rebuild in one click.`
         );
       }
     })();
