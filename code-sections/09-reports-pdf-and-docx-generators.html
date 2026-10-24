@@ -275,18 +275,176 @@
       };
     }
 
-    // Deduplicate identical parenthetical markdown link URLs within a single bullet string without ever stripping links to plain text
+    // Normalize and canonicalize botanical & conservation sources so identical sources reuse the same citation number
+    function canonicalizeSourceCitation(label, url, accessedDateStr) {
+      const rawLabel = String(label || 'Source').replace(/^["“]+|["”.]+$/g, '').trim() || 'Source';
+      const rawUrl = String(url || '').trim();
+      const lowerLabel = rawLabel.toLowerCase();
+      const normUrl = rawUrl.toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '');
+      const accessed = accessedDateStr || formatReportAccessedDate();
+
+      if (
+        lowerLabel === 'missouri botanical garden plantfinder' ||
+        lowerLabel === 'missouri botanical garden' ||
+        normUrl.startsWith('missouribotanicalgarden.org/plantfinder')
+      ) {
+        return {
+          key: 'source:mobot-plantfinder',
+          label: 'Missouri Botanical Garden PlantFinder',
+          url: 'https://www.missouribotanicalgarden.org/plantfinder/plantfindersearch.aspx',
+          accessed
+        };
+      }
+      if (
+        lowerLabel === 'grow native!' ||
+        lowerLabel === 'grow native' ||
+        lowerLabel.startsWith('grow native!:') ||
+        normUrl.startsWith('grownative.org/native_plants') ||
+        normUrl === 'grownative.org' ||
+        normUrl === 'grownative.org/native-plant-database'
+      ) {
+        return {
+          key: 'source:grow-native',
+          label: 'Grow Native! Native Plant Database – Missouri Prairie Foundation',
+          url: 'https://grownative.org/native-plant-database/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('illinois wildflowers') || normUrl.startsWith('illinoiswildflowers.info')) {
+        return {
+          key: 'source:illinois-wildflowers',
+          label: 'Illinois Wildflowers Database',
+          url: 'https://www.illinoiswildflowers.info/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('butterflies and moths') || normUrl.startsWith('butterfliesandmoths.org')) {
+        return {
+          key: 'source:bamona',
+          label: 'Butterflies and Moths of North America (BAMONA)',
+          url: 'https://www.butterfliesandmoths.org/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('lady bird johnson') || lowerLabel.includes('wildflower center') || normUrl.startsWith('wildflower.org')) {
+        return {
+          key: 'source:wildflower-center',
+          label: 'Lady Bird Johnson Wildflower Center Native Plant Database',
+          url: 'https://www.wildflower.org/plants/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('usda plants') || normUrl.startsWith('plants.usda.gov')) {
+        return {
+          key: 'source:usda-plants',
+          label: 'USDA NRCS PLANTS Database',
+          url: 'https://plants.usda.gov/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('flora of north america') || normUrl.startsWith('floranorthamerica.org')) {
+        return {
+          key: 'source:fna',
+          label: 'Flora of North America',
+          url: 'http://floranorthamerica.org/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('leave the leaves') && (lowerLabel.includes('xerces') || normUrl.includes('xerces.org'))) {
+        return {
+          key: 'source:xerces-leave-the-leaves',
+          label: 'Leave the Leaves – The Xerces Society for Invertebrate Conservation',
+          url: 'https://xerces.org/leave-the-leaves',
+          accessed
+        };
+      }
+      if (
+        (lowerLabel.includes('nesting') && lowerLabel.includes('xerces')) ||
+        lowerLabel.includes('xerces stem') ||
+        normUrl.includes('nesting-overwintering-habitat')
+      ) {
+        return {
+          key: 'source:xerces-nesting',
+          label: 'Nesting & Overwintering Habitat for Pollinators – The Xerces Society',
+          url: 'https://xerces.org/publications/guidelines/nesting-overwintering-habitat',
+          accessed
+        };
+      }
+      if (
+        lowerLabel === 'xerces society' ||
+        lowerLabel === 'xerces society for invertebrate conservation' ||
+        lowerLabel === 'the xerces society for invertebrate conservation' ||
+        lowerLabel === 'xerces society: pollinator conservation' ||
+        normUrl === 'xerces.org' ||
+        normUrl === 'xerces.org/pollinator-conservation' ||
+        normUrl === 'xerces.org/pollinator-conservation/plant-lists'
+      ) {
+        return {
+          key: 'source:xerces-general',
+          label: 'The Xerces Society for Invertebrate Conservation',
+          url: 'https://xerces.org/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('national wildlife federation') || (lowerLabel.includes('leave the leaves') && normUrl.includes('nwf.org'))) {
+        return {
+          key: 'source:nwf-leave-the-leaves',
+          label: 'Leave the Leaves – National Wildlife Federation',
+          url: 'https://www.nwf.org/Magazines/National-Wildlife/2015/OctNov/Gardening/Leave-the-Leaves',
+          accessed
+        };
+      }
+      if (
+        lowerLabel === 'missouri department of conservation' ||
+        lowerLabel === 'mdc field guide' ||
+        normUrl === 'mdc.mo.gov/discover-nature/field-guide'
+      ) {
+        return {
+          key: 'source:mdc-field-guide',
+          label: 'Discover Nature Field Guide – Missouri Department of Conservation',
+          url: 'https://mdc.mo.gov/discover-nature/field-guide',
+          accessed
+        };
+      }
+      if (lowerLabel === 'all about birds' || normUrl.startsWith('allaboutbirds.org/guide')) {
+        return {
+          key: 'source:all-about-birds',
+          label: 'All About Birds – Cornell Lab of Ornithology',
+          url: 'https://www.allaboutbirds.org/',
+          accessed
+        };
+      }
+      if (lowerLabel.includes('monarch watch') || normUrl === 'monarchwatch.org') {
+        return {
+          key: 'source:monarch-watch',
+          label: 'Monarch Watch',
+          url: 'https://monarchwatch.org/',
+          accessed
+        };
+      }
+      return {
+        key: normUrl ? `url:${normUrl}` : `label:${lowerLabel}`,
+        label: rawLabel,
+        url: rawUrl,
+        accessed
+      };
+    }
+
+    // Deduplicate identical parenthetical markdown link URLs or canonical sources within a single bullet string
     function deduplicateMarkdownLinksInBullet(text) {
       if (!text) return '';
-      const seenUrls = new Set();
+      const seenKeys = new Set();
       // Match ([Label](url)) or [Label](url)
       return String(text).replace(/\(\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)\)|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (full, pLabel, pUrl, bLabel, bUrl) => {
+        const label = (pLabel || bLabel || '').trim();
         const url = (pUrl || bUrl || '').trim();
         const normUrl = url.replace(/\/+$/, '').toLowerCase();
-        if (seenUrls.has(normUrl)) {
-          return pLabel ? '' : full;
+        const canon = canonicalizeSourceCitation(label, url);
+        if (seenKeys.has(normUrl) || seenKeys.has(canon.key)) {
+          return pLabel ? '' : label;
         }
-        seenUrls.add(normUrl);
+        seenKeys.add(normUrl);
+        seenKeys.add(canon.key);
         return full;
       }).replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1').trim();
     }
@@ -407,15 +565,19 @@
 
     function createCitationCollector(accessedDateStr) {
       const citations = [];
+      const keyToNum = new Map();
       const addCitation = (label, url) => {
-        const cleanLabel = String(label || 'Source').replace(/\.+$/, '').trim();
-        const cleanUrl = String(url || '').trim();
+        const canon = canonicalizeSourceCitation(label, url, accessedDateStr);
+        if (keyToNum.has(canon.key)) {
+          return keyToNum.get(canon.key);
+        }
         const num = citations.length + 1;
+        keyToNum.set(canon.key, num);
         citations.push({
           num,
-          label: cleanLabel,
-          url: cleanUrl,
-          accessed: accessedDateStr || formatReportAccessedDate()
+          label: canon.label,
+          url: canon.url,
+          accessed: canon.accessed
         });
         return num;
       };
@@ -424,7 +586,7 @@
 
     function renderInlineMarkdownWithCitationsMd(text, collector, plantRef = null) {
       if (!text) return '';
-      const segments = parseInlineMarkdownSegments(text, plantRef);
+      const segments = parseInlineMarkdownSegments(deduplicateMarkdownLinksInBullet(text), plantRef);
       return segments.map(seg => {
         if (seg.type === 'link') {
           const num = collector ? collector.addCitation(seg.text, seg.url) : null;
@@ -439,7 +601,7 @@
 
     function renderInlineMarkdownWithCitationsHtml(text, collector, plantRef = null) {
       if (!text) return '';
-      const segments = parseInlineMarkdownSegments(text, plantRef);
+      const segments = parseInlineMarkdownSegments(deduplicateMarkdownLinksInBullet(text), plantRef);
       return segments.map(seg => {
         if (seg.type === 'link') {
           const num = collector ? collector.addCitation(seg.text, seg.url) : null;
@@ -2661,7 +2823,7 @@
 
           function buildRichRunsXml(markdownText, plantRef = null) {
             if (!markdownText) return '';
-            const segments = parseInlineMarkdownSegments(markdownText, plantRef);
+            const segments = parseInlineMarkdownSegments(deduplicateMarkdownLinksInBullet(markdownText), plantRef);
             let out = '';
             for (const seg of segments) {
               if (seg.type === 'link') {
@@ -2670,7 +2832,8 @@
                 const tempFnId = tempFnCounter++;
                 pendingPlantFootnotes.set(String(tempFnId), {
                   label: seg.text.replace(/\.+$/, '').trim(),
-                  url: seg.url
+                  url: seg.url,
+                  accessed: accessedDateFormatted
                 });
                 out += `<w:hyperlink r:id="${linkRId}" w:history="1"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:u w:val="single"/></w:rPr><w:t xml:space="preserve">${escapeXml(seg.text)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${tempFnId}"/></w:r>`;
               } else if (seg.type === 'italic') {
@@ -2727,11 +2890,22 @@
                 const sciName = resolved.scientific_name;
                 const desc = resolved.advisor_description;
 
-                const mainPlantFnId = tempFnCounter++;
-                pendingPlantFootnotes.set(String(mainPlantFnId), {
-                  label: `${commonName} (${sciName})`,
-                  url: targetUrl
-                });
+                const plantCanon = canonicalizeSourceCitation(`${commonName} (${sciName})`, targetUrl, accessedDateFormatted);
+                const descSegments = parseInlineMarkdownSegments(deduplicateMarkdownLinksInBullet(desc || ''), resolved);
+                const descAlreadyCitesSameSource = descSegments.some(
+                  seg => seg.type === 'link' && canonicalizeSourceCitation(seg.text, seg.url, accessedDateFormatted).key === plantCanon.key
+                );
+
+                let mainPlantFnXml = '';
+                if (!descAlreadyCitesSameSource) {
+                  const mainPlantFnId = tempFnCounter++;
+                  pendingPlantFootnotes.set(String(mainPlantFnId), {
+                    label: `${commonName} (${sciName})`,
+                    url: targetUrl,
+                    accessed: accessedDateFormatted
+                  });
+                  mainPlantFnXml = `<w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${mainPlantFnId}"/></w:r>`;
+                }
 
                 plantBlocks += `
 <w:p>
@@ -2754,7 +2928,7 @@
             <w:t>${escapeXml(commonName)}</w:t>
         </w:r>
     </w:hyperlink>
-    <w:r><w:rPr><w:rFonts w:cs="Times New Roman"/><w:vertAlign w:val="superscript"/></w:rPr><w:footnoteReference w:id="${mainPlantFnId}"/></w:r>
+    ${mainPlantFnXml}
     <w:r>
         <w:rPr><w:i/></w:rPr>
         <w:t xml:space="preserve"> (${escapeXml(sciName)}) – </w:t>
@@ -3205,75 +3379,131 @@
           docXml = docXml.replace(/<w:color\s+w:val="(?:FF0000|C00000|red|9900FF)"[^>]*\/>/gi, '<w:color w:val="000000"/>');
           docXml = docXml.replace(/You might be interested\/You also expressed interest/g, "You may also be interested");
 
-          // 8. Synchronize & Renumber All Document Footnotes Sequentially (1..M) in word/footnotes.xml
+          // 8. Convert all page-bottom footnotes into deduplicated inline [N] citations and place all sources at the end of the report
           const fnFile = zip.file('word/footnotes.xml');
           const fnRelsFile = zip.file('word/_rels/footnotes.xml.rels');
-          if (fnFile && fnRelsFile) {
-            let footnotesXml = await fnFile.async('string');
-            let footnotesRelsXml = await fnRelsFile.async('string');
+          const existingFnInfoMap = new Map();
+          let separatorFootnotesXml = '';
+          let footnotesXml = '';
 
-            // Parse existing footnotes from word/footnotes.xml
-            const existingFnMap = new Map();
-            let separatorFootnotesXml = '';
+          if (fnFile && fnRelsFile) {
+            footnotesXml = await fnFile.async('string');
+            const footnotesRelsXml = await fnRelsFile.async('string');
+
+            const fnRelTargetMap = new Map();
+            const fnRelEntryRegex = /<Relationship\b[^>]*?\bId="(rId\d+)"[^>]*?\bTarget="([^"]+)"[^>]*?>/gi;
+            let fnRelEntryMatch;
+            while ((fnRelEntryMatch = fnRelEntryRegex.exec(footnotesRelsXml)) !== null) {
+              fnRelTargetMap.set(fnRelEntryMatch[1], fnRelEntryMatch[2]);
+            }
+
             const fnBlockRegex = /<w:footnote\b[^>]*\bw:id="(-?\d+)"[^>]*>[\s\S]*?<\/w:footnote>/g;
             let fnBlockMatch;
             while ((fnBlockMatch = fnBlockRegex.exec(footnotesXml)) !== null) {
               const fnId = fnBlockMatch[1];
+              const fnBlock = fnBlockMatch[0];
               if (fnId === '-1' || fnId === '0') {
-                separatorFootnotesXml += fnBlockMatch[0];
+                separatorFootnotesXml += fnBlock;
               } else {
-                existingFnMap.set(fnId, fnBlockMatch[0]);
+                const rIdMatch = fnBlock.match(/r:id="(rId\d+)"/);
+                const url = rIdMatch ? (fnRelTargetMap.get(rIdMatch[1]) || '') : '';
+                const plainTxt = fnBlock
+                  .replace(/<[^>]+>/g, '')
+                  .replace(/&amp;/g, '&')
+                  .replace(/&quot;/g, '"')
+                  .replace(/&apos;/g, "'")
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                const qMatch = plainTxt.match(/^["“]([^"”]+)["”]/);
+                const label = qMatch
+                  ? qMatch[1].replace(/\.+$/, '').trim()
+                  : plainTxt.split(/https?:\/\//i)[0].replace(/^["“.\s]+|["”.\s]+$/g, '').trim();
+                const accMatch = plainTxt.match(/Accessed\s+([^.]+)\.?/i);
+                const accessed = accMatch ? accMatch[1].trim() : accessedDateFormatted;
+                existingFnInfoMap.set(fnId, {
+                  label: label || 'Reference Source',
+                  url,
+                  accessed
+                });
               }
             }
+          }
 
-            // Scan docXml in sequential document order for all <w:footnoteReference w:id="..."/>
-            const orderedOldIds = [];
-            const oldToNewId = new Map();
-            let fnSeq = 1;
-            docXml = docXml.replace(/<w:footnoteReference\b([^>]*?)\bw:id="(\d+)"([^>]*?)\/>/g, (full, pre, oldId, post) => {
-              let assignedId = oldToNewId.get(oldId);
-              if (!assignedId) {
-                assignedId = String(fnSeq++);
-                oldToNewId.set(oldId, assignedId);
-                orderedOldIds.push(oldId);
-              }
-              return `<w:footnoteReference${pre}w:id="${assignedId}"${post}/>`;
-            });
+          // Scan docXml in sequential document order, deduplicate identical sources, and replace <w:footnoteReference/> with inline [N]
+          const endSourcesList = [];
+          const canonKeyToNum = new Map();
 
-            let fnRelCounter = 500;
-            const fnRelMatches = footnotesRelsXml.match(/Id="rId(\d+)"/g);
-            if (fnRelMatches) {
-              const maxFnRel = Math.max(...fnRelMatches.map(m => parseInt(m.replace(/\D/g, ''), 10) || 0));
-              if (maxFnRel >= fnRelCounter) fnRelCounter = maxFnRel + 1;
+          docXml = docXml.replace(/<w:footnoteReference\b([^>]*?)\bw:id="(\d+)"([^>]*?)\/>/g, (full, pre, oldId) => {
+            const rawInfo = pendingPlantFootnotes.get(oldId)
+              || existingFnInfoMap.get(oldId)
+              || { label: 'Reference Source', url: 'https://deeproots.org', accessed: accessedDateFormatted };
+            const canon = canonicalizeSourceCitation(rawInfo.label, rawInfo.url, rawInfo.accessed || accessedDateFormatted);
+            let assignedNum = canonKeyToNum.get(canon.key);
+            if (!assignedNum) {
+              assignedNum = endSourcesList.length + 1;
+              canonKeyToNum.set(canon.key, assignedNum);
+              endSourcesList.push({
+                num: assignedNum,
+                label: canon.label,
+                url: canon.url,
+                accessed: canon.accessed
+              });
             }
+            return `<w:t xml:space="preserve">[${assignedNum}]</w:t>`;
+          });
 
-            let newFnRels = '';
-            let rebuiltFootnotesBody = separatorFootnotesXml;
-
-            for (const oldId of orderedOldIds) {
-              const newId = oldToNewId.get(oldId);
-              if (pendingPlantFootnotes.has(oldId)) {
-                const info = pendingPlantFootnotes.get(oldId);
-                const fnRId = `rId${fnRelCounter++}`;
-                newFnRels += `<Relationship Id="${fnRId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(info.url)}" TargetMode="External"/>`;
-                rebuiltFootnotesBody += `<w:footnote w:id="${newId}"><w:p><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto" /><w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr></w:pPr><w:r><w:rPr><w:vertAlign w:val="superscript" /></w:rPr><w:footnoteRef /></w:r><w:r><w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr><w:t xml:space="preserve"> "${escapeXml(info.label)}." </w:t></w:r><w:hyperlink r:id="${fnRId}"><w:r><w:rPr><w:color w:val="1155CC" /><w:sz w:val="20" /><w:szCs w:val="20" /><w:u w:val="single" /></w:rPr><w:t>${escapeXml(info.url)}</w:t></w:r></w:hyperlink><w:r><w:rPr><w:sz w:val="20" /><w:szCs w:val="20" /></w:rPr><w:t>. Accessed ${escapeXml(accessedDateFormatted)}.</w:t></w:r></w:p></w:footnote>`;
-              } else if (existingFnMap.has(oldId)) {
-                const origBlock = existingFnMap.get(oldId);
-                const updatedBlock = origBlock.replace(/(<w:footnote\b[^>]*?\bw:id=")(\d+)(")/, `$1${newId}$3`);
-                rebuiltFootnotesBody += updatedBlock;
-              }
-            }
-
+          // Clear page-bottom footnotes in word/footnotes.xml so no sources appear at the bottom of pages
+          if (fnFile && footnotesXml) {
             const fnHeaderMatch = footnotesXml.match(/^[\s\S]*?<w:footnotes\b[^>]*>/);
             const fnOpenTag = fnHeaderMatch ? fnHeaderMatch[0] : `<?xml version="1.0" encoding="utf-8"?><w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`;
-            footnotesXml = `${fnOpenTag}${rebuiltFootnotesBody}</w:footnotes>`;
+            zip.file('word/footnotes.xml', `${fnOpenTag}${separatorFootnotesXml}</w:footnotes>`);
+          }
 
-            if (newFnRels.length > 0) {
-              footnotesRelsXml = footnotesRelsXml.replace('</Relationships>', `${newFnRels}</Relationships>`);
+          // Append consolidated "SOURCES CITED" section at the very end of the report (before <w:sectPr)
+          if (endSourcesList.length > 0) {
+            let sourcesSectionXml = `
+<w:p>
+    <w:pPr>
+        <w:pStyle w:val="Heading1"/>
+        <w:spacing w:before="280" w:after="120"/>
+    </w:pPr>
+    <w:r><w:t>SOURCES CITED</w:t></w:r>
+</w:p>`;
+            for (const src of endSourcesList) {
+              let linkRunXml = '';
+              if (src.url) {
+                const srcRId = `rId${relCounter++}`;
+                newRels += `<Relationship Id="${srcRId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(src.url)}" TargetMode="External"/>`;
+                linkRunXml = `<w:hyperlink r:id="${srcRId}" w:history="1"><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:rStyle w:val="Hyperlink"/><w:color w:val="1155CC"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:u w:val="single"/></w:rPr><w:t>${escapeXml(src.url)}</w:t></w:r></w:hyperlink>`;
+              }
+              sourcesSectionXml += `
+<w:p>
+    <w:pPr>
+        <w:spacing w:before="30" w:after="40" w:line="240" w:lineRule="auto"/>
+        <w:ind w:left="360" w:hanging="360"/>
+    </w:pPr>
+    <w:r>
+        <w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:b/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>
+        <w:t xml:space="preserve">[${src.num}] </w:t>
+    </w:r>
+    <w:r>
+        <w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>
+        <w:t xml:space="preserve">"${escapeXml(src.label)}." </w:t>
+    </w:r>
+    ${linkRunXml}
+    <w:r>
+        <w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>
+        <w:t>. Accessed ${escapeXml(src.accessed)}.</w:t>
+    </w:r>
+</w:p>`;
             }
 
-            zip.file('word/footnotes.xml', footnotesXml);
-            zip.file('word/_rels/footnotes.xml.rels', footnotesRelsXml);
+            const lastSectPrIdx = docXml.lastIndexOf('<w:sectPr');
+            if (lastSectPrIdx !== -1) {
+              docXml = docXml.slice(0, lastSectPrIdx) + sourcesSectionXml + docXml.slice(lastSectPrIdx);
+            } else {
+              docXml = docXml.replace('</w:body>', `${sourcesSectionXml}</w:body>`);
+            }
           }
 
           // Append hyperlink relationships
