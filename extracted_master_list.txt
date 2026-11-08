@@ -1,0 +1,284 @@
+0: Resource Plant List for Nature Advisor Reports
+1: How to use: This is a living document where we can add plants that are commonly used in our reports. Add plants to this list if they are missing.
+2: Plants are grouped by their native environment and then listed alphabetically by botanical names (since there can be many common names for one plant).
+3: If a plant has multiple native environments, we place it into the primary environment.
+4: Copy/paste the desired plant into your Nature Advisor report. The formatting is already done.
+5: You can use what you want from the plant description in your report. Feel free to add to or edit the descriptions, keeping each to 3 lines or less of text.
+6: Assess each client’s appetite and understanding of plant communities and make only enough species recommendations to encourage – not overwhelm. Use the Deep Roots Sweet 16 and KC Keystones list for easy reference, and their ready-made garden designs that can be easily implemented.
+7: I.Forest1
+8: II.Cliff/Glade5
+9: III.Prairie8
+10: IV.Savannah/Woodland12
+11: V.Stream Edge/Wetland18
+12: VI.Container Planting Ideas with Native Plants21
+13: VII.Native Plant Designs from Deep Roots21
+14: VIII.Suggested additions22
+15: *= Highly gregarious plant, per Cydney Ross list at bottom of document
+16: Forest
+17: Downy Serviceberry - (Amelanchier arborea) A large shrub or small tree reaching 15-20’ in height with white showy flowers in spring, good fall color, and purplish-black berries in summer that birds love.
+18: Shadblow Serviceberry - (Amelanchier candensis) More shrub-like and thicket forming than Downy, with equivalent blooms and size; and it can thrive in more moist soils.
+19: Winterberry / Deciduous Holly (Ilex verticillata) – Excellent understory shrub for birds, preferring streamside, boggy soils or irrigated landscape beds. Like other Hollies, this plant is dioicous, requiring separate male and female plants to produce fruit – an eye-catching source of food for overwintering birds and mammals.
+20: Leatherwood – (Dirca palustris) - A great understory shrub for swampy areas, found along streambanks and pond edges. Attractive foliage, with drooping yellow flowers that emerge before the pale green leaves. Birds and small mammals feed voraciously on the fruit.
+21: Yellowwood (Cladustris kentuckea) - Medium-sized tree, 30-40', with impressive, pinnately compound leaves that turn from bright green to bright yellow in fall. Mature trees (8-10 y/o) put on intensely fragrant panicles of white flowers at their branch tips, resembling Wisteria or Black Locust blooms.
+22: American Hornbeam / Musclewood (Carpinus carolinus) - Slow-growing understory tree with an attractive, smoothly fluted bark that lends to the common name. Inconspicuous flowers in Spring and their attractive shape make this a fine ornamental street tree, in lawns or understory settings.
+23: American Spikenard (Aralia racemosa) – A bushy plant with heart-shaped leaves and tiny greenish-white summer flowers on panicles; flowers are followed by hanging clusters of showy fall fruits that ripen to purplish-black and are eaten by birds.
+24: Black Cohosh (Actaea racemosa) - Attractive, astilbe-like foliage adorns this large bushy perennial with medicinal properties. Tall spikes of creamy white flowers rise up to 6’ high over the mound. A delicate plant that is slow to establish, prefers sheltered microclimates with humusy, moisture retaining soils.
+25: Wild Ginger (Asarum canadense) – Large, heart-shaped leaves persist well into early winter, forming a tough, attractive groundcover. Hidden beneath the foliage are its unique, bell-shaped flowers.
+26: Cross Vine (Bignonia capreolata) – clusters of sweetly scented, showy, orange-red, tubular flowers with yellow throats bloom April-June
+27: Leather Flower (Clematis versicolor) – A small, clump-forming perennial vine with ornate foliage, bell-shaped flowers, and feathery seed structures
+28: Flowering Dogwood (Cornus florida) – Understory tree prized for its spring display. Showy white “petals” (actually bracts) surround tiny true flowers that provide an early nectar source for bees. Growing 15–30 feet tall, it offers year-round interest with glossy green foliage that turns rich shades of red, purple, and orange in fall, followed by bright red fruits relished by birds.
+29: Pagoda Dogwood (Cornus alternifolia) – Spreading, horizontal, low-branched trees with great horizontal habit. Flat-topped clusters of fragrant, yellowish white flowers in May or June are followed by handsome blue-black berries on red stems. Burgundy foliage in fall.
+30: American Hazelnut (Corylus americana) – A deciduous multi-stemmed shrub with dark green leaves that forms a rounded thicket. Fall color varies from combinations of orange, rose, purplish red, yellow and green to dull yellowish green.
+31: Washington Hawthorn (Crataegus phaenopyrum) – A tough, 25–30 ft deciduous tree with white early-summer flowers, glossy red winter berries, and vibrant fall color (orange to purple). New leaves emerge purple, maturing to dark green. It has sharp 1–3" thorns, though thornless cultivars exist. Tolerates clay, pollution, and pruning; best in full sun and well-drained soil. Great as a specimen, street tree, or hedge.
+32: Green Hawthorn (Crataegus viridis) – 20-35’ tall. One of the more robust Hawthorns, this species has minimal thorns. Clusters of white flowers cover the tree in May. This tree’s bark exfoliates exposing an orangish-brown bark. With its bright red berries and yellow fall foliage, this tree is a looker in the fall.
+33: White woodland Aster (Eurybia divaricata) – Growing 1-2.5’ tall and blooming from August to September, this white aster tolerates part shade to full shade.
+34: Common Witch hazel (Hamamelis virginiana)—A fall-blooming shrub or small tree, the fragrant ribbon-like flowers bloom often after leaf drop, providing a late nectar source for bees and other insects.
+35: Wild Hydrangea  (Hydrangea arborescens) – A lovely shrub that can tolerate deep shade. Large clusters of flat, creamy white, flowers open in June and last for many weeks. Plants bloom most of the summer. Pollen-rich flowers attract many insects. Make sure you look for the native variety; many cultivars don't offer any pollinator benefits.
+36: Spicebush (Lindera benzoin) – Large, multi-stemmed native shrub producing fragrant yellow-green flowers in early spring before leaves emerge. Female plants develop red fruits in fall, and the leaves host caterpillars of the spicebush swallowtail butterfly. Aromatic twigs, leaves, and fruits have traditional uses for tea and spice, and planting both male and female shrubs helps ensure fruit production.
+37: Coral honeysuckle (Lonicera sempervirens) – Clump-forming vine. Great species for hummingbirds. The red flowers are prolific for about a month in May/June followed by sporadic flowering the rest of the season. Use on a fence, trellis, or arbor, or use as ground cover, in part shade to full sun.
+38: False Solomon’s Seal (Maianthemum racemosum)--Growing 12-24”H with arching form and massing habit, an exceptional woodland plant with large white flower clusters in May followed by bright red fruit.
+39: Ostrich fern (Matteuccia struthiopteris)--Growing 2-4’H, this fern prefers shade and open, rich soil kept evenly moist. Clump-forming and rhizomatous, this plant will fill in an area over time.
+40: Woodland Phlox/Wild Sweet William (Phlox divaricata) – Loose clusters of white to blue to blue-violet, star-shaped flowers early in spring provide nectar for hummingbirds and butterflies. The flowers are sweetly scented. Evergreen basal leaves.
+41: Mayapple (Podophyllum peltatum) – a favorite ephemeral, its large leaves add interest to a soft landing. Umbrellas in the shade garden is a good way to describe this plant. Pairs of large, notched leaves, up to 1′ wide, are held on 12-18″ stalks. Goes dormant in peak summer, to return with vigor next Spring.
+42: Jacob's Ladder (Polemonium reptans) – Very pretty, light blue, bell-shaped flowers in loose clusters appear on sprawling, weak stems in mid to late spring. The pinnate, fern-like foliage looks fresh and green all through the growing season.
+43: Christmas Fern (Polystichum acrostichoides) – A resilient, drought-tolerant native fern that provides year-round greenery; perfect for the deeper shade areas under trees
+44: Chokecherry (Prunus virginiana) – Large deciduous, thicket-forming shrub, or small understory tree, with showy white flowers mid-Spring, followed by blue-black, edible cherries that are a critical food source for birds in the peak summer months. Also makes a fine jelly, good partner for American Plum.
+45: Woodland Pink (Spigelia marilandica) – A brilliant summer-blooming showpiece for the shade garden, it is found in open wood edges and along streams. Blooms from spring to summer with dazzling displays of upright bright, red and yellow tubular flowers that are a favorite nectar source of hummingbirds.
+46: Celandine Poppy (Stylophorum diphyllum) – Brightens early spring gardens with clusters of showy yellow flowers in April and May above lobed, blue-green foliage. It grows best in rich, moist woodland soils where it forms a dense 12–16 inch clump, often reseeding and pairing beautifully with other spring bloomers. The plant’s yellow sap and roots have historically been used to produce a yellow dye.
+47: Rue Anemone (Thalictrum thalictroides) – A native woodland wildflower that grows up to 9" high and features white flowers with 5-10 petal-like sepals (usually 5) and numerous greenish-yellow stamens. Flowers appear in loose clusters above whorls of three-lobed leaves, but each flower has its own stem.
+48: Arrowwood Viburnum (Viburnum dentatum) – Upright, multi-stemmed native shrub that typically grows 6–10 feet tall and produces flat clusters of white flowers in late spring, followed by blue-black berries from late summer into fall that attract birds and other wildlife. Great fall color displayed.
+49: Nannyberry Viburnum (Viburnum lentago) - Robust fruit-producing shrub, typically multi-stemmed and suckering, with late spring blooms and drupes of berries that persist into winter for resident songbirds and mammals. Excellent hedge and screening shrub option to replace Bush Honeysuckle. 18-20' tall.
+50: Barren Strawberry (Waldsteinia fragarioides) – This is a versatile evergreen ground cover, excellent choice for native bees to be able to nest under.
+51: Jumpseed (Persicaria virginiana) – This one will spread rapidly if it’s happy; white arching flowers in late summer; spreading foliage mound 2-3' high and as wide; arrow-shaped leaves; tolerates deer, drought and wet soil.
+52: Passion Flower (Passiflora incarnata) A beautiful vine that spreads from rhizomes. The flowers are among the most dramatic of all native plants and the fruit it produces is edible.
+53: Elderberry (Sambucus canadensis) With large, white, fragrant flowers in the spring followed by dark berries in the summer, it’s a favorite of many birds and pollinators. Once established it grows by runners and can take up a decent amount of real estate. It can also handle the juglone from black walnut trees.
+54: Star Tickseed (Coreopsis pubescens) -This coreopsis can handle more shade than others but will still have the abundant flowers typical of coreopsis. Pollinator magnets and the seeds are loved by birds.
+55: Cliff/Glade
+56: Nodding Wild Onion (Allium cernuum) – Onion-scented grass-like leaves and summer blooms. Flowering structures consist of characteristically nodding umbel-shaped clusters of bell-shaped flowers in shades of pink, lilac, or white. Used for food, historically.
+57: Fall Glade Onion (Allium stellatum) – golf ball size, pink flowers sit atop 12’’ stems in late summer and into fall. Great tucked among other plants as their footprint remains small.
+58: Whorled Milkweed (Asclepias verticillata) -- Clusters of greenish-white flowers appear from late spring through summer, in loose heads over attractive, thread-like foliage. The plants are upright and sparingly branched. Seed pods are narrow, unlike many other milkweeds, and about 3″ long.
+59: Rose verbena (Glandularia canadensis) – A trailing plant that spreads quickly to form an attractive ground cover. Flat-topped clusters of rose-pink to rose-purple flowers appear on top of stems for several months from spring intermittently to frost (March-November). Use as groundcover; spreads readily.
+60: Bush's Poppy Mallow (Callirhoe bushii) – Combining Bush’s Poppy Mallow with Rose Verbena will add big impact. This plant has a mounding, arching form (1-2 ft tall), while the Rose Verbena spreads low (6-12 in tall) and bloom for a long season.
+61: Purple Poppy Mallow (Callirhoe involucrata) – Low, mat-forming perennial that produces showy red-violet, cup-shaped flowers from early summer through frost, with trailing stems that spill over edges and spread about 2–3 feet wide. Growing only about 6–9 inches tall, it makes an excellent ground cover for sunny beds, dry or rocky soils, and even more formal plantings where a shorter plant is desired.
+62: Glade Coneflower (Echinacea simulata) – a graceful native with drooping lavender-pink petals that bloom in June. Loved by wildlife, it attracts butterflies and bees, while goldfinches feed on the seeds in its distinctive brown cones. It thrives in sunny, dry soils.
+63: Purple Prairie Clover (Dalea purpurea) – Wiry stems topped by cone-like clusters of tiny purple flowers that bloom in summer and attract many pollinators. 1–2 feet tall, it has small, ferny leaves and thrives in full sun and well-drained soils ranging from sandy and rocky to clay.
+64: Pale Purple Coneflower (Echinacea pallida) – Tall bare stems are topped by lavender pink flowers with cone-shaped brown seed heads June-July. Good fresh cut flower or dried flower. Songbirds eat the seed if old flower heads are not removed.
+65: Maple-leaved Coral Bells (Heuchera villosa) – Compact mounds of mostly evergreen foliage, plus a long flowering period, make this a super formal plant for shade. Sends up flowering stalks of pearly white flowers in late summer/early fall.
+66: Missouri Evening Primrose (Oenothera macrocarpa) – Low-growing spreader with lemon-yellow blooms from May to August. Tolerates poor soil and drought and prefers full sun.
+67: Fameflower / Rock Pink (Phemeranthus calycinus) – A petite succulent with the foliage portion only 1 to 3 inches across and tall resembles the last few inches of spruce twigs. The fuchsia-pink flowers appear 6 to 12 inches above the foliage on thin, pencil lead-sized stems.
+68: Slender Mountain Mint (Pycnanthemum tenuifolium) – This one is a well-behaved pollinator magnet.  A good matrix plant to blend amongst other plants in the bed. Up to 2ft tall with clusters of white flowers. Delicate feathery foliage can be used in tea.
+69: Sand Phlox (Phlox bifida) – Beautiful pale purple, star-like flowers in spring adorn this low-spreading native that grows in dry areas with shade or sun. Each flower petal has a V-shaped notch on its edge, giving a fringed appearance. Short, pale green, thread-like leaves form thick mats.
+70: Golden Currant (Ribes odoratum) – Smaller shrub (4-6 ft) with open habit; trumpet-shaped, yellow spring flowers with an assertive fragrance of cloves. Shiny hanging fruits ripen in summer from green to red then black and feed birds. The fruits are also edible for people, similar to gooseberries. Not self-fertile, so two genetically different plants are required for the plants to produce seeds.
+71: Wild Petunia (Ruellia humilis) – A native perennial of great character with flowers that will remind you of the annual non-native petunia bedding plant. Charming, low growing clumps produce light purple/lavender, tubular flowers from June to September.  The square stems and the leaves are both quite hairy—a natural defense against dry conditions.
+72: Missouri Coneflower (Rudbeckia missouriensis) – Flower heads with yellow petals and black center disks on branched stems. The narrow green leaves are conspicuously hairy. Blooms for many weeks in July and August and is a good cut flower.
+73: Small Skullcap (Scutellaria parvula)—Preferring full sun to light shade, this low-growing perennial grows 6-12” and blooms May to July with pairs of petite blue flowers followed by seed capsules. Spreads by short rhizomes. Good for rock gardens, containers, and edges of borders.
+74: Sedum (Sedum ternatum) – commonly called three-leaved or whorled stonecrop, grows 3–6 inches tall and spreads by creeping stems that root at the nodes, forming low mats in moist, rocky areas. Its evergreen, fleshy leaves appear in whorls of three along the stems, and in spring the plant is covered with clusters of tiny white, star-like flowers that attract bees.
+75: *Cliff Goldenrod (Solidago drummondii) – This is the shortest goldenrod, at 2-3 feet in height. It makes a nice yellow mound when it is planted on flat ground and not over ledges. It can also stand more shade than other goldenrods.
+76: Smooth Aster (Symphiotrichum laeve)—Blooming September to October, this aster pairs nicely with goldenrods. Growing 2-3’ H and 1-2’W, it prefers full sun and dry to average soil. Violet to blue rays with yellow disks. Readily self-seeds – deadhead if you do not desire this feature.
+77: *Aromatic Aster (Symphyotrichum oblongifolium) – One of the last wildflowers to bloom, this aster is loaded with blue-purple daisy-like flowers in late fall. By trimming this plant annually, no later than May, this aster grows into a tidy, compact, self-supporting mound and may be grown as a hedge.
+78: Prairie
+79: Yarrow (Achillea millefolium) – Flat-topped clusters of 3- to 4-inch white flowers appear at the tops of 2- to 3-foot stems. Foliage is mostly at the ground level. Serves as a host plant for several moth and beetle species.
+80: Nodding onion (Allium cernuum)—This member of the onion family grows 1-1.5’H, with nodding clusters of pink blooms and narrow, grass-like leaves. Distasteful to rabbits, it can be planted as a deterrent around other plants that are more susceptible. Foliage remains awhile after blooms, which occur June to August.
+81: Indian Blanketflower (Gaillardia pulchella) - Easy-to-grow native annual wildflower that fits in great with perennials in a hot, dry, sandy area. Beautiful red, yellow, and orange daisy-like blooms pop consistently through summer, especially when deadheaded. Makes a lovely cut flower.
+82: Prairie Pussytoes (Antennaria neglecta) – low-growing ground cover with silvery-green leaves that form a dense 2-inch mat, making it useful in sunny, dry beds or as a filler in containers. In spring, white flower clusters that resemble tiny cat paws rise above the foliage, and female plants later produce wispy seedheads. This dioecious plant spreads by short stolons. Host for the American painted lady butterfly.
+83: Lead Plant (Amorpha canescens) – Gray-green foliage and purple blooms starting in May and scattered until frost, this slow-growing long-lived shrub attracts numerous species of bees, and the grasshoppers attracted to the foliage are a food source for birds.
+84: Indigo Bush (Amorpha fruticosa) – Growing 4-12’H and 6-12’W, each compound leaf contains 11-35 leaflets. Flowering May to June with spiky clusters that turn to seedpods in fall. Attracts butterflies.
+85: Marsh /Swamp Milkweed (Asclepias incarnata) – Swamp milkweed is a good candidate for rain gardens and will also tolerate average moisture. Flowers have a vanilla odor, reddish-purple in color and only provide nectar (no pollen). Blooms mid to late summer, 3-5' H.
+86: Butterfly Milkweed (Asclepias tuberosa) – Bright orange, flat-topped flower clusters June through July. Plants bloom for many weeks. Host plant for the monarch butterfly and a great nectar source for many other butterflies and pollinators.
+87: Blue Wild Indigo (Baptisia australis)—Long-lived perennial with smooth grayish-white stems, rounded leaflets, and tall spikes of blue, lupine-like flowers that emerge in spring. It typically grows about 3–4 feet tall and wide, forming a shrub-like clump over time and thriving in full sun to part shade.
+88: Sideoats Grama (Bouteloua curtipendula) – Warm-season grass forms compact clumps of narrow, bluish-gray leaves about 1–1.5 feet tall, with flowering stems rising to around 3 feet in summer. Oat-like seed spikes hang along one side of the stem, often showing bright orange-red stamens when in bloom. Drought-tolerant and adaptable, even near black walnut, provides excellent habitat for skipper butterflies and develops attractive fall color in shades of gold, orange, and red.
+89: Blue Grama Grass (Bouteloua gracilis) – an attractive, small, clump-forming perennial grass with unique, showy flowers. Fine, blue-gray foliage turns a nice golden brown with orange-red hues in fall.
+90: Buffalo Grass (Buchloe dactyloides) – Fine-textured warm-season native grass is an extremely drought tolerant choice for lawns, requiring infrequent mowing.
+91: Bush's Sedge  (Carex bushii) – Short (1-2' tall), clump-forming sedge that grows well in many conditions, but prefers moist soils and full to part sun. Excellent when used in masses along the edges of ponds, swales, or rain gardens, or as turf replacement in low-lying lawn areas.
+92: Lanceleaf Coreopsis  (Coreopsis lanceolata) – Long blooming color, can be deadheaded and will rebloom. Nice compact form, with deep yellow color. I save the seeds from the first two deadheads to put in my bird feeders in the winter when the seed heads in my yard are empty.
+93: Prairie Coreopsis (Coreopsis palmata) – Beautiful, highly popular native wildflower for full to part sun. Features soft yellow, daisy-like flowers with flat yellow centers on top of stiff upright 2-3' tall stems. Thirives in dry, rocky soils and harsh, dry conditions.
+94: Plains Coreopsis (Coreopsis tinctoria) – A bright annual that flowers from June to Sept. Lots of very showy yellow flowers with red centers are produced on fairly large branched plants. Central disk is brown. Flowers are usually 1″ across. Leaves are deeply divided into narrow leaflets and about 4″long.
+95: Purple Lovegrass (Eragrostis spectabilis) – A warm-season bunch grass with attractive reddish-purple flowers that form a loose, open inflorescence in July-August. The flowers turn brown by October, and the seed heads may detach and form tumbleweeds at season’s end. Host to Zabulon skipper butterfly.
+96: Rattlesnake Master (Eryngium yuccifolium) – Sword-shaped, medium green leaves are topped by clusters of round heads of greenish white, globe-shaped flowers. Tolerates wide range of conditions, but thrives in full sun, drier, glade-like conditions, excellent pollinator support with long bloom time.
+97: Wild Strawberry (Fragaria virginiana) – Semi-evergreen groundcover for sunny spots. Several plants are required to ensure production of tiny edible berries. Host to the gray hairstreak butterfly; its white spring flowers distinguish it from the common, weedy Mock Strawberry that has yellow flowers.
+98: Prairie Smoke (Geum triflorum) – A very special three-season interest plant with unique flowers and seed heads. Feathery pink flowers are whimsical, and the semi-evergreen foliage is lush and fern-like.  Makes an excellent border plant, with short mounding habit, good choice for rock gardens and glades.
+99: Western Sunflower (Helianthus occidentalis) – Bright yellow flower heads in late summer, on stems with reduced leaves. Prominent basal leaves. Birds feast on the seeds.
+100: Lanceleaf Coreopsis  (Coreopsis lanceolata) – Long blooming color, can be deadheaded and will rebloom. Nice compact form, with deep yellow color. I save the seeds from the first two deadheads to put in my bird feeders in the winter when the seed heads in my yard are empty.
+101: June Grass (Koeleria macrantha) – One of the most practical cool-season native grasses, this is a shorter prairie grass, growing to around 2 feet in height with richly plumed, tan seed heads in early summer. Its neat mounding habit makes this a perfect matrix plant for filling in between flowers. Prefers dry soils.
+102: Rough Blazing Star (Liatris aspera) – Tall stalks of rounded, fluffy, deep rosy purple flower heads bloom July-November. Most of the flowers open at the same time making it a good cut flower. Butterflies love the nectar. This is one of the last Liatris species to bloom.
+103: Bottle Brush Blazing Star (Liatris mucronata) – An earlier blooming, very showy liatris that doesn’t get too tall. Thrives in dry, poor conditions and provides strong winter interest and seed for resident birds.
+104: Eastern Blazing Star (Liatris scariosa) – Intensely colored, pink-purple rounded flower heads line tall flower spikes in August and September. Butterflies flock to the flowers for nectar. Hummingbirds frequent this plant during migration.
+105: Pink evening primrose (Oenothera speciosa)-- Showy pink flowers from May to July, speciosa is tolerant of full sun and dry soils. Growing 1-2’ high with fragrant bowl-shaped flowers over narrow green leaves, it spreads by rhizomes and is best in an area you wish to naturalize.
+106: Switch Grass (Panicum virgatum)— Upright clumps of rich green sheaths, 3-6’tall with fluffy panicles of seed. Spreads slowly by rhizomes and retains its shape throughout the growing season. A great structural grass for the formal landscape, but an assertive species in a prairie matrix planting.
+107: *Big Bluestem (Andropogodon gerardi) - Tall and slender-stalked warm-season grass with unique “Turkey Foot” seed heads. A mainstay of the Tallgrass Prairie, this grass does best in the landscape when surrounded by other supporting plants, to prevent flopping.
+108: Small Skullcap (Scutellaria parvula) – Short and compact, looks great massed and as a border plant. Small lavender flowers in late spring and early summer.
+109: Wild Quinine (Parthenium integrifolium) – Woolly-looking, white flowers in broad, flat-topped heads bloom from late spring to late summer. Leaves are aromatic and handsome. Long-petioled basal leaves are much larger than stem leaves and grow in a distinct clump.
+110: Purple Beardtongue (Penstemon cobaea) – A beautiful, mid-sized bumble bee magnet, his plant is very dramatic in the Spring, and the seedheads add interest to the bed in Winter. Rising 3’ tall and clumping; with large and drooping, deeply-colored flower clusters.
+111: Foxglove Beardtongue (Penstemon digitalis) – A profusion of tubular, bright-white flowers on strong stems in May and June are magnets for many long-tongued bees. Attractive seed pods are almost red in summer.  A hardy and versatile, long-lived beardtongue; the basal foliage is short and semi-evergreen.
+112: Black-Eyed Susan (Rudbeckia hirta) – This plant is easy to grow and grows fast to give a bright show of color but is rather short-lived. Will self-seed after blooming, to give another display later in the year. Flowers mid-spring through summer. Large yellow flowers with dark brown centers.
+113: Sweet Coneflower (Rudbeckia subtomentosa) -- Full sun to part shade, this perennial occurs on moist prairies, along streambanks and in low areas throughout Missouri. Typically grows 3-5' tall and features daisy-like flowers (to 3" across) with yellow rays and dark brownish-purple center disks on branched stems. Flowers have a mild aroma of anise, hence the common name.
+114: Little Bluestem (Schizachyrium scoparium) – A small, non-rhizomatic, clump-forming grass with blue-green leaves that turn reddish orange in the fall. Fluffy silver seed heads are ornamental through winter. Host plant for larvae of a number of skipper butterflies.
+115: Prairie Dock (Silphium terebinthinaceum) – Robust, long-lived perennial with large, spade-shaped basal leaves that grow 2–3 feet tall and tall flower stalks that can reach up to 8 feet. In late summer it produces bold, sunflower-like yellow blooms that attract bees, while the seedheads provide food for finches and other songbirds.
+116: Showy Goldenrod (Solidago speciosa) – Stunning yellow flowers in the fall and a very important nectar source for migrating monarchs and resident late season pollinators.
+117: *Indian Grass (Sorghastrum nutans) – Upright clumps (36-72″ tall) of slender, blue-green leaves turn golden yellow in fall. Stiff, vertical flowering stems, topped with 12″ long, narrow, light brown flower panicles with yellow stamens, rise well above the foliage in late summer.
+118: Prairie Dropseed (Sporobolus heterolepis) – Looks great toward the front of the border or weaving in and out of taller flowering plants. Use in native plant gardens, naturalized areas, prairies and meadows. Excellent in massed plantings. Provides food and cover for wildlife.
+119: *New England Aster (Symphiotrichum novae-angliae) – Use in the back of the garden for late season color and to attract butterflies. Grows well in native plant gardens or in damp prairies. They grow best in fertile soil with constant moisture. Pinch garden plants back three or four times before Aug. 15th to keep them more compact. 3-5'H
+120: Blue Vervain (Verbena hastata)—Grows 2-6’H, can form large colonies over time. Candlelabra-like inflorescenses of a blue-purple color, each flower blooming from bottom to top. Blooms over a long period from July to September. Prefers medium to moist conditions.
+121: Willowleaf Sunflower (Helianthus salicifolius) - Striking texture with its narrow, drooping leaves and clusters of bright yellow flowers in late summer to fall. Best in full sun and average to drier soils, spreading to form colonies. Tall and graceful—often 5–6 feet or more—it also makes an excellent cut flower.
+122: *Wild Bergamot (Monarda fistulosa)—Grows 2-4’H with whorls of purple flowers atop grayish stems. Leaves can be used to make tea. Host plant for the Hermit Sphinx Moth and attracts butterflies and hummingbirds. Full sun to part shade, dry to medium soils.
+123: Golden Alexander (Zizia aurea) – A very adaptable native perennial for average soils and moisture. Golden Alexanders provide bright color in gardens in early spring. The flowers are an important source of nectar and pollen for insects just emerging from pupation. 2-3'H
+124: Savannah/Woodland
+125: Pawpaw (Asimina triloba)—Growing 15-30’H, this understory tree is tolerant of wet soil and black walnuts. Burgundy flowers appear before leaf bud, followed in summer by a showy edible fruit. Large oval leaves turn yellow in fall. Can grow in full sun or part shade. Larval host to Zebra Swallowtail.
+126: Ohio Buckeye (Aesculus glabra)—Typically grows in rocky or wooded areas, growing 20-40’ H, this tree is tolerant of walnut trees. Spring blooms of green-yellow clusters followed by the “buckeye” fruits. Leaf is palmate, usually turning yellow in fall.
+127: Red Buckeye (Aesculus pavia)--A deciduous shrub growing 12-15’H with red bottlebrush blooms in spring that attract hummingbirds. Grows in full sun to part shade.
+128: Thimbleweed (Anemone virginiana)—Grows 1-3’ tall with layers of leaves. Each stalk is topped in spring by by 5 white petals with a “thimble” shaped center. In fall and winter, the thimble seedhead becomes fluffy, resembling a large Q-tip.
+129: Pussytoes (Antennaria parlinii) – Very low-growing ground cover that will spread gradually over time, critically important pollen and nectar source for early-emerging native bees.
+130: Black Chokeberry (Aronia melanocarpa) – Sweet white flower clusters in April; beautiful fall color; black berry in fall; good for erosion control. 3-6'H x 3-6'W
+131: Bladdernut (Staphylea trifolia) - fast-growing, small understory tree known for its drooping clusters of bell-shaped white flowers in spring and distinctive, bladder-like seed pods that persist into winter. Reaching 10–15 feet tall, it forms dense colonies and thrives in moist, partially shaded areas, though it can adapt to drier, fertile soils. An excellent choice for naturalized screens or woodland edges.
+132: Columbine (Aquilegia canadensis) – Nodding red and yellow blooms in April and May that attract hummingbirds, butterflies, and bumblebees. It grows easily in well-drained soil in sun to part shade, often self-seeding to form colonies on rocky slopes and woodland edges. After blooming, plants can be cut back to the ground to encourage fresh foliage.
+133: Purple Milkweed (Asclepias purpurascens) – Sweetly-scented spherical clusters of purplish burgundy flowers bloom in early summer. Grows naturally in open woodlands and between roadsides and woodlands. More compact and colorful than common milkweed. Monarch host plant, doesn’t spread.
+134: Ohio Horsemint (Blephilia ciliata)   Flowers layered at the top of 16- to 24-inch stems. Flowers in May and June are especially valuable for bumble bees. Dried gray seed stalks add interest during the summer. Fall and winter foliage hugs the soil surface like a ground cover.
+135: Carolina Allspice (Calycanthus floridus) – A densely rounded long–blooming shrub with sweetly fragrant, maroon flowers from late spring into July. Reaches 6-10' tall and wide, preferring medium to moist soils. Suckering can be intrusive, so best suited in a naturalized setting, though tolerates pruning.
+136: Oak Sedge (Carex albicans) – Small clump-forming perennial sedge with fountain-like form. Does best in part shade to shade in moderate soils. Use as a ground cover, low border, or between other species for mulch and weed control.
+137: Common Woodland Sedge (Carex blanda) – can be used as grass-like ground cover and a native substitute for liriope.  This sedge is one of the most versatile of all sedges.  When in doubt, use this one.  Sun, shade, wet, dry. Amazingly easy to grow and looks great all season long. Almost evergreen.
+138: Short-Beak Sedge (Carex brevior) – 6-12” H, clump-forming, compact, oval shaped seedheads. For more fomal look, trim dead foliage in spring.
+139: Cedar Sedge (Carex eburnea) – Hair-like leaves. Plants spread slowly to form a fine-textured groundcover under trees, shrubs, and other dry shaded locations. Semi-evergreen. Ecological Benefits: Several species of butterfly larvae, leaf hoppers, grasshoppers, and beetles feed on sedge foliage.
+140: James’ Sedge (Carex jamesii) – James’ Sedge resembles Liriope. Semi-evergreen, it is a clump-forming sedge with a tidy appearance.
+141: Pennsylvania Sedge (Carex pensylvanica) – A soft, fine-textured, semi-evergreen groundcover, Pennsylvania Sedge spreads slowly via rhizomes, naturally filling in the space and reducing the need for mulch. Beyond its aesthetic appeal, it serves as a host plant for many beneficial insects. It has a soft texture and would be a nice transition from surrounding lawn.
+142: American Beautyberry (Callicarpa americana) – Small, long-lived native shrub known for its striking clusters of bright purple berries that appear in fall. It produces small pink flowers from June through August that attract pollinators and grows about 3–5 feet tall and wider, thriving in full sun to part shade. The plant may die back after harsh winters, so they benefit from a layer of mulch in fall.
+143: New Jersey Tea (Ceanothus americanus) – compact, nitrogen-fixing shrub attracting bees with fragrant white blooms in late spring. Growing 2–3 feet tall, it thrives in hot, dry conditions and works well in shrub borders, native gardens, or as a low, shrubby ground cover on challenging sites like rocky slopes. Protect from deer and rabbit browsing during establishment.
+144: Eastern Redbud (Cercis canadensis) – Prolific, edible, deep pink flowers in early spring. Red-purple, pea-shaped seed pods follow the flowers. Heart-shaped leaves turn yellow in fall.
+145: Fringetree (Chionanthus virginicus) – 8-10' tall. Shimmering white, frothy flowers cover this shrub/small tree in May or June. Female trees produce small, bluish, olive-like fruit in fall, loved by birds. Leaves turn bright yellow in fall. Host to many moth larvae.
+146: Silky Dogwood (Cornus amomum) – White blossoms in June, blue fruit in August, red stems in fall; attracts birds. 6-8'H x 6-10'W
+147: American Smoke Tree –(Cotinus obovatus) a small tree or large shrub that gets interesting flowers in the spring, fantastic fall color and a larger leaf shape that contrasts nicely with other native shrubs.
+148: Dittany (Cunila origanoides) – A small mint plant that is habitually orderly and clean in appearance. By September and October it reaches just 12 to 16 inches tall and wide, and is covered in small, heart-shaped leaves and tiny pinkish lavender flowers. May be used as a culinary herb.
+149: American Beakgrain (Diarrhena obovata) – Moderate-height perennial ground cover with dark green glossy medium-texture foliage that turns white-tipped in winter.
+150: Purple Coneflower (Echinacea purpurea) – Staple of any many native landscapes, with wide appeal for hundreds of pollinators. Can tolerate partial shade. Goldfinches eat the seeds as fast as they ripen
+151: Bottlebrush Rye  (Elymus hystrix) – provides fabulous texture and interest in wooded areas and is perfect for planting under oaks and other deciduous trees where some light is able to penetrate to the forest floor
+152: Robin's Plantain (Erigeron pulchellus)—Fuzzy foliage and daisy-like white flowers in spring, spreads fairly quickly to fill in exposed sites. Adaptable from full sun to part shade, this is a great plant to include in a medium-sun matrix.
+153: Joe Pye (Eutrochium purpureum) – This is another very tall perennial, serving as a good backdrop for your garden.
+154: Wild Geranium (Geranium maculatum) – Woodland Spring bloomer, with prolific, bright lavender flowers and almost snowflake-shaped leaves, it’s a great choice for shady borders or woodland gardens. Distinct beaked seed capsules—giving rise to the name “crane’s bill”—provide seeds that birds enjoy.
+155: Indian Physic (Gillenia stipulata) – The foliage is attractive in spring and summer, but outstanding when it is yellow, orange, and red in the fall. Five-petaled flowers in June are followed by red seed pods in summer. Ecological Benefits: Nectar and pollen for pollinators. Also known as Ipecac.
+156: Alumroot / Coral Bells (Heuchera americana) – Dense mounds of round, mottled foliage, 12 to 24 inches tall, are the main feature. Foliage can remain green throughout winter. Slender flower stalks, 24 to 36 inches tall, bear many pea-sized, cream-colored flowers April-June.
+157: Maple-leaved Coral Bells (Heuchera villosa) – Compact mounds of mostly evergreen foliage, plus a long flowering period, make this a super formal plant for shade. Shoots flowering stalks and flowers in late summer/early fall.
+158: Prairie Alumroot (Heuchera richardsonii) – 1-2’ high heart-shaped basal foliage with wands of greenish bell-shaped flowers extending 18”-24” on slender stems. Blooms spring to early summer. Good in both formal and informal settings.
+159: Virginia Bluebells (Mertensia virginica)—Spring ephemeral blooming clusters of blue bells in mid-April. Plants die back in summer. Part shade to full shade, medium moisture.
+160: Short Beebalm (Monarda bradburiana) – A clump-forming, mint family member that grows typically to 1-2' tall. Each flower head rests on a whorl of showy, purplish, leafy bracts. Flowers attract bees and butterflies when they bloom in May and June. The aromatic gray-green leaves may be used in teas.
+161: Shrubby St. John’s Wort (Hypericum prolificum) – 3-5 ft tall, bright yellow flowers in the summer are covered in native insects, and with the stalks, they make a unique addition to cut floral arrangements.
+162: Crested Iris (Iris cristata) – At 6 to 12” tall, this April-blooming purple iris can be used as a
+163: groundcover or to naturalize an area. Makes a great border plant, along sidewalks or landscape edges, and is adaptable to part to full shade, and edges of rain gardens.
+164: Roundleaf Groundsel (Packera obovata) – Loose umbels of yellow flowers in April and May on 12-14” stems. The evergreen foliage is rounded and serrated along the edges, growing to a height of 3-4”. Plants spread slowly by underground stems. Grows well in dry shade. Host to northern metalmark butterfly.
+165: Creeping Lespedeza (Lespedeza repens) – Mat-forming ground cover that can improve soil quality. Trailing stems have little ovalish leaves in groups of three and little bean-type blooms in shades of pink and purple that last from July-October. Flowers are followed by pods with seeds eaten by gamebirds in its native habitat.
+166: Solomon’s Seal (Polygonatum biflorum)—Grown mostly for its arching foliage, the springtime white flowers cluster on the underside of the leaf and are followed by blue-black berries in fall. Flowers are buzz-pollinated by bumblebees and also visited by carpenter and sweat bees.
+167: Wild Plum (Prunus americana) – Can be grown as a single trunk tree or multi-stemmed shrub. The pure white, fragrant flowers are among the first to open in spring. Heavier flowering in sun. Yellow to red, round, edible fruits, 1″ in diameter. Host to Red-spotted Purple Butterfly and many moths.
+168: Common Blue Violet  (Viola sororia) – Heart-shaped, scalloped, hairy to nearly glabrous leaves with small flowers (mostly in spring and early summer) that are typically blue-purple with white throats or sometimes white. Host plant for caterpillars of the Great spangled fritillary butterfly (Speyeria cybele). May not be available in the nursery trade, but commonly found in yards. Leaves and flowers are edible.
+169: Fragrant Sumac  (Rhus aromatica) – This is a shorter shrub, that gets great fall color and is particularly good for slopes. 2-6'H x 6-10'W
+170: Wild Senna (Senna marilandica)  – This erect herbaceous perennial is the larval food source for Sulphur butterflies and the Sleepy Orange butterfly. Clusters of brownish yellow, pea-like flowers top stems in summer. Flowers give way to arching, pea-like seed pods (to 4 in. long) which turn black in fall and remain ornamental through winter. Feathery, compound, locustlike, green leaves. 3’-5’ tall
+171: Fire Pink (Silene virginica) – lovely plant for hummingbirds, great color for contrasting with your other plants.
+172: Zig-zag Goldenrod (Solidago flexicaulis) – Tolerates shade and clay; zig-zag stem topped by small yellow flowers in fall. 1-3'H x 1’3’W
+173: Heart-leaved aster (Symphiotrichum cordifolium) – Blooming August to September, this aster’s flower is rich blue with yellow centers. It can tolerate full sun to part shade and pinching back several times before mid-July will maintain a bushier plant.
+174: Drummond’s Aster (Symphiotrichum drummondii) – Tolerates part shade; fall-blooming small purple flowers with heart-shaped leaves. Spreads aggressively by seed, and is an ideal candidate for the “Chelsea Chop”, cutting the plant down to 1’ high in mid-June to keep it more compact. 3-4'H x 2-3'W.
+175: Woodland Spiderwort - (Tradescantia ernestiana) is a hardy native perennial that thrives in shady, rocky woodlands and ravines. It produces clusters of vibrant purple, blue, or rose-colored flowers in late spring, each bloom lasting just a day but appearing in succession. Drought-tolerant and low-maintenance, it goes dormant in summer and returns with fresh growth and reblooms in fall.
+176: Culver’s root (Veronicastrum viginicum) – 3-4’H, candelabra-like spikes of white flowers blooming for weeks in late summer, can take sun or shade and is a good cut flower.
+177: Rusty Blackhaw (Viburnum rufidulum) – A deciduous shrub with glossy green, leathery leaves, which can be grown as a shrub or pruned as a small tree. Showy flat clusters of white flowers adorn the plant March-June. Many types of birds and mammals eat the fruit, and the leaves turn a rich burgundy in fall.
+178: Bird’s-foot Violet (Viola pedota)  – Small five-petaled spring flowers, typically appearing all pale lilac/lavender. Less commonly, flowers are white or display other combinations of the colors mentioned.
+179: Tulip Poplar (Liriodendron tulipifera) - large, fast-growing shade tree that can reach 60–90 feet tall with a pyramidal form when young. Produces distinctive yellow-green, tulip-shaped flowers rich in nectar that support pollinators and serve as a host for tiger swallowtail butterfly larvae, followed by cone-like fruits and bright green leaves that turn golden yellow in fall.
+180: Nuttall Oak (Quercus texana) - large, fast-growing deciduous oak that typically reaches 50–80 feet tall with a broad, rounded crown. Native to floodplain forests, a great choice for high clay sites. Dark green, deeply lobed leaves that resemble pin oak and often turn rich shades of red late in fall.
+181: Downy Skullcap (Scuttelaria incana) - Produces large clusters of blue flowers from mid summer into fall, that attract bumble bees and hummingbirds. Can reach 3-4 feet in height.
+182: Stream Edge/Wetland
+183: Thread-Leafed Blue Star  (Amsonia ciliata) – Ornamental, clump-forming native perennial that produces clusters of pale blue, star-shaped flowers that attract butterflies and hummingbirds while typically being ignored by deer. It grows about 15–24 inches tall, with soft, pine-needle-like foliage that turns a pleasant yellow at the end of the season. Cut back to 8–10 inches after flowering for a rounded shape.
+184: Shining Blue Star (Amsonia illustris) – Often called Ozark Blue Star, this tough, low-maintenance perennial has three seasons of interest—clusters of starry sky-blue flowers appear around Memorial Day for several weeks, glossy willow-shaped leaves stay green through summer, and the plant turns brilliant gold in fall. Over a few years it forms a stout, vase-shaped clump about three to four feet tall and wide.
+185: Copper Iris (Iris fulva) - Deeply colored bronze flowers on this unique iris make it a standout in rain gardens and in moist to wet rich soils. Neither crested nor bearded, these simple flowers bloom in May on 2’ tall, spiked foliage. Spreads readily and forms large clumps, ideal for dividing and transplanting.
+186: Blue Flag Iris (Iris virginica) - More versatile and taller than Copper Iris, thrives in medium to moist soils and sun to medium shade. Long blooming from May –July, this is an excellent hummingbird attractant. Reaches 3’ or more in height and can have multiple blooms in one season.
+187: Virginia Sweetspire (Itea virginica)—Arched drooping branches of fragrant white clusters of bloom in April to May, this shrub tolerates full sun to part shade and prefers moisture and acidic soil. It is nice in masses. Growing 3-5’H and often wider than tall. Leaves turn scarlet in fall.
+188: *Meadow Anemone (Anemone canadensis) With thin-stalked buttercup-like flowers, this thrives in moist areas; in water gardens and near water features, can serve as a cohesive element and keep out some unwelcome volunteers. Can serve as a ground cover under taller plants in appropriate spots.
+189: Globe Sedge (Carex grayi) Growing 2-3’ high with a spiked club-shaped seedhead from May to October, this sedge will tolerate moisture and light shade.
+190: Palm Sedge (Carex muskingumensis) – Easily grown in average, medium to wet soil in full sun to part shade. This species does well in some shade but tends to flop in too much shade. 2-3'H x 2-3'W
+191: Short’s Sedge (Carex shortiana) – A clump-forming sedge with chocolate-brown seedheads and blue-green leaves; it does well in both wet and dry soils, sun to part shade. At 18-24” it is taller than some other sedges.
+192: Fox Sedge (Carex vulpinoidea) – Abundant fountain-shaped sedge with soft, fluffy seedhead, like a fox‘s tail. Great for use in moist rainscapes for good texture and to stabilize the soil.
+193: Buttonbush (Cephalanthus occidentalis) – Ball-shaped, creamy white flowers dangle from the beautifully-structured bush in July; favorite nesting site of birds, food and cover for butterflies and other pollinators; use in rain gardens, near downspouts; 5-10'H x 6-10'W
+194: Bald Cypress (Taxodium distichum) - Long-lived, pyramidal conifer that grows 50–70 feet tall. Unlike most conifers, loses its soft, feathery needles each fall after they turn a warm orange-brown. Native to southern swamps and river bottoms but adaptable to upland soils. Great choice for clay or poorly drained sites. Valued for wildlife habitat and fast-growing habit that thrives in average to moist soils.
+195: *River Oats (Chasmanthium latifolium) – Upright clumps of bamboo-like foliage. Green leaves turn copper in fall and brown in winter. Attractive flat flower spikes hang down from stems. Prefers light shade and damp soil. Self-seeds prolifically.
+196: Mist Flower (Conoclinium coelestinum) – Flat-topped flower heads have tufty, dense clusters of bright blue-violet flowers from mid-Summer to early Fall. Aggressive clump-forming specimen, especially in moist areas and rain gardens. Will outcompete many other undesirable plants. 18-24" height and spread.
+197: Virginia Wild Rye (Elymus virginicus) – Cool-season grass with flat leaves that grow in bunches and generally upright-positioned flowering structures that resemble those of wheat. Foliage grows to 1′; much taller seedheads appear beginning in June, host plant for larvae of false wainscot moths.
+198: Rose Mallow (Hibiscus lasiocarpos) - A tall, native wetland perennial with large, fuzzy leaves and showy white or pink flowers with red centers that bloom mid to late summer. It thrives in full sun and moist soil. Important for pollinators in rain gardens, swales, and naturalizing along sunny stream edges.
+199: Virgina Sweetspire (Itea virginica) – Shrub with slender upright branches that eventually arch over; usually wider than tall. Very fragrant clusters of drooping creamy white flowers May-June. Dark green leaves turn scarlet and crimson in fall, remaining showy for many weeks.
+200: Cardinal Flower (Lobelia cardinalis) – great plant for hummers, plant in groupings to attract more birds. These can be Chelsea chopped in June to create bushier plants with more blooms.
+201: Blue Lobelia (Lobelia siphilitica) Blue wands 2-3’ tall, July to September, grows well in a more diverse range of conditions than its red cousin.
+202: Showy Primrose (Oenothera speciosa) – this likes to spread and is a great groundcover. It will have one big bloom, then bloom off and on all Summer. Deadheading makes it more attractive.
+203: Garden Phlox (Phlox paniculata) -- Grow in full sun to part shade in average to moist soil. Plant in an area with plenty of ventilation to prevent mildew. 3-4'H
+204: Ninebark (Physocarpus opulifolius) – Clusters of white pinkish flowers resembling spirea bloom May-June growing 8-10ft tall x 6-10ft wide. Birds eat the seed formed in reddish drooping fruit clusters in fall. The bark provides winter interest as it peels away in strips to reveal layers of reddish to light brown inner bark on mature stems.
+205: Showy Coneflower/Orange Coneflower (Rudbeckia fulgida) – Yellow petals surround a brown-purple central seed head. Blooms are good cut flowers. Plants spread slowly from clumps and grow well in poorly drained clay soil.
+206: Blue-eyed Grass (Sisyrinchium angustifolium) – noted for its violet-blue flowers and branched flowering stems. Not a grass, per se, but a thin-leaved member of the Iris family. It is native to Missouri where it occurs in damp open woods, slopes and along stream banks throughout much of the State.
+207: Blackhaw Viburnum (Viburnum prunifoilum) – Average to high moisture tolerance; White flat-top cluster flowers in spring; burgundy fall foliage; purple-black fruits. Round-headed tree or multi-stem shrub. 12-15'H x 12-15'W
+208: Vernal Witch Hazel (Hamamelis vernalis) -- Also known as Ozark witch hazel, this unique native shrub flowers from late winter into early spring, when little else is blooming in the landscape. The fragrant flowers are clustered or solitary, yellow to dark red in color. 6-10’H
+209: Blue Pickerel (Pontedaria cordata) - A true emergent wetland species, thrives in shallow muddy shorelines or contained as a specimen in water features. Bright blue flowers produce prolific seeds, the stems and submerged roots are prime habitat for dragon and damsel flies, fish, and amphibians.
+210: Broadleaf Arrowhead (Sagitarria latifolia) - Three-petaled white flowers adorn tall stalks up to 4’ tall. With vigorous saggitate (arrow-shaped) foliage, this wetland species produces starchy golf ball-like tubers that have long been an indigenous food staple known as wapato, or duck potato in English.
+211: Pink Turtlehead (Chelone obliqua) - Adptable to a surpisingly wide range of growing conditions, from rich medium-moist soils to swampy wetlands, the flowers are eye-catching and resemble an open-mouthed turtle. Prefers partial sun to dappled shade and consistent moisture.
+212: Container Planting Ideas with Native Plants
+213: Container Gardening with Native Plants from Missouri Botanical Garden
+214: Missouri Native Plant Container Designs from GrowNative!
+215: Native Plant Designs from Deep Roots
+216: “Sweet Sixteen Most Likely to Success Plants”
+217: “The Long Season” (Full sun to medium shade – approx. size 8’ x 8’)
+218: “The Longer Season” (Full sun to medium shade – approx. size 12’ x 12’)
+219: “Bee in a Candy Store” (Full sun – border along fence or foundation – approx.. size 14’ x 3’)
+220: “Bee in Candy Land” (Full sun to light shade – border along fence or foundation – 25’ x 6’)
+221: “Shady Soft Landings” (Part sun to full shade – surrounding tree trunk – approx. size 8’ x 10’)
+222: “Shadier Soft Landings” (Part sun to full shade – surrounding tree trunk – approx. 15’ diameter)
+223: “Welcome Summer!” (Full sun – approx. size 8’ x 8’)
+224: “Welcome All Year!” (Full sun to light shade – approx. size 10’ x 20’)
+225: Suggested additions
+226: Pawpaw
+227: Red Buckeye
+228: Packera aurea
+229: IX.  Sociability of plant species (from Curious by Nature episode)
+230: Less Social, Solitary Species:
+231: Rock Pink (Phemeranthus calycinus)
+232: Pussytoes (Antennaria species)
+233: Short Bee Balm (Monarda bradburiana)
+234: Hoary Puccoon (Lithospermum canescens)
+235: Small Skullcap (Scutellaria parvula)
+236: Alumroot (Heuchera species)
+237: Rose Verbena (Glandularia candensis)
+238: Jacob’s Ladder (Polemonium reptans)
+239: Crested Iris (Iris cristata)
+240: Copper Iris (Iris fulva)
+241: Butterfly Milkweed (Asclepias tuberosa)
+242: Oak Sedge (Carex albicans)
+243: Cedar Sedge (Carex eburnea)
+244: Dittany (Cunila origanoides)
+245: Thread-leaf Bluestar (Amsonia ciliata)
+246: Royal Catchfly (Silene regia)
+247: Woodland Spiderwort (Tradescantia ernestiana)
+248: Wild Sweet William (Phlox divaricata)
+249: Pale Purple Coneflower (Echinacea pallida)
+250: Yellow Coneflower (Echinacea paradoxa)
+251: Medium or Moderate Spreading Species:
+252: Robin’s Plantain (Erigeron pulchellus)
+253: Blue Grama (Bouteloua gracilis)
+254: Prairie Dropseed (Sporobolus heterolepis)
+255: Golden Groundsel (Packera obovata)
+256: Whorled Milkweed (Asclepias verticillata)
+257: Woodland Pinkroot (Spigelia marilandica)
+258: Lanceleaf Coreopsis (Coreopsis lanceolata)
+259: Yarrow (Achillea millefolium)
+260: Eastern Bluestar (Amsonia tabernaemontana)
+261: Ohio Spiderwort (Tradescantia ohiensis)
+262: Columbine (Aquilegia canadensis)
+263: Missouri Evening Primrose (Oenothera macrocarpa)
+264: Golden Alexander (Zizia aurea)
+265: Purple Poppy Mallow (Callirhoe involucrata)
+266: Purple Coneflower (Echinacea purpurea)
+267: Culver’s Root (Veronicastrum virginicum)
+268: Highly Social or Gregarious Species:
+269: Meadow Anemone (Anemonastrum canadense)
+270: New England Aster (Symphyotrichum novae-angliae)
+271: Aromatic Aster (Symphyotrichum oblongifolium)
+272: Prairie Feather Grass (Sorghastrum nutans)
+273: Big Bluestem (Andropogon gerardi)
+274: Cliff Goldenrod (Solidago drummondii)
+275: Rigid Goldenrod (Solidago rigida)
+276: Common Milkweed (Asclepias syriaca)
+277: Tall Bee Balm (Monarda fistulosa)
+278: Blue Sage (Salvia azurea)
+279: Willow-leaved Sunflower (Helianthus salicifolius)
+280: Ironweed (Vernonia fasciculata)
+281: River Oats (Chasmanthium latifolium)
+282: Cord Grass (Spartina pectinata)
+283: Grayhead Coneflower (Ratibida pinnata)

@@ -264,7 +264,7 @@ JavaScript Syntax: 100% Validated (0 syntax or runtime compilation errors)
 
 ### 4.2. Manual Screen Reader & Keyboard Validation Checklist
 1. **Screen Readers Tested:**
-   - Android TalkBack (Touch and physical keyboard exploration)
+   - TalkBack / Mobile Screen Readers (Touch and physical keyboard exploration)
    - ChromeVox / VoiceOver / NVDA
 2. **Keyboard Testing Protocol:**
    - Press `Tab` upon initial page load &rarr; `.skip-link` immediately gains visible focus.

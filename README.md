@@ -1,16 +1,13 @@
 # Deep Roots Nature Advisors - Kansas City Native Plant Database
 ### *Deep Roots Database*
 
-A multi-platform, production-grade ecological conservation planning application and plant intelligence database built for **Deep Roots Nature Advisors** in the Greater Kansas City region.
+A production-grade ecological conservation planning web application and plant intelligence database built for **Deep Roots Nature Advisors** in the Greater Kansas City region.
 
-Available across platforms:
+Available resources:
 - 🌐 **Web Application**: [`index.html`](./index.html), hosted live on GitHub Pages at [**bradlchr.github.io**](https://bradlchr.github.io/).
-- 💻 **Interactive Code Documentation**: [**`docs.html`**](https://bradlchr.github.io/docs.html) (Live Interactive Portal) and [**`CODE_DOCUMENTATION.md`**](./CODE_DOCUMENTATION.md) — Full technical manual detailing the architecture, technologies used, security, OpenXML pipeline, and reference of all 118 functions.
-- 📱 **Native Android & ChromeOS Application**: Pre-compiled [`DeepRootsAdvisor-debug.apk`](./DeepRootsAdvisor-debug.apk) (20 MB), built with Kotlin, Jetpack Compose, and Material 3 Adaptive WindowSizeClass.
 - 📄 **Official Word Report Generator**: Integrates the official Deep Roots Word template ([`report_template.docx`](./report_template.docx)) to output genuine, formatted `.docx` consultation reports.
 - 📖 **User Guide**: [**Web Application User Guide (`USER_GUIDE.md`)**](./USER_GUIDE.md) — Step-by-step field guide for searching plants, configuring garden zones, and exporting reports.
 - ♿ **ADA & WCAG 2.1 AA Compliance Documentation**: Detailed standards mapping, assistive technology testing, and implementation guide at [**`ADA_COMPLIANCE.md`**](./ADA_COMPLIANCE.md).
-- 📊 **Program Manager Presentation**: Executive briefing deck at [**`PRESENTATION.md`**](./PRESENTATION.md) (or [**`program_manager_presentation.md`**](./program_manager_presentation.md)) and interactive browser slide deck at [**`presentation.html`**](./presentation.html).
 
 Nature Advisors use the **Deep Roots Database** in the office and out in the field to research native species, evaluate site conditions, curate plant palettes into personalized client reports, and synchronize botanical records in real time via Cloud Firestore.
 
@@ -168,54 +165,27 @@ Replaces third-party Google Sign-In with an integrated, standalone Nature Adviso
 ```
 Deep Roots Database/
 ├── index.html                                  # Standalone Single-File Web Application
-├── presentation.html                           # Interactive Web Presentation Deck
-├── PRESENTATION.md                             # Program Manager Executive Presentation Briefing
-├── program_manager_presentation.md             # Program Manager Executive Presentation (canonical copy)
+├── training.html                               # Interactive Codebase Walkthrough & Quiz Academy
+├── Rebuild-Index.html                          # Browser-based modular rebuild utility (zero terminal)
+├── Rebuild-Index.command                       # macOS double-click rebuild shortcut
+├── Rebuild-Index.bat                           # Windows double-click rebuild shortcut
+├── Rebuild-Index.sh                            # Linux rebuild shortcut
+├── code-sections/                              # Modular 10-part source files & rebuild-index.js
+├── USER_GUIDE.md                               # Web Application User Guide
 ├── ADA_COMPLIANCE.md                           # ADA Title III & WCAG 2.1 AA Compliance Documentation
 ├── report_template.docx                        # Official Deep Roots Word Document Template (1.4 MB)
-├── DeepRootsAdvisor-debug.apk                  # Pre-compiled Android Debug APK (20 MB)
 ├── firestore.rules                             # Hardened Cloud Firestore Security Rules
-├── README.md                                   # Project documentation
-├── implementation_plan.md                      # Web & system implementation specification
-├── mobile_architecture_plan.md                 # Mobile architecture specification
-├── android/                                    # Native Android Project (Kotlin / Jetpack Compose)
-│   ├── app/src/main/
-│   │   ├── java/org/deeproots/advisor/
-│   │   │   ├── auth/
-│   │   │   │   └── AuthManager.kt              # RBAC authentication & password hashing
-│   │   │   ├── data/
-│   │   │   │   ├── PlantRepository.kt          # Room database, caching, & report storage
-│   │   │   │   ├── CloudPlantSyncEngine.kt     # Firestore catalog synchronization
-│   │   │   │   └── FirestoreUserSyncEngine.kt  # User roster & consultation reports sync
-│   │   │   ├── sync/
-│   │   │   │   ├── ReportSyncManager.kt        # Two-way Firestore consultation report sync
-│   │   │   │   └── TemplateReportGenerator.kt  # Official .docx Word report builder
-│   │   │   ├── ui/
-│   │   │   │   ├── DeepRootsApp.kt             # Main navigation & top app bar
-│   │   │   │   ├── PlantViewModel.kt           # State management & reactive flows
-│   │   │   │   └── components/                 # Modals, plant cards, staging pane, filters
-│   │   └── assets/report_template.docx         # Bundled Word report template
-│   └── gradlew                                 # Gradle wrapper script
-└── scripts/
-    └── build_single_file_html.py               # Single-file HTML compiler script
+└── README.md                                   # Project documentation
 ```
 
 ---
 
 ## 🚀 Running the Application
 
-### 1. Web Application (Zero-Build)
+### Web Application (Zero-Build)
 - Open `index.html` in any web browser, or access the live GitHub Pages deployment at:
   > **[https://bradlchr.github.io/](https://bradlchr.github.io/)**
-
-### 2. Android Application
-- Download [`DeepRootsAdvisor-debug.apk`](./DeepRootsAdvisor-debug.apk) directly or from [bradlchr.github.io/DeepRootsAdvisor-debug.apk](https://bradlchr.github.io/DeepRootsAdvisor-debug.apk).
-- To compile from source:
-  ```bash
-  cd android
-  ./gradlew assembleDebug --no-daemon
-  ```
-  The compiled APK will be at `android/app/build/outputs/apk/debug/DeepRootsAdvisor-debug.apk`.
+- If you edit any modular section inside `code-sections/`, double-click `Rebuild-Index.html` (or `Rebuild-Index.command` / `Rebuild-Index.bat`) or run `node code-sections/rebuild-index.js` to recompile `index.html`.
 
 ---
 

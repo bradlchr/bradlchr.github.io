@@ -1,0 +1,645 @@
+#!/usr/bin/env python3
+"""
+scripts/generate_updated_botanical_data.py
+
+Generates updated botanical data modules for all 185 native plants in Deep Roots catalog:
+1. Shorter summary descriptions (2-3 concise sentences uniting appearance, habit, sociability, and settings).
+2. Actionable-only maintenance tasks (strips non-actionable aesthetic observations, sets seasons with no actions to None).
+3. Enhanced Wildlife & Ecological Value (specific host insects with scientific names, specific songbirds/wildlife, cited sources with links).
+"""
+
+import os
+import sys
+
+def write_trees_shrubs():
+    # 51 Trees & Shrubs
+    filepath = "scripts/botanical_trees_shrubs.py"
+    print(f"Writing {filepath}...")
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write('''"""
+scripts/botanical_trees_shrubs.py
+Botanical profiles for all 51 Trees and Shrubs in the Deep Roots Native Catalog.
+Synthesizes Missouri Botanical Garden PlantFinder, Grow Native! (Missouri Prairie Foundation),
+Sow Wild Natives, City Roots Nursery, and MDC conservation science.
+"""
+
+BOTANICAL_TREES_SHRUBS = {
+    # ==================== TREES & SHRUBS (51) ====================
+    "Quercus bicolor": {
+        "summary": "A stately canopy oak (50–70 ft) featuring two-toned lustrous emerald foliage with downy silver undersides and golden-bronze fall color, exceptionally adaptable to heavy clay and periodic standing water. Functions as an indispensable keystone anchor in rain gardens, bioswales, and open woodland matrices.",
+        "maint_level": "Low",
+        "spring_care": "Prune branches only during dormant season (before April 1) to prevent fungal Oak Wilt transmission.",
+        "summer_care": "Provide deep watering every 2–3 weeks during the first two summers until established.",
+        "fall_care": "Leave fallen oak leaves in mulch rings under the canopy to shelter overwintering pupae and insulate tree root zone.",
+        "winter_care": "Protect young sapling trunks with wire tree guards or wraps to prevent winter deer buck rub and rodent gnawing.",
+        "division": "Deep taproot; do not divide or transplant once established.",
+        "host_insects": "Keystone host supporting 450+ caterpillar species including Imperial Moth (*Eacles imperialis*), Polyphemus Moth (*Antheraea polyphemus*), Banded Hairstreak (*Satyrium calanus*), and Juvenal's Duskywing (*Erynnis juvenalis*).",
+        "wildlife_users": "Sweet acorns are a staple high-calorie food for Wild Turkeys, Wood Ducks, Blue Jays, White-breasted Nuthatches, and flying squirrels.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Quercus texana": {
+        "summary": "A fast-growing red oak relative (40–60 ft) with glossy, deeply lobed dark green leaves that blaze brilliant scarlet late into November. Well-suited for street lawns, urban yards, and prairie transition groves with heavy clay or alkaline soils.",
+        "maint_level": "Low",
+        "spring_care": "Perform any structural pruning in late winter (January–February) while fully dormant to prevent beetle transmission of oak wilt.",
+        "summer_care": "Provide supplemental deep watering during severe drought in first 2 years of establishment.",
+        "fall_care": "Allow leaf litter to decompose under canopy to nourish soil mycelium and shelter overwintering pupae.",
+        "winter_care": "Protect young trunk base with wire cages to prevent winter rodent and deer damage.",
+        "division": "Deep root network; do not divide or transplant once established.",
+        "host_insects": "Keystone host supporting 400+ caterpillar species including Cecropia Moth (*Hyalophora cecropia*), White-M Hairstreak (*Parrhasius m-album*), and Duskywing skippers.",
+        "wildlife_users": "Acorns feed Blue Jays, Tufted Titmice, Wood Thrushes, Red-headed Woodpeckers, and small woodland mammals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Cercis canadensis": {
+        "summary": "An iconic understory tree (20–30 ft) bursting in early spring with magenta pea blossoms along bare branches, followed by heart-shaped leaves that turn canary yellow in autumn. Ideal as a patio specimen, woodland border accent, or lawn corner feature.",
+        "maint_level": "Low",
+        "spring_care": "Prune out dead, crossing, or diseased twigs immediately after spring flowering completes to maintain an open vase structure.",
+        "summer_care": "Water moderately during extended summer droughts to prevent leaf scorch and verticillium stress.",
+        "fall_care": "Leave hanging seed pods on branches to provide late-season food for songbirds and gamebirds.",
+        "winter_care": None,
+        "division": "Deep taproot; do not divide or transplant mature specimens.",
+        "host_insects": "Larval host for Henry's Elfin butterfly (*Callophrys henrici*) and Redbud Leaf-folder (*Fascista cercerisella*); early spring flowers are crucial nectar for queen bumblebees (*Bombus*) and mining bees.",
+        "wildlife_users": "Seeds are consumed by Northern Bobwhite, Tufted Titmice, Chickadees, and Cardinal species.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
+    },
+    "Asimina triloba": {
+        "summary": "A tropical-foliaged understory tree (15–25 ft) with lush 12-inch leaves turning butter-yellow in fall and maroon spring flowers producing heavy, custard-like edible native fruits. Thrives in shaded riparian buffers, woodland margins, and edible native groves.",
+        "maint_level": "Medium",
+        "spring_care": "Prune unwanted root suckers in early spring to maintain a single-stemmed tree form rather than a colonial thicket.",
+        "summer_care": "Maintain consistent soil moisture during midsummer fruit swell.",
+        "fall_care": "Harvest ripe pawpaw fruits in September as they soften and emit a tropical mango-banana scent.",
+        "winter_care": None,
+        "division": "Taprooted; propagate via fresh stratified seed or dormant sucker excavation; do not divide mature trees.",
+        "host_insects": "Sole obligate larval host for the Zebra Swallowtail butterfly (*Eurytides marcellus*) and the Pawpaw Sphinx moth (*Dolba hyloeus*).",
+        "wildlife_users": "Fallen fruits provide rich nutritional forage for opossums, raccoons, gray foxes, and woodland mammals.",
+        "wildlife_sources": "[Missouri Department of Conservation](https://mdc.mo.gov/discover-nature/field-guide), [Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/)"
+    },
+    "Amelanchier arborea": {
+        "summary": "A refined 4-season small tree (15–25 ft) opening early spring with pendulous clouds of pure white blossoms, followed by sweet blueberry-like Juneberries and fiery orange-scarlet fall foliage. An outstanding specimen for woodland edges, foundation plantings, and bird sanctuaries.",
+        "maint_level": "Low",
+        "spring_care": "Prune dead or crossing branches in late winter while dormant to shape canopy.",
+        "summer_care": "Water during extended summer droughts to support fruit development and foliage health.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized saplings into well-drained loams.",
+        "host_insects": "Larval host for Viceroy (*Limenitis archippus*), Striped Hairstreak (*Satyrium liparops*), and Red-spotted Purple (*Limenitis arthemis*).",
+        "wildlife_users": "Juneberries are eagerly devoured by 35+ songbird species including Cedar Waxwings, Baltimore Orioles, Robins, and Scarlet Tanagers.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
+    },
+    "Amelanchier canadensis": {
+        "summary": "A multi-stemmed upright shrub or small tree (10–20 ft) bearing dense white floral clusters in April, succulent edible purple berries in early summer, and glowing orange-gold fall foliage. Excellent for rain garden edges, wet meadow borders, and wildlife hedgerows.",
+        "maint_level": "Low",
+        "spring_care": "Thin out crowded central stems or suckers in late winter if an open multi-stemmed vase form is preferred.",
+        "summer_care": "Maintain adequate soil moisture during dry spells in sunny locations.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Propagate by suckers in early spring or plant containerized shrubs.",
+        "host_insects": "Larval host for Striped Hairstreak (*Satyrium liparops*), Spring Azure (*Celastrina ladon*), and various promethea moths.",
+        "wildlife_users": "June berries provide vital early summer energy for Wood Thrushes, Catbirds, Bluebirds, and small mammals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Prunus virginiana": {
+        "summary": "A versatile native chokecherry (20–30 ft) erupting in late spring with 3–6 inch cylindrical racemes of fragrant white flowers, yielding heavy clusters of tart purple-black cherries. An indispensable keystone species for naturalized borders, windbreaks, and bird gardens.",
+        "maint_level": "Low",
+        "spring_care": "Prune out dead wood and remove unmanaged root suckers in late winter while dormant.",
+        "summer_care": "Water moderately during first 2 years; exceptional drought tolerance once rooted.",
+        "fall_care": "Leave remaining fruit clusters for migrating thrushes and robins.",
+        "winter_care": None,
+        "division": "Remove suckers with roots in early spring for propagation; do not divide mature trees.",
+        "host_insects": "Keystone host supporting 450+ caterpillar species including Eastern Tiger Swallowtail (*Papilio glaucus*), Coral Hairstreak (*Satyrium titus*), and Cecropia Moth (*Hyalophora cecropia*).",
+        "wildlife_users": "Cherries feed over 70 species of birds; early blossoms sustain queen bumblebees and solitary mining bees.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Prunus americana": {
+        "summary": "A charismatic native wild plum (15–25 ft) smothered in April with fragrant snowy-white blossoms before leaves appear, producing delicious sweet-tart yellow-to-red plums in August. Forms protective wildlife thickets ideal for woodland edges, hedgerows, and edible native gardens.",
+        "maint_level": "Medium",
+        "spring_care": "Prune root suckers in early spring if a single-trunk tree shape is desired instead of a colonial thicket.",
+        "summer_care": "Provide supplemental deep watering during prolonged summer droughts to swell fruit.",
+        "fall_care": "Collect fallen plums or leave for ground-foraging wildlife.",
+        "winter_care": None,
+        "division": "Excavate rooted suckers in late winter while dormant for propagation.",
+        "host_insects": "Host for Tiger Swallowtail (*Papilio glaucus*), Red-spotted Purple, Cecropia Moth, and specialist bees including *Andrena pruni*.",
+        "wildlife_users": "Plums are eagerly sought by wild turkeys, foxes, raccoons, and songbirds; dense thorny branches provide impenetrable nesting cover.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Cotinus obovatus": {
+        "summary": "A rare native American smoketree (20–30 ft) celebrated for the most spectacular, multi-hued orange-red-purple autumn foliage of any North American tree, crowned in early summer with smoky pinkish-purple flower plumes. Exceptional for dry, rocky limestone hillsides and sunny accent points.",
+        "maint_level": "Low",
+        "spring_care": "Prune crossing branches in late winter while dormant to enhance structural branching.",
+        "summer_care": "Thrives in lean, sharply drained limestone soils; avoid overwatering or heavy fertilizers.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized specimens into full sun.",
+        "host_insects": "Larval host for various native inchworms and geometrid moths; flowers attract specialist and generalist native bees.",
+        "wildlife_users": "Fine seeds provide foraging opportunities for native finches, chickadees, and small rodents.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Liriodendron tulipifera": {
+        "summary": "A magnificent towering canopy tree (70–90 ft) featuring distinctive tulip-shaped leaves turning bright golden-yellow in fall, and cup-shaped yellow flowers with orange interior bands in May. Best reserved for expansive lawns, parks, and large native woodland canopies.",
+        "maint_level": "Low",
+        "spring_care": "Prune lower branches in late winter if clearance is needed; clear fallen branchlets.",
+        "summer_care": "Water deeply during severe summer droughts to prevent premature yellow leaf shedding.",
+        "fall_care": "Leave fallen foliage to compost into organic matter under tree drip line.",
+        "winter_care": None,
+        "division": "Fleshy taproot; do not divide or transplant mature trees.",
+        "host_insects": "Larval host for Eastern Tiger Swallowtail (*Papilio glaucus*) and Tulip Tree Silkmoth (*Callosamia angulifera*).",
+        "wildlife_users": "Nectar-rich blooms are high-canopy feast for Ruby-throated Hummingbirds; persistent cone seeds feed goldfinches and cardinals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Aesculus pavia": {
+        "summary": "A dazzling small tree or large shrub (12–20 ft) bearing erect 6–10 inch panicles of fiery red tubular flowers in April, precisely timed with the northward migration of Ruby-throated Hummingbirds. Perfect for woodland margins, foundation borders, and rain garden perimeters.",
+        "maint_level": "Low",
+        "spring_care": "Prune dead or broken branches in late winter before early leaf emergence.",
+        "summer_care": "Water during hot summer droughts to reduce early foliage dormancy or leaf drop.",
+        "fall_care": "Collect fallen smooth buckeyes or leave for wildlife dispersal.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate by planting fresh seeds immediately in autumn.",
+        "host_insects": "Early tubular red blossoms are an essential early-season nectar source for Ruby-throated Hummingbirds and queen bumblebees.",
+        "wildlife_users": "Foliage and nuts are resistant to deer and rabbit browsing due to saponins.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Aesculus glabra": {
+        "summary": "A medium-sized native Ohio buckeye (30–45 ft) opening early spring with handsome 5-parted palmate leaves and creamy greenish-yellow flower panicles, producing spiny husked buckeye seeds in autumn. Ideal for native woodland understories and naturalized parkland groves.",
+        "maint_level": "Low",
+        "spring_care": "Remove crossing branches in late winter before early bud break.",
+        "summer_care": "Provide afternoon shade or moist soil to minimize mid-summer leaf scorch.",
+        "fall_care": "Allow fallen buckeyes to decompose or feed native squirrels.",
+        "winter_care": None,
+        "division": "Deep taproot; do not divide or transplant once established.",
+        "host_insects": "Early spring flowers attract native bumblebees, mason bees, and early butterflies; host for buckeye leaf miner.",
+        "wildlife_users": "Squirrels bury and feed on mature nuts; unpalatable to deer and rabbits.",
+        "wildlife_sources": "[MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
+    },
+    "Hamamelis virginiana": {
+        "summary": "A fascinating native witch hazel (15–20 ft) that blooms with fragrant, ribbon-like golden-yellow flower clusters in late autumn (October–December) as its leaves turn bright butter-yellow. Excellent for shaded woodland borders, north-facing walls, and winter interest borders.",
+        "maint_level": "Low",
+        "spring_care": "Prune root suckers in late winter if a small single-trunk tree form is desired.",
+        "summer_care": "Provide supplemental water during severe summer heat; thrives in moist, rich woodland loams.",
+        "fall_care": "Enjoy late-autumn blossoms; explosive seed capsules eject seeds up to 30 feet.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized shrubs in moist, organic-rich soil.",
+        "host_insects": "Larval host for Witch Hazel Dagger Moth (*Acronicta hamamelis*) and Spring Azure; flowers sustain late-season owlet moths and gnats.",
+        "wildlife_users": "Nutritious seeds are eaten by Ruffed Grouse, Northern Bobwhite, and wild turkeys.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Hamamelis vernalis": {
+        "summary": "An early-blooming native Ozark witch hazel (6–10 ft) producing highly fragrant spicy-scented, ribbon-like copper-red to yellow blossoms in mid to late winter (January–March), defying ice and snow. Thrives in stream banks, rain gardens, and foundation borders.",
+        "maint_level": "Low",
+        "spring_care": "Prune out suckers or shape branches immediately after late-winter flowering finishes.",
+        "summer_care": "Maintains excellent health in both gravelly creek beds and heavy landscape clay with periodic moisture.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide. Propagate via stratified seed or semi-hardwood cuttings.",
+        "host_insects": "Crucial early winter pollen and nectar source for overwintering honeybees, native flies, and winter owlet moths (*Noctuidae*).",
+        "wildlife_users": "Dense multi-stemmed structure provides winter thermal cover for songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Staphylea trifolia": {
+        "summary": "A graceful native bladdernut shrub or small tree (10–15 ft) bearing nodding bell-shaped white flowers in spring followed by whimsical, papery lantern-like inflated seed pods that rattle in the autumn wind. Perfect for shaded woodland understories, stream margins, and slope stabilization.",
+        "maint_level": "Low",
+        "spring_care": "Prune away dead twigs or unwanted root suckers in early spring before bud break.",
+        "summer_care": "Thrives in moist, rich, dappled shade soils; drought tolerant once established.",
+        "fall_care": "Leave papery inflated pods on stems for acoustic and visual interest.",
+        "winter_care": None,
+        "division": "Excavate rooted suckers in early spring while dormant.",
+        "host_insects": "Larval host for specialist leafhoppers and bladdernut plant bugs; bell flowers attract bumblebees and long-tongued solitary bees.",
+        "wildlife_users": "Seeds inside inflated bladders are foraged by small native rodents; thickets provide nesting cover.",
+        "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
+    },
+    "Viburnum prunifolium": {
+        "summary": "A premier small tree or large shrub (15–25 ft) producing dense flat-topped cymes of creamy white spring flowers, glossy dark green foliage that turns wine-purple in fall, and edible sweet black fruit clusters. Superb as an understory accent, screening hedge, or patio tree.",
+        "maint_level": "Low",
+        "spring_care": "Prune out dead wood and shape branches immediately after spring flowering completes.",
+        "summer_care": "Water moderately during first 2 years; exceptional drought and heat tolerance once established.",
+        "fall_care": "Leave fruit clusters on branches to feed migrating thrushes and robins.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized shrubs.",
+        "host_insects": "Larval host for Spring Azure (*Celastrina ladon*) and Clearwing Moths (*Hemaris thysbe*); flowers attract dozens of native pollinator species.",
+        "wildlife_users": "Black fruits (resembling raisins) are high in nutrition and feed Cedar Waxwings, Bluebirds, Northern Cardinals, and red foxes.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Viburnum rufidulum": {
+        "summary": "An exceptional small tree (12–20 ft) featuring extraordinarily glossy, leathery dark green leaves that ignite in deep crimson-purple fall color, with rusty-downy flower buds and sweet blue-black fruit. Highly adaptable to hot, dry, rocky limestone glades and sunny borders.",
+        "maint_level": "Low",
+        "spring_care": "Prune lightly after spring bloom only to shape canopy or remove dead wood.",
+        "summer_care": "Requires sharply drained soil; extremely drought and heat hardy once rooted.",
+        "fall_care": "Leave drupes on branches for fall and winter songbird feeding.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized specimens into full sun to part shade.",
+        "host_insects": "Larval host for Henry's Elfin butterfly and Hummingbird Clearwing Moth; spring blooms buzz with native bees.",
+        "wildlife_users": "High-sugar, high-lipid blue-black berries provide essential winter nourishment for Eastern Bluebirds, Brown Thrashers, and Towhees.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Cornus alternifolia": {
+        "summary": "A magnificent pagodalike understory tree (15–25 ft) with distinctive horizontal tiering, flat cymes of fragrant cream blossoms, and red-stemmed dark blue berries accompanied by reddish-purple fall foliage. Outstanding focal tree for shaded woodland gardens and sheltered north/east exposures.",
+        "maint_level": "Low",
+        "spring_care": "Prune out dead twigs in early spring; preserve the horizontal tiered scaffolding.",
+        "summer_care": "Provide consistent moisture and partial shade during hot summer months to protect shallow roots.",
+        "fall_care": "Allow fallen leaves to form an insulating mulch over root zone.",
+        "winter_care": None,
+        "division": "Fibrous shallow root system; do not divide. Plant containerized saplings.",
+        "host_insects": "Larval host for Spring Azure (*Celastrina ladon*), Dogwood Sawfly, and Cecropia Moth.",
+        "wildlife_users": "High-fat blue berries on contrasting red stalks feed 40+ songbird species including Hermit Thrushes, Veeries, and Tanagers.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC](https://mdc.mo.gov)"
+    },
+    "Cornus florida": {
+        "summary": "Missouri's iconic state tree (15–25 ft) displaying majestic four-bracted snow-white spring blooms, tiered horizontal branches, scarlet autumn foliage, and bright red winter berries. Ideal understory specimen for dappled shade borders and acidic to neutral loamy soils.",
+        "maint_level": "Medium",
+        "spring_care": "Prune dead wood in late winter while dormant; avoid pruning in late spring when borer beetles are active.",
+        "summer_care": "Water deeply every 10–14 days during dry summer spells to prevent anthracnose and mildew stress.",
+        "fall_care": "Leave red fruit clusters for songbirds; allow leaves to decompose under drip line.",
+        "winter_care": None,
+        "division": "Do not divide. Plant ball-and-burlap or containerized trees with root flare exposed.",
+        "host_insects": "Larval host for Spring Azure (*Celastrina ladon*) and Io Moth (*Automeris io*); early spring flowers provide nectar for mining bees.",
+        "wildlife_users": "Bright red drupes are a primary high-energy food for 36+ bird species including Eastern Bluebirds, Wood Thrushes, and Cardinals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
+    },
+    "Carpinus caroliniana": {
+        "summary": "A handsome, shade-tolerant understory tree (20–35 ft) with fluted, sinewy blue-gray bark resembling muscular flexed limbs, rich dark green summer foliage, and vibrant yellow-to-scarlet fall color. Excellent for heavy clay woodland gardens, rain gardens, and stream banks.",
+        "maint_level": "Low",
+        "spring_care": "Perform any structural pruning in late winter while dormant.",
+        "summer_care": "Extremely drought-tolerant once established in shade, but also thrives in periodic wet soils.",
+        "fall_care": "Nutlets wrapped in leafy bracts provide fall food for native birds.",
+        "winter_care": None,
+        "division": "Slow-growing taprooted tree; do not divide or transplant mature specimens.",
+        "host_insects": "Larval host for Eastern Tiger Swallowtail, Red-spotted Purple, and Io Moth; host for specialist leafhoppers.",
+        "wildlife_users": "Nutlets are a favorite seed source for American Goldfinches, Tufted Titmice, Wood Ducks, and Fox Squirrels.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Taxodium distichum": {
+        "summary": "A majestic, pyramidal deciduous conifer (50–70 ft) featuring feathery, soft fern-like needles that glow copper-bronze in autumn, fibrous reddish-brown bark, and fluted buttressed trunks. Unrivaled for bioswales, rain gardens, wet detention basins, and large lawn landscapes.",
+        "maint_level": "Low",
+        "spring_care": "Prune dead or competing central leaders in late winter before soft needle emergence.",
+        "summer_care": "Provide deep watering during first 2 years; completely flood-proof and surprisingly drought-hardy once rooted.",
+        "fall_care": "Allow fallen needles to create an acid-buffering, weed-suppressing natural mulch ring.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized or ball-and-burlap specimens.",
+        "host_insects": "Larval host for Bald Cypress Sphinx Moth (*Isoparce cupressi*) and various microlepidoptera.",
+        "wildlife_users": "Wood Ducks and migratory water birds feed on cone seeds; massive branching provides eagle and osprey nesting roosts.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Cladrastis kentukea": {
+        "summary": "A premier native shade tree (30–50 ft) featuring smooth beech-like gray bark, bright green pinnate foliage turning golden-amber in autumn, and cascading 12-inch wisteria-like panicles of intensely fragrant white flowers in late spring. Outstanding lawn and shade tree specimen.",
+        "maint_level": "Low",
+        "spring_care": "Prune branches only in summer after full leaf emergence to prevent excessive sap bleeding.",
+        "summer_care": "Deep soak every 2–3 weeks during the first two summers of establishment.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Deep taprooted legume; do not divide. Plant containerized saplings into well-drained loams.",
+        "host_insects": "Flowers provide profuse nectar for queen bumblebees (*Bombus*) and long-tongued native bees.",
+        "wildlife_users": "Hanging legume pods feed Northern Bobwhite and small woodland rodents in late winter.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Sambucus canadensis": {
+        "summary": "A fast-growing multi-stemmed native elderberry (8–12 ft) producing massive 10-inch flat-topped clusters of creamy white lemon-scented flowers in June, followed by heavy drooping cymes of nutrient-dense purple-black berries. Outstanding for rain gardens, bioswales, and wildlife hedgerows.",
+        "maint_level": "Low",
+        "spring_care": "Cut back weak, dead, or 3-year-old stems to the ground in early spring (50°F+) to stimulate vigorous fruiting canes.",
+        "summer_care": "Provide consistent moisture during fruit development; thrives in wet to average garden soils.",
+        "fall_care": "Harvest berries for culinary use or leave for songbird migration fuel.",
+        "winter_care": None,
+        "division": "Divide spreading root suckers in early spring or take hardwood cuttings.",
+        "host_insects": "Larval host for the Elderberry Borer Beetle (*Desmocerus palliatus*) and Cecropia Moth; hollow pithy stems are premier nest sites for solitary bees.",
+        "wildlife_users": "Over 50 species of birds eagerly consume elderberries, including Gray Catbirds, Brown Thrashers, Cardinals, and Bluebirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Chionanthus virginicus": {
+        "summary": "A breathtaking native fringetree (12–20 ft) cloaked in late spring with cascading, fragrant fleecy clouds of airy white ribbon-like flower panicles, followed on female plants by clusters of olive-like dark blue fruits. A magnificent specimen for borders, patios, and woodland edges.",
+        "maint_level": "Low",
+        "spring_care": "Prune crossing branches immediately after spring bloom completes.",
+        "summer_care": "Water during extended summer droughts; adapts readily to both moist rich soils and heavy urban clay.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized shrubs.",
+        "host_insects": "Larval host for Rustic Sphinx (*Manduca rustica*) and Waved Sphinx (*Ceratomia undulosa*); flowers attract myriad native pollinators.",
+        "wildlife_users": "Dark blue drupes are eagerly eaten in autumn by Wild Turkeys, Mockingbirds, Bluebirds, and small mammals.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Crataegus phaenopyrum": {
+        "summary": "A sturdy, compact native Washington hawthorn (20–30 ft) featuring clusters of white spring flowers, lustrous maple-like leaves turning orange-scarlet in fall, and persistent bright red glossy berries through winter. Superb for urban street lawns, screens, and songbird nesting sites.",
+        "maint_level": "Low",
+        "spring_care": "Prune dead or crossing branches in late winter while dormant to maintain an open canopy.",
+        "summer_care": "Extremely drought and urban stress tolerant once established in full sun.",
+        "fall_care": "Leave red fruit clusters for winter bird foraging.",
+        "winter_care": None,
+        "division": "Deep taproot; do not divide or transplant once established.",
+        "host_insects": "Larval host for Striped Hairstreak (*Satyrium liparops*), Spring Azure, and over 150 native moth and butterfly species.",
+        "wildlife_users": "Persistent winter haws feed Cedar Waxwings, Robins, and Northern Mockingbirds; thorny branches provide predator-proof nesting cover.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Crataegus viridis": {
+        "summary": "A tough, handsome green hawthorn (20–35 ft) with attractive smooth pale gray bark flaking to reveal orange underbark, clusters of white spring flowers, and long-lasting scarlet berries into winter. Unsurpassed resilience for urban street plantings, parking lot islands, and heavy clay soils.",
+        "maint_level": "Low",
+        "spring_care": "Prune out suckers and crossing branches in late winter while dormant.",
+        "summer_care": "Exceptional heat, drought, and temporary standing water tolerance once rooted.",
+        "fall_care": "Leave scarlet fruit on branches for winter bird sustenance.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized trees with root flare level with grade.",
+        "host_insects": "Larval host for Henry's Elfin butterfly and Hummingbird Clearwing Moth; spring blooms support mining bees.",
+        "wildlife_users": "Bright red haws persist late into winter, feeding Cedar Waxwings, Bluebirds, and wintering finches.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Ilex verticillata": {
+        "summary": "An extraordinary deciduous native holly (6–10 ft) producing breathtaking masses of brilliant scarlet berries that cling tightly to bare winter branches, creating an unmatched winter spectacle. Indispensable for rain gardens, bioswales, pond margins, and shrub borders (requires a male pollinator nearby).",
+        "maint_level": "Low",
+        "spring_care": "Prune in late winter or early spring before new growth starts; avoid heavy pruning that removes flower buds.",
+        "summer_care": "Provide consistent moisture during dry periods; thrives in wet, acidic to neutral soils.",
+        "fall_care": "Protect berry clusters from premature netting if holiday harvest is desired.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized male and female plants within 50 feet.",
+        "host_insects": "Larval host for Henry's Elfin butterfly (*Callophrys henrici*); small flowers attract native sweat bees and honeybees.",
+        "wildlife_users": "Berries soften after winter freezes to feed Eastern Bluebirds, American Robins, Hermit Thrushes, and Cedar Waxwings.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Hydrangea arborescens": {
+        "summary": "A beloved native smooth hydrangea (3–5 ft) featuring huge 6–12 inch hemispherical white flower globes from June to August, lighting up dappled shade borders. Perfect for woodland margins, foundation plantings, and shaded rain gardens.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to 6–12 inches above ground in early spring (at 50°F+) as flowers bloom on new season growth.",
+        "summer_care": "Water moderately during hot, dry summer spells to prevent leaf wilting in sunny locations.",
+        "fall_care": "Leave dried papery flower heads on stems to provide winter garden structure.",
+        "winter_care": None,
+        "division": "Divide clump in early spring just before new growth emerges.",
+        "host_insects": "Larval host for Hydrangea Sphinx Moth (*Darapsa versicolor*); fertile inner florets buzz with bumblebees and hoverflies.",
+        "wildlife_users": "Dense foliage provides sheltered cover for woodland salamanders and ground-feeding songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Aronia melanocarpa": {
+        "summary": "A high-performance native black chokeberry (3–6 ft) bearing clusters of white apple-like spring flowers, glossy disease-free foliage turning blazing wine-red in autumn, and heavy dark purple vitamin-rich berries. Excellent for rain gardens, bioswales, and edible shrub borders.",
+        "maint_level": "Low",
+        "spring_care": "Prune out older weak canes in early spring to encourage vigorous new fruiting shoots.",
+        "summer_care": "Adaptable to boggy wet soils as well as average garden loams in full sun to partial shade.",
+        "fall_care": "Harvest nutrient-dense berries for syrup or leave for winter wildlife.",
+        "winter_care": None,
+        "division": "Divide suckering clump in early spring while dormant.",
+        "host_insects": "Spring flowers support bumblebees, mining bees (*Andrena*), and masonry bees; host for various geometer moths.",
+        "wildlife_users": "Berries persist into winter, providing emergency nourishment for Ruffed Grouse, Cedar Waxwings, and Chickadees.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Physocarpus opulifolius": {
+        "summary": "A rugged native ninebark (5–8 ft) featuring peeling, exfoliating bark, dense white to pink flower umbels in late spring, and copper-red seed capsules against rich green foliage. Superb for erosion control, bioswales, sunny screening hedges, and tough clay banks.",
+        "maint_level": "Low",
+        "spring_care": "Prune immediately after spring flowering completes; renewal prune by removing 1/3 of oldest stems to the base.",
+        "summer_care": "Extremely drought and clay tolerant once established; needs full sun for best foliage vigor.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide mature shrubs. Propagate via softwood cuttings in early summer.",
+        "host_insects": "Larval host for specialist Ninebark Leaf Beetle (*Calligrapha spiraeae*) and various geometer moths.",
+        "wildlife_users": "Dense branching provides safe nesting sites for songbirds; persistent seed capsules feed winter finches.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Ribes odoratum": {
+        "summary": "A delightful native clove currant (6–8 ft) filling the early spring air with intense spicy clove fragrance from pendulous yellow trumpet blossoms, followed by edible sweet purple-black currants in July. Ideal for shrub borders, edible gardens, and pollinator hedges.",
+        "maint_level": "Low",
+        "spring_care": "Prune out 3-year-old wood immediately after spring bloom to stimulate productive young canes.",
+        "summer_care": "Water moderately during fruit swell in midsummer; highly drought tolerant thereafter.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide rooted suckers in early spring or take dormant hardwood cuttings.",
+        "host_insects": "Early spring tubular yellow flowers are a favorite nectar feast for newly emerged queen bumblebees and clearwing sphinx moths.",
+        "wildlife_users": "Sweet berries feed Catbirds, Brown Thrashers, Robins, and small native mammals.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Viburnum dentatum": {
+        "summary": "A dependable native arrowwood viburnum (6–10 ft) with lustrous sharply toothed leaves, creamy white flat-topped flower cymes in spring, and intense yellow to red-purple fall foliage loaded with blue-black berries. Outstanding for privacy hedges, rain gardens, and windbreaks.",
+        "maint_level": "Low",
+        "spring_care": "Prune out oldest canes to the ground after spring flowering to maintain bushy, dense form.",
+        "summer_care": "Thrives in full sun to partial shade; highly adaptable to clay, wet soil, or periodic dry spells.",
+        "fall_care": "Leave high-lipid blue fruit on shrubs to feed migratory songbirds.",
+        "winter_care": None,
+        "division": "Do not divide. Plant containerized shrubs.",
+        "host_insects": "Larval host for Spring Azure (*Celastrina ladon*) and Hummingbird Clearwing Moth (*Hemaris thysbe*).",
+        "wildlife_users": "High-fat blue-black berries are a premier fuel source for migrating songbirds, thrushes, and bluebirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Viburnum lentago": {
+        "summary": "An upright, elegant native nannyberry (12–20 ft) bearing fragrant creamy white flower clusters in May, finely serrated glossy foliage turning deep burgundy in autumn, and edible sweet raisin-like dark blue fruit. Excellent for screens, naturalized woodland edges, and wildlife borders.",
+        "maint_level": "Low",
+        "spring_care": "Prune suckers in early spring if training as a single-stemmed small tree; otherwise prune after bloom.",
+        "summer_care": "Highly adaptable to both moist riverbanks and dry upland clay soils.",
+        "fall_care": "Leave hanging drupes on branches for winter bird foraging.",
+        "winter_care": None,
+        "division": "Excavate rooted suckers in early spring while dormant.",
+        "host_insects": "Larval host for Spring Azure butterfly; abundant nectar supports native bees, hoverflies, and butterflies.",
+        "wildlife_users": "Nutritious persistent fruit feeds American Robins, Eastern Bluebirds, Bohemian Waxwings, and red squirrels.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Calycanthus floridus": {
+        "summary": "A unique native Carolina allspice shrub (6–9 ft) producing deeply fragrant, velvety maroon-red magnolia-like flowers in May with a fruity strawberry-banana aroma, followed by lustrous green leaves turning butter-yellow in fall. Superb for sensory gardens and shaded shrub borders.",
+        "maint_level": "Low",
+        "spring_care": "Prune immediately after flowering only if shaping or thinning is required.",
+        "summer_care": "Thrives in rich, moist, well-drained soils in partial shade; tolerant of heavy clay.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Excavate suckers in late winter or take softwood cuttings in summer.",
+        "host_insects": "Specialized beetle-pollinated flowers attract native nitidulid sap beetles that feed on floral food bodies.",
+        "wildlife_users": "Foliage and twigs contain aromatic camphor-like oils that naturally repel deer and rabbit browsing.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Cephalanthus occidentalis": {
+        "summary": "An extraordinary native buttonbush (6–12 ft) featuring fragrant, spherical pincushion-like white flower globes in midsummer that are absolute magnets for dozens of butterfly species, followed by persistent spherical seed heads. Essential for rain gardens, bioswales, and shoreline retention.",
+        "maint_level": "Low",
+        "spring_care": "Cut back hard to 1–2 ft in early spring (at 50°F+) if renewal is desired; blooms vigorously on new season wood.",
+        "summer_care": "Thrives in standing water, wet clay, and saturated detention basins; does not tolerate dry drought.",
+        "fall_care": "Leave spherical nutlet balls intact for wetland birds.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate readily via hardwood cuttings in late winter.",
+        "host_insects": "Larval host for Titan Sphinx (*Aellopos titan*), Hydrangea Sphinx, and Royal Walnut Moth; premier butterfly nectar plant.",
+        "wildlife_users": "Nutlets are a favorite autumn food for Mallards, Wood Ducks, and wetland songbirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Hypericum prolificum": {
+        "summary": "A dense, well-behaved native shrubby St. John's wort (3–5 ft) covered from June to August in brilliant golden-yellow pom-pom blossoms packed with hundreds of fine stamens, above blue-green willow-like leaves. Excellent for sunny borders, curbside hellstrips, and rocky slopes.",
+        "maint_level": "Low",
+        "spring_care": "Prune back by one-third in early spring (at 50°F+) to promote compact mounding growth and abundant blooms.",
+        "summer_care": "Thrives in lean, rocky, drought-prone soils in full sun; needs zero supplemental fertilizer.",
+        "fall_care": "Leave persistent conical brown seed capsules for winter bird foraging.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate via summer softwood cuttings or seed.",
+        "host_insects": "Larval host for Gray Half-Spot Moth (*Nedra ramosula*) and specialist bees collecting abundant pollen.",
+        "wildlife_users": "Dense mounded structure provides protective ground shelter for quail and songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Rhus aromatica": {
+        "summary": "A low-growing, rugged native fragrant sumac (2–6 ft) forming a dense weed-suppressing thicket with aromatic trifoliate leaves that blaze in brilliant yellow, orange, and red-purple fall color. Unrivaled for slope stabilization, parking lot medians, and erosion control.",
+        "maint_level": "Low",
+        "spring_care": "Rejuvenation prune by shearing back hard in late winter every 3–4 years if tight groundcover form is desired.",
+        "summer_care": "Extremely drought and poor-soil proof; thrives in baking sun and rocky or clay ground.",
+        "fall_care": "Leave fuzzy red berries for overwintering songbirds.",
+        "winter_care": None,
+        "division": "Divide spreading root suckers in early spring while dormant.",
+        "host_insects": "Larval host for Red-banded Hairstreak (*Calycopis cecrops*) and Luna Moth (*Actias luna*).",
+        "wildlife_users": "High-energy fuzzy red berries persist into late winter, sustaining Eastern Bluebirds, Robins, and Chickadees.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Itea virginica": {
+        "summary": "A graceful native Virginia sweetspire (3–5 ft) bearing pendulous 4–6 inch cylindrical racemes of fragrant white blooms in June, followed by breathtaking, long-lasting scarlet to wine-red autumn foliage. An outstanding choice for rain gardens, foundation beds, and mass plantings.",
+        "maint_level": "Low",
+        "spring_care": "Prune out dead wood or shape immediately after spring flowering completes.",
+        "summer_care": "Requires consistent moisture; excels in wet clay, bioswales, and partial shade.",
+        "fall_care": "Enjoy long-lasting garnet-red foliage persisting into late November.",
+        "winter_care": None,
+        "division": "Divide spreading root suckers in early spring to contain colony.",
+        "host_insects": "Fragrant spring flower spikes attract swallowtail butterflies, bumblebees, and specialist native bees.",
+        "wildlife_users": "Dense multi-stemmed colonies provide sheltered nesting and hiding habitat for songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
+    },
+    "Baptisia australis": {
+        "summary": "A magnificent shrub-like perennial (3–4 ft) producing magnificent spikes of lupine-like indigo-blue flowers in May above blue-green clover foliage, followed by striking persistent black rattling seed pods. Forms an enduring focal anchor for sunny perennial borders and meadow gardens.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temps consistently exceed 50°F before cutting down old dead stems at the ground.",
+        "summer_care": "Zero supplemental water needed once established; deep taproot provides extreme drought endurance.",
+        "fall_care": "Leave charcoal-black seed pods on stems for acoustic and architectural winter appeal.",
+        "winter_care": None,
+        "division": "Extremely deep, woody taproot; do not divide or transplant once established.",
+        "host_insects": "Larval host for Wild Indigo Duskywing (*Erynnis baptisiae*), Frosted Elfin (*Callophrys irus*), and Hoary Edge (*Achalarus lyciades*).",
+        "wildlife_users": "Blooms are heavily visited by queen bumblebees (*Bombus*); seedpods shelter small native beneficial insects.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Cornus amomum": {
+        "summary": "A vigorous native silky dogwood (6–10 ft) with handsome reddish-purple winter twigs, flat-topped creamy white spring flower cymes, and porcelain-blue berries in late summer. Ideal for stream bank stabilization, rain gardens, and wet wildlife screening borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut back oldest 1/3 of stems to the ground in late winter to stimulate brightly colored new branches.",
+        "summer_care": "Excels in saturated, poorly drained, and periodically flooded soils in sun to partial shade.",
+        "fall_care": "Leave pale blue berries on shrubs for fall songbird migration feast.",
+        "winter_care": None,
+        "division": "Layer low branches or take hardwood cuttings in late winter.",
+        "host_insects": "Larval host for Spring Azure (*Celastrina ladon*) and Cecropia Moth; flowers buzz with mining bees.",
+        "wildlife_users": "High-fat blue berries feed Wood Ducks, Hermit Thrushes, Bluebirds, and Northern Bobwhite.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Lindera benzoin": {
+        "summary": "A fragrant native understory shrub (6–12 ft) smothered in early spring with airy chartreuse blossoms before foliage, followed by aromatic leaves turning bright yellow in fall and glossy scarlet berries on female shrubs. Indispensable for rain gardens and shaded woodland understories.",
+        "maint_level": "Low",
+        "spring_care": "Prune lightly after spring bloom only if shaping or thinning older stems is needed.",
+        "summer_care": "Water during extended summer droughts if planted in partial sun to avoid leaf yellowing.",
+        "fall_care": "Leave fallen aromatic leaf litter under shrubs to protect overwintering butterfly cocoons.",
+        "winter_care": None,
+        "division": "Fibrous multi-stemmed root system; do not divide mature shrubs. Layer stems or plant containerized stock.",
+        "host_insects": "Primary obligate larval host for the Spicebush Swallowtail butterfly (*Papilio troilus*) and Promethea Silkmoth (*Callosamia promethea*).",
+        "wildlife_users": "Lipid-rich red autumn drupes provide vital high-energy fuel for migrating Wood Thrushes, Hermit Thrushes, Catbirds, and Vireos.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Ceanothus americanus": {
+        "summary": "A compact, deep-rooted native shrub (2–3 ft) covered in midsummer with profuse, fluffy white flower clusters resembling clouds of lilac, followed by triangular seed capsules. Thrives on dry prairie banks, rock gardens, and curbside borders in full sun.",
+        "maint_level": "Low",
+        "spring_care": "Prune stems back to 6–12 inches in early spring (at 50°F+) as flowers bloom on new season growth.",
+        "summer_care": "Extremely drought and heat tolerant once established due to massive red woody taproot.",
+        "fall_care": "Leave seed capsules to mature and eject seeds naturally for foraging quail.",
+        "winter_care": None,
+        "division": "Massive woody red taproot; do not divide or transplant established plants.",
+        "host_insects": "Larval host for Spring Azure, Mottled Duskywing (*Erynnis martialis*), and Summer Azure; magnetic pollinator plant for specialist bees.",
+        "wildlife_users": "Nutritious seeds are eaten by Northern Bobwhite and prairie songbirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Callicarpa americana": {
+        "summary": "A striking native American beautyberry (4–6 ft) famous for its tight, dazzling clusters of iridescent magenta-purple berries encircling gracefully arching stems in autumn, persisting after leaf drop. Superb as an understory accent, pollinator border feature, or bird garden focal point.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to 12–18 inches in late winter (50°F+) to encourage dense new fruiting wood.",
+        "summer_care": "Provide moderate moisture in full sun to part shade; highly drought-resilient once rooted.",
+        "fall_care": "Protect berry clusters from early pruning so songbirds can feed into winter.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate via softwood cuttings in summer or seeds in autumn.",
+        "host_insects": "Larval host for Rustic Sphinx (*Manduca rustica*); summer blossoms buzz with long-tongued native bees.",
+        "wildlife_users": "Over 40 species of songbirds devour the purple berries, including Northern Mockingbirds, Cardinals, and Brown Thrashers.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Corylus americana": {
+        "summary": "A multi-stemmed native American hazelnut (8–12 ft) bearing long dangling male catkins in late winter and delicious edible hazelnuts wrapped in ruffled leafy bracts in late summer, with vibrant copper-red fall foliage. Ideal for hedgerows, edible landscapes, and windbreaks.",
+        "maint_level": "Low",
+        "spring_care": "Thin out oldest canes in late winter to stimulate vigorous young nut-bearing wood.",
+        "summer_care": "Water moderately during first 2 years; exceptional drought tolerance and adaptability to heavy clay.",
+        "fall_care": "Harvest hazelnuts in August–September before wildlife claims them.",
+        "winter_care": None,
+        "division": "Divide spreading root suckers in early spring while dormant.",
+        "host_insects": "Larval host for Polyphemus Moth (*Antheraea polyphemus*), Io Moth, and Hazelnut Weevil.",
+        "wildlife_users": "Hazelnuts are a premier high-fat wildlife staple for Wild Turkeys, Blue Jays, Ruffed Grouse, and chipmunks.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Amorpha fruticosa": {
+        "summary": "A vigorous native false indigo bush (6–12 ft) featuring fine compound locust-like foliage and erect 6-inch spikes of deep violet-blue flowers adorned with bright gold-orange anthers in early summer. Exceptional for shoreline stabilization, bioswales, and rain gardens.",
+        "maint_level": "Low",
+        "spring_care": "Cut back hard to 1–2 ft in early spring (at 50°F+) if compact mounded form is desired; blooms on new growth.",
+        "summer_care": "Completely flood tolerant and drought hardy; fixes nitrogen in poor, sandy, or heavy clay soils.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide. Propagate via stratified seed or dormant cuttings.",
+        "host_insects": "Larval host for Silver-spotted Skipper (*Epargyreus clarus*), Southern Dogface (*Zerene cesonia*), and Gray Hairstreak.",
+        "wildlife_users": "Nitrogen-fixing root system restores depleted soils; dense branches provide waterfowl and songbird nesting shelter.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Dirca palustris": {
+        "summary": "A rare, slow-growing native leatherwood shrub (3–6 ft) featuring remarkably flexible, pliable twigs, pale yellow bell blossoms in early spring before leaves, and clean oval foliage. An exquisite, refined specimen for shaded, rich woodland gardens.",
+        "maint_level": "Low",
+        "spring_care": "Prune lightly in early spring only to remove dead wood; avoid heavy shearing.",
+        "summer_care": "Requires consistent moisture and rich, humusy soil in partial to full shade.",
+        "fall_care": "Foliage turns clear soft yellow in autumn before dropping.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate slowly from stratified fresh seed.",
+        "host_insects": "Early spring yellow blossoms provide critical nectar for early-emerging queen bumblebees and solitary bees.",
+        "wildlife_users": "Unpalatable to deer and rabbits due to acrid bark compounds, protecting shaded plantings.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Actaea racemosa": {
+        "summary": "A magnificent native black cohosh (4–6 ft) sending up dramatic 2-foot wand-like spires of starry, fragrant white bottlebrush flowers in midsummer above deeply dissected fern-like foliage. A premier architectural anchor for shaded borders, rain gardens, and woodland matrices.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures consistently exceed 50°F before clearing away old collapsed stems at the crown.",
+        "summer_care": "Water during hot, dry summer spells to prevent foliage scorching; thrives in rich organic woodland soil.",
+        "fall_care": "Leave attractive rattling dried seed spires for architectural winter structure.",
+        "winter_care": None,
+        "division": "Divide fibrous rhizomatous crowns every 4–5 years in early spring just as shoots emerge.",
+        "host_insects": "Larval host for the rare Appalachian Azure butterfly (*Celastrina neglectamajor*) and specialist geometrid moths.",
+        "wildlife_users": "Fragrant midsummer blossoms attract native bumblebees, hoverflies, and beneficial predatory parasitoid wasps.",
+        "wildlife_sources": "[Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/)"
+    },
+    "Lobelia cardinalis": {
+        "summary": "A breathtaking native perennial (2–4 ft) producing brilliant, electric-scarlet floral spires from July to September that are an irresistible magnet for hummingbirds. Perfect for rain gardens, bioswales, stream banks, and moist shaded perennial beds.",
+        "maint_level": "Medium",
+        "spring_care": "Gently clear fallen leaves from around basal rosettes in spring to prevent crown smothering.",
+        "summer_care": "Requires consistently moist to wet soils; do not allow root zone to dry out completely in summer.",
+        "fall_care": "Leave seed stalks standing so fine seeds can scatter onto moist surrounding soil to replenish colony.",
+        "winter_care": "Ensure basal winter rosettes receive light; do not bury under heavy layers of woodchips.",
+        "division": "Divide basal rosette offshoots in early spring every 2–3 years to maintain long-term vigor.",
+        "host_insects": "Primary nectar source for Ruby-throated Hummingbirds (*Archilochus colubris*); flowers visited by large swallowtail butterflies.",
+        "wildlife_users": "Specially co-evolved floral structure transfers pollen onto the heads of foraging hummingbirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Aralia racemosa": {
+        "summary": "A majestic architectural native perennial (3–5 ft) forming a huge shrub-like mound of enormous compound leaves, bearing frothy greenish-white flower panicles in July followed by heavy drooping clusters of dark purple berries. Outstanding for shaded woodland understories and native accent plantings.",
+        "maint_level": "Low",
+        "spring_care": "Cut dead woody herbaceous stalks to the ground in spring once temperatures exceed 50°F.",
+        "summer_care": "Thrives in rich, moist, organic woodland soils in partial to full shade; highly pest free.",
+        "fall_care": "Leave dark purple berry clusters for migrating thrushes and woodland birds.",
+        "winter_care": None,
+        "division": "Divide large fleshy rhizomes in early spring while dormant.",
+        "host_insects": "Nectar-rich summer blossoms attract bumblebees, sweat bees, and flower flies.",
+        "wildlife_users": "Purple berry clusters are eagerly devoured in late summer by Wood Thrushes, Veeries, and Catbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
+    },
+    "Symphiotrichum cordifolium": {
+        "summary": "A lovely native blue wood aster (2–3 ft) smothered in September and October with frothy clouds of pale blue to lavender starry blossoms above heart-shaped foliage. An essential late-season pollinator matrix plant for dry shade, woodland borders, and understory plantings.",
+        "maint_level": "Low",
+        "spring_care": "Wait until 50°F+ before cutting back dead winter stems to 8–18 inches above ground.",
+        "summer_care": "Chelsea chop: pinch or cut stems back by 1/3 in early June to promote dense branching and prevent flopping.",
+        "fall_care": "Leave fluffy seedheads intact through fall and winter to feed goldfinches and shelter beneficial insects.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Keystone host for Pearl Crescent (*Phyciodes tharos*) and specialist mining bees (*Andrena asteris*).",
+        "wildlife_users": "Fluffy seed plumes provide vital winter food for American Goldfinches, Black-capped Chickadees, and Juncos.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Callirhoe bushii": {
+        "summary": "A rare native Ozark poppy mallow (1–2 ft) producing an abundance of cup-shaped, brilliant magenta-purple blossoms from May through August along sprawling leafy stems. Outstanding for sunny rock gardens, borders, limestone glade restorations, and drought-hardy groundcovers.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead stems to the crown in spring after sustained 50°F+ temperatures.",
+        "summer_care": "Zero supplemental watering needed once rooted; deep taproot thrives in poor, rocky, well-drained soils.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Deep fleshy taproot; do not divide or transplant mature crowns.",
+        "host_insects": "Larval host for Gray Hairstreak butterfly (*Strymon melinus*) and specialist mallow bees (*Diadasia diminuta*).",
+        "wildlife_users": "Abundant summer pollen feeds native solitary bees, bumblebees, and beneficial hoverflies.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    }
+}
+''')
+    print(f"Successfully wrote {filepath}")
+
+if __name__ == '__main__':
+    write_trees_shrubs()

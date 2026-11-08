@@ -381,7 +381,7 @@
       } else if (resolved.length === 2) {
         return `linear-gradient(135deg, ${resolved[0]} 0%, ${resolved[1]} 100%)`;
       } else {
-        // 3+ colors: Luminous multi-point mesh gradient matching Android app
+        // 3+ colors: Luminous multi-point mesh gradient
         return `radial-gradient(circle at 15% 15%, ${resolved[0]} 0%, transparent 65%), ` +
                `radial-gradient(circle at 85% 85%, ${resolved[1]} 0%, transparent 65%), ` +
                `linear-gradient(135deg, ${resolved[2] || resolved[0]}, ${resolved[0]})`;

@@ -559,7 +559,7 @@
         }
       });
 
-      // Import Plants JSON (e.g. from Android backup) (Admin Only)
+      // Import Plants JSON Backup (Admin Only)
       document.getElementById('importJsonFileInput')?.addEventListener('change', async (e) => {
         if (!state.currentUser || !state.currentUser.isAdmin) {
           showToast("Administrator privileges required to import plant JSON backups.", "danger");

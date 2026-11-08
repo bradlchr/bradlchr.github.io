@@ -1,0 +1,487 @@
+#!/usr/bin/env python3
+"""
+scripts/write_botanical_grasses.py
+Generates botanical data module for 38 Grasses, Sedges, Ferns, and Vines with:
+1. Shorter summaries
+2. Actionable-only maintenance
+3. Specific host insects, wildlife, and source links
+"""
+
+filepath = "scripts/botanical_grasses_sedges_ferns_vines.py"
+print(f"Writing {filepath}...")
+
+with open(filepath, "w", encoding="utf-8") as f:
+    f.write('''"""
+scripts/botanical_grasses_sedges_ferns_vines.py
+Botanical profiles for 18 Grasses, 11 Sedges, 5 Ferns, and 4 Vines (38 species total)
+in the Deep Roots Native Catalog.
+"""
+
+BOTANICAL_GRASSES_SEDGES_FERNS_VINES = {
+    # ==================== GRASSES (18) ====================
+    "Sporobolus heterolepis": {
+        "summary": "A premier native bunchgrass (18–24 in) forming a fine emerald fountain crowned in late summer by airy pinkish flower panicles with a hot buttered popcorn fragrance, turning glowing pumpkin-orange in fall. Acts as a well-behaved green mulch matrix for formal borders, rain garden margins, and hellstrips.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dried foliage to 2–3 inches in early spring once temperatures exceed 50°F before new green shoots emerge.",
+        "summer_care": None,
+        "fall_care": "Leave standing foliage and seedheads undisturbed through fall and winter to feed winter sparrows and insulate the crown.",
+        "winter_care": None,
+        "division": "Slow-growing clump; division is rarely needed. If rejuvenating, divide large mature clumps in early spring.",
+        "host_insects": "Larval host for Leonard's Skipper (*Hesperia leonardus*), Cobweb Skipper (*Hesperia metea*), and Ottoe Skipper (*Hesperia ottoe*).",
+        "wildlife_users": "Seeds feed winter songbirds including Field Sparrows, Dark-eyed Juncos, and American Tree Sparrows; bunching base shelters overwintering bumblebees.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Schizachyrium scoparium": {
+        "summary": "An iconic prairie bunchgrass (2–3 ft) with fine blue-green foliage that transforms into a fiery blaze of copper, amber, and burgundy in autumn, adorned with silvery crystalline seed plumes. A premier vertical structural matrix for sunny borders, rock gardens, and curbside hellstrips.",
+        "maint_level": "Low",
+        "spring_care": "Cut back stems to 2–3 inches in late spring (at 50°F+) as soil warms in May before new growth shoots appear.",
+        "summer_care": None,
+        "fall_care": "Leave stiff upright stems and fluffy plumes intact through fall and winter for seed foraging and snow cover.",
+        "winter_care": None,
+        "division": "Divide dormant clumps in early spring just as green shoots begin if center dies out after 5–7 years.",
+        "host_insects": "Larval host for 9+ native skipper butterflies including Swarthy Skipper (*Nastra lherminier*), Cobweb Skipper, and Dusted Skipper.",
+        "wildlife_users": "Fluffy seedheads provide vital winter calories for American Goldfinches, Juncos, and native mice.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Bouteloua curtipendula": {
+        "summary": "A charismatic native bunchgrass (1.5–2.5 ft) bearing arching flower stalks adorned with oat-like spikelets that dangle gracefully along one side with vivid red-orange stamens, turning golden-tan in fall. Excellent for erosion-prone slopes, dry meadows, and low-water borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut back to the ground in early spring at 50°F+; rake away dead thatch.",
+        "summer_care": None,
+        "fall_care": "Leave dangling seed stalks intact through fall to feed foraging songbirds.",
+        "winter_care": None,
+        "division": "Divide in early spring every 4–6 years if rejuvenating clump.",
+        "host_insects": "Larval host for Leonard's Skipper, Ottoe Skipper, and Green Skipper (*Hesperia viridis*).",
+        "wildlife_users": "Seeds are eagerly consumed by Northern Bobwhite, Wild Turkeys, and small native rodents.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Bouteloua gracilis": {
+        "summary": "A delightful shortgrass prairie gem (9–15 in) featuring distinctive horizontal 'eyebrow' flower spikes that hover like floating combs above fine blue-gray foliage. Perfect for curbside hellstrips, green roofs, rock gardens, and low-mow lawn alternatives.",
+        "maint_level": "Low",
+        "spring_care": "Mow or shear back to 2 inches in spring (50°F+) before warm-season growth initiates.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide in spring if rejuvenating or propagating.",
+        "host_insects": "Larval host for Uncas Skipper (*Hesperia uncas*) and Pahaska Skipper (*Hesperia pahaska*).",
+        "wildlife_users": "Provides ground forage seeds for horned larks and native sparrows in shortgrass matrices.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Buchloe dactyloides": {
+        "summary": "The premier native shortgrass sod-former (4–8 in) forming a soft, fine-textured grayish-green turf requiring little to no mowing and zero supplemental watering once established. The ideal eco-lawn alternative for full-sun yards, parkways, and golf roughs.",
+        "maint_level": "Low",
+        "spring_care": "Mow once in late spring to 2–3 inches to remove old winter dormant blades.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Spreads via surface stolons; plug or transplant runners in late spring while active.",
+        "host_insects": "Larval host for Green Skipper and various native grass-mining moths.",
+        "wildlife_users": "Dense sod provides safe nesting grounds for ground-nesting native bees and songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Panicum virgatum": {
+        "summary": "A commanding prairie switchgrass (4–6 ft) forming upright blue-green columns crowned in midsummer by airy, cloud-like pinkish flower panicles, turning rich copper-gold in autumn. Unrivaled for bioswales, rain gardens, screening hedges, and erosion control.",
+        "maint_level": "Low",
+        "spring_care": "Cut back to 3–4 inches in late spring at 50°F+ before new shoots rise from the base.",
+        "summer_care": None,
+        "fall_care": "Leave dense upright stems standing through winter for wind screening and bird refuge.",
+        "winter_care": None,
+        "division": "Divide dense root clumps every 4–6 years in early spring if centers hollow.",
+        "host_insects": "Larval host for Delaware Skipper (*Anatrytone logan*), Hobomok Skipper, and Northern Broken-Dash.",
+        "wildlife_users": "Abundant seeds feed American Goldfinches, Bobwhite Quail, and Mourning Doves through harsh snows.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Chasmanthium latifolium": {
+        "summary": "An exquisite native northern sea oats (2–3 ft) featuring drooping, flattened oat-like seed spikelets that flutter gracefully in the slightest breeze above bamboo-like foliage, turning rich bronze in fall. Ideal for shaded borders, rain gardens, and dry-shade erosion control.",
+        "maint_level": "Low",
+        "spring_care": "Cut back to 2 inches in spring after sustained 50°F+ temperatures.",
+        "summer_care": None,
+        "fall_care": "Leave decorative seed clusters on stems for winter movement and wildlife forage.",
+        "winter_care": None,
+        "division": "Divide dense fibrous clumps in early spring or pull unwanted self-sown seedlings.",
+        "host_insects": "Larval host for Northern Pearly-Eye (*Enodia anthedon*), Pepper and Salt Skipper, and Bell's Roadside-Skipper.",
+        "wildlife_users": "Heavy dangling seeds are a staple winter food for Cardinals, Juncos, and small mammals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Elymus hystrix": {
+        "summary": "A striking native bottlebrush grass (2–3 ft) bearing distinctive horizontal, bristly spikelets that look like spiky bottle brushes hovering above broad green blades. Thrives in dry woodland shade, oak savannas, and naturalized understory matrices.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the ground in early spring at 50°F+ before cool-season growth accelerates.",
+        "summer_care": None,
+        "fall_care": "Leave bristly seedheads intact to self-sow naturally in woodland matrix gaps.",
+        "winter_care": None,
+        "division": "Divide short-lived clumps in early spring or rely on natural seed recruitment.",
+        "host_insects": "Larval host for Northern Pearly-Eye (*Enodia anthedon*) and specialist aphid predators.",
+        "wildlife_users": "Seeds are eaten by woodland sparrows, towhees, and wild turkeys.",
+        "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Elymus virginicus": {
+        "summary": "A robust cool-season Virginia wild rye (2–4 ft) featuring dense, bristly, erect seed spikes resembling cultivated wheat or barley above bluish-green foliage. Superb for bioswales, rain garden perimeters, and rapid erosion control on shaded slopes.",
+        "maint_level": "Low",
+        "spring_care": "Cut back old foliage in late winter or early spring (at 50°F+) as cool-season shoots awaken.",
+        "summer_care": None,
+        "fall_care": "Leave standing seed spikes for winter forage and cover.",
+        "winter_care": None,
+        "division": "Divide fibrous clumps in early spring.",
+        "host_insects": "Larval host for various leaf-mining microlepidoptera and native grass skippers.",
+        "wildlife_users": "Seed spikes provide heavy calorie yields for wetland waterfowl, songbirds, and small mammals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC](https://mdc.mo.gov)"
+    },
+    "Sorghastrum nutans": {
+        "summary": "Missouri's official state grass (4–6 ft), forming an upright blue-green clump that ignites in rich burnt-orange in autumn, topped by magnificent shimmering golden-copper flower plumes with bright yellow stamens. A cornerstone keystone for sunny prairies, meadows, and large perennial borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut back to 3 inches in late spring at 50°F+ as warm-season soil temperatures rise.",
+        "summer_care": None,
+        "fall_care": "Leave tall upright stems and golden seed plumes intact for winter structure and wildlife seed.",
+        "winter_care": None,
+        "division": "Divide dense clumps in spring every 4–5 years to maintain vigor.",
+        "host_insects": "Larval host for Pepper and Salt Skipper (*Amblyscirtes hegon*) and Delaware Skipper.",
+        "wildlife_users": "Nutritious seeds feed over 20 species of native songbirds; thick bunchgrass bases shelter overwintering quail.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Andropogon gerardii": {
+        "summary": "The undisputed king of the tallgrass prairie (5–8 ft) with silvery blue-green summer foliage that blazes in shades of bronze, copper, and ruby in autumn, topped by distinctive 3-parted 'turkey foot' flower spikes. Best suited for meadow restorations, bioswales, and expansive sunny boundaries.",
+        "maint_level": "Low",
+        "spring_care": "Cut back to 3–4 inches in late spring (at 50°F+) before vigorous warm-season growth begins.",
+        "summer_care": None,
+        "fall_care": "Leave towering stems standing through winter to catch drifting snow and feed birds.",
+        "winter_care": None,
+        "division": "Divide large crowns in early spring every 5–7 years.",
+        "host_insects": "Larval host for Delaware Skipper, Byssus Skipper (*Problema byssus*), and Arogos Skipper.",
+        "wildlife_users": "High-carbohydrate seeds sustain winter sparrows, finches, and wild turkeys; dense stalks create crucial winter shelter.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Eragrostis spectabilis": {
+        "summary": "A dazzling native purple lovegrass (1–2 ft) producing breathtaking clouds of airy reddish-purple flower panicles in late summer that envelop the ground in a vibrant pink-purple haze. Exceptional for curbside hellstrips, sandy borders, and sunny rock gardens.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dried foliage to 2 inches in spring at 50°F+ before new growth emerges.",
+        "summer_care": None,
+        "fall_care": "Allow airy dried seed panicles to detach and tumble as miniature tumbleweeds to disperse seeds naturally.",
+        "winter_care": None,
+        "division": "Divide clumps in early spring if desired.",
+        "host_insects": "Larval host for Zabulon Skipper (*Poanes zabulon*) and Hobomok Skipper.",
+        "wildlife_users": "Tiny seeds feed ground-foraging sparrows, towhees, and mourning doves in open prairie soils.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Koeleria macrantha": {
+        "summary": "A refined cool-season prairie junegrass (1–2 ft) forming tight, dense tufts of fine blue-gray foliage topped in early summer by silvery, upright cylindrical seed plumes. Ideal for green roofs, dry prairie matrices, and formal low-water borders.",
+        "maint_level": "Low",
+        "spring_care": "Clean out dead winter blades with a hand rake or shear back lightly in early spring at 50°F+.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide tight clumps in early spring or early autumn.",
+        "host_insects": "Larval host for various native micro-moths and early skipper caterpillars.",
+        "wildlife_users": "Fine seeds provide early summer food for grassland songbirds before warm-season grasses mature.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Sisyrinchium angustifolium": {
+        "summary": "A delightful native blue-eyed grass (6–12 in) with iris-like sword foliage producing starry, violet-blue flowers with bright yellow centers from May through June. Charming as an edging plant along pathways, rock gardens, and moist meadow matrices.",
+        "maint_level": "Low",
+        "spring_care": "Trim back old foliage in spring at 50°F+ before delicate flower scapes arise.",
+        "summer_care": "Provide moderate moisture during severe drought to prevent early dormancy.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide small fibrous clumps every 2–3 years in early spring to sustain vigor.",
+        "host_insects": "Specialist native bees (*Halictus* and *Lasioglossum*) feed heavily on rich pollen.",
+        "wildlife_users": "Small seeds are eaten by native sparrows; nectar visited by small copper butterflies.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Allium cernuum": {
+        "summary": "A graceful native nodding wild onion (12–18 in) bearing nodding umbels of soft lilac-pink to white bell flowers on arching scapes in midsummer above slender grass-like foliage. Exceptional for rock gardens, dry borders, hellstrips, and rain garden perimeters.",
+        "maint_level": "Low",
+        "spring_care": "Clear old debris in early spring at 50°F+; new onion-scented chive blades emerge early.",
+        "summer_care": None,
+        "fall_care": "Leave papery triangular seed capsules to self-sow naturally or collect for propagation.",
+        "winter_care": None,
+        "division": "Divide bulb clusters every 3–4 years in early spring or autumn.",
+        "host_insects": "Midsummer flower umbels attract numerous small sweat bees, mining bees, and hairstreak butterflies.",
+        "wildlife_users": "Onion scent naturally repels deer, rabbits, and voles, protecting companion plants.",
+        "wildlife_sources": "[Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
+    },
+    "Viola sororia": {
+        "summary": "A versatile native common blue violet (4–8 in) with heart-shaped leaves and charming purple, blue, or white blossoms in April and May. An indispensable keystone groundcover matrix for shaded lawns, woodland borders, and fruit tree guilds.",
+        "maint_level": "Low",
+        "spring_care": "Allow spring flowers to bloom freely; rake lightly to expose rosettes if smothered by heavy leaves.",
+        "summer_care": None,
+        "fall_care": "Leave basal foliage intact as an insulating living green mulch.",
+        "winter_care": None,
+        "division": "Self-seeds readily via cleistogamous summer seed capsules; divide rhizomes in spring if relocating.",
+        "host_insects": "Primary obligate larval host for Great Spangled Fritillary (*Speyeria cybele*) and Meadow Fritillary (*Boloria bellona*).",
+        "wildlife_users": "Specialist mining bee *Andrena violae* relies exclusively on violet pollen for its brood.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Bignonia capreolata": {
+        "summary": "A vigorous native crossvine (20–40 ft) climbing via adhesive tendril disks, smothered in May with fragrant, bicolored tangerine-orange and yellow trumpet blossoms with a sweet mocha aroma. Magnificent for brick chimneys, masonry walls, trellises, and sunny pergolas.",
+        "maint_level": "Low",
+        "spring_care": "Prune immediately after spring flowering only if training vines or checking runaway growth.",
+        "summer_care": "Water moderately during first season; remarkably heat and drought tolerant once rooted.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Do not divide. Propagate via layering or softwood cuttings in early summer.",
+        "host_insects": "Early spring tubular blooms provide vital high-volume nectar for Ruby-throated Hummingbirds and large bumblebees.",
+        "wildlife_users": "Semi-evergreen foliage provides year-round thermal cover and nesting habitat for Carolina Wrens.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Amorpha canescens": {
+        "summary": "A magnificent deep-rooted prairie sub-shrub (2–3 ft) featuring delicate silvery-gray downy compound foliage and dense 6-inch spikes of electric violet-purple flowers dotted with bright orange-gold stamens in June. Unsurpassed for dry prairie meadows, rock gardens, and drought-hardy borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut back woody herbaceous stems to 4–6 inches in spring at 50°F+ as growth initiates on new wood.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Massive woody taproot reaching 15 feet; do not divide or transplant once established.",
+        "host_insects": "Larval host for Silver-spotted Skipper, Leadplant Flower Moth (*Schinia lucens*), and specialist bees (*Colletes albescens*).",
+        "wildlife_users": "Deep root nodules fix atmospheric nitrogen, nourishing surrounding matrix perennials and native grasses.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+
+    # ==================== SEDGES (11) ====================
+    "Carex pensylvanica": {
+        "summary": "A premier native woodland sedge (6–10 in) forming a soft, lush emerald carpet through creeping underground rhizomes in dry to moist shade. The ultimate living green mulch for underplanting native trees, spring ephemerals, and shaded borders.",
+        "maint_level": "Low",
+        "spring_care": "Rake off heavy autumn leaves; shear back to 2–3 inches in early spring (50°F+) to refresh carpet before new growth.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide rooted rhizome plugs in early spring or early autumn to propagate groundcover.",
+        "host_insects": "Larval host for Eyed Brown (*Satyrodes eurydice*), Appalachian Brown (*Lethe appalachia*), and various sedge-feeding skippers.",
+        "wildlife_users": "Early-maturing seed achenes provide critical spring nutrition for ground-foraging woodland birds like Eastern Towhees and Wood Thrushes.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Carex albicans": {
+        "summary": "A refined native oak sedge (6–12 in) forming tidy, dense hair-like fountains of bright green narrow blades in dry, upland woodland shade and rocky slopes. Superb non-spreading green mulch matrix for shaded perennial beds and slope stabilization.",
+        "maint_level": "Low",
+        "spring_care": "Comb out dried winter blades by hand or trim lightly to 2 inches in spring at 50°F+.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide dense clumps in early spring or early fall.",
+        "host_insects": "Larval host for various native satyr butterflies and specialist leafhoppers.",
+        "wildlife_users": "Early spring seeds feed forest sparrows and juncos; provides shelter for ground beetles.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
+    },
+    "Carex jamesii": {
+        "summary": "A handsome clump-forming forest sedge (6–10 in) with fine grassy foliage producing distinctive early spring flowering spikes with prominent pale green bracts. Ideal for rich shaded woodland understories, calcareous slopes, and naturalized matrices.",
+        "maint_level": "Low",
+        "spring_care": "Trim back ragged winter foliage in spring (at 50°F+) as early bloom spikes emerge.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide established clumps in early spring.",
+        "host_insects": "Larval host for sedge skippers and leaf-mining moths.",
+        "wildlife_users": "Seeds feature fleshy appendages (elaiosomes) collected and dispersed by native ants (myrmecochory).",
+        "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Carex brevior": {
+        "summary": "A versatile native plains oval sedge (1–2 ft) producing dense emerald tufts topped by attractive oval green-to-bronze seed heads in late spring. Thrives in full sun to partial shade in both dry clay and moist prairie bioswales.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead foliage to 2 inches in early spring at 50°F+ before new shoots rise.",
+        "summer_care": None,
+        "fall_care": "Leave seedheads intact for winter seed foraging.",
+        "winter_care": None,
+        "division": "Divide clumps in early spring every 3–4 years.",
+        "host_insects": "Larval host for Dun Skipper (*Euphyes vestris*) and Black Dash (*Euphyes conspicua*).",
+        "wildlife_users": "Plump seed achenes are relished by American Goldfinches, Bobwhite Quail, and wetland birds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Carex blanda": {
+        "summary": "A remarkably adaptable native common wood sedge (8–14 in) forming cheerful emerald clumps with broad shiny blades and abundant seed spikes, thriving in challenging dry shade and urban clay soils. Outstanding workhorse green mulch for under trees and shrubs.",
+        "maint_level": "Low",
+        "spring_care": "Trim away tattered leaves in spring at 50°F+; refreshes rapidly with bright green new growth.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide clumps in spring or allow natural seed dispersal in woodland matrix.",
+        "host_insects": "Larval host for Eyed Brown butterfly and specialist sedge aphids.",
+        "wildlife_users": "Heavy seed yields provide valuable nutrition for wild turkeys, towhees, and woodcocks.",
+        "wildlife_sources": "[Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide), [Grow Native!](https://grownative.org)"
+    },
+    "Carex vulpinoidea": {
+        "summary": "A dependable native fox sedge (1.5–3 ft) forming fountain-like clumps crowned in early summer with bristly, coppery-brown flowering spikes resembling the bushy tail of a fox. Exceptional for rain gardens, retention basins, bioswales, and moist sunny meadows.",
+        "maint_level": "Low",
+        "spring_care": "Cut back old foliage to 3 inches in early spring at 50°F+ before new growth emerges.",
+        "summer_care": "Requires consistent moisture; excels in wet clay and temporary standing water.",
+        "fall_care": "Leave bristly seedheads intact to feed overwintering waterfowl and birds.",
+        "winter_care": None,
+        "division": "Divide dense root clumps in early spring.",
+        "host_insects": "Larval host for Dion Skipper (*Euphyes dion*), Mulberry Wing (*Poanes massasoit*), and Eyed Brown.",
+        "wildlife_users": "Abundant seed production feeds Mallards, Wood Ducks, wetland sparrows, and rails.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Carex eburnea": {
+        "summary": "An exquisite native bristle-leaved sedge (4–8 in) forming dense, hair-fine emerald cushions like living velvet on dry, alkaline limestone outcroppings and shaded rocky borders. The premier groundcover for shaded limestone gardens and tight border edges.",
+        "maint_level": "Low",
+        "spring_care": "Comb out dried blades with fingers in early spring at 50°F+; avoid heavy mechanical shearing.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide delicate rhizomatous tufts in early spring.",
+        "host_insects": "Supports small leafhoppers and specialized micro-moths.",
+        "wildlife_users": "Forms a dense green turf sheltering beneficial ground beetles and soil microfauna.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Carex shortiana": {
+        "summary": "A distinctive native Short's sedge (1.5–2.5 ft) forming neat, attractive clumps bearing stout, cylindrical chocolate-brown seed spikes in May and June that stand erect above bright green foliage. Superb for rain gardens, bioswales, and wetland restoration meadows.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dried foliage to 2–3 inches in early spring at 50°F+.",
+        "summer_care": "Thrives in moist to wet loams and heavy clay soils in full sun to partial shade.",
+        "fall_care": "Leave brown seed spikes for winter wildlife seed foraging.",
+        "winter_care": None,
+        "division": "Divide fibrous clumps in early spring.",
+        "host_insects": "Larval host for native wetland skippers and sedge moths.",
+        "wildlife_users": "Heavy seed clusters feed migratory waterfowl, red-winged blackbirds, and swamp sparrows.",
+        "wildlife_sources": "[Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
+    },
+    "Carex grayi": {
+        "summary": "A showstopping native Gray's sedge (2–3 ft) producing large, whimsical, pale green spherical seedheads with radiating beaks resembling spiky medieval maces or geometric stars. Outstanding focal accent for rain gardens, bioswales, and pond margins.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead foliage in early spring at 50°F+ before new star-headed shoots emerge.",
+        "summer_care": "Enjoys consistently moist to wet soil; tolerates standing water and heavy clay.",
+        "fall_care": "Leave architectural mace-like seedheads standing for winter visual appeal and wildlife food.",
+        "winter_care": None,
+        "division": "Divide clump in early spring just as growth starts.",
+        "host_insects": "Larval host for Eyed Brown butterfly and various sedge leafhoppers.",
+        "wildlife_users": "Large seeds inside inflated perigynia are foraged by wood ducks and wetland songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Carex muskingumensis": {
+        "summary": "An extraordinary native palm sedge (2–3 ft) featuring upright stems clad in whorls of pointed green leaves that closely resemble miniature palm trees, turning rich golden-yellow in fall. Exceptional for rain gardens, bioswales, and architectural massings in wet shade to sun.",
+        "maint_level": "Low",
+        "spring_care": "Cut back old dried stems to the ground in spring after 50°F+ temperatures.",
+        "summer_care": "Provide consistent moisture; thrives in saturated soils and standing water.",
+        "fall_care": "Enjoy glowing golden-yellow foliage before cutting or leave for bird cover.",
+        "winter_care": None,
+        "division": "Divide expanding rhizomatous clumps in early spring.",
+        "host_insects": "Larval host for Appalachian Brown (*Lethe appalachia*) and Duke's Skipper (*Euphyes dukesi*).",
+        "wildlife_users": "Dense palm-like foliage provides thermal protection and nesting cover for amphibians and songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
+    },
+    "Carex bushii": {
+        "summary": "A handsome native Bush's sedge (1–2 ft) with attractive tufted foliage bearing neat, cylindrical green-to-brown seed spikes in late spring. Highly valued for prairie restorations, meadow matrices, and sunny to partly shaded borders in average to moist soils.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead foliage to 2 inches in early spring at 50°F+.",
+        "summer_care": None,
+        "fall_care": "Leave seedheads standing for native sparrows.",
+        "winter_care": None,
+        "division": "Divide clumps in early spring.",
+        "host_insects": "Larval host for native sedge-feeding skipper butterflies.",
+        "wildlife_users": "Seeds feed native prairie birds; base provides shelter for beneficial insects.",
+        "wildlife_sources": "[Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
+    },
+
+    # ==================== FERNS & FLOWERING ASSOCIATES (5) ====================
+    "Polystichum acrostichoides": {
+        "summary": "A resilient native evergreen fern (1–2 ft) producing lustrous dark green leathery fronds that persist year-round, emerging with silvery fiddleheads in spring. Unsurpassed for shaded hillsides, erosion control, woodland borders, and foundation plantings.",
+        "maint_level": "Low",
+        "spring_care": "Trim away tattered, flattened overwintered fronds in early spring after 50°F+ temperatures as silvery fiddleheads unfurl.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide mature crowns in early spring just before new croziers emerge.",
+        "host_insects": "Larval host for the Pink-shaded Fern Moth (*Callopistria mollissima*) and Osmunda Borer Moth.",
+        "wildlife_users": "Evergreen fronds shelter woodland salamanders, toads, and ground-feeding songbirds during freezing winter rains.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/), [MDC](https://mdc.mo.gov)"
+    },
+    "Matteuccia struthiopteris": {
+        "summary": "A magnificent native ostrich fern (3–5 ft) forming stately vase-shaped crowns of huge, feathery emerald fronds reminiscent of ostrich plumes, with edible fiddleheads in spring. Unrivaled for moist shade, rain gardens, and stream margins.",
+        "maint_level": "Low",
+        "spring_care": "Harvest tight curled fiddleheads as a spring delicacy or allow them to unfurl; clear away dead previous-year fronds at 50°F+.",
+        "summer_care": "Requires consistent moisture in shade; may enter early dormancy if allowed to dry out.",
+        "fall_care": "Persistent dark brown woody fertile fronds remain upright all winter.",
+        "winter_care": None,
+        "division": "Divide creeping rhizome runners in early spring while dormant.",
+        "host_insects": "Larval host for Ostrich Fern Borer Moth (*Papaipema speciosissima*).",
+        "wildlife_users": "Stately frond colonies provide sheltered foraging grounds for Wood Thrushes and American Toads.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Geum triflorum": {
+        "summary": "An enchanting shortgrass prairie perennial (6–12 in) opening in spring with nodding rosy-pink cup flowers, followed by whimsical feathery, smoke-like pink seed plumes that shimmer in the sun. Ideal for sunny rock gardens, gravel borders, and curbside hellstrips.",
+        "maint_level": "Low",
+        "spring_care": "Trim away any dead winter foliage in spring (50°F+) as pink nodding bells appear.",
+        "summer_care": "Requires sharp drainage and full sun; do not overwater.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide creeping woody crowns every 3–4 years in early spring.",
+        "host_insects": "Nodding spring blossoms provide essential nectar and pollen for queen bumblebees (*Bombus*) buzzing the bells.",
+        "wildlife_users": "Feathery seedheads are collected by small birds for nest lining.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Dalea purpurea": {
+        "summary": "An extraordinary native purple prairie clover (1–2 ft) featuring delicate, lacy needle-like foliage and cylindrical cones encircled by a ring of tiny electric-violet florets with bright gold anthers in midsummer. Essential for sunny meadows, dry borders, and prairie restorations.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
+        "summer_care": "Zero supplemental water needed once established; deep taproot provides extreme drought endurance.",
+        "fall_care": "Leave decorative conical seedheads for winter bird foraging.",
+        "winter_care": None,
+        "division": "Deep woody taproot; do not divide. Propagate readily from scarified seed.",
+        "host_insects": "Larval host for Dogface Butterfly (*Zerene cesonia*), Reakirt's Blue (*Echinargus isola*), and specialist bees (*Colletes robertsonii*).",
+        "wildlife_users": "Nitrogen-fixing root system enriches surrounding soil; high-protein seeds feed grassland birds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Polemonium reptans": {
+        "summary": "A delightful native Jacob's ladder (8–15 in) forming lush mounds of fern-like compound leaves bearing loose clusters of bell-shaped, sky-blue blossoms with white stamens in April and May. Outstanding for shaded borders, woodland rock gardens, and underplanting shrubs.",
+        "maint_level": "Low",
+        "spring_care": "Clean away collapsed foliage in early spring at 50°F+ as sky-blue flower bells appear.",
+        "summer_care": "Provide partial to full shade and moderate moisture to prevent summer dormancy.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring or autumn.",
+        "host_insects": "Early spring flower bells provide essential nectar for native mining bees (*Andrena*), mason bees, and queen bumblebees.",
+        "wildlife_users": "Soft foliage provides early spring ground cover for woodland salamanders and ground beetles.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+
+    # ==================== VINES (4) ====================
+    "Lonicera sempervirens": {
+        "summary": "A well-behaved, non-invasive native coral honeysuckle vine (10–15 ft) bearing trumpet-shaped, scarlet-coral blossoms with yellow throats from May to October, followed by bright red berries. Unmatched for sunny arbors, deck railings, and trellis focal points.",
+        "maint_level": "Low",
+        "spring_care": "Prune back lightly after spring flowering to shape vines; blooms on both old and new wood.",
+        "summer_care": "Provide moderate moisture during extended droughts to prolong continuous bloom cycle.",
+        "fall_care": "Leave red berries on vines for migrating songbirds.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate via summer softwood cuttings or layering.",
+        "host_insects": "Larval host for Snowberry Clearwing Moth (*Hemaris diffinis*) and Spring Azure butterfly (*Celastrina ladon*).",
+        "wildlife_users": "Premier nectar magnet for Ruby-throated Hummingbirds (*Archilochus colubris*); red berries feed Purple Finches and Hermit Thrushes.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Passiflora incarnata": {
+        "summary": "A vigorous, fast-growing native passionflower vine (10–25 ft) producing intricate 3-inch fringed purple-and-white exotic blossoms followed by edible, fragrant green 'maypop' fruits. Superb for sunny trellises, arbors, and chain-link fence naturalization.",
+        "maint_level": "Medium",
+        "spring_care": "Emerges late in spring (May); cut dead winter vines to the ground at 50°F+ and guide vigorous new shoots onto trellis.",
+        "summer_care": "Pull wandering surface root runners in midsummer if containing within designated garden beds.",
+        "fall_care": "Harvest ripe yellow-green maypop fruits in September–October as they soften.",
+        "winter_care": None,
+        "division": "Divide spreading root runners in early spring while dormant.",
+        "host_insects": "Sole obligate larval host for the Gulf Fritillary (*Dione vanillae*) and primary host for the Variegated Fritillary (*Euptoieta claudia*).",
+        "wildlife_users": "High-nectar blossoms are magnetic to large carpenter bees (*Xylocopa*), bumblebees, and hummingbirds.",
+        "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Clematis versicolor": {
+        "summary": "A refined, non-aggressive native leather flower vine (6–10 ft) producing exquisite nodding, bell-shaped pale pink-lavender blossoms with recurved petal tips in summer, followed by feathery, swirling silvery seed plumes. Excellent for climbing through small shrubs, obelisks, and rock gardens.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to 12–18 inches in early spring (at 50°F+) as flowers bloom on current season growth.",
+        "summer_care": "Thrives in sunny, well-drained limestone soils with roots kept shaded by groundcovers or mulch.",
+        "fall_care": "Enjoy persistent swirling silvery seed plumes catching autumn light.",
+        "winter_care": None,
+        "division": "Do not divide. Propagate via stratified seed or layering.",
+        "host_insects": "Larval host for specialist Clematis Clearwing Moth and visited by bumblebees.",
+        "wildlife_users": "Feathery seed clusters are collected by songbirds for soft nest insulation.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Tradescantia ernestiana": {
+        "summary": "A charming native spiderwort (8–15 in) forming compact clumps of arching foliage topped in April and May by triangular 3-petaled violet-blue blossoms with bright golden-yellow fuzzy stamens. Perfect for rock gardens, shaded border edges, and open woodland matrices.",
+        "maint_level": "Low",
+        "spring_care": "Clean away old dead foliage in early spring at 50°F+ as crisp green shoots appear.",
+        "summer_care": "Cut stems back by half after spring flowering if foliage declines to stimulate fresh compact basal growth.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Flowers produce abundant, high-protein pollen heavily collected by native sweat bees (*Halictus*) and bumblebees.",
+        "wildlife_users": "Succulent foliage and buds are foraged by box turtles and small woodland wildlife.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    }
+}
+''')
+
+print(f"Successfully wrote {filepath}")

@@ -16,8 +16,6 @@ Welcome to the **Deep Roots Nature Advisors - Kansas City Native Plant Database*
 | **5. Customize** | Toggle Wildlife Stewardship & Stormwater County options | Enable/disable nest boxes, bird baths, bat boxes, county cost-share |
 | **6. Export** | Click **Download Official Word Report (.docx)** | Tailored Word document ready for client delivery (all red instructions removed) |
 
-> 💡 **Developer & System Architecture**: For an interactive breakdown of the system architecture, OpenXML Word pipeline, and reference of all 118 functions, visit [**bradlchr.github.io/docs.html**](https://bradlchr.github.io/docs.html) or read [**`CODE_DOCUMENTATION.md`**](./CODE_DOCUMENTATION.md).
-
 ---
 
 ## 🌿 1. Browsing & Filtering Kansas City Native Plants
@@ -176,7 +174,7 @@ Select which habitat structures to include in the client deliverable:
    - Updates the Table of Contents with your custom Garden Areas.
    - Formats professional plant recommendation cards grouped by Garden Area, complete with Grow Native! hyperlinks, botanical bullet points, bloom seasons, and your custom site notes.
    - Applies your Invasive Species and Wildlife/Stormwater toggles.
-   - **Removes all red instructional text** from the template, producing a clean, final deliverable ready for client presentation.
+   - **Removes all red instructional text** from the template, producing a clean, final deliverable ready for client delivery.
    - Downloads a genuine, non-corrupt `.docx` file ready for Microsoft Word or Google Docs.
 
 ### Copy Markdown Report
@@ -194,11 +192,10 @@ Clicking your avatar badge in the top-right header opens the redesigned **Adviso
 
 - **Advisor Details & Contact Card**: View your assigned advisor tier, email, and phone number, with an inline **Edit** button for rapid profile updates.
 - **Display & Text Size Preferences**: Select your interface and typography scale (`100%`, `110%`, `125%`, or `140%`) with automatic persistence across devices.
-- **2-Column Action Tiles Grid**:
+- **Action Tiles Grid**:
   - 📁 **Consultations**: Access your consultations manager with live count badges.
   - ☁️ **Cloud Sync**: Check shared Firestore database status, sync logs, and cloud backups.
   - ➕ **Contribute**: Submit new native plant species to the catalog.
-  - 📖 **Code Manual**: Launch the interactive architecture and code manual (`docs.html`).
 - **Administrator Operations Card** *(Privileged)*: High-priority admin tools (**Plant Approval Inbox**, **Consultation Reports Repository**, and **Advisor Administration Console**) are grouped in a dedicated amber management card that automatically hides for standard advisors.
 - **Account Actions Footer**: Clean, compact side-by-side **Password** change and **Sign Out** controls.
 
@@ -241,12 +238,12 @@ Advisors with the `admin` role can oversee all consultations conducted across th
    - Prompts for confirmation with the client name and author.
    - Permanently deletes the report from Cloud Firestore across all document paths (`/reports`, `/plants/_report_*`, and `/users/{username}/reports`), purging local caches and updating repository counters.
 
-### 9.3 Master Catalog Governance (Database Sync Dialog)
+### 10.3 Master Catalog Governance (Database Sync Dialog)
 To protect data integrity, destructive master database operations in the **Shared Master Database** dialog (`#syncModal`) are strictly limited to Program Administrators:
 - **Pull Fresh Data from Master Database**: Available to all signed-in advisors to pull latest updates.
 - **Upload Master Plant Catalog to Firestore** *(Admin Only)*: Batches all 185 baseline species definitions to the remote Firestore master catalog.
 - **Reset Local Edits to Clean Master Catalog** *(Admin Only)*: Clears local customizations and restores the pristine default botanical catalog.
-- **Import Plants JSON (Android Backup)** *(Admin Only)*: Imports JSON backup files from native Android app backups.
+- **Import Plants JSON Backup** *(Admin Only)*: Imports plant catalog JSON backup files.
 
 ---
 

@@ -1,0 +1,599 @@
+#!/usr/bin/env python3
+"""
+scripts/write_botanical_wildflowers_2.py
+Generates updated botanical data module for 48 Wildflowers (Part 2) with:
+1. Shorter summaries
+2. Actionable-only maintenance
+3. Specific host insects, wildlife, and source links
+"""
+
+filepath = "scripts/botanical_wildflowers_2.py"
+print(f"Writing {filepath}...")
+
+with open(filepath, "w", encoding="utf-8") as f:
+    f.write('''"""
+scripts/botanical_wildflowers_2.py
+Botanical profiles for 48 Wildflowers (Part 2) in the Deep Roots Native Catalog.
+"""
+
+BOTANICAL_WILDFLOWERS_2 = {
+    "Oenothera speciosa": {
+        "summary": "A vigorous native pink evening primrose (1–2 ft) producing clouds of 2-inch, fragrant saucer-shaped white blossoms that flush soft rose-pink from May through July above sprawling stems. Exceptional for erosion control, hot hellstrips, and sunny meadow borders where vigorous spreading is welcomed.",
+        "maint_level": "Medium",
+        "spring_care": "Shear back stems to 2–3 inches in early spring at 50°F+; edge bed boundaries to contain spreading rhizomes.",
+        "summer_care": "Shear back by half after main spring bloom wave to stimulate fresh compact foliage.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide shallow spreading runners in early spring or spade edge to contain boundaries.",
+        "host_insects": "Larval host for White-lined Sphinx Moth (*Hyles lineata*) and specialist evening primrose sweat bees.",
+        "wildlife_users": "Day-and-night opening flowers feed both diurnal native bees and nocturnal sphinx moths.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Eurybia divaricata": {
+        "summary": "A refined native white wood aster (1–2.5 ft) producing frothy sprays of starry white daisy blossoms with yellow-to-burgundy centers in late summer atop distinctive dark, zigzagging wiry stems. The gold standard for dry shaded borders, woodland gardens, and tree underplantings.",
+        "maint_level": "Low",
+        "spring_care": "Wait until sustained 50°F+ temperatures before cutting back dead winter stems to 8–18 inches.",
+        "summer_care": "Chelsea chop: pinch back stems by 1/3 in early June to promote dense branching and compact form.",
+        "fall_care": "Leave fluffy seed plumes intact through fall and winter to feed goldfinches and shelter beneficial insects.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Keystone host for Pearl Crescent (*Phyciodes tharos*) and specialist mining bees (*Andrena asteris*).",
+        "wildlife_users": "Fluffy seed plumes provide vital late-season food for American Goldfinches, Chickadees, and Juncos.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Persicaria virginiana": {
+        "summary": "A handsome architectural native jumpseed (2–3 ft) featuring large, oval pointed leaves often marked with striking dark chevrons, sending up airy 2-foot wiry spires of tiny ruby-red to white florets in late summer. Ideal for woodland borders, shaded rain gardens, and naturalized matrices.",
+        "maint_level": "Low",
+        "spring_care": "Cut back old dead stalks in spring after 50°F+ temperatures.",
+        "summer_care": "Provide consistent moisture and partial to full shade; highly pest-free.",
+        "fall_care": "Leave slender seed spires intact; seeds 'jump' when touched to self-sow in matrix gaps.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps in early spring.",
+        "host_insects": "Larval host for Bronze Copper butterfly (*Lycaena hyllus*) and various native geometer moths.",
+        "wildlife_users": "Small achenes provide late-autumn food for woodland gamebirds and native sparrows.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Aquilegia canadensis": {
+        "summary": "An enchanting native wild columbine (1–2 ft) producing exquisite nodding, spurred bell blossoms of fiery scarlet and canary-yellow in April and May above delicate, fern-like blue-green foliage. Essential for shaded borders, rocky slopes, and early-season hummingbird feeding stations.",
+        "maint_level": "Low",
+        "spring_care": "Clear old debris gently in spring (50°F+) as delicate ferny foliage emerges.",
+        "summer_care": "Cut stems back to basal foliage after flowering if columbine leaf miners tatter leaves.",
+        "fall_care": "Leave upright 5-lobed seed capsules to release glossy black seeds into surrounding matrix.",
+        "winter_care": None,
+        "division": "Short-lived perennial that self-sows freely; do not divide. Propagate via seed.",
+        "host_insects": "Larval host for Columbine Duskywing (*Erynnis lucilius*) and visited by queen bumblebees.",
+        "wildlife_users": "Long nectar spurs are tailored specifically for Ruby-throated Hummingbirds (*Archilochus colubris*).",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Phlox divaricata": {
+        "summary": "A fragrant native wild blue phlox (8–14 in) forming a sprawling semi-evergreen mat topped in April and May with loose clusters of intensely fragrant, periwinkle-blue to lavender blossoms. The premier spring understory matrix plant for woodland gardens, shade borders, and path margins.",
+        "maint_level": "Low",
+        "spring_care": "Shear back lightly by 1/3 after spring flowering completes to encourage dense, fresh basal growth.",
+        "summer_care": "Provide partial shade and moist, rich loamy soil; highly powdery mildew resistant in good airflow.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide rooted stoloniferous stems every 3–4 years in early spring or early autumn.",
+        "host_insects": "Larval host for Phlox Moth (*Schinia indiana*) and early spring swallowtail butterflies.",
+        "wildlife_users": "Fragrant spring blooms provide crucial nectar for early-emerging bumblebees and hummingbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Echinacea purpurea": {
+        "summary": "The iconic native purple coneflower (2–4 ft) bearing stout stems topped from June through August by large, long-lasting rose-purple daisy blossoms with prominent spiky orange-bronze central cones. Indispensable keystone anchor for sunny borders, meadow matrices, and wildlife gardens.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures consistently exceed 50°F before cutting dead stalks to 8–18 inches.",
+        "summer_care": "Zero supplemental watering needed once established; deep taproot provides extreme drought endurance.",
+        "fall_care": "Leave rigid cones standing undisturbed through winter to feed goldfinches and native birds.",
+        "winter_care": None,
+        "division": "Divide fibrous taproot crowns every 4–5 years in early spring.",
+        "host_insects": "Larval host for Silvery Checkerspot (*Chlosyne nycteis*) and Sunflower Moth (*Homoeosoma electellum*).",
+        "wildlife_users": "Rigid cones are a primary winter seed staple for American Goldfinches, Chickadees, and Tufted Titmice.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Amsonia ciliata": {
+        "summary": "A refined native fringed bluestar (2–3 ft) featuring soft, feathery needle-like foliage that creates an ethereal soft-textured mound, topped in May by starry sky-blue blossoms, turning glowing golden-amber in autumn. Exceptional for sunny borders, rock gardens, and modern matrix plantings.",
+        "maint_level": "Low",
+        "spring_care": "Cut woody dead stems to the crown in spring after sustained 50°F+ temperatures.",
+        "summer_care": "Thrives in lean, sharply drained sunny soils; zero supplemental watering needed once established.",
+        "fall_care": "Enjoy glowing golden-yellow autumn foliage before cutting.",
+        "winter_care": None,
+        "division": "Deep woody root crown; do not divide once established. Propagate via seed or softwood cuttings.",
+        "host_insects": "Larval host for Snowberry Clearwing Moth (*Hemaris diffinis*) and visited by early spring swallowtails.",
+        "wildlife_users": "Astringent latex sap naturally repels deer, rabbits, and rodents.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
+    },
+    "Monarda bradburiana": {
+        "summary": "A well-behaved, compact native eastern beebalm (1–2 ft) producing dense heads of white-to-pale-pink tubular blossoms delicately speckled with purple in May and June above aromatic foliage. Uniquely mildew-resistant and non-invasive, ideal for borders, rock gardens, and dry shade.",
+        "maint_level": "Low",
+        "spring_care": "Cut dead stalks to the crown in early spring at 50°F+; fresh aromatic rosettes emerge early.",
+        "summer_care": None,
+        "fall_care": "Leave decorative button-like seedheads for winter visual texture and bird forage.",
+        "winter_care": None,
+        "division": "Divide tidy clumps every 3–4 years in early spring.",
+        "host_insects": "Larval host for Hermit Sphinx (*Lintneria eremitus*) and visited heavily by bumblebees and clearwing moths.",
+        "wildlife_users": "Early tubular flowers provide an essential energy source for Ruby-throated Hummingbirds in May.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Penstemon digitalis": {
+        "summary": "A dependable native foxglove beardtongue (2–3 ft) producing tall, sturdy spikes of pure white to pale pink tubular bell blossoms in May and June above semi-evergreen basal foliage. Outstanding for rain gardens, sunny perennial beds, bioswales, and pollinator matrices.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting back dead flower stalks to the basal rosette.",
+        "summer_care": None,
+        "fall_care": "Leave woody dark purple seed capsules for winter bird foraging.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Larval host for Chalcedon Checkerspot and Baltimore Checkerspot; specialist sweat bee *Osmia distincta*.",
+        "wildlife_users": "White tubular blossoms are heavily frequented by bumblebees and visited by Ruby-throated Hummingbirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Heuchera americana": {
+        "summary": "A refined native woodland alumroot (1–2 ft) forming compact mounds of scalloped leaves exquisitely marbled with silver, pewter, and burgundy veining, sending up airy wands of tiny greenish-white bells in June. Serves as an elegant groundcover matrix for shaded borders, rock gardens, and woodland path margins.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures consistently exceed 50°F before trimming away tattered overwintered leaves at the crown.",
+        "summer_care": None,
+        "fall_care": None,
+        "winter_care": "Apply 1–2 inches of light mulch around root crowns in late November to prevent frost heaving in exposed beds.",
+        "division": "Divide mature woody rootstocks every 3–4 years in early spring.",
+        "host_insects": "Host for specialist native bees (*Colletes* and *Lasioglossum*) and larvae of the American Alumroot Borer Moth (*Papaipema* species).",
+        "wildlife_users": "Airy spring flowers provide essential early nectar for Ruby-throated Hummingbirds, hoverflies, and solitary bees.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Conoclinium coelestinum": {
+        "summary": "A dazzling native blue mistflower (1.5–3 ft) producing frothy, powder-puff clusters of vivid ageratum-like mist-blue to lavender blossoms from July through October that blanket the garden in cool blue clouds. Outstanding for rain gardens, bioswales, moist borders, and monarch waystations.",
+        "maint_level": "Medium",
+        "spring_care": "Emerges late in spring (May); cut back old stems at 50°F+ and edge boundaries if containing in formal beds.",
+        "summer_care": "Provide consistent moisture; excels in wet clay soils and partial to full sun.",
+        "fall_care": "Breathtaking late blue floral clouds provide vital late-season fuel for migrating monarchs.",
+        "winter_care": None,
+        "division": "Divide spreading rhizomes in early spring or pull perimeter runners to maintain bed boundaries.",
+        "host_insects": "Larval host for Three-lined Flower Moth (*Schinia trifascia*) and visited by hundreds of migrating Monarchs.",
+        "wildlife_users": "Unrivaled high-volume nectar source for migrating Monarchs, swallowtails, and native solitary bees in late fall.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Grow Native!](https://grownative.org)"
+    },
+    "Silene virginica": {
+        "summary": "A breathtaking native fire pink (1–2 ft) producing loose clusters of brilliant, fiery scarlet-red 5-petaled notched stars from May to July above sticky lanceolate foliage. An extraordinary focal accent for shaded rock gardens, open woodland slopes, and well-drained borders.",
+        "maint_level": "Low",
+        "spring_care": "Clear debris gently in spring (50°F+) as basal rosettes awaken.",
+        "summer_care": "Requires partial shade and excellent drainage; avoid heavy wet clay around the crown.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Short-lived perennial that self-sows naturally; do not divide. Propagate via fresh seed.",
+        "host_insects": "Electric scarlet tubular blossoms are co-evolved specifically for Ruby-throated Hummingbirds.",
+        "wildlife_users": "Primary nectar source for early-summer Ruby-throated Hummingbirds and large swallowtail butterflies.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Polygonatum biflorum": {
+        "summary": "An architectural native smooth Solomon's seal (2–3 ft) featuring gracefully arching unbranched stems clothed in ribbed green leaves, dangling pairs of creamy-white bell blossoms in May, followed by blue-black berries in autumn. Outstanding for shaded borders, woodland understories, and fern matrices.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before clearing away old dead stalks.",
+        "summer_care": "Thrives in rich, moist, organic woodland soil in partial to full shade.",
+        "fall_care": "Leave blue-black berries on arching stems for woodland birds.",
+        "winter_care": None,
+        "division": "Divide thick knobby rhizomes every 4–5 years in early spring or early autumn.",
+        "host_insects": "Dangling bell blossoms are pollinated by queen bumblebees (*Bombus*) and long-tongued solitary bees.",
+        "wildlife_users": "Blue-black autumn berries provide nourishment for Wood Thrushes, Veeries, and small native rodents.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Anemone canadensis": {
+        "summary": "A vigorous native meadow anemone (1–2 ft) forming a dense emerald carpet of deeply lobed leaves smothered in late spring with pristine, cup-shaped pure white 5-petaled blossoms with bright golden stamens. Unmatched rapid groundcover for rain gardens, retention swales, and moist sunny banks.",
+        "maint_level": "Medium",
+        "spring_care": "Cut back dead foliage in early spring at 50°F+; edge boundaries to contain vigorous underground rhizomes.",
+        "summer_care": "Thrives in moist to wet soils in full sun to partial shade; highly competitive groundcover.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide spreading rhizome colonies in early spring or autumn to manage boundaries.",
+        "host_insects": "Pollen-rich blossoms attract native sweat bees (*Lasioglossum*), mining bees, and syrphid flies.",
+        "wildlife_users": "Dense rhizomatous carpet binds saturated soils against erosion and provides amphibian shelter.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Coreopsis lanceolata": {
+        "summary": "A dependable native lanceleaf coreopsis (1–2 ft) producing bright, sunny golden-yellow daisy blossoms with fringed petals from May through July above narrow lanceolate foliage. Essential workhorse for sunny borders, rock gardens, curbside hellstrips, and pollinator matrices.",
+        "maint_level": "Low",
+        "spring_care": "Cut back old flowering stems in early spring at 50°F+; fresh green rosettes awaken early.",
+        "summer_care": "Deadhead spent flowers in July to promote continuous blooming through late summer.",
+        "fall_care": "Leave late seedheads intact to feed overwintering American Goldfinches.",
+        "winter_care": None,
+        "division": "Divide fibrous clumps every 2–3 years in early spring to maintain vigorous flowering.",
+        "host_insects": "Larval host for Wavy-lined Emerald Moth (*Synchlora aerata*) and visited by diverse native sweat bees.",
+        "wildlife_users": "Seeds provide high-energy nutrition for American Goldfinches, Field Sparrows, and Bobwhite Quail.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Thalictrum thalictroides": {
+        "summary": "An enchanting native rue anemone (4–8 in) opening in early spring with delicate, multi-petaled pure white to pale pink blossoms that hover like stars above delicate, columbine-like blue-green foliage. A refined spring ephemeral for rich woodland gardens, shade borders, and rock gardens.",
+        "maint_level": "Low",
+        "spring_care": "Clear debris lightly in early spring at 50°F+; foliage and blooms emerge together early.",
+        "summer_care": "Provide partial to full shade and organic moisture; naturally goes dormant in hot dry summers.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide small tuberous roots in late summer during dormancy or early spring.",
+        "host_insects": "Early spring starry blossoms provide essential pollen for newly emerged queen bumblebees and solitary bees.",
+        "wildlife_users": "Forms a delicate early carpet that protects shaded woodland soils from erosion.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Gaillardia pulchella": {
+        "summary": "A vibrant native Indian blanket (1–2 ft) producing continuous masses of brilliant bicolored daisy blossoms with fiery red centers tipped in sunny yellow from May until heavy frost. Outstanding for hot, dry rock gardens, curbside hellstrips, and sunny meadow borders.",
+        "maint_level": "Low",
+        "spring_care": "Allow self-sown seeds to germinate in spring; thin seedlings if crowded.",
+        "summer_care": "Zero supplemental watering needed once established; thrives in baking sun and lean sandy/rocky soils.",
+        "fall_care": "Leave spherical seedheads to self-sow and replenish the annual/perennial colony naturally.",
+        "winter_care": None,
+        "division": "Annual to short-lived perennial; propagate via self-sown seed.",
+        "host_insects": "Larval host for Painted Lady (*Vanessa cardui*) and specialist long-horned bees (*Melissodes*).",
+        "wildlife_users": "Continuous blooming provides uninterrupted nectar for butterflies; spherical seed balls feed winter finches.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Antennaria parlinii": {
+        "summary": "A tough native Parlin's pussytoes (6–12 in) forming a dense, weed-suppressing groundcover carpet of broad, silvery-felted basal leaves, sending up fuzzy white-and-pink flower clusters resembling kitten paws in early spring. Ideal for dry shaded borders, rocky slopes, and poor clay soils.",
+        "maint_level": "Low",
+        "spring_care": "Rake away smothering tree leaves in early spring at 50°F+; semi-evergreen silvery mat refreshes quickly.",
+        "summer_care": "Extremely drought tolerant once established in dry shade to partial sun.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide stoloniferous rosette mats in early spring or immediately after flowering.",
+        "host_insects": "Primary obligate larval host for the American Lady butterfly (*Vanessa virginiensis*).",
+        "wildlife_users": "Fuzzy flower heads are gathered by small woodland birds for nest insulation; dense mat suppresses weeds.",
+        "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Monarda fistulosa": {
+        "summary": "An indispensable keystone native wild bergamot (2–4 ft) bearing fragrant minty foliage topped from July to September by dense mop-head clusters of lavender-pink tubular blossoms. Essential pollinator anchor for sunny meadows, rain gardens, borders, and monarch waystations.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches.",
+        "summer_care": "Chelsea chop: pinch stems back by 1/3 in early June to promote dense bushy growth and prevent lodging.",
+        "fall_care": "Leave aromatic button seedheads intact through winter to feed native songbirds.",
+        "winter_care": None,
+        "division": "Divide fibrous rhizomatous clumps every 3 years in early spring to maintain center vigor.",
+        "host_insects": "Larval host for Hermit Sphinx (*Lintneria eremitus*) and Gray Marvel (*Phobolosia anfracta*); magnetic nectar source for clearwing sphinx moths.",
+        "wildlife_users": "High-sugar tubular flowers are heavily favored by Ruby-throated Hummingbirds and long-tongued bumblebees (*Bombus pensylvanicus*).",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Liatris aspera": {
+        "summary": "A showstopping native rough blazing star (2–3 ft) bearing distinctive rounded, button-like flower heads of electric magenta-purple spaced along stiff upright stalks in August and September. An unrivaled nectar magnet for sunny prairie borders, rock gardens, and monarch waystations.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
+        "summer_care": "Requires full sun and lean, sharply drained soils; highly drought hardy.",
+        "fall_care": "Leave fluffy seedheads intact to feed overwintering American Goldfinches.",
+        "winter_care": None,
+        "division": "Divide dormant corms every 4–5 years in early spring.",
+        "host_insects": "Larval host for Glorious Flower Moth (*Schinia gloriosa*) and premier nectar magnet for migrating Monarch butterflies.",
+        "wildlife_users": "Fluffy seedheads provide vital winter calories for American Goldfinches and native sparrows.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Pontederia cordata": {
+        "summary": "A majestic native pickerelweed (2–3 ft) featuring large, lustrous arrow-shaped foliage emerging from shallow water, topped from June to September by dense spikes of brilliant violet-blue blossoms with two yellow nectar spots. Essential for retention ponds, bioswales, rain gardens, and wetland margins.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead brown stalks in early spring at 50°F+ before new aquatic spears emerge.",
+        "summer_care": "Requires shallow standing water or constantly saturated wetland soil in full sun.",
+        "fall_care": "Leave nutritious starchy seed spikes for wetland birds and waterfowl.",
+        "winter_care": None,
+        "division": "Divide thick rhizomatous crowns in early spring.",
+        "host_insects": "Larval host for the Bellura gortynoides moth and specialist native pickerelweed bees (*Dufourea novaeangliae*).",
+        "wildlife_users": "Starchy seeds are a premier food for Wood Ducks, Mallards, and rails; foliage shelters dragonfly nymphs.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Asclepias verticillata": {
+        "summary": "An elegant native whorled milkweed (1–2.5 ft) featuring slender needle-like leaves in dense whorls along unbranched stems, topped in late summer by delicate, fragrant flat-topped umbels of snowy-white blossoms. Outstanding for dry borders, rock gardens, hellstrips, and monarch waystations.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before clearing old dead stalks (emerges late in May).",
+        "summer_care": "Zero supplemental watering needed once established; thrives in poor rocky clay and full baking sun.",
+        "fall_care": "Leave slender ornamental seed pods to release silky seeds into autumn winds.",
+        "winter_care": None,
+        "division": "Spreads slowly by underground rhizomes; divide in early spring.",
+        "host_insects": "Obligate larval host for Monarch (*Danaus plexippus*) and Queen (*Danaus gilippus*) butterflies and Milkweed Tussock Moth.",
+        "wildlife_users": "Late-blooming white flowers provide vital high-sugar nectar for late-season pollinators and migrating monarchs.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Coreopsis pubescens": {
+        "summary": "A charming native star tickseed (2–3 ft) bearing downy foliage and masses of bright golden-yellow daisy blossoms with fringed petals from June to August on airy branching stems. Excellent for open woodland margins, shaded borders, and dry rocky slopes.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead stems to the crown in spring after 50°F+ temperatures.",
+        "summer_care": "Highly drought tolerant in partial shade to full sun; needs zero supplemental fertilizer.",
+        "fall_care": "Leave seedheads intact for winter seed foraging.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Larval host for Wavy-lined Emerald Moth; flowers visited by diverse sweat bees and mining bees.",
+        "wildlife_users": "Seeds provide high-energy forage for native sparrows, finches, and small prairie birds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Ruellia humilis": {
+        "summary": "A tough, compact native wild petunia (12–18 in) producing velvety olive-green foliage smothered from June to August in charming 2-inch lavender-blue trumpet blossoms that open fresh each morning. Unsurpassed drought-hardy groundcover for rock gardens, hellstrips, and sunny borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut back woody dead stems to the ground in spring after 50°F+ temperatures (wakes up in May).",
+        "summer_care": "Zero supplemental watering needed once established; thrives in hot baking sun and rocky soils.",
+        "fall_care": "Explosive seed capsules pop audibly when wet, flinging seeds across surrounding matrix.",
+        "winter_care": None,
+        "division": "Deep fibrous taproot; do not divide. Self-sows gently in matrix gaps.",
+        "host_insects": "Primary larval host for the Common Buckeye butterfly (*Junonia coenia*).",
+        "wildlife_users": "Morning-opening trumpet blossoms provide vital early-day nectar for long-tongued native bees and hummingbirds.",
+        "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Echinacea pallida": {
+        "summary": "An elegant native pale purple coneflower (2–3 ft) opening in May and June with dramatic, slender drooping rose-pink to white reflexed petals radiating from spiky copper-orange cones on graceful stems. A premier early-summer anchor for sunny borders, meadows, and prairie restorations.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to the crown.",
+        "summer_care": "Zero supplemental watering needed once established; deep taproot provides extreme drought endurance.",
+        "fall_care": "Leave spiky dark cones standing through winter to feed American Goldfinches.",
+        "winter_care": None,
+        "division": "Deep woody taproot; do not divide or transplant mature specimens.",
+        "host_insects": "Larval host for Silvery Checkerspot (*Chlosyne nycteis*) and early summer swallowtail butterflies.",
+        "wildlife_users": "Cones are a premier winter seed staple for American Goldfinches, Chickadees, and Juncos.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Helianthus occidentalis": {
+        "summary": "A refined, well-behaved native western sunflower (2–3 ft) forming neat rosettes of basal leaves that send up slender, nearly leafless wiry stems topped by brilliant golden-yellow sunflowers from July to September. Perfect non-aggressive sunflower for formal borders, rock gardens, and prairie matrices.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
+        "summer_care": "Requires full sun and lean, sharply drained soils; highly drought-resilient.",
+        "fall_care": "Leave golden seedheads intact through winter for goldfinches and winter songbirds.",
+        "winter_care": None,
+        "division": "Divide shallow rhizome offshoots in early spring every 3–4 years.",
+        "host_insects": "Keystone host for Silvery Checkerspot, Gorgone Checkerspot, and specialist bees (*Melissodes agilis*).",
+        "wildlife_users": "Heavy seed yields provide crucial high-fat winter nutrition for goldfinches, nuthatches, and chickadees.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Viola pedota": {
+        "summary": "An exquisite native bird's foot violet (3–6 in) featuring deeply dissected foliage resembling a bird's foot and large, pansy-like velvety blossoms with the upper two petals deep violet and the lower three pale lavender with orange beards. Ideal for baking sunny rock gardens, sand beds, and limestone glades.",
+        "maint_level": "Low",
+        "spring_care": "Clear debris lightly in early spring at 50°F+; requires sharp drainage and lean rocky soil.",
+        "summer_care": "Requires full sun and excellent drainage; avoid rich fertilizers or heavy mulch.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide woody crown offsets in early spring or immediately after flowering.",
+        "host_insects": "Primary obligate larval host for Regal Fritillary (*Speyeria idalia*) and Great Spangled Fritillary.",
+        "wildlife_users": "Specialist mining bee *Andrena violae* relies exclusively on violet pollen for its brood.",
+        "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Solidago flexicaulis": {
+        "summary": "A shade-loving native zigzag goldenrod (1.5–3 ft) featuring distinctive zigzagging stems clothed in broad, sharply toothed leaves, bearing bright golden-yellow clusters of flowers in the leaf axils from August to October. Outstanding for lighting up shaded woodland understories and north foundation beds.",
+        "maint_level": "Low",
+        "spring_care": "Wait until sustained 50°F+ temperatures before cutting back dead winter stems to 8–18 inches.",
+        "summer_care": "Thrives in rich, moist to average organic woodland loams in partial to full shade.",
+        "fall_care": "Leave golden-bronze seedheads intact through fall and winter to feed songbirds and shelter beneficial insects.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Keystone host supporting 100+ caterpillar species and specialist mining bees (*Andrena asteris*).",
+        "wildlife_users": "Essential late-season nectar feast for woodland butterflies; seeds sustain chickadees and juncos all winter.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Spigelia marilandica": {
+        "summary": "An extraordinary native Indian pink (1–2 ft) producing upright one-sided floral cymes of brilliant scarlet tubular flowers that flare open at the tips into 5-pointed, canary-yellow starry stars in June. The ultimate showstopping focal accent for shaded borders and woodland gardens.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before clearing away old dead stems at the crown.",
+        "summer_care": "Provide partial shade and moist, rich, organic woodland loams.",
+        "fall_care": "Fleshy explosive capsules eject seeds several feet into surrounding soil.",
+        "winter_care": None,
+        "division": "Divide fibrous clumps every 4–5 years in early spring.",
+        "host_insects": "Bright scarlet tubular blossoms are co-evolved specifically for Ruby-throated Hummingbirds.",
+        "wildlife_users": "Premier June nectar magnet for Ruby-throated Hummingbirds; visitations are frequent and repeated daily.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Lespedeza repens": {
+        "summary": "A non-aggressive native creeping bush clover (4–8 in tall, trailing 2 ft) forming a soft emerald mat of clover-like trifoliate leaves, bearing delicate pinkish-purple pea flowers in late summer. Exceptional drought-hardy groundcover for rocky slopes, open savannas, and sunny banks.",
+        "maint_level": "Low",
+        "spring_care": "Cut back dead trailing stems to the crown in spring after 50°F+ temperatures.",
+        "summer_care": "Zero supplemental watering needed once established; fixes nitrogen in poor, depleted soils.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Deep woody taproot; do not divide. Propagate via scarified seed.",
+        "host_insects": "Larval host for Eastern Tailed-Blue (*Cupido comyntas*) and Southern Dogface (*Zerene cesonia*).",
+        "wildlife_users": "Nitrogen-fixing root system enriches surrounding soil; high-protein seeds feed Northern Bobwhite and songbirds.",
+        "wildlife_sources": "[Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Liatris scariosa": {
+        "summary": "A stately native savannas blazing star (2–4 ft) producing large, button-shaped flower heads of vibrant amethyst-purple on long upright spikes in August and September above lanceolate foliage. Outstanding for sunny borders, oak savanna restorations, and monarch waystations.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
+        "summer_care": "Thrives in full sun to light savanna shade; highly drought-resilient.",
+        "fall_care": "Leave fluffy seedheads intact to feed overwintering American Goldfinches.",
+        "winter_care": None,
+        "division": "Divide dormant corms every 4–5 years in early spring.",
+        "host_insects": "Larval host for Glorious Flower Moth (*Schinia gloriosa*) and premier nectar magnet for migrating Monarch butterflies.",
+        "wildlife_users": "Fluffy seedheads provide vital winter calories for American Goldfinches and native sparrows.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
+    },
+    "Echinacea simulata": {
+        "summary": "A rare native glade coneflower (2–3 ft) opening in May and June with slender, drooping pale pink reflexed rays radiating from spiky golden-brown central cones, producing distinctive bright yellow pollen. Ideal for dry limestone glades, rock gardens, and sunny prairie borders.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to the crown.",
+        "summer_care": "Requires full sun and sharp drainage; zero supplemental water needed once established.",
+        "fall_care": "Leave spiky dark cones standing through winter to feed American Goldfinches.",
+        "winter_care": None,
+        "division": "Deep woody taproot; do not divide or transplant mature specimens.",
+        "host_insects": "Larval host for Silvery Checkerspot (*Chlosyne nycteis*) and early summer swallowtail butterflies.",
+        "wildlife_users": "Cones are a premier winter seed staple for American Goldfinches, Chickadees, and Juncos.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Scuttelaria incana": {
+        "summary": "A stately native hoary skullcap (2–3 ft) producing terminal branched racemes of vibrant violet-blue two-lipped hooded flowers from July to September above downy grayish-green leaves. Superb for open woodland margins, sunny borders, and pollinator matrices.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
+        "summer_care": "Thrives in full sun to partial shade in average to dry soils; highly pest-free.",
+        "fall_care": "Leave cup-shaped seed capsules resembling miniature helmets for native seed dispersal.",
+        "winter_care": None,
+        "division": "Divide fibrous clumps every 3–4 years in early spring.",
+        "host_insects": "Hooded blue blossoms attract bumblebees, long-tongued solitary bees, and beeflies.",
+        "wildlife_users": "Foliage contains bitter skullcap compounds that naturally deter deer and rabbit browsing.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Antennaria neglecta": {
+        "summary": "A low-growing native field pussytoes (3–6 in) forming a dense creeping semi-evergreen mat of silvery-gray spoon-shaped leaves, sending up fuzzy white-and-pink flower clusters resembling kitten paws in April. Exceptional groundcover for dry sunny slopes, curbsides, and rock gardens.",
+        "maint_level": "Low",
+        "spring_care": "Rake away smothering tree leaves in early spring at 50°F+; semi-evergreen silvery mat refreshes quickly.",
+        "summer_care": "Extremely drought and heat hardy once established in full baking sun.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide creeping stoloniferous rosettes in early spring or immediately after flowering.",
+        "host_insects": "Primary obligate larval host for the American Lady butterfly (*Vanessa virginiensis*).",
+        "wildlife_users": "Silky seed fluff is gathered by chickadees and goldfinches for soft spring nest lining.",
+        "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Sagittaria latifolia": {
+        "summary": "A magnificent native broadleaf arrowhead or duck potato (2–4 ft) producing bold, architectural arrow-shaped leaves emerging from shallow water, topped by whorls of pure white 3-petaled blossoms with golden centers in summer. Essential for retention basins, bioswales, rain gardens, and wetland restorations.",
+        "maint_level": "Low",
+        "spring_care": "Clear dead aquatic debris in spring at 50°F+; starchy tubers awaken as water warms.",
+        "summer_care": "Requires shallow standing water or constantly saturated wetland soil in full sun.",
+        "fall_care": "Leave nutritious starchy tubers undisturbed in mud for wetland wildlife.",
+        "winter_care": None,
+        "division": "Divide underground starchy tubers in early spring or autumn.",
+        "host_insects": "Larval host for various aquatic micro-moths and visited heavily by native wetland bees.",
+        "wildlife_users": "Nutritious underground tubers ('duck potatoes') are a primary food for waterfowl, muskrats, and beavers.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Solidago drummondii": {
+        "summary": "A graceful native cliff goldenrod (1–2 ft) producing arching stems clothed in soft velvety foliage, bearing cascading one-sided wand-like plumes of golden-yellow blossoms in September and October. Superb for rock gardens, dry limestone retaining walls, and sunny slope borders.",
+        "maint_level": "Low",
+        "spring_care": "Wait until sustained 50°F+ temperatures before cutting back dead winter stems to 8–18 inches.",
+        "summer_care": "Requires sharply drained sunny soil; thrives in rock crevices with zero supplemental water.",
+        "fall_care": "Leave golden-bronze seed plumes intact through fall and winter for songbirds and beneficial insects.",
+        "winter_care": None,
+        "division": "Divide fibrous clumps in early spring.",
+        "host_insects": "Keystone host supporting 100+ caterpillar species and specialist mining bees (*Andrena asteris*).",
+        "wildlife_users": "Essential high-calorie late-season fuel for migrating Monarch butterflies; seeds feed winter finches.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Xerces Society](https://xerces.org/)"
+    },
+    "Zizia aurea": {
+        "summary": "A premier native golden alexanders (1.5–3 ft) producing flat-topped umbels of tiny, brilliant golden-yellow flowers in May and June above glossy compound foliage. An essential early-season pollinator keystone for rain gardens, sunny meadows, borders, and black swallowtail habitat.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the ground in spring after 50°F+ temperatures.",
+        "summer_care": "Thrives in full sun to partial shade in average to moist soils; highly drought-resilient once rooted.",
+        "fall_care": "Leave purple-tinted seed umbels intact to self-sow naturally in meadow gaps.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps every 3–4 years in early spring.",
+        "host_insects": "Primary obligate larval host for Black Swallowtail (*Papilio polyxenes*) and specialist solitary bee *Andrena ziziae*.",
+        "wildlife_users": "Broad flat umbels are a premier landing platform for beneficial predatory parasitoid wasps and hoverflies.",
+        "wildlife_sources": "[Butterflies and Moths of North America](https://www.butterfliesandmoths.org/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Cunila origanoides": {
+        "summary": "A delightful native dittany (1–1.5 ft) forming a compact, aromatic mounded sub-shrub covered in late summer with frothy clouds of tiny lavender-pink two-lipped blossoms above mint-scented leaves. Famous for producing whimsical ribbon-like ice crystals ('frost flowers') from its stems during early winter freezes.",
+        "maint_level": "Low",
+        "spring_care": "Cut woody dead stems to the crown in spring after 50°F+ temperatures.",
+        "summer_care": "Requires sharp drainage and full sun to dappled shade; thrives in rocky, poor, dry soils.",
+        "fall_care": "Leave stems standing into late autumn to observe spectacular frost ribbon formations.",
+        "winter_care": None,
+        "division": "Divide fibrous root clumps in early spring.",
+        "host_insects": "Aromatic blossoms attract native sweat bees, small leafcutter bees, and flower flies.",
+        "wildlife_users": "Strong aromatic oils naturally repel deer and rabbit browsing.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Rudbeckia hirta": {
+        "summary": "The cheerful native black-eyed Susan (1–3 ft) bearing bristly hairy stems topped from June through September with bright golden-yellow daisy blossoms surrounding a raised dark chocolate-brown central cone. An iconic, fast-blooming workhorse for sunny borders, meadow matrices, and pollinator gardens.",
+        "maint_level": "Low",
+        "spring_care": "Allow self-sown seedlings to establish in matrix gaps; clear dead winter stems at 50°F+.",
+        "summer_care": "Deadhead spent blooms in midsummer if tidy appearance and prolonged bloom is desired.",
+        "fall_care": "Leave rigid dark cones standing through winter to feed American Goldfinches and self-sow.",
+        "winter_care": None,
+        "division": "Biennial to short-lived perennial; self-sows freely; propagate via seed.",
+        "host_insects": "Larval host for Silvery Checkerspot (*Chlosyne nycteis*) and Wavy-lined Emerald Moth.",
+        "wildlife_users": "Cones are a premier winter seed staple for American Goldfinches, Black-capped Chickadees, and Juncos.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Phlox paniculata": {
+        "summary": "The stately native garden phlox (3–5 ft) producing massive pyramidal flower panicles of fragrant rose-pink to magenta blossoms from July through September above upright stems with lanceolate leaves. An indispensable high-summer focal anchor for borders, rain gardens, and cottage matrices.",
+        "maint_level": "Medium",
+        "spring_care": "Wait until sustained 50°F+ temperatures before cutting dead stalks to the crown.",
+        "summer_care": "Water at soil level during severe drought to prevent powdery mildew stress; provide good air circulation.",
+        "fall_care": "Leave seed capsules for winter bird foraging.",
+        "winter_care": None,
+        "division": "Divide fibrous root crowns every 3–4 years in early spring.",
+        "host_insects": "Larval host for the Phlox Moth (*Schinia indiana*) and visited by tiger swallowtails and clearwing moths.",
+        "wildlife_users": "Deep tubular flowers provide abundant nectar for Ruby-throated Hummingbirds and large butterfly species.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Packera obovata": {
+        "summary": "An exceptional native roundleaf ragwort (1–2 ft) forming an evergreen emerald rosette carpet that erupts in April and May with cheerful clusters of bright golden-yellow daisy blossoms on upright stems. The ultimate living green mulch for shaded borders, woodland edges, and under trees.",
+        "maint_level": "Low",
+        "spring_care": "Rake away smothering tree leaves in early spring at 50°F+; semi-evergreen rosettes awaken quickly.",
+        "summer_care": "Highly drought-tolerant once established in shade; suppresses weeds throughout summer.",
+        "fall_care": None,
+        "winter_care": None,
+        "division": "Divide rooted stoloniferous rosettes in early spring or immediately after flowering.",
+        "host_insects": "Early spring golden blossoms provide essential nectar and pollen for solitary mining bees (*Andrena*).",
+        "wildlife_users": "Foliage contains pyrrolizidine alkaloids that make it completely immune to deer and rabbit browsing.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Rudbeckia missouriensis": {
+        "summary": "A rugged native Missouri coneflower (1–2 ft) producing bristly, hairy stems topped by bright golden-yellow daisy blossoms with dark brown cones from June to October, uniquely adapted to dry limestone glades. Outstanding for rock gardens, dry borders, hellstrips, and glade restorations.",
+        "maint_level": "Low",
+        "spring_care": "Cut stems back to the basal rosette in spring after 50°F+ temperatures.",
+        "summer_care": "Requires full sun and sharp drainage; zero supplemental water needed once established.",
+        "fall_care": "Leave rigid cones standing through winter to feed American Goldfinches.",
+        "winter_care": None,
+        "division": "Divide fibrous crowns every 3–4 years in early spring.",
+        "host_insects": "Larval host for Silvery Checkerspot (*Chlosyne nycteis*) and visited by native leafcutter bees.",
+        "wildlife_users": "Cones provide high-energy seeds for goldfinches and native wintering sparrows.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Fragaria virginiana": {
+        "summary": "A delightful native wild strawberry (4–7 in) forming a lush emerald groundcover carpet via surface runners, bearing 5-petaled white flowers in spring followed by intensely sweet, aromatic miniature strawberries in June. Unsurpassed living green mulch for borders, orchards, and sunny matrices.",
+        "maint_level": "Low",
+        "spring_care": "Rake lightly in spring at 50°F+; semi-evergreen trifoliate leaves awaken early.",
+        "summer_care": "Harvest sweet miniature strawberries or leave for wildlife; drought tolerant once established.",
+        "fall_care": "Foliage takes on rich crimson-purple winter tones.",
+        "winter_care": None,
+        "division": "Easily propagated by transplanting rooted runner daughter plants in spring or autumn.",
+        "host_insects": "Larval host for Grizzled Skipper (*Pyrgus centaureae*) and visited by diverse native solitary bees.",
+        "wildlife_users": "Sweet berries are a premier early summer food for songbirds, box turtles, and small mammals.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Diarrhena obovata": {
+        "summary": "An exceptional native American beakgrain (2–3 ft) forming a dense, lush woodland carpet of arching, shiny emerald blades, sending up slender arching flower culms bearing distinctive beak-like green seed grains in late summer. Outstanding weed-suppressing matrix for dry to moist shade.",
+        "maint_level": "Low",
+        "spring_care": "Cut back old foliage to 2–3 inches in early spring at 50°F+ as new glossy shoots emerge.",
+        "summer_care": "Thrives in rich, moist to dry woodland soils in partial to full shade.",
+        "fall_care": "Leave arching seed culms intact for winter woodland songbirds.",
+        "winter_care": None,
+        "division": "Divide spreading rhizome clumps in early spring or early autumn.",
+        "host_insects": "Larval host for native woodland satyr butterflies and specialist leafhoppers.",
+        "wildlife_users": "Large beak-like seed grains feed wild turkeys, woodland mice, and songbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [Illinois Wildflowers](https://www.illinoiswildflowers.info/)"
+    },
+    "Pycnanthemum tenuifolium": {
+        "summary": "A phenomenal native slender mountain mint (2–3 ft) forming a bushy cloud of fine needle-like aromatic foliage topped from July to September by dense clusters of tiny white blossoms speckled with purple. The undisputed champion pollinator magnet for sunny borders, rain gardens, and meadows.",
+        "maint_level": "Low",
+        "spring_care": "Wait until sustained 50°F+ temperatures before cutting dead stems to 8–18 inches.",
+        "summer_care": "Zero supplemental watering needed once established; extremely drought and clay hardy.",
+        "fall_care": "Leave decorative charcoal-gray button seedheads for winter architectural interest and bird forage.",
+        "winter_care": None,
+        "division": "Divide fibrous rhizomatous clumps every 3–4 years in early spring.",
+        "host_insects": "Attracts the highest diversity of native beneficial insects of any plant, including parasitoid wasps, soldier beetles, and sweat bees.",
+        "wildlife_users": "Aromatic mint foliage naturally repels deer and rabbits; winter seedheads feed goldfinches.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Iris fulva": {
+        "summary": "A rare, captivating native copper iris (2–3 ft) producing drooping, flat-topped blossoms of unique copper-red, brick-red, or terracotta hues in May and June above graceful sword-like foliage. Exceptional focal accent for rain gardens, bioswales, pond margins, and moist shaded borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut away old winter foliage in early spring at 50°F+ before new sword blades emerge.",
+        "summer_care": "Thrives in standing water, saturated soils, and heavy clay in full sun to partial shade.",
+        "fall_care": "Leave hexagonal seed capsules for architectural interest or collect for propagation.",
+        "winter_care": None,
+        "division": "Divide fleshy rhizomes every 3–4 years in late summer after flowering.",
+        "host_insects": "Visited by native bumblebees and clearwing moths; host for Iris Borer Moth.",
+        "wildlife_users": "Unique copper-red blossoms are co-evolved to attract Ruby-throated Hummingbirds.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Grow Native!](https://grownative.org), [MDC](https://mdc.mo.gov)"
+    },
+    "Hibiscus lasiocarpos": {
+        "summary": "A magnificent native woolly rose mallow (4–6 ft) bearing massive 6–8 inch white or pale pink crepe-paper blossoms with deep crimson-red throats from July through September above velvety heart-shaped leaves. A showstopping keystone anchor for rain gardens, bioswales, pond margins, and moist borders.",
+        "maint_level": "Low",
+        "spring_care": "Cut dead woody stalks back to 4–6 inches in late spring at 50°F+ (emerges late in May).",
+        "summer_care": "Provide consistent moisture; excels in standing water and saturated soils in full sun.",
+        "fall_care": "Leave velvety seed capsules for winter bird foraging.",
+        "winter_care": None,
+        "division": "Massive woody root crown; divide in early spring or propagate via seed.",
+        "host_insects": "Larval host for specialist Hibiscus Bee (*Ptilothrix bombiformis*) and Io Moth (*Automeris io*).",
+        "wildlife_users": "Massive blossoms are visited by hummingbirds, bumblebees, and specialist native bees.",
+        "wildlife_sources": "[Missouri Botanical Garden](https://www.missouribotanicalgarden.org/PlantFinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    },
+    "Veronicastrum viginicum": {
+        "summary": "A commanding architectural native Culver's root (3–6 ft) featuring upright stems encircled by handsome whorls of lance-shaped leaves, topped in midsummer by elegant candelabras of dense, branching white-to-pale-blue floral wands. An indispensable vertical accent for rain gardens, bioswales, and sunny borders.",
+        "maint_level": "Low",
+        "spring_care": "Wait until daytime temperatures exceed 50°F before cutting dead stalks to 8–18 inches.",
+        "summer_care": "Thrives in moist, rich loams and heavy clay in full sun to partial shade; highly drought-resilient once rooted.",
+        "fall_care": "Leave slender candelabra seed spikes intact for winter architectural structure and songbird foraging.",
+        "winter_care": None,
+        "division": "Divide woody crowns every 4–5 years in early spring.",
+        "host_insects": "Larval host for Culver's Root Borer Moth (*Papaipema sciata*) and visited by hundreds of native bee species.",
+        "wildlife_users": "Tall floral candelabras are a high-value landing pad for swallowtails, monarchs, and hummingbirds.",
+        "wildlife_sources": "[National Wildlife Federation Native Plant Finder](https://www.nwf.org/nativeplantfinder/), [Xerces Society](https://xerces.org/), [MDC Field Guide](https://mdc.mo.gov/discover-nature/field-guide)"
+    }
+}
+''')
+
+print(f"Successfully wrote {filepath}")
