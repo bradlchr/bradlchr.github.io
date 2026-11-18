@@ -496,11 +496,6 @@
         dbConnectionBadge.textContent = (state.currentUser && hasToken) ? 'Firebase Auth Active' : 'Public Read Connected';
       }
 
-      const syncKeyInput = document.getElementById('syncFirebaseApiKeyInput');
-      if (syncKeyInput && typeof getFirebaseApiKey === 'function') {
-        syncKeyInput.value = getFirebaseApiKey();
-      }
-
       const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
       const adminOptions = document.getElementById('syncAdminOptions');
       if (adminOptions) {
@@ -584,14 +579,6 @@
       if (!modal) return;
       document.getElementById('loginUsernameInput').value = '';
       document.getElementById('loginPasswordInput').value = '';
-      const keyInput = document.getElementById('loginFirebaseApiKeyInput');
-      if (keyInput && typeof getFirebaseApiKey === 'function') {
-        keyInput.value = getFirebaseApiKey();
-      }
-      const detailsEl = document.getElementById('firebaseAuthConfigDetails');
-      if (detailsEl && typeof getFirebaseApiKey === 'function' && !getFirebaseApiKey()) {
-        detailsEl.open = true;
-      }
       const banner = document.getElementById('loginErrorBanner');
       if (banner) banner.style.display = 'none';
       modal.showModal();

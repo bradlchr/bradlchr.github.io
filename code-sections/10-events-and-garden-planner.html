@@ -465,15 +465,6 @@
         document.getElementById('syncModal')?.showModal();
       });
 
-      document.getElementById('saveFirebaseApiKeyBtn')?.addEventListener('click', () => {
-        const keyInput = document.getElementById('syncFirebaseApiKeyInput');
-        if (!keyInput) return;
-        const val = keyInput.value.trim();
-        setFirebaseApiKey(val);
-        renderSyncModal();
-        showToast(val ? 'Saved Firebase Web API Key. Sign in again to refresh your Firebase Auth token.' : 'Cleared Firebase Web API Key.', 'info');
-      });
-
       document.getElementById('refreshFromDbBtn').addEventListener('click', async () => {
         showToast("Synchronizing with shared Cloud Firestore master database...");
         await tryLiveSyncFromDatabase(true);

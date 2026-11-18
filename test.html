@@ -3912,18 +3912,10 @@
         </div>
       </div>
 
-      <details id="firebaseAuthConfigDetails" style="margin-top:8px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:8px 10px;font-size:11.5px;">
-        <summary style="cursor:pointer;font-weight:700;color:var(--text-secondary);user-select:none;">Firebase Authentication Web API Key (Project: deep-roots-nature-advisors)</summary>
-        <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
-          <label for="loginFirebaseApiKeyInput" style="font-size:11px;color:var(--text-muted);">Firebase Web API Key (required for Firebase Auth ID tokens):</label>
-          <input type="text" id="loginFirebaseApiKeyInput" placeholder="AIzaSy..." autocomplete="off" style="font-size:12px;font-family:monospace;padding:6px 8px;">
-        </div>
-      </details>
-
       <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
         <button type="submit" id="submitLoginBtn" class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;font-weight:700;">
           <i data-lucide="log-in"></i>
-          <span>Sign In with Firebase Auth</span>
+          <span>Sign In as Nature Advisor</span>
         </button>
       </div>
 
@@ -5323,22 +5315,16 @@
         </div>
       </div>
 
-      <!-- Cloud Target Status Badge & Firebase Web API Key Configuration -->
-      <div style="background:var(--bg-base);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px;font-size:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <i data-lucide="cloud" style="width:16px;height:16px;color:var(--primary);"></i>
-            <div>
-              <div style="font-weight:700;color:var(--text-main);">Google Cloud Firestore</div>
-              <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">deep-roots-nature-advisors</div>
-            </div>
+      <!-- Cloud Target Status Badge -->
+      <div style="background:var(--bg-base);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i data-lucide="cloud" style="width:16px;height:16px;color:var(--primary);"></i>
+          <div>
+            <div style="font-weight:700;color:var(--text-main);">Google Cloud Firestore</div>
+            <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">deep-roots-nature-advisors</div>
           </div>
-          <span id="dbConnectionBadge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(46,125,50,0.12);color:var(--primary);border:1px solid rgba(46,125,50,0.25);">Public Read Connected</span>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;border-top:1px solid var(--border-subtle);padding-top:8px;">
-          <input type="text" id="syncFirebaseApiKeyInput" placeholder="Firebase Web API Key (AIzaSy...)" aria-label="Firebase Web API Key" style="flex:1;font-size:11.5px;font-family:monospace;padding:6px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-surface);color:var(--text-main);">
-          <button type="button" id="saveFirebaseApiKeyBtn" class="btn btn-secondary btn-sm" style="font-size:11.5px;padding:6px 10px;white-space:nowrap;">Save API Key</button>
-        </div>
+        <span id="dbConnectionBadge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(46,125,50,0.12);color:var(--primary);border:1px solid rgba(46,125,50,0.25);">Public Read Connected</span>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:10px;">
@@ -6281,30 +6267,15 @@
     }
 
     // ==================== Firebase Authentication & Authenticated Firestore Transport ====================
+    const FIREBASE_WEB_API_KEY = 'AIzaSyBnurgmueeP4FR-ami2I4mIMvq6cuKRDiI';
     let firebaseAppInstance = null;
     let firebaseAuthInstance = null;
     let firebaseSdkModules = null;
 
     function getFirebaseApiKey() {
-      return (
-        localStorage.getItem('dr_firebase_api_key') ||
-        (window.DEEP_ROOTS_FIREBASE_CONFIG && window.DEEP_ROOTS_FIREBASE_CONFIG.apiKey) ||
-        ''
-      ).trim();
-    }
-
-    function setFirebaseApiKey(apiKey) {
-      const clean = (apiKey || '').trim();
-      if (clean) {
-        localStorage.setItem('dr_firebase_api_key', clean);
-      } else {
-        localStorage.removeItem('dr_firebase_api_key');
-      }
-      firebaseAppInstance = null;
-      firebaseAuthInstance = null;
+      return FIREBASE_WEB_API_KEY;
     }
     window.getFirebaseApiKey = getFirebaseApiKey;
-    window.setFirebaseApiKey = setFirebaseApiKey;
 
     async function ensureFirebaseAuthSdk() {
       const apiKey = getFirebaseApiKey();
@@ -6540,17 +6511,23 @@
       return users;
     }
 
+    function formatFirebaseAuthErrorMessage(rawCodeOrMessage) {
+      const msg = String(rawCodeOrMessage || '');
+      if (msg.includes('CONFIGURATION_NOT_FOUND') || msg.includes('OPERATION_NOT_ALLOWED') || msg.includes('auth/configuration-not-found') || msg.includes('auth/operation-not-allowed')) {
+        return 'Firebase Authentication Email/Password sign-in is not enabled yet in the Firebase Console. In Firebase Console -> Build -> Authentication -> Get started -> Sign-in method, enable "Email/Password".';
+      }
+      if (msg.includes('INVALID_PASSWORD') || msg.includes('INVALID_LOGIN_CREDENTIALS') || msg.includes('auth/wrong-password') || msg.includes('auth/invalid-credential')) {
+        return 'Invalid email/username or password.';
+      }
+      if (msg.includes('EMAIL_NOT_FOUND') || msg.includes('auth/user-not-found')) {
+        return 'Advisor account not found in Firebase Authentication.';
+      }
+      return msg || 'Firebase Authentication failed.';
+    }
+
     // Authenticate with Firebase Authentication (SDK or Identity Toolkit REST API)
     async function authenticateWithFirebase(email, password, createIfMissing = false) {
       const apiKey = getFirebaseApiKey();
-      if (!apiKey) {
-        return {
-          authenticated: false,
-          uid: '',
-          idToken: '',
-          error: 'Firebase Web API Key is not configured. Please enter the project Firebase Web API Key under "Firebase Authentication Web API Key" to obtain a Firebase Auth token.'
-        };
-      }
 
       // 1. Try Firebase Auth Modular Web SDK
       const sdk = await ensureFirebaseAuthSdk();
@@ -6566,8 +6543,8 @@
           localStorage.setItem('dr_firebase_uid', cred.user.uid);
           return { authenticated: true, uid: cred.user.uid, idToken, email: cred.user.email || email };
         } catch (sdkErr) {
-          const code = sdkErr?.code || '';
-          if (createIfMissing && (code === 'auth/user-not-found' || code === 'auth/invalid-credential')) {
+          const code = sdkErr?.code || sdkErr?.message || '';
+          if (createIfMissing && (code.includes('user-not-found') || code.includes('invalid-credential'))) {
             try {
               const created = await sdk.createUserWithEmailAndPassword(sdk.auth, email, password);
               const idToken = await created.user.getIdToken();
@@ -6579,10 +6556,10 @@
               localStorage.setItem('dr_firebase_uid', created.user.uid);
               return { authenticated: true, uid: created.user.uid, idToken, email: created.user.email || email };
             } catch (createErr) {
-              return { authenticated: false, uid: '', idToken: '', error: createErr.message || 'Firebase Auth sign-in failed.' };
+              return { authenticated: false, uid: '', idToken: '', error: formatFirebaseAuthErrorMessage(createErr?.code || createErr?.message) };
             }
           }
-          return { authenticated: false, uid: '', idToken: '', error: sdkErr.message || 'Firebase Auth sign-in failed.' };
+          return { authenticated: false, uid: '', idToken: '', error: formatFirebaseAuthErrorMessage(code) };
         }
       }
 
@@ -6611,7 +6588,7 @@
             authenticated: false,
             uid: '',
             idToken: '',
-            error: data?.error?.message || `Firebase Auth HTTP ${res.status}`
+            error: formatFirebaseAuthErrorMessage(data?.error?.message || `HTTP ${res.status}`)
           };
         }
 
@@ -6623,7 +6600,7 @@
         localStorage.setItem('dr_firebase_uid', data.localId);
         return { authenticated: true, uid: data.localId, idToken: data.idToken, email: data.email || email };
       } catch (err) {
-        return { authenticated: false, uid: '', idToken: '', error: err.message };
+        return { authenticated: false, uid: '', idToken: '', error: formatFirebaseAuthErrorMessage(err.message) };
       }
     }
 
@@ -6856,21 +6833,15 @@
         return { success: false, error: 'Please enter both username/email and password.' };
       }
 
-      // Save Firebase Web API Key if entered in login modal
-      const loginKeyInput = document.getElementById('loginFirebaseApiKeyInput');
-      if (loginKeyInput && loginKeyInput.value.trim()) {
-        setFirebaseApiKey(loginKeyInput.value.trim());
-      }
-
       let users = loadUsersCache();
       let user = users.find(u => u.username.toLowerCase() === query || (u.email && u.email.toLowerCase() === query));
 
       // Determine email for Firebase Auth sign-in
       const authEmail = (user && user.email)
         ? user.email
-        : (query.includes('@') ? query : `${query}@deeproots.org`);
+        : (query === 'chris.bradley' ? 'ctbbradley@gmail.com' : (query.includes('@') ? query : `${query}@deeproots.org`));
 
-      // Verify local password hash if user is cached locally
+      // Verify local password hash if user is cached locally (to auto-bootstrap Firebase Auth account on first sign-in)
       let localPasswordVerified = false;
       if (user && user.salt && user.passwordHash) {
         const expectedHash = await hashPassword(password, user.salt);
@@ -6882,10 +6853,10 @@
       // Authenticate with Firebase Auth to obtain ID Token & UID for Firestore Security Rules
       const fbAuth = await authenticateWithFirebase(authEmail, password, localPasswordVerified);
 
-      if (!fbAuth.authenticated && !localPasswordVerified) {
+      if (!fbAuth.authenticated) {
         return {
           success: false,
-          error: fbAuth.error || 'Invalid credentials or advisor account not found.'
+          error: fbAuth.error || 'Firebase Authentication sign-in failed. Please verify your email/username and password.'
         };
       }
 
@@ -7065,8 +7036,26 @@
       const salt = generateSalt();
       const hash = await hashPassword(tempPassword, salt);
 
+      // Create Firebase Auth account for the new advisor (without replacing the Admin's own active token)
+      let provisionedUid = '';
+      try {
+        const signUpUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${encodeURIComponent(getFirebaseApiKey())}`;
+        const signUpRes = await fetch(signUpUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), password: tempPassword, returnSecureToken: true })
+        });
+        const signUpData = await signUpRes.json().catch(() => ({}));
+        if (signUpRes.ok && signUpData.localId) {
+          provisionedUid = signUpData.localId;
+        }
+      } catch (e) {
+        console.warn('Firebase Auth signUp during provisioning notice:', e);
+      }
+
       const newUser = {
-        id: `user-${username}`,
+        id: provisionedUid || `user-${username}`,
+        uid: provisionedUid,
         username: username,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -9328,11 +9317,6 @@
         dbConnectionBadge.textContent = (state.currentUser && hasToken) ? 'Firebase Auth Active' : 'Public Read Connected';
       }
 
-      const syncKeyInput = document.getElementById('syncFirebaseApiKeyInput');
-      if (syncKeyInput && typeof getFirebaseApiKey === 'function') {
-        syncKeyInput.value = getFirebaseApiKey();
-      }
-
       const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
       const adminOptions = document.getElementById('syncAdminOptions');
       if (adminOptions) {
@@ -9416,14 +9400,6 @@
       if (!modal) return;
       document.getElementById('loginUsernameInput').value = '';
       document.getElementById('loginPasswordInput').value = '';
-      const keyInput = document.getElementById('loginFirebaseApiKeyInput');
-      if (keyInput && typeof getFirebaseApiKey === 'function') {
-        keyInput.value = getFirebaseApiKey();
-      }
-      const detailsEl = document.getElementById('firebaseAuthConfigDetails');
-      if (detailsEl && typeof getFirebaseApiKey === 'function' && !getFirebaseApiKey()) {
-        detailsEl.open = true;
-      }
       const banner = document.getElementById('loginErrorBanner');
       if (banner) banner.style.display = 'none';
       modal.showModal();
@@ -16377,15 +16353,6 @@
       document.getElementById('syncModalBtn')?.addEventListener('click', () => {
         renderSyncModal();
         document.getElementById('syncModal')?.showModal();
-      });
-
-      document.getElementById('saveFirebaseApiKeyBtn')?.addEventListener('click', () => {
-        const keyInput = document.getElementById('syncFirebaseApiKeyInput');
-        if (!keyInput) return;
-        const val = keyInput.value.trim();
-        setFirebaseApiKey(val);
-        renderSyncModal();
-        showToast(val ? 'Saved Firebase Web API Key. Sign in again to refresh your Firebase Auth token.' : 'Cleared Firebase Web API Key.', 'info');
       });
 
       document.getElementById('refreshFromDbBtn').addEventListener('click', async () => {
