@@ -168,18 +168,15 @@
         const normSci = normalizePlantLookupKey(sciKey);
         const emb = embeddedMap.get(sciKey) || embeddedMap.get(normSci) || (p.id ? embeddedMap.get(p.id) : null);
         if (emb) {
-          if (emb.advisor_description) p.advisor_description = emb.advisor_description;
-          if (emb.maintenance_level) p.maintenance_level = emb.maintenance_level;
-          if (emb.maintenance_guide) p.maintenance_guide = emb.maintenance_guide;
-          if (emb.wildlife_detail) p.wildlife_detail = emb.wildlife_detail;
-          if (emb.wildlife_ecological_value) p.wildlife_ecological_value = emb.wildlife_ecological_value;
-          if (emb.images && emb.images.length > 0) {
-            const remoteHasPm = (p.images || []).some(im => (im.url || '').includes('prairiemoon.com'));
-            const remoteHasMobot = (p.images || []).some(im => (im.url || '').includes('mobot.org'));
-            if (remoteHasPm || !remoteHasMobot || (emb.images.length > (p.images || []).length)) {
-              p.images = emb.images;
-              p.plantfinder_url = emb.plantfinder_url || p.plantfinder_url;
-            }
+          // Only backfill missing fields from embedded baseline so confirmed Firestore admin updates take precedence
+          if (!p.advisor_description && emb.advisor_description) p.advisor_description = emb.advisor_description;
+          if (!p.maintenance_level && emb.maintenance_level) p.maintenance_level = emb.maintenance_level;
+          if (!p.maintenance_guide && emb.maintenance_guide) p.maintenance_guide = emb.maintenance_guide;
+          if (!p.wildlife_detail && emb.wildlife_detail) p.wildlife_detail = emb.wildlife_detail;
+          if (!p.wildlife_ecological_value && emb.wildlife_ecological_value) p.wildlife_ecological_value = emb.wildlife_ecological_value;
+          if ((!p.images || p.images.length === 0) && emb.images && emb.images.length > 0) {
+            p.images = emb.images;
+            p.plantfinder_url = emb.plantfinder_url || p.plantfinder_url;
           }
         }
       });
@@ -193,11 +190,11 @@
         const sciKey = (item.scientific_name || '').toLowerCase().trim();
         const normSci = normalizePlantLookupKey(sciKey);
         const commonKey = normalizePlantLookupKey(item.common_name || '');
-        return embeddedMap.get(sciKey)
+        return (state.allPlants || []).find(mp => mp.id === item.id || (mp.scientific_name && normalizePlantLookupKey(mp.scientific_name) === normSci))
+          || embeddedMap.get(sciKey)
           || embeddedMap.get(normSci)
           || (item.id ? embeddedMap.get(item.id) : null)
-          || (commonKey ? embeddedMap.get(commonKey) : null)
-          || (state.allPlants || []).find(mp => mp.id === item.id || (mp.scientific_name && normalizePlantLookupKey(mp.scientific_name) === normSci));
+          || (commonKey ? embeddedMap.get(commonKey) : null);
       };
 
       const syncItem = (item) => {
@@ -219,9 +216,15 @@
       }
     }
 
-    // Load and Synchronize Plants
+    // Load and Synchronize Plants directly from Cloud Firestore (using localStorage only as a temporary read cache)
     async function loadMasterPlants() {
-      // 1. Initial load from local Firestore cache or embedded master catalog
+      // Remove legacy dr_custom_plants so local storage is never treated as proof of a shared update
+      try {
+        localStorage.removeItem('dr_custom_plants');
+        state.customPlants = {};
+      } catch (e) {}
+
+      // 1. Initial fast render from temporary Firestore cache or embedded baseline while awaiting live Cloud Firestore response
       const raw = document.getElementById('embeddedMasterPlants')?.textContent;
       let embeddedList = [];
       if (raw) {
@@ -238,7 +241,7 @@
             const hasMobot = parsedCache.some(p => p.plantfinder_url || (p.images && p.images.some(img => img.url && img.url.includes('mobot.org'))));
             if (hasMobot && Array.isArray(parsedCache) && parsedCache.length > 50) {
               state.allPlants = overlayCanonicalMasterFields(parsedCache);
-              document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore (Cached)';
+              document.getElementById('dbEngineTxt').textContent = 'Cloud Firestore (Temporary Local Cache)';
             }
           } catch (e) {}
         }
@@ -246,15 +249,6 @@
 
       if (!state.allPlants || state.allPlants.length === 0) {
         state.allPlants = embeddedList;
-      }
-
-      if (!state.allPlants || state.allPlants.length === 0) {
-        const raw = document.getElementById('embeddedMasterPlants').textContent;
-        try {
-          state.allPlants = JSON.parse(raw);
-        } catch (err) {
-          console.error("Error loading embedded plants:", err);
-        }
       }
 
       overlayCanonicalMasterFields(state.allPlants);
@@ -269,11 +263,9 @@
         p.isKcKeystone = key;
       });
 
-      // 2. Apply any custom local advisor edits
-      applyCustomEditsToPlants();
       refreshStagedPlantsFromCatalog();
 
-      // 3. Attempt live sync from database endpoints
+      // 2. Live sync directly from Cloud Firestore
       await tryLiveSyncFromDatabase(false);
 
       try {
@@ -288,43 +280,18 @@
     }
 
     function applyCustomEditsToPlants() {
-      const customs = state.customPlants;
-      const count = Object.keys(customs).length;
-      document.getElementById('dbCustomCountTxt').textContent = `${count} Modified`;
-
-      state.allPlants.forEach((p, idx) => {
-        const id = p.id || p.scientific_name;
-        if (customs[id]) {
-          state.allPlants[idx] = { ...p, ...customs[id] };
-        }
-      });
+      const el = document.getElementById('dbCustomCountTxt');
+      if (el) el.textContent = 'Temporary Read Cache Only';
     }
 
     async function tryLiveSyncFromDatabase(showNotification = false) {
-      // 1. Try local REST API endpoint first if running via server.py
-      try {
-        const res = await fetch('/api/plants?limit=300', { signal: AbortSignal.timeout(2000) });
-        if (res.ok) {
-          const data = await res.json();
-          const remoteList = data.plants || data;
-          if (Array.isArray(remoteList) && remoteList.length > 50) {
-            replaceWithRemotePlants(remoteList);
-            state.lastSyncTime = new Date().toLocaleTimeString();
-            document.getElementById('dbEngineTxt').textContent = 'Live SQLite & Shared API';
-            if (showNotification) showToast(`Synchronized ${remoteList.length} plants from local server.`);
-            return;
-          }
-        }
-      } catch (e) {}
-
-      // 2. Try Cloud Firestore REST endpoint with pagination & multi-database fallback
+      // Cloud Firestore REST endpoint with pagination (public read allowed by Firestore Security Rules)
       const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
       let dbId = localStorage.getItem('dr_firestore_database_id');
       if (!dbId || dbId === '(default)') {
         dbId = 'deep-roots-nature-advisors';
         localStorage.setItem('dr_firestore_database_id', dbId);
       }
-      // Cloud Firestore read is open for community species catalog without Google tokens
       const headers = { 'Accept': 'application/json' };
 
       async function queryFirestoreDb(targetDb) {
@@ -354,9 +321,7 @@
       try {
         let { docs: allDocs, err: syncError } = await queryFirestoreDb(dbId);
 
-        // If (default) does not exist, attempt fallback to projectId
         if (syncError && syncError.data?.error?.message?.includes('database (default) does not exist') && dbId === '(default)') {
-          console.info(`Database '(default)' not found. Checking database '${projectId}'...`);
           const fallback = await queryFirestoreDb(projectId);
           if (fallback.docs.length > 0 || !fallback.err) {
             allDocs = fallback.docs;
@@ -376,25 +341,25 @@
             try {
               localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(state.allPlants));
             } catch (e) {}
-            showToast(`Synchronized ${parsed.length} plants directly from Cloud Firestore!`, 'success');
+            if (showNotification) {
+              showToast(`Synchronized ${parsed.length} plants directly from Cloud Firestore!`, 'success');
+            }
             return;
           }
         } else if (syncError) {
           const msg = syncError.data?.error?.message || `HTTP ${syncError.status}`;
           if (syncError.status === 403 && msg.includes('disabled')) {
-            showToast("Cloud Firestore API is disabled in project deep-roots-nature-advisors. Please enable it in Google Cloud Console.", "warning", 9000);
+            showToast("Cloud Firestore API is disabled in project deep-roots-nature-advisors. Please enable it in Google Cloud Console.", "danger");
           } else if (msg.includes('does not exist')) {
-            showToast(`Database '${dbId}' does not exist in project '${projectId}'.`, "warning", 9000);
-          } else if (syncError.status === 401 || syncError.status === 403) {
-            if (showNotification) showToast("Firestore access restricted. Please sign in with your Nature Advisor account.", "warning");
+            showToast(`Database '${dbId}' does not exist in project '${projectId}'.`, "danger");
           } else {
-            console.warn("Firestore sync warning:", msg);
-            if (showNotification) showToast("Firestore sync notice: " + msg, "warning");
+            console.warn("Firestore sync error:", msg);
+            if (showNotification) showToast(`Firestore rejected catalog read: ${msg}`, "danger");
           }
         }
       } catch (err) {
         console.warn("Firestore live sync exception:", err);
-        if (showNotification) showToast("Could not reach Firestore: " + err.message, "warning");
+        if (showNotification) showToast("Could not reach Cloud Firestore: " + err.message, "danger");
       }
     }
 
@@ -404,7 +369,6 @@
       overlayCanonicalMasterFields(remoteList);
 
       state.allPlants = remoteList;
-      applyCustomEditsToPlants();
       refreshStagedPlantsFromCatalog();
       applyFilters();
       updateHeaderInfo();
@@ -440,10 +404,10 @@
       if (!res.id && doc.name) {
         res.id = doc.name.split('/').pop();
       }
-      if (res.id && (res.id.startsWith('_user_') || res.id.startsWith('_report_'))) {
+      if (res.id && res.id.startsWith('_')) {
         return null;
       }
-      if (!res.scientific_name) {
+      if (!res.scientific_name || String(res.scientific_name).startsWith('_')) {
         return null;
       }
 
@@ -509,8 +473,32 @@
 
       const dbCustomCountTxt = document.getElementById('dbCustomCountTxt');
       if (dbCustomCountTxt) {
-        const count = Object.keys(state.customPlants || {}).length;
-        dbCustomCountTxt.textContent = `${count} Modified`;
+        dbCustomCountTxt.textContent = 'Temporary Read Cache Only';
+      }
+
+      const hasToken = Boolean(sessionStorage.getItem('dr_firebase_id_token') || localStorage.getItem('dr_firebase_id_token'));
+      const uid = state.currentUser?.uid || localStorage.getItem('dr_firebase_uid') || '';
+      const dbAuthStatusTxt = document.getElementById('dbAuthStatusTxt');
+      const dbConnectionBadge = document.getElementById('dbConnectionBadge');
+      if (dbAuthStatusTxt) {
+        if (state.currentUser && hasToken) {
+          dbAuthStatusTxt.textContent = `${state.currentUser.isAdmin ? 'Admin' : 'Advisor'} Authenticated (UID: ${uid.slice(0, 8)}...)`;
+          dbAuthStatusTxt.style.color = 'var(--primary)';
+        } else if (state.currentUser) {
+          dbAuthStatusTxt.textContent = 'Local Session Only (No Firebase Auth Token)';
+          dbAuthStatusTxt.style.color = '#d97706';
+        } else {
+          dbAuthStatusTxt.textContent = 'Public Read-Only (Unauthenticated)';
+          dbAuthStatusTxt.style.color = 'var(--text-secondary)';
+        }
+      }
+      if (dbConnectionBadge) {
+        dbConnectionBadge.textContent = (state.currentUser && hasToken) ? 'Firebase Auth Active' : 'Public Read Connected';
+      }
+
+      const syncKeyInput = document.getElementById('syncFirebaseApiKeyInput');
+      if (syncKeyInput && typeof getFirebaseApiKey === 'function') {
+        syncKeyInput.value = getFirebaseApiKey();
       }
 
       const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
@@ -596,6 +584,14 @@
       if (!modal) return;
       document.getElementById('loginUsernameInput').value = '';
       document.getElementById('loginPasswordInput').value = '';
+      const keyInput = document.getElementById('loginFirebaseApiKeyInput');
+      if (keyInput && typeof getFirebaseApiKey === 'function') {
+        keyInput.value = getFirebaseApiKey();
+      }
+      const detailsEl = document.getElementById('firebaseAuthConfigDetails');
+      if (detailsEl && typeof getFirebaseApiKey === 'function' && !getFirebaseApiKey()) {
+        detailsEl.open = true;
+      }
       const banner = document.getElementById('loginErrorBanner');
       if (banner) banner.style.display = 'none';
       modal.showModal();
@@ -726,6 +722,9 @@
     }
 
     async function fetchAllAdvisorReports() {
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        return [];
+      }
       const allReports = [];
       const seenIds = new Set();
 
@@ -742,83 +741,33 @@
         }
       }
 
-      // 1. Scan LocalStorage for all consultations cached on this device across any advisor
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('dr_reports_')) {
-            const u = key.replace('dr_reports_', '');
-            try {
-              const list = JSON.parse(localStorage.getItem(key) || '[]');
-              if (Array.isArray(list)) {
-                list.forEach(c => {
-                  if (c && c.id) {
-                    if (!c.username) c.username = u;
-                    addReport(c);
-                  }
-                });
-              }
-            } catch (err) {}
-          }
-        }
-      } catch (err) {
-        console.warn('Local storage scan notice:', err);
-      }
-
-      // Also include active consultations in state
-      if (state.consultations && Array.isArray(state.consultations)) {
-        state.consultations.forEach(c => addReport(c));
-      }
-
-      // 2. Fetch from Cloud Firestore fallback collection: /plants looking for all _report_ documents
-      try {
-        const url = `${getFirestoreBaseUrl()}/plants?pageSize=300`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
-            const docId = doc.name ? doc.name.split('/').pop() : '';
-            if (docId.startsWith('_report_')) {
-              const parts = docId.split('_');
-              const authorUser = parts[2] || '';
-              const r = parseFirestoreReportDoc(doc, authorUser);
-              if (r) addReport(r);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Firestore plants fallback scan notice:', err);
-      }
-
-      // 3. Fetch from top-level /reports collection
+      // 1. Fetch from top-level /reports collection using authenticated Admin token
       try {
         const url = `${getFirestoreBaseUrl()}/reports?pageSize=100`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
-            const r = parseFirestoreReportDoc(doc);
-            if (r) addReport(r);
-          }
+        const data = await firestoreFetch(url, {}, true);
+        for (const doc of data?.documents || []) {
+          const r = parseFirestoreReportDoc(doc);
+          if (r) addReport(r);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.warn('Firestore /reports fetch notice:', err);
+      }
 
-      // 4. Fetch from /users/{username}/reports for every known advisor in the roster
+      // 2. Fetch from /users/{userId}/reports for every known advisor in the roster
       try {
         const users = loadUsersCache();
         const fetchPromises = users.map(async (u) => {
-          if (!u.username || u.username === 'guest') return;
-          try {
-            const uUrl = `${getFirestoreBaseUrl()}/users/${u.username}/reports?pageSize=100`;
-            const res = await fetch(uUrl);
-            if (res.ok) {
-              const data = await res.json();
-              for (const doc of data.documents || []) {
+          const pathIds = Array.from(new Set([u.uid, u.username].filter(id => id && id !== 'guest')));
+          for (const pathId of pathIds) {
+            try {
+              const uUrl = `${getFirestoreBaseUrl()}/users/${encodeURIComponent(pathId)}/reports?pageSize=100`;
+              const data = await firestoreFetch(uUrl, {}, true);
+              for (const doc of data?.documents || []) {
                 const r = parseFirestoreReportDoc(doc, u.username);
                 if (r) addReport(r);
               }
-            }
-          } catch (e) {}
+            } catch (e) {}
+          }
         });
         await Promise.allSettled(fetchPromises);
       } catch (err) {
@@ -1239,27 +1188,34 @@
 
       showToast(`Deleting report for "${clientName}"...`, "info");
 
-      // Build list of all potential Firestore delete endpoints
+      // Build list of Firestore delete endpoints (never /plants)
       const deleteUrls = [
-        `${baseUrl}/reports/${reportId}`,
-        `${baseUrl}/plants/_report_${reportId}`
+        `${baseUrl}/reports/${encodeURIComponent(reportId)}`
       ];
       if (authorUsername) {
-        deleteUrls.push(`${baseUrl}/users/${authorUsername}/reports/${reportId}`);
-        deleteUrls.push(`${baseUrl}/plants/_report_${authorUsername}_${reportId}`);
+        deleteUrls.push(`${baseUrl}/users/${encodeURIComponent(authorUsername)}/reports/${encodeURIComponent(reportId)}`);
+      }
+      if (state.currentUser.uid) {
+        deleteUrls.push(`${baseUrl}/users/${encodeURIComponent(state.currentUser.uid)}/reports/${encodeURIComponent(reportId)}`);
       }
       if (state.currentUser.username && state.currentUser.username !== authorUsername) {
-        deleteUrls.push(`${baseUrl}/users/${state.currentUser.username}/reports/${reportId}`);
-        deleteUrls.push(`${baseUrl}/plants/_report_${state.currentUser.username}_${reportId}`);
+        deleteUrls.push(`${baseUrl}/users/${encodeURIComponent(state.currentUser.username)}/reports/${encodeURIComponent(reportId)}`);
       }
 
-      // Execute deletion across all Firestore paths
+      // Execute authenticated deletion across Firestore paths and verify response before updating UI
       try {
-        await Promise.allSettled(
-          deleteUrls.map(url => fetch(url, { method: 'DELETE' }))
-        );
+        for (const url of deleteUrls) {
+          try {
+            await firestoreFetch(url, { method: 'DELETE' }, true);
+          } catch (delErr) {
+            if (!String(delErr.message || '').includes('(404)')) {
+              throw delErr;
+            }
+          }
+        }
       } catch (err) {
-        console.warn("Firestore delete reports notice:", err);
+        showToast(`Firestore rejected report deletion: ${err.message}`, "danger");
+        return;
       }
 
       // Purge from active memory state

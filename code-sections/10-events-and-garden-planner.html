@@ -465,6 +465,15 @@
         document.getElementById('syncModal')?.showModal();
       });
 
+      document.getElementById('saveFirebaseApiKeyBtn')?.addEventListener('click', () => {
+        const keyInput = document.getElementById('syncFirebaseApiKeyInput');
+        if (!keyInput) return;
+        const val = keyInput.value.trim();
+        setFirebaseApiKey(val);
+        renderSyncModal();
+        showToast(val ? 'Saved Firebase Web API Key. Sign in again to refresh your Firebase Auth token.' : 'Cleared Firebase Web API Key.', 'info');
+      });
+
       document.getElementById('refreshFromDbBtn').addEventListener('click', async () => {
         showToast("Synchronizing with shared Cloud Firestore master database...");
         await tryLiveSyncFromDatabase(true);
@@ -480,86 +489,50 @@
         }
         if (!confirm(`Upload all ${state.allPlants.length} species directly to Cloud Firestore collection 'plants'?`)) return;
 
-        showToast("Starting Cloud Firestore batch upload...", "info");
-        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
-        let dId = localStorage.getItem('dr_firestore_database_id') || 'deep-roots-nature-advisors';
-        if (dId === '(default)') dId = 'deep-roots-nature-advisors';
-        
-        let uploaded = 0;
-        for (const p of state.allPlants) {
-          const docId = encodeURIComponent(p.id || p.scientific_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
-          const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${docId}`;
-          
-          const body = {
-            fields: {
-              scientific_name: { stringValue: p.scientific_name || '' },
-              common_names: { arrayValue: { values: (p.common_names || []).map(n => ({ stringValue: String(n) })) } },
-              native_environment: { stringValue: p.native_environment || 'Forest' },
-              plant_type: { arrayValue: { values: (Array.isArray(p.plant_type) ? p.plant_type : [p.plant_type || 'Wildflower']).map(t => ({ stringValue: String(t) })) } },
-              mature_height: {
-                mapValue: {
-                  fields: {
-                    min_ft: { doubleValue: Number(p.mature_height_min || 1) },
-                    max_ft: { doubleValue: Number(p.mature_height_max || 3) },
-                    display: { stringValue: p.height_display || '1–3 ft' }
-                  }
-                }
-              },
-              plant_url: { stringValue: getPlantUrl(p) },
-              advisor_description: { stringValue: getPlantDesc(p) },
-              sociability: { stringValue: getPlantSociability(p) },
-              soil_requirements: { arrayValue: { values: (p.soil_requirements || []).map(s => ({ stringValue: String(s) })) } },
-              moisture_requirements: { arrayValue: { values: (p.moisture_requirements || []).map(m => ({ stringValue: String(m) })) } },
-              light_requirements: { arrayValue: { values: (p.light_requirements || []).map(l => ({ stringValue: String(l) })) } },
-              wildlife_ecosystem_benefits: { arrayValue: { values: (p.wildlife_ecosystem_benefits || []).map(w => ({ stringValue: String(w) })) } },
-              images: {
-                arrayValue: {
-                  values: (p.images || []).map(img => ({
-                    mapValue: {
-                      fields: {
-                        url: { stringValue: img.url || '' },
-                        caption: { stringValue: img.caption || '' },
-                        attribution_name: { stringValue: img.attribution_name || 'Grow Native!' }
-                      }
-                    }
-                  }))
-                }
-              }
-            }
-          };
+        const seedBtn = document.getElementById('seedFirestoreBtn');
+        const origHtml = seedBtn ? seedBtn.innerHTML : '';
+        if (seedBtn) {
+          seedBtn.disabled = true;
+          seedBtn.innerHTML = `<i data-lucide="loader-2" class="spin"></i><span>Verifying &amp; Uploading to Firestore...</span>`;
+          if (window.lucide) lucide.createIcons();
+        }
 
-          try {
-            await fetch(url, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(body)
-            });
+        let uploaded = 0;
+        try {
+          for (const p of state.allPlants) {
+            await syncPlantToFirestore(p);
             uploaded++;
-          } catch (e) {
-            console.error("Upload error for plant:", p.scientific_name, e);
+          }
+          showToast(`Verified and uploaded ${uploaded} plants to Cloud Firestore!`, 'success');
+          await tryLiveSyncFromDatabase(true);
+        } catch (err) {
+          console.error("Firestore rejected catalog batch upload:", err);
+          showToast(`Firestore rejected catalog upload after ${uploaded} plants: ${err.message}`, 'danger');
+        } finally {
+          if (seedBtn) {
+            seedBtn.disabled = false;
+            seedBtn.innerHTML = origHtml;
+            if (window.lucide) lucide.createIcons();
           }
         }
-        showToast(`Uploaded ${uploaded} plants to Cloud Firestore!`, 'success');
-        tryLiveSyncFromDatabase(true);
       });
 
-      // Reset Local Edits to Clean Master Catalog (Admin Only)
-      document.getElementById('resetCustomEditsBtn')?.addEventListener('click', () => {
+      // Reset Local Cache & Re-pull Clean Master Catalog from Firestore (Admin Only)
+      document.getElementById('resetCustomEditsBtn')?.addEventListener('click', async () => {
         if (!state.currentUser || !state.currentUser.isAdmin) {
-          showToast("Administrator privileges required to reset master catalog.", "danger");
+          showToast("Administrator privileges required to reset local catalog cache.", "danger");
           return;
         }
-        if (confirm("Reset all local edits back to authoritative master catalog?")) {
+        if (confirm("Clear temporary local plant cache and re-sync directly from Cloud Firestore?")) {
           state.customPlants = {};
           localStorage.removeItem('dr_custom_plants');
-          loadMasterPlants();
-          showToast("Reset to pristine shared master catalog.");
+          localStorage.removeItem('dr_firestore_cache_plants');
+          await loadMasterPlants();
+          showToast("Cleared local cache and re-synchronized from Cloud Firestore.");
         }
       });
 
-      // Import Plants JSON Backup (Admin Only)
+      // Import Plants JSON Backup (Admin Only) — uploads to Firestore and checks response before applying
       document.getElementById('importJsonFileInput')?.addEventListener('change', async (e) => {
         if (!state.currentUser || !state.currentUser.isAdmin) {
           showToast("Administrator privileges required to import plant JSON backups.", "danger");
@@ -572,18 +545,26 @@
           const text = await file.text();
           const imported = JSON.parse(text);
           if (Array.isArray(imported) && imported.length > 0) {
+            if (!confirm(`Publish ${imported.length} plants from "${file.name}" to Cloud Firestore?`)) {
+              e.target.value = '';
+              return;
+            }
+            let uploaded = 0;
+            for (const p of imported) {
+              await syncPlantToFirestore(p);
+              uploaded++;
+            }
             replaceWithRemotePlants(imported);
             state.lastSyncTime = new Date().toLocaleTimeString();
             updateHeaderInfo();
-            showToast(`Imported ${imported.length} plants from file!`, 'success');
-            if (confirm(`Successfully imported ${imported.length} plants! Would you like to upload them directly to Cloud Firestore now?`)) {
-              document.getElementById('seedFirestoreBtn')?.click();
-            }
+            showToast(`Verified and published ${uploaded} imported plants to Cloud Firestore!`, 'success');
           } else {
             showToast("Invalid plant JSON file.", "danger");
           }
         } catch (err) {
-          showToast(`Failed to parse JSON: ${err.message}`, "danger");
+          showToast(`Firestore rejected JSON import: ${err.message}`, "danger");
+        } finally {
+          e.target.value = '';
         }
       });
 

@@ -145,48 +145,28 @@
     }
 
     async function fetchRemoteConsultations(username) {
-      if (!username || username === 'guest') return [];
+      if (!username || username === 'guest' || !state.currentUser) return [];
+      const token = await getFirebaseIdToken();
+      if (!token) return [];
+
       const reports = [];
       const seenIds = new Set();
+      const userPathIds = Array.from(new Set([state.currentUser.uid, username].filter(Boolean)));
 
-      // Primary: /users/{username}/reports
-      try {
-        const url = `${getFirestoreBaseUrl()}/users/${username}/reports?pageSize=100`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
+      for (const pathId of userPathIds) {
+        try {
+          const url = `${getFirestoreBaseUrl()}/users/${encodeURIComponent(pathId)}/reports?pageSize=100`;
+          const data = await firestoreFetch(url, {}, true);
+          for (const doc of data?.documents || []) {
             const r = parseFirestoreReportDoc(doc, username);
             if (r && !seenIds.has(r.id)) {
               seenIds.add(r.id);
               reports.push(r);
             }
           }
+        } catch (e) {
+          console.warn(`Fetch user reports notice (${pathId}):`, e);
         }
-      } catch (e) {
-        console.warn("Fetch user reports notice:", e);
-      }
-
-      // Fallback: /plants collection looking for documents starting with _report_{username}_
-      try {
-        const url = `${getFirestoreBaseUrl()}/plants?pageSize=300`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          const prefix = `_report_${username}_`;
-          for (const doc of data.documents || []) {
-            const docId = doc.name ? doc.name.split('/').pop() : '';
-            if (docId.startsWith(prefix)) {
-              const r = parseFirestoreReportDoc(doc, username);
-              if (r && !seenIds.has(r.id)) {
-                seenIds.add(r.id);
-                reports.push(r);
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Fetch fallback reports notice:", e);
       }
 
       return reports;
@@ -1235,29 +1215,51 @@
         return;
       }
 
+      // If signed in and report was synced or user is authenticated, delete from Cloud Firestore first and verify response
+      if (state.currentUser) {
+        const token = await getFirebaseIdToken();
+        if (token) {
+          const username = state.currentUser.username;
+          const uid = state.currentUser.uid;
+          const authorUsername = c?.username || username;
+          const baseUrl = getFirestoreBaseUrl();
+          const deleteUrls = [
+            `${baseUrl}/reports/${encodeURIComponent(consultationId)}`,
+            `${baseUrl}/users/${encodeURIComponent(uid || username)}/reports/${encodeURIComponent(consultationId)}`
+          ];
+          if (uid && username && uid !== username) {
+            deleteUrls.push(`${baseUrl}/users/${encodeURIComponent(username)}/reports/${encodeURIComponent(consultationId)}`);
+          }
+          if (authorUsername && authorUsername !== username) {
+            deleteUrls.push(`${baseUrl}/users/${encodeURIComponent(authorUsername)}/reports/${encodeURIComponent(consultationId)}`);
+          }
+
+          try {
+            for (const u of deleteUrls) {
+              try {
+                await firestoreFetch(u, { method: 'DELETE' }, true);
+              } catch (delErr) {
+                // Allow 404 Not Found if the report was only a local draft and not yet in that subcollection
+                if (!String(delErr.message || '').includes('(404)')) {
+                  throw delErr;
+                }
+              }
+            }
+          } catch (err) {
+            showToast(`Firestore rejected report deletion: ${err.message}`, 'danger');
+            return;
+          }
+        } else if (c?.isCloudSynced) {
+          showToast('Cannot delete cloud-synced report: Firebase Authentication session is required.', 'danger');
+          return;
+        }
+      }
+
       const idx = state.consultations.findIndex(item => item.id === consultationId);
       if (idx >= 0) {
         state.consultations.splice(idx, 1);
       }
       persistConsultations();
-
-      // If signed in, delete from Cloud Firestore
-      if (state.currentUser) {
-        const username = state.currentUser.username;
-        const authorUsername = c?.username || username;
-        const baseUrl = getFirestoreBaseUrl();
-        const deleteUrls = [
-          `${baseUrl}/reports/${consultationId}`,
-          `${baseUrl}/plants/_report_${consultationId}`,
-          `${baseUrl}/users/${username}/reports/${consultationId}`,
-          `${baseUrl}/plants/_report_${username}_${consultationId}`
-        ];
-        if (authorUsername && authorUsername !== username) {
-          deleteUrls.push(`${baseUrl}/users/${authorUsername}/reports/${consultationId}`);
-          deleteUrls.push(`${baseUrl}/plants/_report_${authorUsername}_${consultationId}`);
-        }
-        Promise.allSettled(deleteUrls.map(u => fetch(u, { method: 'DELETE' }))).catch(e => console.warn("Firestore report delete notice:", e));
-      }
 
       // Sync with admin repository state if present
       if (state.allAdvisorReports) {
@@ -1463,9 +1465,12 @@
         state.consultations[activeIdx].lastModified = Date.now();
       }
 
+      const ownerUid = state.currentUser.uid || state.currentUser.id || `user-${username}`;
       const reportPayload = {
         fields: {
           id: { stringValue: reportId },
+          owner_uid: { stringValue: ownerUid },
+          advisor_id: { stringValue: ownerUid },
           username: { stringValue: username },
           client_name: { stringValue: meta.name || 'Kansas City Native Garden' },
           client_address: { stringValue: meta.address || '' },
@@ -1506,7 +1511,7 @@
                     id: { stringValue: inv.id || '' },
                     name: { stringValue: inv.name || '' },
                     scientific: { stringValue: inv.scientific || '' },
-                    location_notes: { stringValue: inv.location_notes || '' },
+                    location_notes: { stringValue: inv.location_notes || inv.notes || '' },
                     status: { stringValue: inv.status || 'Confirmed on site' }
                   }
                 }
@@ -1530,48 +1535,71 @@
         }
       };
 
+      const saveBtn = document.getElementById('saveCloudReportBtn');
+      const originalBtnHtml = saveBtn ? saveBtn.innerHTML : '';
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i data-lucide="loader-2" class="spin"></i><span>Saving to Firestore...</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+
       try {
-        showToast("Saving report to advisor cloud profile...", "info");
-        // 1. Save to user reports subcollection
-        const stdUrl = `${getFirestoreBaseUrl()}/users/${username}/reports/${reportId}`;
-        fetch(stdUrl, {
+        // 1. Save to top-level /reports/{reportId} collection and verify response
+        const topUrl = `${getFirestoreBaseUrl()}/reports/${encodeURIComponent(reportId)}`;
+        const savedTopDoc = await firestoreFetch(topUrl, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reportPayload)
-        }).catch(() => {});
+        }, true);
 
-        // 2. Save to top-level reports collection
-        const topUrl = `${getFirestoreBaseUrl()}/reports/${reportId}`;
-        fetch(topUrl, {
+        if (!savedTopDoc || !savedTopDoc.fields) {
+          throw new Error('Invalid response from Cloud Firestore /reports endpoint.');
+        }
+
+        // 2. Save to user-scoped /users/{uid}/reports/{reportId} subcollection and verify response
+        const userDocKey = encodeURIComponent(state.currentUser.uid || username);
+        const stdUrl = `${getFirestoreBaseUrl()}/users/${userDocKey}/reports/${encodeURIComponent(reportId)}`;
+        const savedUserDoc = await firestoreFetch(stdUrl, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reportPayload)
-        }).catch(() => {});
+        }, true);
 
-        // 3. Save to /plants fallback collection
-        const fbUrl = `${getFirestoreBaseUrl()}/plants/_report_${username}_${reportId}`;
-        await fetch(fbUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reportPayload)
-        });
+        if (!savedUserDoc || !savedUserDoc.fields) {
+          throw new Error('Invalid response from Cloud Firestore user reports subcollection.');
+        }
 
+        if (activeIdx >= 0) {
+          state.consultations[activeIdx].isCloudSynced = true;
+        }
         persistConsultations();
         renderConsultationSwitcher();
 
         const statusText = document.getElementById('consultationStatusText');
         const statusDot = document.getElementById('consultationSavedDot');
         if (statusText && statusDot) {
-          statusText.textContent = 'Saved to Cloud (just now)';
+          statusText.textContent = 'Verified in Cloud Firestore (just now)';
           statusDot.className = 'status-dot synced';
         }
 
-        showToast("Consultation report saved to your advisor profile in Firestore!", "success");
+        showToast("Consultation report verified and saved to Cloud Firestore!", "success");
       } catch (err) {
-        console.warn("Report cloud save notice:", err);
+        console.error("Firestore rejected report save:", err);
         persistConsultations();
         renderConsultationSwitcher();
-        showToast("Saved report locally to your advisor profile.", "success");
+
+        const statusText = document.getElementById('consultationStatusText');
+        const statusDot = document.getElementById('consultationSavedDot');
+        if (statusText && statusDot) {
+          statusText.textContent = 'Cloud Sync Failed (Local Draft Cache Only)';
+          statusDot.className = 'status-dot';
+        }
+
+        showToast(`Firestore rejected report save: ${err.message}. Local storage is only a temporary draft cache.`, "danger");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalBtnHtml;
+          if (window.lucide) lucide.createIcons();
+        }
       }
     }
 

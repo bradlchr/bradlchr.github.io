@@ -1131,170 +1131,157 @@
 
     // ==================== Plant Firestore & Approval Synchronization Engine ====================
     async function syncPlantToFirestore(plant) {
-      try {
-        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
-        let dId = localStorage.getItem('dr_firestore_database_id');
-        if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
-        const docId = encodeURIComponent(plant.id || plant.scientific_name);
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${docId}`;
-        
-        const docFields = {
-          scientific_name: { stringValue: plant.scientific_name || '' },
-          common_names: { arrayValue: { values: (plant.common_names || []).map(c => ({ stringValue: String(c) })) } },
-          plant_url: { stringValue: getPlantUrl(plant) },
-          advisor_description: { stringValue: getPlantDesc(plant) },
-          height_display: { stringValue: getPlantHeight(plant) },
-          bloom_color: { arrayValue: { values: (plant.bloom_color || plant.bloomColor || []).map(c => ({ stringValue: String(c) })) } },
-          bloom_period: { arrayValue: { values: (plant.bloom_period || plant.bloomSeason || []).map(s => ({ stringValue: String(s) })) } },
-          light_requirements: { arrayValue: { values: (plant.light_requirements || []).map(s => ({ stringValue: String(s) })) } },
-          moisture_requirements: { arrayValue: { values: (plant.moisture_requirements || []).map(s => ({ stringValue: String(s) })) } },
-          sociability: { stringValue: getPlantSociability(plant) },
-          last_edited_by_user_id: { stringValue: plant.last_edited_by_user_id || '' },
-          last_edited_by_user_name: { stringValue: plant.last_edited_by_user_name || '' },
-          last_edited_by_user_email: { stringValue: plant.last_edited_by_user_email || '' },
-          last_edited_timestamp: { stringValue: plant.last_edited_timestamp || new Date().toISOString() },
-          updated_at: { stringValue: plant.updated_at || new Date().toISOString() },
-          updated_by: { stringValue: plant.updated_by || 'Nature Advisor' }
-        };
-
-        if (plant.plantfinder_url) {
-          docFields.plantfinder_url = { stringValue: plant.plantfinder_url };
-        }
-        if (plant.native_environment) {
-          docFields.native_environment = { stringValue: plant.native_environment };
-        }
-        if (plant.architectural_layer) {
-          docFields.architectural_layer = { stringValue: plant.architectural_layer };
-        }
-        if (plant.plant_type) {
-          const pt = Array.isArray(plant.plant_type) ? plant.plant_type : [plant.plant_type];
-          docFields.plant_type = { arrayValue: { values: pt.map(t => ({ stringValue: String(t) })) } };
-        }
-        if (plant.images && Array.isArray(plant.images) && plant.images.length > 0) {
-          docFields.images = {
-            arrayValue: {
-              values: plant.images.slice(0, 15).map(img => ({
-                mapValue: {
-                  fields: {
-                    url: { stringValue: img.url || '' },
-                    thumbnail: { stringValue: img.thumbnail_url || img.thumbnail || '' },
-                    attribution_name: { stringValue: img.attribution_name || img.attribution || 'Courtesy Missouri Botanical Garden PlantFinder' },
-                    license: { stringValue: img.license || 'Courtesy Missouri Botanical Garden PlantFinder' },
-                    caption: { stringValue: img.caption || '' },
-                    attribution_url: { stringValue: img.source_url || plant.plantfinder_url || '' }
-                  }
-                }
-              }))
-            }
-          };
-        }
-
-        await fetch(firestoreUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fields: docFields })
-        });
-      } catch (err) {
-        console.warn('Firestore plant sync notice:', err);
+      if (!state.currentUser || !state.currentUser.isAdmin) {
+        throw new Error('Only authenticated administrators are permitted to publish plant changes to Cloud Firestore.');
       }
+
+      const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      let dId = localStorage.getItem('dr_firestore_database_id');
+      if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
+      const rawId = String(plant.id || plant.scientific_name || '').replace(/^_+/, '');
+      const docId = encodeURIComponent(rawId);
+      const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/${docId}`;
+
+      const docFields = {
+        id: { stringValue: rawId },
+        scientific_name: { stringValue: plant.scientific_name || '' },
+        common_names: { arrayValue: { values: (plant.common_names || []).map(c => ({ stringValue: String(c) })) } },
+        plant_url: { stringValue: getPlantUrl(plant) },
+        advisor_description: { stringValue: getPlantDesc(plant) },
+        height_display: { stringValue: getPlantHeight(plant) },
+        bloom_color: { arrayValue: { values: (plant.bloom_color || plant.bloomColor || []).map(c => ({ stringValue: String(c) })) } },
+        bloom_period: { arrayValue: { values: (plant.bloom_period || plant.bloomSeason || []).map(s => ({ stringValue: String(s) })) } },
+        light_requirements: { arrayValue: { values: (plant.light_requirements || []).map(s => ({ stringValue: String(s) })) } },
+        moisture_requirements: { arrayValue: { values: (plant.moisture_requirements || []).map(s => ({ stringValue: String(s) })) } },
+        sociability: { stringValue: getPlantSociability(plant) },
+        maintenance_level: { stringValue: getPlantMaintenanceLevel(plant) },
+        last_edited_by_user_id: { stringValue: plant.last_edited_by_user_id || state.currentUser.uid || state.currentUser.id || '' },
+        last_edited_by_user_name: { stringValue: plant.last_edited_by_user_name || state.currentUser.name || '' },
+        last_edited_by_user_email: { stringValue: plant.last_edited_by_user_email || state.currentUser.email || '' },
+        last_edited_timestamp: { stringValue: plant.last_edited_timestamp || new Date().toISOString() },
+        updated_at: { stringValue: plant.updated_at || new Date().toISOString() },
+        updated_by: { stringValue: plant.updated_by || state.currentUser.name || 'Administrator' }
+      };
+
+      if (plant.soil_requirements && Array.isArray(plant.soil_requirements)) {
+        docFields.soil_requirements = { arrayValue: { values: plant.soil_requirements.map(s => ({ stringValue: String(s) })) } };
+      }
+      if (plant.wildlife_ecosystem_benefits && Array.isArray(plant.wildlife_ecosystem_benefits)) {
+        docFields.wildlife_ecosystem_benefits = { arrayValue: { values: plant.wildlife_ecosystem_benefits.map(w => ({ stringValue: String(w) })) } };
+      }
+      if (plant.plantfinder_url) {
+        docFields.plantfinder_url = { stringValue: plant.plantfinder_url };
+      }
+      if (plant.native_environment) {
+        docFields.native_environment = { stringValue: plant.native_environment };
+      }
+      if (plant.architectural_layer) {
+        docFields.architectural_layer = { stringValue: Array.isArray(plant.architectural_layer) ? (plant.architectural_layer[0] || '') : String(plant.architectural_layer) };
+      }
+      if (plant.plant_type) {
+        const pt = Array.isArray(plant.plant_type) ? plant.plant_type : [plant.plant_type];
+        docFields.plant_type = { arrayValue: { values: pt.map(t => ({ stringValue: String(t) })) } };
+      }
+      if (plant.images && Array.isArray(plant.images) && plant.images.length > 0) {
+        docFields.images = {
+          arrayValue: {
+            values: plant.images.slice(0, 15).map(img => ({
+              mapValue: {
+                fields: {
+                  url: { stringValue: img.url || '' },
+                  thumbnail: { stringValue: img.thumbnail_url || img.thumbnail || '' },
+                  attribution_name: { stringValue: img.attribution_name || img.attribution || 'Courtesy Missouri Botanical Garden PlantFinder' },
+                  license: { stringValue: img.license || 'Courtesy Missouri Botanical Garden PlantFinder' },
+                  caption: { stringValue: img.caption || '' },
+                  attribution_url: { stringValue: img.source_url || img.attribution_url || plant.plantfinder_url || '' }
+                }
+              }
+            }))
+          }
+        };
+      }
+
+      const savedDoc = await firestoreFetch(firestoreUrl, {
+        method: 'PATCH',
+        body: JSON.stringify({ fields: docFields })
+      }, true);
+
+      if (!savedDoc || !savedDoc.fields) {
+        throw new Error('Cloud Firestore did not return a valid document confirmation.');
+      }
+      return savedDoc;
     }
 
     async function savePlantApprovalToFirestore(approval) {
-      if (!approval || !approval.id) return;
-      try {
-        const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
-        let dId = localStorage.getItem('dr_firestore_database_id');
-        if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
-
-        const jsonPayload = JSON.stringify(approval);
-        const fields = {
-          id: { stringValue: approval.id },
-          type: { stringValue: approval.type || 'edit' },
-          status: { stringValue: approval.status || 'pending' },
-          plant_id: { stringValue: approval.plant_id || '' },
-          scientific_name: { stringValue: approval.scientific_name || '' },
-          common_name: { stringValue: approval.common_name || '' },
-          submitted_by_id: { stringValue: approval.submitted_by_id || '' },
-          submitted_by_name: { stringValue: approval.submitted_by_name || '' },
-          submitted_by_email: { stringValue: approval.submitted_by_email || '' },
-          submitted_at: { stringValue: approval.submitted_at || '' },
-          reviewed_by_id: { stringValue: approval.reviewed_by_id || '' },
-          reviewed_by_name: { stringValue: approval.reviewed_by_name || '' },
-          reviewed_at: { stringValue: approval.reviewed_at || '' },
-          raw_json: { stringValue: jsonPayload }
-        };
-
-        const primaryUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plant_approvals/${encodeURIComponent(approval.id)}`;
-        fetch(primaryUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fields })
-        }).catch(() => {});
-
-        const fallbackUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants/_approval_${encodeURIComponent(approval.id)}`;
-        fetch(fallbackUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fields: {
-              ...fields,
-              scientific_name: { stringValue: `_approval_${approval.id}` }
-            }
-          })
-        }).catch(() => {});
-      } catch (e) {
-        console.warn('savePlantApprovalToFirestore notice:', e);
+      if (!approval || !approval.id) {
+        throw new Error('Invalid approval payload.');
       }
+      const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+      let dId = localStorage.getItem('dr_firestore_database_id');
+      if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
+
+      const jsonPayload = JSON.stringify(approval);
+      const fields = {
+        id: { stringValue: approval.id },
+        type: { stringValue: approval.type || 'edit' },
+        status: { stringValue: approval.status || 'pending' },
+        plant_id: { stringValue: approval.plant_id || '' },
+        scientific_name: { stringValue: approval.scientific_name || '' },
+        common_name: { stringValue: approval.common_name || '' },
+        submitted_by_id: { stringValue: approval.submitted_by_id || '' },
+        submitted_by_name: { stringValue: approval.submitted_by_name || '' },
+        submitted_by_email: { stringValue: approval.submitted_by_email || '' },
+        submitted_at: { stringValue: approval.submitted_at || '' },
+        reviewed_by_id: { stringValue: approval.reviewed_by_id || '' },
+        reviewed_by_name: { stringValue: approval.reviewed_by_name || '' },
+        reviewed_at: { stringValue: approval.reviewed_at || '' },
+        raw_json: { stringValue: jsonPayload }
+      };
+
+      const primaryUrl = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plant_approvals/${encodeURIComponent(approval.id)}`;
+      const savedDoc = await firestoreFetch(primaryUrl, {
+        method: 'PATCH',
+        body: JSON.stringify({ fields })
+      }, true);
+
+      if (!savedDoc || !savedDoc.fields) {
+        throw new Error('Cloud Firestore did not confirm the plant approval record write.');
+      }
+      return savedDoc;
     }
 
     async function fetchPlantApprovalsFromFirestore() {
-      const mergedMap = new Map();
-      (state.plantApprovals || []).forEach(a => {
-        if (a && a.id) mergedMap.set(a.id, a);
-      });
+      const token = await getFirebaseIdToken();
+      if (!token) {
+        updateApprovalBadges();
+        return state.plantApprovals || [];
+      }
 
       const pId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
       let dId = localStorage.getItem('dr_firestore_database_id');
       if (!dId || dId === '(default)') dId = 'deep-roots-nature-advisors';
 
-      try {
-        const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plant_approvals?pageSize=200`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
-            const rawJson = doc.fields?.raw_json?.stringValue;
-            if (rawJson) {
-              try {
-                const parsed = JSON.parse(rawJson);
-                if (parsed && parsed.id) mergedMap.set(parsed.id, parsed);
-              } catch (e) {}
+      const remoteMap = new Map();
+      const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plant_approvals?pageSize=200`;
+      const data = await firestoreFetch(url, {}, true);
+      for (const doc of data?.documents || []) {
+        const rawJson = doc.fields?.raw_json?.stringValue;
+        if (rawJson) {
+          try {
+            const parsed = JSON.parse(rawJson);
+            if (parsed && parsed.id) {
+              // Ensure status reflects top-level Firestore field if updated by Admin
+              if (doc.fields?.status?.stringValue) parsed.status = doc.fields.status.stringValue;
+              if (doc.fields?.reviewed_by_id?.stringValue) parsed.reviewed_by_id = doc.fields.reviewed_by_id.stringValue;
+              if (doc.fields?.reviewed_by_name?.stringValue) parsed.reviewed_by_name = doc.fields.reviewed_by_name.stringValue;
+              if (doc.fields?.reviewed_at?.stringValue) parsed.reviewed_at = doc.fields.reviewed_at.stringValue;
+              remoteMap.set(parsed.id, parsed);
             }
-          }
+          } catch (e) {}
         }
-      } catch (err) {}
+      }
 
-      try {
-        const url = `https://firestore.googleapis.com/v1/projects/${pId}/databases/${dId}/documents/plants?pageSize=300`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
-            const docId = doc.name ? doc.name.split('/').pop() : '';
-            if (docId.startsWith('_approval_')) {
-              const rawJson = doc.fields?.raw_json?.stringValue;
-              if (rawJson) {
-                try {
-                  const parsed = JSON.parse(rawJson);
-                  if (parsed && parsed.id) mergedMap.set(parsed.id, parsed);
-                } catch (e) {}
-              }
-            }
-          }
-        }
-      } catch (err) {}
-
-      state.plantApprovals = Array.from(mergedMap.values()).sort((a, b) => {
+      state.plantApprovals = Array.from(remoteMap.values()).sort((a, b) => {
         return new Date(b.submitted_at || 0) - new Date(a.submitted_at || 0);
       });
       localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
@@ -1343,16 +1330,16 @@
         if (isAdmin) {
           notice.style.background = 'rgba(21,128,61,0.1)';
           notice.style.color = '#15803d';
-          notice.innerHTML = '🛡️ <strong>Administrator Mode:</strong> Edits saved here will immediately update the master database and synchronize across all devices.';
+          notice.innerHTML = '🛡️ <strong>Administrator Mode:</strong> Edits will be verified by Cloud Firestore Security Rules before updating the shared master catalog.';
         } else {
           notice.style.background = 'var(--primary-subtle)';
           notice.style.color = 'var(--primary-dark)';
-          notice.innerHTML = 'ℹ️ <strong>Advisor Mode:</strong> Edits will be submitted to the <strong>Admin Approval Inbox</strong> for review before being applied to the master catalog.';
+          notice.innerHTML = 'ℹ️ <strong>Advisor Mode:</strong> Edits will be submitted to the Cloud Firestore <strong>Admin Approval Inbox</strong> for administrator review before being published.';
         }
       }
 
       if (submitBtn) {
-        submitBtn.textContent = isAdmin ? 'Save to Master Catalog' : 'Submit Changes for Approval';
+        submitBtn.textContent = isAdmin ? 'Publish to Master Catalog' : 'Submit Changes for Approval';
       }
 
       document.getElementById('editPlantModal').showModal();
@@ -1368,54 +1355,68 @@
 
       const id = document.getElementById('editPlantId').value;
       const plant = state.allPlants.find(p => p.id === id || p.scientific_name === id);
-      if (plant) {
-        const edits = {
-          common_names: [document.getElementById('editCommonName').value.trim()],
-          scientific_name: document.getElementById('editSciName').value.trim(),
-          plant_url: document.getElementById('editOfficialUrl').value.trim(),
-          advisor_description: document.getElementById('editAdvisorDesc').value.trim(),
-          light_requirements: document.getElementById('editLight').value.split(',').map(s => s.trim()).filter(Boolean),
-          moisture_requirements: document.getElementById('editMoisture').value.split(',').map(s => s.trim()).filter(Boolean),
-          height_display: document.getElementById('editHeight').value.trim(),
-          sociability: document.getElementById('editSociability').value,
-          maintenance_level: document.getElementById('editMaintenanceLevel')?.value || 'Low',
-          bloom_color: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
-          bloomColor: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
-          bloom_period: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
-          bloomSeason: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
-          last_edited_by_user_id: state.currentUser.id || state.currentUser.username,
-          last_edited_by_user_name: state.currentUser.name || `${state.currentUser.firstName} ${state.currentUser.lastName}`.trim() || state.currentUser.username,
-          last_edited_by_user_email: state.currentUser.email || '',
-          last_edited_timestamp: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          updated_by: state.currentUser.name || state.currentUser.username
+      if (!plant) return;
+
+      const edits = {
+        common_names: [document.getElementById('editCommonName').value.trim()],
+        scientific_name: document.getElementById('editSciName').value.trim(),
+        plant_url: document.getElementById('editOfficialUrl').value.trim(),
+        advisor_description: document.getElementById('editAdvisorDesc').value.trim(),
+        light_requirements: document.getElementById('editLight').value.split(',').map(s => s.trim()).filter(Boolean),
+        moisture_requirements: document.getElementById('editMoisture').value.split(',').map(s => s.trim()).filter(Boolean),
+        height_display: document.getElementById('editHeight').value.trim(),
+        sociability: document.getElementById('editSociability').value,
+        maintenance_level: document.getElementById('editMaintenanceLevel')?.value || 'Low',
+        bloom_color: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
+        bloomColor: document.getElementById('editBloomColor').value.split(',').map(s => s.trim()).filter(Boolean),
+        bloom_period: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
+        bloomSeason: document.getElementById('editBloomPeriod').value.split(',').map(s => s.trim()).filter(Boolean),
+        last_edited_by_user_id: state.currentUser.uid || state.currentUser.id || state.currentUser.username,
+        last_edited_by_user_name: state.currentUser.name || `${state.currentUser.firstName} ${state.currentUser.lastName}`.trim() || state.currentUser.username,
+        last_edited_by_user_email: state.currentUser.email || '',
+        last_edited_timestamp: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        updated_by: state.currentUser.name || state.currentUser.username
+      };
+
+      const imgUrl = document.getElementById('editImageUrl').value.trim();
+      if (imgUrl) {
+        const imgAttr = document.getElementById('editImageAttr').value.trim() || 'Courtesy Missouri Botanical Garden PlantFinder';
+        const newImg = {
+          url: imgUrl,
+          thumbnail_url: imgUrl,
+          attribution_name: imgAttr,
+          license: 'Courtesy Missouri Botanical Garden PlantFinder',
+          caption: edits.scientific_name,
+          source_name: 'Missouri Botanical Garden PlantFinder',
+          source_url: edits.plant_url || plant.plantfinder_url || getPlantUrl(plant)
         };
+        edits.images = [newImg, ...(plant.images || []).filter(im => im.url !== imgUrl)];
+      }
 
-        const imgUrl = document.getElementById('editImageUrl').value.trim();
-        if (imgUrl) {
-          const imgAttr = document.getElementById('editImageAttr').value.trim() || 'Courtesy Missouri Botanical Garden PlantFinder';
-          const newImg = {
-            url: imgUrl,
-            thumbnail_url: imgUrl,
-            attribution_name: imgAttr,
-            license: 'Courtesy Missouri Botanical Garden PlantFinder',
-            caption: edits.scientific_name,
-            source_name: 'Missouri Botanical Garden PlantFinder',
-            source_url: edits.plant_url || plant.plantfinder_url || getPlantUrl(plant)
-          };
-          edits.images = [newImg, ...(plant.images || []).filter(im => im.url !== imgUrl)];
-        }
+      const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
+      const submitBtn = document.getElementById('editPlantSubmitBtn');
+      const origBtnText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = isAdmin ? 'Publishing to Firestore...' : 'Submitting to Firestore...';
+      }
 
-        const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
-
+      try {
         if (isAdmin) {
+          // Wait for Firestore write and verify response BEFORE mutating catalog state or showing success
+          const candidatePlant = { ...plant, ...edits };
+          await syncPlantToFirestore(candidatePlant);
+
           Object.assign(plant, edits);
-          state.customPlants[id] = edits;
-          localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
-          syncPlantToFirestore(plant);
+          try {
+            localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(state.allPlants));
+          } catch (cacheErr) {}
+          refreshStagedPlantsFromCatalog();
           applyFilters();
           updateHeaderInfo();
-          showToast(`Saved changes for ${plant.common_names[0]} to master catalog!`, "success");
+          document.getElementById('editPlantModal').close();
+          showToast(`Verified and published changes for ${plant.common_names[0]} to Cloud Firestore!`, "success");
         } else {
           const approval = {
             id: 'appr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
@@ -1424,7 +1425,7 @@
             plant_id: plant.id || plant.scientific_name,
             scientific_name: edits.scientific_name,
             common_name: edits.common_names[0] || (plant.common_names && plant.common_names[0]) || edits.scientific_name,
-            submitted_by_id: state.currentUser.id || state.currentUser.username,
+            submitted_by_id: state.currentUser.uid || state.currentUser.id || state.currentUser.username,
             submitted_by_name: state.currentUser.name || state.currentUser.username,
             submitted_by_email: state.currentUser.email || '',
             submitted_at: new Date().toISOString(),
@@ -1444,16 +1445,25 @@
             }
           };
 
+          await savePlantApprovalToFirestore(approval);
+
           state.plantApprovals = state.plantApprovals || [];
           state.plantApprovals.unshift(approval);
           localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
-          savePlantApprovalToFirestore(approval);
           updateApprovalBadges();
           applyFilters();
-          showToast(`Proposed edits for ${approval.common_name} submitted to Admin Approval Inbox!`, "success");
+          document.getElementById('editPlantModal').close();
+          showToast(`Proposed edits for ${approval.common_name} verified and submitted to Admin Approval Inbox!`, "success");
+        }
+      } catch (err) {
+        console.error('Firestore rejected plant edit/proposal:', err);
+        showToast(`Firestore rejected plant update: ${err.message}`, "danger");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origBtnText;
         }
       }
-      document.getElementById('editPlantModal').close();
     });
 
     // ==================== Add Plant Modal & Role-Aware Submission ====================
@@ -1476,16 +1486,16 @@
         if (isAdmin) {
           notice.style.background = 'rgba(21,128,61,0.1)';
           notice.style.color = '#15803d';
-          notice.innerHTML = '🛡️ <strong>Administrator Mode:</strong> New species added here will be immediately published to the master catalog.';
+          notice.innerHTML = '🛡️ <strong>Administrator Mode:</strong> New species will be verified by Cloud Firestore Security Rules before being added to the shared master catalog.';
         } else {
           notice.style.background = 'var(--primary-subtle)';
           notice.style.color = 'var(--primary-dark)';
-          notice.innerHTML = 'ℹ️ <strong>Advisor Mode:</strong> Proposed species will be submitted to the <strong>Admin Approval Inbox</strong> for verification before landing in the master database.';
+          notice.innerHTML = 'ℹ️ <strong>Advisor Mode:</strong> Proposed species will be submitted to the Cloud Firestore <strong>Admin Approval Inbox</strong> for administrator review before landing in the master database.';
         }
       }
 
       if (submitBtn) {
-        submitBtn.textContent = isAdmin ? 'Add to Master Catalog' : 'Submit for Approval';
+        submitBtn.textContent = isAdmin ? 'Publish to Master Catalog' : 'Submit for Approval';
       }
 
       modal.showModal();
@@ -1576,45 +1586,65 @@
         is_kc_keystone: false,
         created_at: new Date().toISOString(),
         created_by: state.currentUser.name || state.currentUser.username,
-        last_edited_by_user_id: state.currentUser.id || state.currentUser.username,
+        last_edited_by_user_id: state.currentUser.uid || state.currentUser.id || state.currentUser.username,
         last_edited_by_user_name: state.currentUser.name || state.currentUser.username,
         last_edited_timestamp: new Date().toISOString()
       };
 
       const isAdmin = Boolean(state.currentUser && state.currentUser.isAdmin);
-
-      if (isAdmin) {
-        state.allPlants.push(newPlant);
-        state.customPlants[newId] = newPlant;
-        localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
-        syncPlantToFirestore(newPlant);
-        applyFilters();
-        updateHeaderInfo();
-        showToast(`Added ${commonName} directly to the master catalog!`, "success");
-      } else {
-        const approval = {
-          id: 'appr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
-          type: 'add',
-          status: 'pending',
-          plant_id: newId,
-          scientific_name: sciName,
-          common_name: commonName,
-          submitted_by_id: state.currentUser.id || state.currentUser.username,
-          submitted_by_name: state.currentUser.name || state.currentUser.username,
-          submitted_by_email: state.currentUser.email || '',
-          submitted_at: new Date().toISOString(),
-          changes: newPlant
-        };
-
-        state.plantApprovals = state.plantApprovals || [];
-        state.plantApprovals.unshift(approval);
-        localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
-        savePlantApprovalToFirestore(approval);
-        updateApprovalBadges();
-        showToast(`New plant proposal for ${commonName} submitted to Admin Approval Inbox!`, "success");
+      const submitBtn = document.getElementById('addPlantSubmitBtn');
+      const origBtnText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = isAdmin ? 'Publishing to Firestore...' : 'Submitting to Firestore...';
       }
 
-      document.getElementById('addPlantModal').close();
+      try {
+        if (isAdmin) {
+          // Wait for Firestore write and verify response BEFORE adding to catalog state
+          await syncPlantToFirestore(newPlant);
+
+          state.allPlants.push(newPlant);
+          try {
+            localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(state.allPlants));
+          } catch (cacheErr) {}
+          applyFilters();
+          updateHeaderInfo();
+          document.getElementById('addPlantModal').close();
+          showToast(`Verified and published ${commonName} to Cloud Firestore master catalog!`, "success");
+        } else {
+          const approval = {
+            id: 'appr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+            type: 'add',
+            status: 'pending',
+            plant_id: newId,
+            scientific_name: sciName,
+            common_name: commonName,
+            submitted_by_id: state.currentUser.uid || state.currentUser.id || state.currentUser.username,
+            submitted_by_name: state.currentUser.name || state.currentUser.username,
+            submitted_by_email: state.currentUser.email || '',
+            submitted_at: new Date().toISOString(),
+            changes: newPlant
+          };
+
+          await savePlantApprovalToFirestore(approval);
+
+          state.plantApprovals = state.plantApprovals || [];
+          state.plantApprovals.unshift(approval);
+          localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+          updateApprovalBadges();
+          document.getElementById('addPlantModal').close();
+          showToast(`New plant proposal for ${commonName} verified and submitted to Admin Approval Inbox!`, "success");
+        }
+      } catch (err) {
+        console.error('Firestore rejected new plant submission:', err);
+        showToast(`Firestore rejected plant submission: ${err.message}`, "danger");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origBtnText;
+        }
+      }
     });
 
     // ==================== Admin Approval Inbox Panel & Review Actions ====================
@@ -1767,42 +1797,60 @@
       if (!approval || approval.status !== 'pending') return;
 
       const reviewerName = state.currentUser.name || state.currentUser.username;
-      approval.status = 'approved';
-      approval.reviewed_by_id = state.currentUser.id || state.currentUser.username;
-      approval.reviewed_by_name = reviewerName;
-      approval.reviewed_at = new Date().toISOString();
+      const updatedApproval = {
+        ...approval,
+        status: 'approved',
+        reviewed_by_id: state.currentUser.uid || state.currentUser.id || state.currentUser.username,
+        reviewed_by_name: reviewerName,
+        reviewed_at: new Date().toISOString()
+      };
 
-      if (approval.type === 'edit') {
-        const targetPlant = state.allPlants.find(p => p.id === approval.plant_id || p.scientific_name === approval.scientific_name);
-        if (targetPlant && approval.changes) {
-          Object.assign(targetPlant, approval.changes);
-          targetPlant.updated_at = new Date().toISOString();
-          targetPlant.updated_by = `Approved by ${reviewerName} (Sub: ${approval.submitted_by_name})`;
-          
-          state.customPlants[targetPlant.id || targetPlant.scientific_name] = approval.changes;
-          localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
-          syncPlantToFirestore(targetPlant);
-        }
-      } else if (approval.type === 'add') {
-        const newPlant = approval.changes;
-        if (newPlant) {
-          newPlant.updated_by = `Approved by ${reviewerName} (Sub: ${approval.submitted_by_name})`;
+      try {
+        if (approval.type === 'edit') {
+          const targetPlant = state.allPlants.find(p => p.id === approval.plant_id || p.scientific_name === approval.scientific_name);
+          if (!targetPlant || !approval.changes) {
+            throw new Error('Target plant record not found in catalog.');
+          }
+          const candidatePlant = {
+            ...targetPlant,
+            ...approval.changes,
+            updated_at: new Date().toISOString(),
+            updated_by: `Approved by ${reviewerName} (Sub: ${approval.submitted_by_name})`
+          };
+          // Wait for both Firestore plant write and approval status update to succeed before mutating local state
+          await syncPlantToFirestore(candidatePlant);
+          await savePlantApprovalToFirestore(updatedApproval);
+          Object.assign(targetPlant, candidatePlant);
+        } else if (approval.type === 'add') {
+          const newPlant = approval.changes ? {
+            ...approval.changes,
+            updated_at: new Date().toISOString(),
+            updated_by: `Approved by ${reviewerName} (Sub: ${approval.submitted_by_name})`
+          } : null;
+          if (!newPlant) {
+            throw new Error('Missing new plant definition in approval proposal.');
+          }
+          await syncPlantToFirestore(newPlant);
+          await savePlantApprovalToFirestore(updatedApproval);
           state.allPlants.push(newPlant);
-          state.customPlants[newPlant.id] = newPlant;
-          localStorage.setItem('dr_custom_plants', JSON.stringify(state.customPlants));
-          syncPlantToFirestore(newPlant);
         }
+
+        Object.assign(approval, updatedApproval);
+        try {
+          localStorage.setItem('dr_firestore_cache_plants', JSON.stringify(state.allPlants));
+          localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+        } catch (cacheErr) {}
+
+        renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
+        updateApprovalBadges();
+        applyFilters();
+        updateHeaderInfo();
+
+        showToast(`Verified and published approved changes for ${approval.common_name} to Cloud Firestore!`, "success");
+      } catch (err) {
+        console.error('Firestore rejected approval publish:', err);
+        showToast(`Firestore rejected approval publish: ${err.message}`, "danger");
       }
-
-      localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
-      savePlantApprovalToFirestore(approval);
-
-      renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
-      updateApprovalBadges();
-      applyFilters();
-      updateHeaderInfo();
-
-      showToast(`Approved changes for ${approval.common_name}! Catalog updated.`, "success");
     }
     window.approvePlantChange = approvePlantChange;
 
@@ -1819,17 +1867,25 @@
         return;
       }
 
-      approval.status = 'denied';
-      approval.reviewed_by_id = state.currentUser.id || state.currentUser.username;
-      approval.reviewed_by_name = state.currentUser.name || state.currentUser.username;
-      approval.reviewed_at = new Date().toISOString();
+      const updatedApproval = {
+        ...approval,
+        status: 'denied',
+        reviewed_by_id: state.currentUser.uid || state.currentUser.id || state.currentUser.username,
+        reviewed_by_name: state.currentUser.name || state.currentUser.username,
+        reviewed_at: new Date().toISOString()
+      };
 
-      localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
-      savePlantApprovalToFirestore(approval);
-
-      renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
-      updateApprovalBadges();
-      showToast(`Changes for ${approval.common_name} were denied.`, "info");
+      try {
+        await savePlantApprovalToFirestore(updatedApproval);
+        Object.assign(approval, updatedApproval);
+        localStorage.setItem('dr_plant_approvals', JSON.stringify(state.plantApprovals));
+        renderAdminApprovals(document.getElementById('adminApprovalsSearchInput')?.value || '');
+        updateApprovalBadges();
+        showToast(`Changes for ${approval.common_name} were marked as denied in Cloud Firestore.`, "info");
+      } catch (err) {
+        console.error('Firestore rejected approval denial:', err);
+        showToast(`Firestore rejected approval update: ${err.message}`, "danger");
+      }
     }
     window.denyPlantChange = denyPlantChange;
 

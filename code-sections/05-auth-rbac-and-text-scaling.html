@@ -80,27 +80,199 @@
       return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${dbId}/documents`;
     }
 
+    // ==================== Firebase Authentication & Authenticated Firestore Transport ====================
+    let firebaseAppInstance = null;
+    let firebaseAuthInstance = null;
+    let firebaseSdkModules = null;
+
+    function getFirebaseApiKey() {
+      return (
+        localStorage.getItem('dr_firebase_api_key') ||
+        (window.DEEP_ROOTS_FIREBASE_CONFIG && window.DEEP_ROOTS_FIREBASE_CONFIG.apiKey) ||
+        ''
+      ).trim();
+    }
+
+    function setFirebaseApiKey(apiKey) {
+      const clean = (apiKey || '').trim();
+      if (clean) {
+        localStorage.setItem('dr_firebase_api_key', clean);
+      } else {
+        localStorage.removeItem('dr_firebase_api_key');
+      }
+      firebaseAppInstance = null;
+      firebaseAuthInstance = null;
+    }
+    window.getFirebaseApiKey = getFirebaseApiKey;
+    window.setFirebaseApiKey = setFirebaseApiKey;
+
+    async function ensureFirebaseAuthSdk() {
+      const apiKey = getFirebaseApiKey();
+      if (!apiKey) return null;
+      if (firebaseAuthInstance && firebaseSdkModules) {
+        return { auth: firebaseAuthInstance, ...firebaseSdkModules };
+      }
+      try {
+        const projectId = localStorage.getItem('dr_firestore_project_id') || 'deep-roots-nature-advisors';
+        const [appMod, authMod] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js')
+        ]);
+        const config = {
+          apiKey,
+          authDomain: `${projectId}.firebaseapp.com`,
+          projectId
+        };
+        const existingApps = appMod.getApps ? appMod.getApps() : [];
+        firebaseAppInstance = existingApps.length > 0 ? existingApps[0] : appMod.initializeApp(config);
+        firebaseAuthInstance = authMod.getAuth(firebaseAppInstance);
+        firebaseSdkModules = authMod;
+        return { auth: firebaseAuthInstance, ...authMod };
+      } catch (err) {
+        console.warn('Firebase Auth SDK load warning, falling back to Identity Toolkit REST:', err);
+        return null;
+      }
+    }
+
+    // Retrieve a valid Firebase Auth ID Token (auto-refreshing if needed)
+    async function getFirebaseIdToken() {
+      // 1. Check live Firebase Auth SDK user first
+      if (firebaseAuthInstance && firebaseAuthInstance.currentUser) {
+        try {
+          const tok = await firebaseAuthInstance.currentUser.getIdToken();
+          if (tok) {
+            sessionStorage.setItem('dr_firebase_id_token', tok);
+            return tok;
+          }
+        } catch (e) {
+          console.warn('Error refreshing token from Firebase Auth SDK:', e);
+        }
+      }
+
+      // 2. Check session/local token & refresh via securetoken.googleapis.com if expired
+      const savedToken = sessionStorage.getItem('dr_firebase_id_token') || localStorage.getItem('dr_firebase_id_token') || '';
+      const refreshToken = localStorage.getItem('dr_firebase_refresh_token') || '';
+      const expiresAt = Number(localStorage.getItem('dr_firebase_token_expires_at') || 0);
+      const apiKey = getFirebaseApiKey();
+
+      if (savedToken && expiresAt > Date.now() + 60000) {
+        return savedToken;
+      }
+
+      if (refreshToken && apiKey) {
+        try {
+          const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.id_token) {
+              const exp = Date.now() + (Number(data.expires_in || 3600) * 1000);
+              sessionStorage.setItem('dr_firebase_id_token', data.id_token);
+              localStorage.setItem('dr_firebase_id_token', data.id_token);
+              if (data.refresh_token) localStorage.setItem('dr_firebase_refresh_token', data.refresh_token);
+              localStorage.setItem('dr_firebase_token_expires_at', String(exp));
+              return data.id_token;
+            }
+          }
+        } catch (e) {
+          console.warn('Token refresh error:', e);
+        }
+      }
+
+      return savedToken || '';
+    }
+
+    function clearFirebaseAuthSession() {
+      sessionStorage.removeItem('dr_firebase_id_token');
+      localStorage.removeItem('dr_firebase_id_token');
+      localStorage.removeItem('dr_firebase_refresh_token');
+      localStorage.removeItem('dr_firebase_token_expires_at');
+      localStorage.removeItem('dr_firebase_uid');
+    }
+
+    /**
+     * Central authenticated Firestore HTTP client.
+     * Attaches the Firebase Authentication Bearer ID token when available,
+     * waits for the response, verifies res.ok, and throws an explicit error if Firestore rejects the request.
+     */
+    async function firestoreFetch(url, options = {}, requireAuth = false) {
+      const idToken = await getFirebaseIdToken();
+      if (requireAuth && !idToken) {
+        const hasKey = Boolean(getFirebaseApiKey());
+        throw new Error(
+          hasKey
+            ? 'Not authenticated with Firebase Authentication. Please sign in again to obtain a valid Firebase Auth token.'
+            : 'Firebase Authentication is not active (missing Firebase Web API Key or active session). Firestore Security Rules require an authenticated user identity.'
+        );
+      }
+
+      const headers = {
+        'Accept': 'application/json',
+        ...(options.headers || {})
+      };
+      if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      if (idToken) {
+        headers['Authorization'] = `Bearer ${idToken}`;
+      }
+
+      const res = await fetch(url, {
+        ...options,
+        headers
+      });
+
+      let data = null;
+      const text = await res.text();
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          data = { raw: text };
+        }
+      }
+
+      if (!res.ok) {
+        const statusCode = res.status;
+        const errStatus = data?.error?.status || '';
+        const errMsg = data?.error?.message || `HTTP ${statusCode}`;
+        if (statusCode === 401 || statusCode === 403 || errStatus === 'PERMISSION_DENIED' || errStatus === 'UNAUTHENTICATED') {
+          throw new Error(`Firestore permission denied (${statusCode} ${errStatus || 'FORBIDDEN'}): ${errMsg}`);
+        }
+        throw new Error(`Firestore request failed (${statusCode}): ${errMsg}`);
+      }
+
+      return data;
+    }
+    window.firestoreFetch = firestoreFetch;
+
     // Convert local UserRecord to Firestore document fields
     function userToFirestoreDoc(u) {
-      return {
-        fields: {
-          id: { stringValue: u.id || `user-${u.username}` },
-          username: { stringValue: u.username },
-          first_name: { stringValue: u.firstName || u.first_name || '' },
-          last_name: { stringValue: u.lastName || u.last_name || '' },
-          email: { stringValue: u.email || '' },
-          phone_number: { stringValue: u.phoneNumber || u.phone_number || '' },
-          advisor_type: { stringValue: u.advisorType || u.advisor_type || 'Advisor in Training' },
-          role: { stringValue: u.role || 'user' },
-          password_hash: { stringValue: u.passwordHash || u.password_hash || '' },
-          salt: { stringValue: u.salt || '' },
-          is_temporary_password: { booleanValue: !!(u.isTemporaryPassword || u.is_temporary_password) },
-          avatar_url: { stringValue: u.avatarUrl || u.avatar_url || '' },
-          text_size: { stringValue: u.textSize || u.text_size || 'standard' },
-          created_at: { integerValue: String(u.createdAt || u.created_at || Date.now()) },
-          updated_at: { integerValue: String(u.updatedAt || u.updated_at || Date.now()) }
-        }
+      const fields = {
+        id: { stringValue: u.id || u.uid || `user-${u.username}` },
+        username: { stringValue: u.username },
+        first_name: { stringValue: u.firstName || u.first_name || '' },
+        last_name: { stringValue: u.lastName || u.last_name || '' },
+        name: { stringValue: `${u.firstName || u.first_name || ''} ${u.lastName || u.last_name || ''}`.trim() || u.name || u.username },
+        email: { stringValue: u.email || '' },
+        phone_number: { stringValue: u.phoneNumber || u.phone_number || '' },
+        advisor_type: { stringValue: u.advisorType || u.advisor_type || 'Advisor in Training' },
+        role: { stringValue: u.role || 'user' },
+        password_hash: { stringValue: u.passwordHash || u.password_hash || '' },
+        salt: { stringValue: u.salt || '' },
+        is_temporary_password: { booleanValue: !!(u.isTemporaryPassword || u.is_temporary_password) },
+        avatar_url: { stringValue: u.avatarUrl || u.avatar_url || '' },
+        text_size: { stringValue: u.textSize || u.text_size || 'standard' },
+        created_at: { integerValue: String(u.createdAt || u.created_at || Date.now()) },
+        updated_at: { integerValue: String(u.updatedAt || u.updated_at || Date.now()) }
       };
+      if (u.uid) {
+        fields.uid = { stringValue: u.uid };
+      }
+      return { fields };
     }
 
     function parseFirestoreUser(doc) {
@@ -110,14 +282,13 @@
       const getBool = (k) => !!f[k]?.booleanValue;
       const getNum = (k) => Number(f[k]?.integerValue || f[k]?.doubleValue || 0);
 
-      let username = getStr('username');
-      if (!username && doc.name) {
-        username = doc.name.split('/').pop().replace('_user_', '');
-      }
+      const docId = doc.name ? doc.name.split('/').pop() : '';
+      let username = getStr('username') || docId;
       if (!username) return null;
 
       return {
         id: getStr('id') || `user-${username}`,
+        uid: getStr('uid') || (docId !== username ? docId : ''),
         username: username,
         firstName: getStr('first_name'),
         lastName: getStr('last_name'),
@@ -136,70 +307,127 @@
     }
 
     async function syncUserToFirestore(user) {
-      try {
-        const payload = userToFirestoreDoc(user);
-        const url = `${getFirestoreBaseUrl()}/users/${user.username}`;
-        const res = await fetch(url, {
+      const payload = userToFirestoreDoc(user);
+      const primaryDocId = encodeURIComponent(user.uid || user.username);
+      const url = `${getFirestoreBaseUrl()}/users/${primaryDocId}`;
+      const savedDoc = await firestoreFetch(url, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      }, true);
+
+      // If user has both a Firebase Auth UID and a distinct canonical username, keep /users/{username} in sync for admin roster lookups
+      if (user.uid && user.username && user.uid !== user.username) {
+        const usernameUrl = `${getFirestoreBaseUrl()}/users/${encodeURIComponent(user.username)}`;
+        await firestoreFetch(usernameUrl, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-          // Fallback to /plants/_user_${username}
-          const fbUrl = `${getFirestoreBaseUrl()}/plants/_user_${user.username}`;
-          await fetch(fbUrl, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-        }
-      } catch (e) {
-        console.warn("User Firestore sync notice:", e);
+        }, true).catch(err => console.warn('Secondary username doc sync warning:', err));
       }
+      return savedDoc;
     }
 
     async function fetchAllRemoteUsers() {
       const users = [];
       const seen = new Set();
-      try {
-        const res = await fetch(`${getFirestoreBaseUrl()}/users?pageSize=100`);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
-            const u = parseFirestoreUser(doc);
-            if (u && !seen.has(u.username)) {
-              seen.add(u.username);
-              users.push(u);
-            }
-          }
+      const data = await firestoreFetch(`${getFirestoreBaseUrl()}/users?pageSize=100`, {}, true);
+      for (const doc of data?.documents || []) {
+        const u = parseFirestoreUser(doc);
+        if (u && !seen.has(u.username)) {
+          seen.add(u.username);
+          users.push(u);
         }
-      } catch (e) {
-        console.warn("Fetch users from standard collection notice:", e);
       }
-
-      // Check fallback /plants/_user_*
-      try {
-        const res = await fetch(`${getFirestoreBaseUrl()}/plants?pageSize=300`);
-        if (res.ok) {
-          const data = await res.json();
-          for (const doc of data.documents || []) {
-            if (doc.name && doc.name.includes('/plants/_user_')) {
-              const u = parseFirestoreUser(doc);
-              if (u && !seen.has(u.username)) {
-                seen.add(u.username);
-                users.push(u);
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Fetch users from fallback notice:", e);
-      }
-
       return users;
     }
 
-    // Initialize Advisor Auth & Pre-seed Chris Bradley Administrator
+    // Authenticate with Firebase Authentication (SDK or Identity Toolkit REST API)
+    async function authenticateWithFirebase(email, password, createIfMissing = false) {
+      const apiKey = getFirebaseApiKey();
+      if (!apiKey) {
+        return {
+          authenticated: false,
+          uid: '',
+          idToken: '',
+          error: 'Firebase Web API Key is not configured. Please enter the project Firebase Web API Key under "Firebase Authentication Web API Key" to obtain a Firebase Auth token.'
+        };
+      }
+
+      // 1. Try Firebase Auth Modular Web SDK
+      const sdk = await ensureFirebaseAuthSdk();
+      if (sdk && sdk.auth) {
+        try {
+          const cred = await sdk.signInWithEmailAndPassword(sdk.auth, email, password);
+          const idToken = await cred.user.getIdToken();
+          const refreshToken = cred.user.refreshToken || '';
+          sessionStorage.setItem('dr_firebase_id_token', idToken);
+          localStorage.setItem('dr_firebase_id_token', idToken);
+          if (refreshToken) localStorage.setItem('dr_firebase_refresh_token', refreshToken);
+          localStorage.setItem('dr_firebase_token_expires_at', String(Date.now() + 3500 * 1000));
+          localStorage.setItem('dr_firebase_uid', cred.user.uid);
+          return { authenticated: true, uid: cred.user.uid, idToken, email: cred.user.email || email };
+        } catch (sdkErr) {
+          const code = sdkErr?.code || '';
+          if (createIfMissing && (code === 'auth/user-not-found' || code === 'auth/invalid-credential')) {
+            try {
+              const created = await sdk.createUserWithEmailAndPassword(sdk.auth, email, password);
+              const idToken = await created.user.getIdToken();
+              const refreshToken = created.user.refreshToken || '';
+              sessionStorage.setItem('dr_firebase_id_token', idToken);
+              localStorage.setItem('dr_firebase_id_token', idToken);
+              if (refreshToken) localStorage.setItem('dr_firebase_refresh_token', refreshToken);
+              localStorage.setItem('dr_firebase_token_expires_at', String(Date.now() + 3500 * 1000));
+              localStorage.setItem('dr_firebase_uid', created.user.uid);
+              return { authenticated: true, uid: created.user.uid, idToken, email: created.user.email || email };
+            } catch (createErr) {
+              return { authenticated: false, uid: '', idToken: '', error: createErr.message || 'Firebase Auth sign-in failed.' };
+            }
+          }
+          return { authenticated: false, uid: '', idToken: '', error: sdkErr.message || 'Firebase Auth sign-in failed.' };
+        }
+      }
+
+      // 2. Fallback to Firebase Auth Identity Toolkit REST API
+      try {
+        const signInUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(apiKey)}`;
+        let res = await fetch(signInUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, returnSecureToken: true })
+        });
+        let data = await res.json().catch(() => ({}));
+
+        if (!res.ok && createIfMissing && (data?.error?.message === 'EMAIL_NOT_FOUND' || data?.error?.message === 'INVALID_LOGIN_CREDENTIALS')) {
+          const signUpUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${encodeURIComponent(apiKey)}`;
+          res = await fetch(signUpUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, returnSecureToken: true })
+          });
+          data = await res.json().catch(() => ({}));
+        }
+
+        if (!res.ok || !data.idToken) {
+          return {
+            authenticated: false,
+            uid: '',
+            idToken: '',
+            error: data?.error?.message || `Firebase Auth HTTP ${res.status}`
+          };
+        }
+
+        const exp = Date.now() + (Number(data.expiresIn || 3600) * 1000);
+        sessionStorage.setItem('dr_firebase_id_token', data.idToken);
+        localStorage.setItem('dr_firebase_id_token', data.idToken);
+        if (data.refreshToken) localStorage.setItem('dr_firebase_refresh_token', data.refreshToken);
+        localStorage.setItem('dr_firebase_token_expires_at', String(exp));
+        localStorage.setItem('dr_firebase_uid', data.localId);
+        return { authenticated: true, uid: data.localId, idToken: data.idToken, email: data.email || email };
+      } catch (err) {
+        return { authenticated: false, uid: '', idToken: '', error: err.message };
+      }
+    }
+
+    // Initialize Advisor Auth & Pre-seed Chris Bradley Administrator in temporary local cache
     async function initAdvisorAuth() {
       let users = loadUsersCache();
       const adminUsername = 'chris.bradley';
@@ -227,14 +455,18 @@
         };
         users.unshift(existingAdmin);
         saveUsersCache(users);
-        syncUserToFirestore(existingAdmin);
       }
+
+      // Initialize Firebase Auth SDK listener if API key is configured
+      ensureFirebaseAuthSdk().catch(() => {});
 
       // Restore session if user was logged in
       const loggedInUsername = localStorage.getItem('dr_logged_in_username');
       if (loggedInUsername) {
         const current = users.find(u => u.username === loggedInUsername);
         if (current) {
+          const savedUid = localStorage.getItem('dr_firebase_uid') || current.uid || '';
+          if (savedUid) current.uid = savedUid;
           state.currentUser = userRecordToProfile(current);
           const userScale = current.textSize || localStorage.getItem(`dr_text_scale_${current.username}`) || localStorage.getItem('dr_text_scale') || 'standard';
           setUserTextScale(userScale, false);
@@ -252,28 +484,31 @@
       renderAuthUser();
       await initConsultations();
 
-      // Refresh users from remote in background
-      fetchAllRemoteUsers().then(remoteUsers => {
-        if (remoteUsers && remoteUsers.length > 0) {
-          const map = new Map();
-          for (const u of loadUsersCache()) map.set(u.username, u);
-          for (const u of remoteUsers) map.set(u.username, u);
-          const merged = Array.from(map.values()).sort((a, b) => a.username.localeCompare(b.username));
-          saveUsersCache(merged);
+      // Refresh users from remote in background ONLY if authenticated with Firebase Auth
+      const activeToken = await getFirebaseIdToken();
+      if (activeToken && state.currentUser) {
+        fetchAllRemoteUsers().then(remoteUsers => {
+          if (remoteUsers && remoteUsers.length > 0) {
+            const map = new Map();
+            for (const u of loadUsersCache()) map.set(u.username, u);
+            for (const u of remoteUsers) map.set(u.username, u);
+            const merged = Array.from(map.values()).sort((a, b) => a.username.localeCompare(b.username));
+            saveUsersCache(merged);
 
-          if (state.currentUser) {
-            const updated = merged.find(u => u.username === state.currentUser.username);
-            if (updated) {
-              if (updated.textSize && !state.currentUser.textSize) {
-                state.currentUser.textSize = updated.textSize;
-                setUserTextScale(updated.textSize, false);
+            if (state.currentUser) {
+              const updated = merged.find(u => u.username === state.currentUser.username);
+              if (updated) {
+                if (updated.textSize && !state.currentUser.textSize) {
+                  state.currentUser.textSize = updated.textSize;
+                  setUserTextScale(updated.textSize, false);
+                }
+                state.currentUser = userRecordToProfile(updated);
+                renderAuthUser();
               }
-              state.currentUser = userRecordToProfile(updated);
-              renderAuthUser();
             }
           }
-        }
-      }).catch(e => console.warn("Remote users refresh notice:", e));
+        }).catch(e => console.warn("Remote users refresh notice:", e));
+      }
     }
 
     function getUserInitials(u) {
@@ -309,8 +544,12 @@
     }
 
     function userRecordToProfile(u) {
+      const uid = u.uid || localStorage.getItem('dr_firebase_uid') || '';
+      const hasFirebaseToken = Boolean(sessionStorage.getItem('dr_firebase_id_token') || localStorage.getItem('dr_firebase_id_token'));
       return {
-        id: u.id || `user-${u.username}`,
+        id: uid || u.id || `user-${u.username}`,
+        uid: uid,
+        firebaseAuthenticated: hasFirebaseToken && Boolean(uid),
         username: u.username,
         firstName: u.firstName || u.first_name || '',
         lastName: u.lastName || u.last_name || '',
@@ -357,7 +596,9 @@
             users[idx].textSize = scaleKey;
             users[idx].updatedAt = Date.now();
             saveUsersCache(users);
-            syncUserToFirestore(users[idx]);
+            syncUserToFirestore(users[idx]).catch(err => {
+              console.warn('Firestore user preference sync warning:', err);
+            });
           }
         }
       }
@@ -415,36 +656,114 @@
         return { success: false, error: 'Please enter both username/email and password.' };
       }
 
+      // Save Firebase Web API Key if entered in login modal
+      const loginKeyInput = document.getElementById('loginFirebaseApiKeyInput');
+      if (loginKeyInput && loginKeyInput.value.trim()) {
+        setFirebaseApiKey(loginKeyInput.value.trim());
+      }
+
       let users = loadUsersCache();
       let user = users.find(u => u.username.toLowerCase() === query || (u.email && u.email.toLowerCase() === query));
 
-      if (!user) {
-        // Try fetching from remote
-        const remoteUsers = await fetchAllRemoteUsers();
-        if (remoteUsers.length > 0) {
-          const map = new Map();
-          for (const u of users) map.set(u.username, u);
-          for (const u of remoteUsers) map.set(u.username, u);
-          users = Array.from(map.values());
-          saveUsersCache(users);
-          user = users.find(u => u.username.toLowerCase() === query || (u.email && u.email.toLowerCase() === query));
+      // Determine email for Firebase Auth sign-in
+      const authEmail = (user && user.email)
+        ? user.email
+        : (query.includes('@') ? query : `${query}@deeproots.org`);
+
+      // Verify local password hash if user is cached locally
+      let localPasswordVerified = false;
+      if (user && user.salt && user.passwordHash) {
+        const expectedHash = await hashPassword(password, user.salt);
+        if (expectedHash === user.passwordHash) {
+          localPasswordVerified = true;
+        }
+      }
+
+      // Authenticate with Firebase Auth to obtain ID Token & UID for Firestore Security Rules
+      const fbAuth = await authenticateWithFirebase(authEmail, password, localPasswordVerified);
+
+      if (!fbAuth.authenticated && !localPasswordVerified) {
+        return {
+          success: false,
+          error: fbAuth.error || 'Invalid credentials or advisor account not found.'
+        };
+      }
+
+      // If authenticated with Firebase Auth, fetch user profile document from Firestore /users/{uid}
+      if (fbAuth.authenticated && fbAuth.uid) {
+        try {
+          const remoteDoc = await firestoreFetch(`${getFirestoreBaseUrl()}/users/${encodeURIComponent(fbAuth.uid)}`, {}, true);
+          const remoteUser = parseFirestoreUser(remoteDoc);
+          if (remoteUser) {
+            user = { ...(user || {}), ...remoteUser, uid: fbAuth.uid };
+          }
+        } catch (e) {
+          // If /users/{uid} doesn't exist yet for this verified user, create/sync it now
+          if (user) {
+            user.uid = fbAuth.uid;
+            user.id = fbAuth.uid;
+            try {
+              await syncUserToFirestore(user);
+            } catch (syncErr) {
+              console.warn('Initial user profile doc sync warning:', syncErr);
+            }
+          }
         }
       }
 
       if (!user) {
-        return { success: false, error: 'Advisor account not found. Please check your username or email.' };
+        if (fbAuth.authenticated && fbAuth.uid) {
+          const derivedUsername = authEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9._-]/g, '.');
+          user = {
+            id: fbAuth.uid,
+            uid: fbAuth.uid,
+            username: derivedUsername,
+            firstName: derivedUsername.split('.')[0] || 'Nature',
+            lastName: derivedUsername.split('.')[1] || 'Advisor',
+            email: authEmail,
+            phoneNumber: '',
+            advisorType: 'Advisor',
+            role: authEmail.toLowerCase() === 'ctbbradley@gmail.com' ? 'admin' : 'user',
+            isTemporaryPassword: false,
+            textSize: 'standard',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          };
+          try {
+            await syncUserToFirestore(user);
+          } catch (e) {
+            console.warn('Could not create remote user profile doc:', e);
+          }
+        } else {
+          return { success: false, error: 'Advisor account not found. Please check your username or email.' };
+        }
       }
 
-      const expectedHash = await hashPassword(password, user.salt);
-      if (expectedHash !== user.passwordHash) {
-        return { success: false, error: 'Incorrect password. Please try again.' };
+      if (fbAuth.uid) {
+        user.uid = fbAuth.uid;
+        user.id = fbAuth.uid;
       }
+
+      const existingIdx = users.findIndex(u => u.username === user.username);
+      if (existingIdx >= 0) {
+        users[existingIdx] = user;
+      } else {
+        users.push(user);
+      }
+      saveUsersCache(users);
 
       // Success
       const profile = userRecordToProfile(user);
       state.currentUser = profile;
       localStorage.setItem('dr_logged_in_username', user.username);
       localStorage.setItem('dr_current_user', JSON.stringify(profile));
+
+      if (!fbAuth.authenticated) {
+        showToast(
+          `Signed in locally as ${profile.name}, but Firebase Auth is not active (${fbAuth.error}). Firestore writes will be rejected until Firebase Auth is configured.`,
+          'warning'
+        );
+      }
 
       // Apply user's text size preference
       const userScale = profile.textSize || localStorage.getItem(`dr_text_scale_${user.username}`) || localStorage.getItem('dr_text_scale') || 'standard';
@@ -464,6 +783,12 @@
 
     async function signOutAdvisor() {
       saveActiveConsultation(false);
+      try {
+        if (firebaseAuthInstance && firebaseSdkModules?.signOut) {
+          await firebaseSdkModules.signOut(firebaseAuthInstance);
+        }
+      } catch (e) {}
+      clearFirebaseAuthSession();
       state.currentUser = null;
       localStorage.removeItem('dr_logged_in_username');
       localStorage.removeItem('dr_current_user');
@@ -497,16 +822,29 @@
       const newSalt = generateSalt();
       const newHash = await hashPassword(newPassword, newSalt);
 
-      users[idx].passwordHash = newHash;
-      users[idx].salt = newSalt;
-      users[idx].isTemporaryPassword = false;
-      users[idx].updatedAt = Date.now();
+      const updatedUser = {
+        ...users[idx],
+        passwordHash: newHash,
+        salt: newSalt,
+        isTemporaryPassword: false,
+        updatedAt: Date.now()
+      };
 
+      try {
+        // Update password in Firebase Auth if signed in
+        if (firebaseAuthInstance?.currentUser && firebaseSdkModules?.updatePassword) {
+          await firebaseSdkModules.updatePassword(firebaseAuthInstance.currentUser, newPassword);
+        }
+        await syncUserToFirestore(updatedUser);
+      } catch (err) {
+        return { success: false, error: `Firestore rejected password update: ${err.message}` };
+      }
+
+      users[idx] = updatedUser;
       saveUsersCache(users);
-      state.currentUser = userRecordToProfile(users[idx]);
+      state.currentUser = userRecordToProfile(updatedUser);
       localStorage.setItem('dr_current_user', JSON.stringify(state.currentUser));
 
-      await syncUserToFirestore(users[idx]);
       return { success: true };
     }
 
@@ -544,9 +882,14 @@
         updatedAt: Date.now()
       };
 
+      try {
+        await syncUserToFirestore(newUser);
+      } catch (err) {
+        return { success: false, error: `Firestore rejected advisor provisioning: ${err.message}` };
+      }
+
       users.push(newUser);
       saveUsersCache(users);
-      await syncUserToFirestore(newUser);
 
       return { success: true, newUser, tempPassword };
     }
@@ -566,13 +909,22 @@
       const salt = generateSalt();
       const hash = await hashPassword(tempPassword, salt);
 
-      users[idx].passwordHash = hash;
-      users[idx].salt = salt;
-      users[idx].isTemporaryPassword = true;
-      users[idx].updatedAt = Date.now();
+      const updatedUser = {
+        ...users[idx],
+        passwordHash: hash,
+        salt: salt,
+        isTemporaryPassword: true,
+        updatedAt: Date.now()
+      };
 
+      try {
+        await syncUserToFirestore(updatedUser);
+      } catch (err) {
+        return { success: false, error: `Firestore rejected password reset: ${err.message}` };
+      }
+
+      users[idx] = updatedUser;
       saveUsersCache(users);
-      await syncUserToFirestore(users[idx]);
 
       return { success: true, tempPassword };
     }
@@ -593,11 +945,20 @@
 
       const currentRole = users[idx].role || 'user';
       const newRole = (currentRole === 'admin') ? 'user' : 'admin';
-      users[idx].role = newRole;
-      users[idx].updatedAt = Date.now();
+      const updatedUser = {
+        ...users[idx],
+        role: newRole,
+        updatedAt: Date.now()
+      };
 
+      try {
+        await syncUserToFirestore(updatedUser);
+      } catch (err) {
+        return { success: false, error: `Firestore rejected role update: ${err.message}` };
+      }
+
+      users[idx] = updatedUser;
       saveUsersCache(users);
-      await syncUserToFirestore(users[idx]);
 
       return { success: true, newRole };
     }
@@ -616,7 +977,7 @@
         return { success: false, error: `User @${username} not found.` };
       }
 
-      const user = users[idx];
+      const user = { ...users[idx] };
 
       if (updates.firstName !== undefined) {
         if (!updates.firstName.trim()) return { success: false, error: 'First name cannot be empty.' };
@@ -659,9 +1020,15 @@
       }
 
       user.updatedAt = Date.now();
+
+      try {
+        await syncUserToFirestore(user);
+      } catch (err) {
+        return { success: false, error: `Firestore rejected user update: ${err.message}` };
+      }
+
       users[idx] = user;
       saveUsersCache(users);
-      await syncUserToFirestore(user);
 
       // If this user is currently logged in, update current session profile & header & text size
       if (state.currentUser && state.currentUser.username === user.username) {
