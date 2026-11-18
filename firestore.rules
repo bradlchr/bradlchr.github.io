@@ -1,156 +1,12 @@
 rules_version = '2';
 
-// ===============================================================
-// Assumed Data Model
-// ===============================================================
-//
-// Collection: plants
-// Document ID: alphanumeric string or slug (e.g., 'plant-915b80758fa4', 'asclepias-tuberosa')
-//   Note: Document IDs starting with '_' (e.g., '_user_*', '_report_*', '_approval_*')
-//         are explicitly prohibited in /plants/{plantId}.
-// Fields:
-//   - id: string (optional, <= 128 chars, immutable)
-//   - scientific_name: string (required, 1-150 chars) - Botanical binomial name
-//   - common_names: list of strings (optional, <= 25 items, <= 150 chars each)
-//   - native_environment: string (optional, <= 100 chars) - e.g., 'Forest', 'Cliff/Glade', 'Prairie', 'Savannah/Woodland', 'Stream Edge/Wetland'
-//   - plant_type: string or list of strings (optional, <= 100 chars or <= 15 items) - e.g., 'Wildflower', 'Tree', 'Shrub'
-//   - architectural_layer: string or list of strings (optional, <= 100 chars or <= 15 items) - Matrix layer
-//   - mature_height: map (optional) - Map containing:
-//       * min_ft: number (required, >= 0, <= 500)
-//       * max_ft: number (required, >= min_ft, <= 500)
-//       * display: string (required, <= 50 chars)
-//   - mature_height_min: number (optional, >= 0, <= 500)
-//   - mature_height_max: number (optional, >= 0, <= 500)
-//   - height_display: string (optional, <= 50 chars)
-//   - bloom_color: list of strings (optional, <= 25 items)
-//   - bloom_period: list of strings (optional, <= 25 items)
-//   - soil_requirements: list of strings (optional, <= 25 items)
-//   - moisture_requirements: list of strings (optional, <= 25 items)
-//   - light_requirements: list of strings (optional, <= 25 items)
-//   - wildlife_ecosystem_benefits: list of strings (optional, <= 35 items)
-//   - wildlife_ecological_value: string (optional, <= 5000 chars)
-//   - wildlife_detail: map (optional) - Host insects, wildlife users, sources
-//   - sociability: string (optional, <= 100 chars)
-//   - maintenance_level: string (optional, <= 50 chars)
-//   - maintenance_guide: map (optional) - Seasonal care instructions
-//   - advisor_description: string (optional, <= 5000 chars) - Curated summary for consultations
-//   - human_health_use: string (optional, <= 5000 chars)
-//   - plant_url: string (optional, <= 1000 chars)
-//   - plantfinder_url: string (optional, <= 1000 chars)
-//   - is_sweet16: bool (optional)
-//   - is_sweet_16: bool (optional)
-//   - is_kc_keystone: bool (optional)
-//   - isKcKeystone: bool (optional)
-//   - special_tags: list of strings (optional, <= 25 items) - e.g., ['Sweet 16', 'KC Keystone']
-//   - images: list of maps (optional, <= 30 items) - Citation & attribution objects:
-//       * url, thumbnail, thumbnail_url, label, caption, attribution_name, attribution,
-//         author, license, attribution_url, source_name, source_url
-//   - sources: list of maps (optional, <= 30 items) - Citation objects:
-//       * source_name, source_url, notes, organization, title, url
-//   - locked_by_user_id: string (optional, <= 128 chars) - Record editing lock lease
-//   - locked_by_user_name: string (optional, <= 100 chars)
-//   - locked_by_user_email: string (optional, <= 150 chars)
-//   - locked_at: timestamp, number, or string (optional)
-//   - lock_expires_at: timestamp, number, or string (optional)
-//   - last_edited_by_user_id: string (optional, <= 128 chars) - Author attribution metadata
-//   - last_edited_by_user_name: string (optional, <= 100 chars)
-//   - last_edited_by_user_email: string (optional, <= 150 chars)
-//   - last_edited_timestamp: timestamp, number, or string (optional)
-//   - created_at: timestamp, number, or string (optional)
-//   - created_by: string (optional, <= 150 chars)
-//   - updated_at: timestamp, number, or string (optional)
-//   - updated_by: string (optional, <= 150 chars)
-//   - metadata: map (optional) - Audit & sync stamp
-//   - updated_at_ms: number (optional)
-//   - raw_desc: string (optional, <= 5000 chars)
-//
-// Collection: users
-// Document ID: userId (Firebase Auth UID or canonical username e.g., 'chris.bradley')
-// Fields:
-//   - id: string (required, 1-128 chars, immutable)
-//   - uid: string (optional, <= 128 chars)
-//   - username: string (optional, 1-64 chars, immutable)
-//   - first_name: string (optional, <= 100 chars)
-//   - last_name: string (optional, <= 100 chars)
-//   - name: string (optional, <= 150 chars)
-//   - email: string (required, <= 150 chars, valid email format)
-//   - phone_number: string (optional, <= 30 chars)
-//   - advisor_type: string (optional, <= 100 chars)
-//   - role: string (required, enum: 'admin', 'user', 'advisor', immutable for non-admins)
-//   - password_hash: string (optional, <= 128 chars)
-//   - salt: string (optional, <= 64 chars)
-//   - is_temporary_password: bool (optional)
-//   - avatar_url: string (optional, <= 1000 chars)
-//   - text_size: string (optional, <= 30 chars)
-//   - created_at: timestamp, number, or string (optional, immutable)
-//   - updated_at: timestamp, number, or string (optional)
-//
-// Collection: reports/{reportId} & Subcollection: users/{userId}/reports/{reportId}
-// Document ID: reportId (e.g., 'rep-1710000000')
-// Fields:
-//   - id: string (optional, <= 128 chars, immutable)
-//   - owner_uid: string (optional, <= 128 chars)
-//   - username: string (optional, <= 64 chars)
-//   - advisor_id: string (optional, <= 128 chars)
-//   - advisor_name: string (optional, <= 100 chars)
-//   - advisor_email: string (optional, <= 150 chars)
-//   - client_name: string (required, 1-150 chars)
-//   - client_address: string (optional, <= 250 chars)
-//   - project_name: string (optional, <= 200 chars)
-//   - consultation_date: string (optional, <= 100 chars)
-//   - site_summary: string (optional, <= 10000 chars)
-//   - summary_notes: string (optional, <= 10000 chars)
-//   - drive_doc_url: string (optional, <= 1000 chars)
-//   - last_modified: timestamp, number, or string (optional)
-//   - is_drive_synced: bool (optional)
-//   - garden_areas: list of strings (optional, <= 50 items, <= 150 chars each)
-//   - garden_area_profiles: list of maps (optional, <= 50 items)
-//   - planner_workflow: map (optional)
-//   - staged_recommendations: list of maps (optional, <= 200 items)
-//   - staged_plants: list (optional, <= 200 items)
-//   - staged_invasives: list of maps (optional, <= 100 items)
-//   - report_options: map (optional)
-//   - created_at: timestamp, number, or string (optional, immutable)
-//   - updated_at: timestamp, number, or string (optional)
-//
-// Collection: plant_approvals/{approvalId}
-// Document ID: approvalId (e.g., 'appr-1710000000-abc123')
-// Fields:
-//   - id: string (required, <= 128 chars, immutable)
-//   - status: string (required, enum: 'pending', 'approved', 'denied')
-//   - type: string (required, enum: 'edit', 'add', 'new_plant')
-//   - scientific_name: string (required, <= 150 chars)
-//   - common_name: string (optional, <= 150 chars)
-//   - plant_id: string (optional, <= 128 chars)
-//   - submitted_by_id: string (optional, <= 128 chars)
-//   - submitted_by_name: string (optional, <= 150 chars)
-//   - submitted_by_email: string (optional, <= 150 chars)
-//   - submitted_at: timestamp, number, or string (optional)
-//   - reviewed_by_id: string or null (optional, <= 128 chars)
-//   - reviewed_by_name: string or null (optional, <= 150 chars)
-//   - reviewed_at: timestamp, number, string, or null (optional)
-//   - raw_json: string (optional, <= 50000 chars)
-//
-// ===============================================================
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ===============================================================
-    // Authentication & Role Helper Functions
-    // ===============================================================
-
-    // Check if the user is authenticated with Firebase Auth
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Check if the authenticated user matches the specified UID
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Check if the user holds Administrator privileges via Firebase Auth token claims or /users/$(request.auth.uid)
     function isAdmin() {
       return isAuthenticated() && (
         ('role' in request.auth.token && request.auth.token.role == 'admin') ||
@@ -160,7 +16,6 @@ service cloud.firestore {
       );
     }
 
-    // Check if the user is an authorized Advisor or Administrator
     function isAdvisor() {
       return isAuthenticated() && (
         isAdmin() ||
@@ -170,7 +25,6 @@ service cloud.firestore {
       );
     }
 
-    // Check if the authenticated user owns the consultation report document
     function isReportOwner(reportData) {
       return isAuthenticated() && (
         ('owner_uid' in reportData && reportData.owner_uid == request.auth.uid) ||
@@ -179,7 +33,6 @@ service cloud.firestore {
       );
     }
 
-    // Check if the authenticated user owns the /users/{userId} path (by UID or linked username)
     function isUserPathOwner(userId) {
       return isAuthenticated() && (
         request.auth.uid == userId ||
@@ -188,572 +41,118 @@ service cloud.firestore {
       );
     }
 
-    // Verify immutable fields remain untouched on update
     function areImmutableFieldsUnchanged(fields) {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
-    }
-
-    // Email format validation (standard RFC 5322 compatible)
-    function isValidEmail(email) {
-      return email is string &&
-        email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
-    }
-
-    // Safe timestamp, epoch number, or ISO string validator
-    function isValidTimestampOrNumber(val) {
-      return val is timestamp || val is number || (val is string && val.size() <= 64);
-    }
-
-    // String list validator with bounded count and item length
-    function isValidStringList(list, maxSize, maxItemSize) {
-      return list is list &&
-        list.size() <= maxSize &&
-        (list.size() == 0 || (list[0] is string && list[0].size() <= maxItemSize));
-    }
-
-    // ===============================================================
-    // Domain Validator: Plants
-    // ===============================================================
-
-    function isValidMatureHeight(height) {
-      return height is map &&
-        height.keys().hasAll(['min_ft', 'max_ft', 'display']) &&
-        height.keys().hasOnly(['min_ft', 'max_ft', 'display']) &&
-        height.min_ft is number &&
-        height.min_ft >= 0 &&
-        height.min_ft <= 500 &&
-        height.max_ft is number &&
-        height.max_ft >= height.min_ft &&
-        height.max_ft <= 500 &&
-        height.display is string &&
-        height.display.size() <= 50;
-    }
-
-    function isValidImageObject(img) {
-      return img is map &&
-        img.keys().hasOnly([
-          'url',
-          'thumbnail',
-          'thumbnail_url',
-          'label',
-          'caption',
-          'attribution_name',
-          'attribution',
-          'author',
-          'license',
-          'attribution_url',
-          'source_name',
-          'source_url'
-        ]) &&
-        (!('url' in img) || (img.url is string && img.url.size() <= 1000)) &&
-        (!('thumbnail' in img) || (img.thumbnail is string && img.thumbnail.size() <= 1000)) &&
-        (!('thumbnail_url' in img) || (img.thumbnail_url is string && img.thumbnail_url.size() <= 1000)) &&
-        (!('label' in img) || (img.label is string && img.label.size() <= 150)) &&
-        (!('caption' in img) || (img.caption is string && img.caption.size() <= 500)) &&
-        (!('attribution_name' in img) || (img.attribution_name is string && img.attribution_name.size() <= 300)) &&
-        (!('attribution' in img) || (img.attribution is string && img.attribution.size() <= 300)) &&
-        (!('author' in img) || (img.author is string && img.author.size() <= 200)) &&
-        (!('license' in img) || (img.license is string && img.license.size() <= 200)) &&
-        (!('attribution_url' in img) || (img.attribution_url is string && img.attribution_url.size() <= 1000)) &&
-        (!('source_name' in img) || (img.source_name is string && img.source_name.size() <= 200)) &&
-        (!('source_url' in img) || (img.source_url is string && img.source_url.size() <= 1000));
-    }
-
-    function isValidImagesList(images) {
-      return images is list &&
-        images.size() <= 30 &&
-        (images.size() == 0 || isValidImageObject(images[0]));
-    }
-
-    function isValidCitationObject(src) {
-      return src is map &&
-        src.keys().hasOnly(['source_name', 'source_url', 'notes', 'organization', 'title', 'url']) &&
-        (!('source_name' in src) || (src.source_name is string && src.source_name.size() <= 200)) &&
-        (!('source_url' in src) || (src.source_url is string && src.source_url.size() <= 1000)) &&
-        (!('notes' in src) || (src.notes is string && src.notes.size() <= 1000)) &&
-        (!('organization' in src) || (src.organization is string && src.organization.size() <= 200)) &&
-        (!('title' in src) || (src.title is string && src.title.size() <= 500)) &&
-        (!('url' in src) || (src.url is string && src.url.size() <= 1000));
-    }
-
-    function isValidSourcesList(sources) {
-      return sources is list &&
-        sources.size() <= 30 &&
-        (sources.size() == 0 || isValidCitationObject(sources[0]));
-    }
-
-    function isValidCommonNames(names) {
-      return names is list &&
-        names.size() <= 25 &&
-        (names.size() == 0 || (names[0] is string && names[0].size() <= 150));
-    }
-
-    function isValidPlantType(pt) {
-      return (pt is string && pt.size() <= 100) ||
-             (pt is list && pt.size() <= 15 && (pt.size() == 0 || (pt[0] is string && pt[0].size() <= 100)));
-    }
-
-    function isValidArchLayer(al) {
-      return (al is string && al.size() <= 100) ||
-             (al is list && al.size() <= 15 && (al.size() == 0 || (al[0] is string && al[0].size() <= 100)));
-    }
-
-    function isValidWildlifeDetail(wd) {
-      return wd is map &&
-        wd.keys().hasOnly(['host_insects', 'wildlife_users', 'sources']) &&
-        (!('host_insects' in wd) || (wd.host_insects is string && wd.host_insects.size() <= 2500)) &&
-        (!('wildlife_users' in wd) || (wd.wildlife_users is string && wd.wildlife_users.size() <= 2500)) &&
-        (!('sources' in wd) || (wd.sources is string && wd.sources.size() <= 1000));
-    }
-
-    function isValidMaintenanceGuide(mg) {
-      return mg is map &&
-        mg.keys().hasOnly(['summary', 'level', 'spring', 'summer', 'fall', 'winter', 'division', 'sources']) &&
-        (!('summary' in mg) || (mg.summary is string && mg.summary.size() <= 2000)) &&
-        (!('level' in mg) || (mg.level is string && mg.level.size() <= 50)) &&
-        (!('spring' in mg) || (mg.spring is string && mg.spring.size() <= 2000)) &&
-        (!('summer' in mg) || (mg.summer is string && mg.summer.size() <= 2000)) &&
-        (!('fall' in mg) || (mg.fall is string && mg.fall.size() <= 2000)) &&
-        (!('winter' in mg) || (mg.winter is string && mg.winter.size() <= 2000)) &&
-        (!('division' in mg) || (mg.division is string && mg.division.size() <= 2000)) &&
-        (!('sources' in mg) || (mg.sources is string && mg.sources.size() <= 1000));
-    }
-
-    function isValidPlantMetadata(meta) {
-      return meta is map &&
-        meta.keys().hasOnly(['created_by', 'updated_by', 'created_at', 'updated_at', 'shared_public']) &&
-        (!('created_by' in meta) || (meta.created_by is string && meta.created_by.size() <= 128)) &&
-        (!('updated_by' in meta) || (meta.updated_by is string && meta.updated_by.size() <= 128)) &&
-        (!('created_at' in meta) || isValidTimestampOrNumber(meta.created_at)) &&
-        (!('updated_at' in meta) || isValidTimestampOrNumber(meta.updated_at)) &&
-        (!('shared_public' in meta) || meta.shared_public is bool);
     }
 
     function isValidPlant(data) {
       return data.keys().hasAll(['scientific_name']) &&
         data.keys().hasOnly([
-          'id',
-          'scientific_name',
-          'common_names',
-          'native_environment',
-          'plant_type',
-          'architectural_layer',
-          'mature_height',
-          'mature_height_min',
-          'mature_height_max',
-          'height_display',
-          'bloom_color',
-          'bloom_period',
-          'soil_requirements',
-          'moisture_requirements',
-          'light_requirements',
-          'wildlife_ecosystem_benefits',
-          'wildlife_ecological_value',
-          'wildlife_detail',
-          'sociability',
-          'maintenance_level',
-          'maintenance_guide',
-          'advisor_description',
-          'human_health_use',
-          'plant_url',
-          'plantfinder_url',
-          'is_sweet16',
-          'is_sweet_16',
-          'is_kc_keystone',
-          'isKcKeystone',
-          'special_tags',
-          'images',
-          'sources',
-          'locked_by_user_id',
-          'locked_by_user_name',
-          'locked_by_user_email',
-          'locked_at',
-          'lock_expires_at',
-          'last_edited_by_user_id',
-          'last_edited_by_user_name',
-          'last_edited_by_user_email',
-          'last_edited_timestamp',
-          'created_at',
-          'created_by',
-          'updated_at',
-          'updated_by',
-          'metadata',
-          'updated_at_ms',
-          'raw_desc'
+          'id', 'scientific_name', 'common_names', 'native_environment', 'plant_type',
+          'architectural_layer', 'mature_height', 'mature_height_min', 'mature_height_max',
+          'height_display', 'bloom_color', 'bloom_period', 'soil_requirements',
+          'moisture_requirements', 'light_requirements', 'wildlife_ecosystem_benefits',
+          'wildlife_ecological_value', 'wildlife_detail', 'sociability', 'maintenance_level',
+          'maintenance_guide', 'advisor_description', 'human_health_use', 'plant_url',
+          'plantfinder_url', 'is_sweet16', 'is_sweet_16', 'is_kc_keystone', 'isKcKeystone',
+          'special_tags', 'images', 'sources', 'locked_by_user_id', 'locked_by_user_name',
+          'locked_by_user_email', 'locked_at', 'lock_expires_at', 'last_edited_by_user_id',
+          'last_edited_by_user_name', 'last_edited_by_user_email', 'last_edited_timestamp',
+          'created_at', 'created_by', 'updated_at', 'updated_by', 'metadata', 'updated_at_ms', 'raw_desc'
         ]) &&
-        data.scientific_name is string &&
-        data.scientific_name.size() > 0 &&
-        data.scientific_name.size() <= 150 &&
+        data.scientific_name is string && data.scientific_name.size() > 0 && data.scientific_name.size() <= 150 &&
         (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
-        (!('common_names' in data) || isValidCommonNames(data.common_names)) &&
-        (!('native_environment' in data) || (data.native_environment is string && data.native_environment.size() <= 100)) &&
-        (!('plant_type' in data) || isValidPlantType(data.plant_type)) &&
-        (!('architectural_layer' in data) || isValidArchLayer(data.architectural_layer)) &&
-        (!('mature_height' in data) || isValidMatureHeight(data.mature_height)) &&
-        (!('mature_height_min' in data) || (data.mature_height_min is number && data.mature_height_min >= 0 && data.mature_height_min <= 500)) &&
-        (!('mature_height_max' in data) || (data.mature_height_max is number && data.mature_height_max >= 0 && data.mature_height_max <= 500)) &&
-        (!('height_display' in data) || (data.height_display is string && data.height_display.size() <= 50)) &&
-        (!('bloom_color' in data) || isValidStringList(data.bloom_color, 25, 100)) &&
-        (!('bloom_period' in data) || isValidStringList(data.bloom_period, 25, 100)) &&
-        (!('soil_requirements' in data) || isValidStringList(data.soil_requirements, 25, 100)) &&
-        (!('moisture_requirements' in data) || isValidStringList(data.moisture_requirements, 25, 100)) &&
-        (!('light_requirements' in data) || isValidStringList(data.light_requirements, 25, 100)) &&
-        (!('wildlife_ecosystem_benefits' in data) || isValidStringList(data.wildlife_ecosystem_benefits, 35, 150)) &&
-        (!('wildlife_ecological_value' in data) || (data.wildlife_ecological_value is string && data.wildlife_ecological_value.size() <= 5000)) &&
-        (!('wildlife_detail' in data) || isValidWildlifeDetail(data.wildlife_detail)) &&
-        (!('sociability' in data) || (data.sociability is string && data.sociability.size() <= 100)) &&
-        (!('maintenance_level' in data) || (data.maintenance_level is string && data.maintenance_level.size() <= 50)) &&
-        (!('maintenance_guide' in data) || isValidMaintenanceGuide(data.maintenance_guide)) &&
+        (!('common_names' in data) || (data.common_names is list && data.common_names.size() <= 25)) &&
+        (!('images' in data) || (data.images is list && data.images.size() <= 30)) &&
+        (!('sources' in data) || (data.sources is list && data.sources.size() <= 30)) &&
         (!('advisor_description' in data) || (data.advisor_description is string && data.advisor_description.size() <= 5000)) &&
-        (!('human_health_use' in data) || (data.human_health_use is string && data.human_health_use.size() <= 5000)) &&
-        (!('plant_url' in data) || (data.plant_url is string && data.plant_url.size() <= 1000)) &&
-        (!('plantfinder_url' in data) || (data.plantfinder_url is string && data.plantfinder_url.size() <= 1000)) &&
-        (!('is_sweet16' in data) || data.is_sweet16 is bool) &&
-        (!('is_sweet_16' in data) || data.is_sweet_16 is bool) &&
-        (!('is_kc_keystone' in data) || data.is_kc_keystone is bool) &&
-        (!('isKcKeystone' in data) || data.isKcKeystone is bool) &&
-        (!('special_tags' in data) || isValidStringList(data.special_tags, 25, 100)) &&
-        (!('images' in data) || isValidImagesList(data.images)) &&
-        (!('sources' in data) || isValidSourcesList(data.sources)) &&
-        (!('locked_by_user_id' in data) || (data.locked_by_user_id is string && data.locked_by_user_id.size() <= 128)) &&
-        (!('locked_by_user_name' in data) || (data.locked_by_user_name is string && data.locked_by_user_name.size() <= 100)) &&
-        (!('locked_by_user_email' in data) || (data.locked_by_user_email is string && data.locked_by_user_email.size() <= 150)) &&
-        (!('locked_at' in data) || isValidTimestampOrNumber(data.locked_at)) &&
-        (!('lock_expires_at' in data) || isValidTimestampOrNumber(data.lock_expires_at)) &&
-        (!('last_edited_by_user_id' in data) || (data.last_edited_by_user_id is string && data.last_edited_by_user_id.size() <= 128)) &&
-        (!('last_edited_by_user_name' in data) || (data.last_edited_by_user_name is string && data.last_edited_by_user_name.size() <= 100)) &&
-        (!('last_edited_by_user_email' in data) || (data.last_edited_by_user_email is string && data.last_edited_by_user_email.size() <= 150)) &&
-        (!('last_edited_timestamp' in data) || isValidTimestampOrNumber(data.last_edited_timestamp)) &&
-        (!('created_at' in data) || isValidTimestampOrNumber(data.created_at)) &&
-        (!('created_by' in data) || (data.created_by is string && data.created_by.size() <= 150)) &&
-        (!('updated_at' in data) || isValidTimestampOrNumber(data.updated_at)) &&
-        (!('updated_by' in data) || (data.updated_by is string && data.updated_by.size() <= 150)) &&
-        (!('metadata' in data) || isValidPlantMetadata(data.metadata)) &&
-        (!('updated_at_ms' in data) || (data.updated_at_ms is number)) &&
-        (!('raw_desc' in data) || (data.raw_desc is string && data.raw_desc.size() <= 5000));
+        (!('wildlife_ecological_value' in data) || (data.wildlife_ecological_value is string && data.wildlife_ecological_value.size() <= 5000)) &&
+        (!('human_health_use' in data) || (data.human_health_use is string && data.human_health_use.size() <= 5000));
     }
-
-    function isValidPlantDocCreate(plantId) {
-      let data = request.resource.data;
-      return !plantId.matches('^_.*') &&
-        isValidPlant(data) &&
-        (!('id' in data) || data.id == plantId);
-    }
-
-    function isValidPlantDocUpdate(plantId) {
-      let data = request.resource.data;
-      return !plantId.matches('^_.*') &&
-        isValidPlant(data) &&
-        areImmutableFieldsUnchanged(['id']);
-    }
-
-    // ===============================================================
-    // Domain Validator: Users & Roles
-    // ===============================================================
 
     function isValidUser(data) {
       return data.keys().hasAll(['id', 'email', 'role']) &&
         data.keys().hasOnly([
-          'id',
-          'uid',
-          'username',
-          'first_name',
-          'last_name',
-          'name',
-          'email',
-          'phone_number',
-          'advisor_type',
-          'role',
-          'password_hash',
-          'salt',
-          'is_temporary_password',
-          'avatar_url',
-          'text_size',
-          'created_at',
-          'updated_at'
+          'id', 'uid', 'username', 'first_name', 'last_name', 'name', 'email',
+          'phone_number', 'advisor_type', 'role', 'password_hash', 'salt',
+          'is_temporary_password', 'avatar_url', 'text_size', 'created_at', 'updated_at'
         ]) &&
-        data.id is string &&
-        data.id.size() > 0 &&
-        data.id.size() <= 128 &&
-        data.email is string &&
-        data.email.size() <= 150 &&
-        (data.email.size() == 0 || isValidEmail(data.email)) &&
-        data.role is string &&
-        data.role in ['admin', 'user', 'advisor'] &&
-        (!('uid' in data) || (data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128)) &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
+        data.email is string && data.email.size() <= 150 &&
+        data.role is string && data.role in ['admin', 'user', 'advisor'] &&
         (!('username' in data) || (data.username is string && data.username.size() > 0 && data.username.size() <= 64)) &&
-        (!('first_name' in data) || (data.first_name is string && data.first_name.size() <= 100)) &&
-        (!('last_name' in data) || (data.last_name is string && data.last_name.size() <= 100)) &&
-        (!('name' in data) || (data.name is string && data.name.size() <= 150)) &&
-        (!('phone_number' in data) || (data.phone_number is string && data.phone_number.size() <= 30)) &&
-        (!('advisor_type' in data) || (data.advisor_type is string && data.advisor_type.size() <= 100)) &&
-        (!('password_hash' in data) || (data.password_hash is string && data.password_hash.size() <= 128)) &&
-        (!('salt' in data) || (data.salt is string && data.salt.size() <= 64)) &&
-        (!('is_temporary_password' in data) || data.is_temporary_password is bool) &&
-        (!('avatar_url' in data) || (data.avatar_url is string && data.avatar_url.size() <= 1000)) &&
-        (!('text_size' in data) || (data.text_size is string && data.text_size.size() <= 30)) &&
-        (!('created_at' in data) || isValidTimestampOrNumber(data.created_at)) &&
-        (!('updated_at' in data) || isValidTimestampOrNumber(data.updated_at));
-    }
-
-    function isValidUserCreate(userId) {
-      let data = request.resource.data;
-      return isValidUser(data) &&
-        (!('username' in data) || data.username == userId || request.auth.uid == userId);
-    }
-
-    function isValidUserUpdate(userId) {
-      let data = request.resource.data;
-      return isValidUser(data) &&
-        areImmutableFieldsUnchanged(['id', 'username']);
-    }
-
-    // ===============================================================
-    // Domain Validator: Consultation Reports
-    // ===============================================================
-
-    function isValidStagedItem(item) {
-      return item is map &&
-        (!('plant_id' in item) || (item.plant_id is string && item.plant_id.size() <= 128)) &&
-        (!('notes' in item) || (item.notes is string && item.notes.size() <= 2000)) &&
-        (!('recommended_count' in item) || (item.recommended_count is number && item.recommended_count >= 0 && item.recommended_count <= 10000)) &&
-        (!('target_area' in item) || (item.target_area is string && item.target_area.size() <= 150)) &&
-        (!('plant_common' in item) || (item.plant_common is string && item.plant_common.size() <= 150)) &&
-        (!('plant_scientific' in item) || (item.plant_scientific is string && item.plant_scientific.size() <= 150));
-    }
-
-    function isValidStagedRecommendations(list) {
-      return list is list &&
-        list.size() <= 200 &&
-        (list.size() == 0 || isValidStagedItem(list[0]));
-    }
-
-    function isValidStagedInvasiveItem(item) {
-      return item is map &&
-        (!('id' in item) || (item.id is string && item.id.size() <= 128)) &&
-        (!('name' in item) || (item.name is string && item.name.size() <= 150)) &&
-        (!('scientific' in item) || (item.scientific is string && item.scientific.size() <= 150)) &&
-        (!('location_notes' in item) || (item.location_notes is string && item.location_notes.size() <= 2000)) &&
-        (!('notes' in item) || (item.notes is string && item.notes.size() <= 2000)) &&
-        (!('status' in item) || (item.status is string && item.status.size() <= 100));
-    }
-
-    function isValidStagedInvasives(list) {
-      return list is list &&
-        list.size() <= 100 &&
-        (list.size() == 0 || isValidStagedInvasiveItem(list[0]));
+        (!('name' in data) || (data.name is string && data.name.size() <= 150));
     }
 
     function isValidReport(data) {
       return data.keys().hasAll(['client_name']) &&
         data.keys().hasOnly([
-          'id',
-          'owner_uid',
-          'username',
-          'advisor_id',
-          'advisor_name',
-          'advisor_email',
-          'client_name',
-          'client_address',
-          'project_name',
-          'consultation_date',
-          'site_summary',
-          'summary_notes',
-          'drive_doc_url',
-          'last_modified',
-          'is_drive_synced',
-          'garden_areas',
-          'garden_area_profiles',
-          'planner_workflow',
-          'staged_recommendations',
-          'staged_plants',
-          'staged_invasives',
-          'report_options',
-          'created_at',
-          'updated_at'
+          'id', 'owner_uid', 'username', 'advisor_id', 'advisor_name', 'advisor_email',
+          'client_name', 'client_address', 'project_name', 'consultation_date',
+          'site_summary', 'summary_notes', 'drive_doc_url', 'last_modified',
+          'is_drive_synced', 'garden_areas', 'garden_area_profiles', 'planner_workflow',
+          'staged_recommendations', 'staged_plants', 'staged_invasives', 'report_options',
+          'created_at', 'updated_at'
         ]) &&
-        data.client_name is string &&
-        data.client_name.size() > 0 &&
-        data.client_name.size() <= 150 &&
+        data.client_name is string && data.client_name.size() > 0 && data.client_name.size() <= 150 &&
         (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
-        (!('owner_uid' in data) || (data.owner_uid is string && data.owner_uid.size() <= 128)) &&
-        (!('username' in data) || (data.username is string && data.username.size() <= 64)) &&
-        (!('advisor_id' in data) || (data.advisor_id is string && data.advisor_id.size() <= 128)) &&
-        (!('advisor_name' in data) || (data.advisor_name is string && data.advisor_name.size() <= 100)) &&
-        (!('advisor_email' in data) || (data.advisor_email is string && data.advisor_email.size() <= 150)) &&
-        (!('client_address' in data) || (data.client_address is string && data.client_address.size() <= 250)) &&
-        (!('project_name' in data) || (data.project_name is string && data.project_name.size() <= 200)) &&
-        (!('consultation_date' in data) || (data.consultation_date is string && data.consultation_date.size() <= 100)) &&
         (!('site_summary' in data) || (data.site_summary is string && data.site_summary.size() <= 10000)) &&
         (!('summary_notes' in data) || (data.summary_notes is string && data.summary_notes.size() <= 10000)) &&
-        (!('drive_doc_url' in data) || (data.drive_doc_url is string && data.drive_doc_url.size() <= 1000)) &&
-        (!('last_modified' in data) || isValidTimestampOrNumber(data.last_modified)) &&
-        (!('is_drive_synced' in data) || data.is_drive_synced is bool) &&
-        (!('garden_areas' in data) || isValidStringList(data.garden_areas, 50, 150)) &&
-        (!('garden_area_profiles' in data) || (data.garden_area_profiles is list && data.garden_area_profiles.size() <= 50)) &&
-        (!('planner_workflow' in data) || (data.planner_workflow is map && data.planner_workflow.keys().size() <= 20)) &&
-        (!('staged_recommendations' in data) || isValidStagedRecommendations(data.staged_recommendations)) &&
+        (!('staged_recommendations' in data) || (data.staged_recommendations is list && data.staged_recommendations.size() <= 200)) &&
         (!('staged_plants' in data) || (data.staged_plants is list && data.staged_plants.size() <= 200)) &&
-        (!('staged_invasives' in data) || isValidStagedInvasives(data.staged_invasives)) &&
-        (!('report_options' in data) || (data.report_options is map && data.report_options.keys().size() <= 30)) &&
-        (!('created_at' in data) || isValidTimestampOrNumber(data.created_at)) &&
-        (!('updated_at' in data) || isValidTimestampOrNumber(data.updated_at));
+        (!('staged_invasives' in data) || (data.staged_invasives is list && data.staged_invasives.size() <= 100));
     }
-
-    function isValidReportCreate(reportId) {
-      let data = request.resource.data;
-      return isValidReport(data) &&
-        (!('id' in data) || data.id == reportId);
-    }
-
-    function isValidReportUpdate(reportId) {
-      let data = request.resource.data;
-      return isValidReport(data) &&
-        areImmutableFieldsUnchanged(['id']);
-    }
-
-    function isValidUserReportCreate(userId, reportId) {
-      let data = request.resource.data;
-      return isValidReport(data) &&
-        (!('id' in data) || data.id == reportId) &&
-        (!('username' in data) || data.username == userId || isUserPathOwner(userId) || isAdmin());
-    }
-
-    function isValidUserReportUpdate(userId, reportId) {
-      let data = request.resource.data;
-      return isValidReport(data) &&
-        areImmutableFieldsUnchanged(['id']) &&
-        (!('username' in data) || data.username == userId || isUserPathOwner(userId) || isAdmin());
-    }
-
-    // ===============================================================
-    // Domain Validator: Plant Approval Requests
-    // ===============================================================
 
     function isValidApproval(data) {
-      return data is map &&
-        data.keys().hasAll(['id', 'status', 'type', 'scientific_name']) &&
+      return data.keys().hasAll(['id', 'status', 'type', 'scientific_name']) &&
         data.keys().hasOnly([
-          'id',
-          'status',
-          'type',
-          'scientific_name',
-          'common_name',
-          'plant_id',
-          'submitted_by_id',
-          'submitted_by_name',
-          'submitted_by_email',
-          'submitted_at',
-          'reviewed_by_id',
-          'reviewed_by_name',
-          'reviewed_at',
-          'raw_json'
+          'id', 'status', 'type', 'scientific_name', 'common_name', 'plant_id',
+          'submitted_by_id', 'submitted_by_name', 'submitted_by_email', 'submitted_at',
+          'reviewed_by_id', 'reviewed_by_name', 'reviewed_at', 'raw_json'
         ]) &&
         data.id is string && data.id.size() <= 128 &&
         data.status is string && data.status in ['pending', 'approved', 'denied'] &&
         data.type is string && data.type in ['edit', 'add', 'new_plant'] &&
         data.scientific_name is string && data.scientific_name.size() <= 150 &&
-        (!('common_name' in data) || (data.common_name is string && data.common_name.size() <= 150)) &&
-        (!('plant_id' in data) || (data.plant_id is string && data.plant_id.size() <= 128)) &&
-        (!('submitted_by_id' in data) || (data.submitted_by_id is string && data.submitted_by_id.size() <= 128)) &&
-        (!('submitted_by_name' in data) || (data.submitted_by_name is string && data.submitted_by_name.size() <= 150)) &&
-        (!('submitted_by_email' in data) || (data.submitted_by_email is string && data.submitted_by_email.size() <= 150)) &&
-        (!('submitted_at' in data) || isValidTimestampOrNumber(data.submitted_at)) &&
-        (!('reviewed_by_id' in data) || data.reviewed_by_id == null || (data.reviewed_by_id is string && data.reviewed_by_id.size() <= 128)) &&
-        (!('reviewed_by_name' in data) || data.reviewed_by_name == null || (data.reviewed_by_name is string && data.reviewed_by_name.size() <= 150)) &&
-        (!('reviewed_at' in data) || data.reviewed_at == null || isValidTimestampOrNumber(data.reviewed_at)) &&
         (!('raw_json' in data) || (data.raw_json is string && data.raw_json.size() <= 50000));
     }
 
-    function isValidApprovalCreate(approvalId) {
-      let data = request.resource.data;
-      return isValidApproval(data) &&
-        (!('id' in data) || data.id == approvalId);
-    }
-
-    function isValidApprovalUpdate(approvalId) {
-      let data = request.resource.data;
-      return isValidApproval(data) &&
-        areImmutableFieldsUnchanged(['id']);
-    }
-
-    // ===============================================================
-    // Collection Security Rules
-    // ===============================================================
-
-    // Default Deny: All access to unregistered paths is forbidden
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // 1. Plants Collection (Public Read, Admin-Only Publish, No Fallback Backdoors)
     match /plants/{plantId} {
-      // Read access: Public reads for plant information
       allow read: if true;
-
-      // Write access: Only authenticated administrators can publish or modify plant changes
-      allow create: if isAdmin() && !plantId.matches('^_.*') && isValidPlantDocCreate(plantId);
-      allow update: if isAdmin() && !plantId.matches('^_.*') && isValidPlantDocUpdate(plantId);
+      allow create: if isAdmin() && !plantId.matches('^_.*') && isValidPlant(request.resource.data) && (!('id' in request.resource.data) || request.resource.data.id == plantId);
+      allow update: if isAdmin() && !plantId.matches('^_.*') && isValidPlant(request.resource.data) && areImmutableFieldsUnchanged(['id']);
       allow delete: if isAdmin();
     }
 
-    // 2. User Accounts & Provisioning Collection
     match /users/{userId} {
-      // Read access: Restricted to the profile owner or administrators (protects PII & hashes)
       allow read: if isAdmin() || isUserPathOwner(userId);
-
-      // Create access: Admins can provision any user; authenticated users can self-register as 'user' or 'advisor'
-      allow create: if (isAdmin() || (isAuthenticated() && request.auth.uid == userId && request.resource.data.role in ['user', 'advisor'])) && isValidUserCreate(userId);
-
-      // Update access: Admins can update any user; owners can update their own profile without escalating role
-      allow update: if (isAdmin() || (isUserPathOwner(userId) && areImmutableFieldsUnchanged(['id', 'username', 'role']))) && isValidUserUpdate(userId);
-
-      // Delete access: Restricted to administrators
+      allow create: if (isAdmin() || (isAuthenticated() && request.auth.uid == userId && request.resource.data.role in ['user', 'advisor'])) && isValidUser(request.resource.data);
+      allow update: if (isAdmin() || (isUserPathOwner(userId) && areImmutableFieldsUnchanged(['id', 'username', 'role']))) && isValidUser(request.resource.data) && areImmutableFieldsUnchanged(['id', 'username']);
       allow delete: if isAdmin();
 
-      // Consultation Reports Subcollection under user: /users/{userId}/reports/{reportId}
       match /reports/{reportId} {
-        // Read access: Restricted to the report owner or authorized administrators
         allow read: if isAdmin() || isUserPathOwner(userId) || isReportOwner(resource.data);
-
-        // Create access: Authenticated owner or administrator
-        allow create: if isAuthenticated() && (isAdmin() || isUserPathOwner(userId) || isReportOwner(request.resource.data)) && isValidUserReportCreate(userId, reportId);
-
-        // Update access: Authenticated owner (preserving ownership) or administrator
-        allow update: if isAuthenticated() && (isAdmin() || ((isUserPathOwner(userId) || isReportOwner(resource.data)) && isReportOwner(request.resource.data))) && isValidUserReportUpdate(userId, reportId);
-
-        // Delete access: Restricted to the report owner or authorized administrators
+        allow create: if isAuthenticated() && (isAdmin() || isUserPathOwner(userId) || isReportOwner(request.resource.data)) && isValidReport(request.resource.data);
+        allow update: if isAuthenticated() && (isAdmin() || ((isUserPathOwner(userId) || isReportOwner(resource.data)) && isReportOwner(request.resource.data))) && isValidReport(request.resource.data) && areImmutableFieldsUnchanged(['id']);
         allow delete: if isAdmin() || isUserPathOwner(userId) || isReportOwner(resource.data);
       }
     }
 
-    // 3. Top-level Consultation Reports Collection
     match /reports/{reportId} {
-      // Read access: Restricted to the report owner or authorized administrators
       allow read: if isAdmin() || isReportOwner(resource.data);
-
-      // Create access: Authenticated owner or administrator
-      allow create: if isAuthenticated() && (isAdmin() || isReportOwner(request.resource.data)) && isValidReportCreate(reportId);
-
-      // Update access: Authenticated owner (preserving ownership) or administrator
-      allow update: if isAuthenticated() && (isAdmin() || (isReportOwner(resource.data) && isReportOwner(request.resource.data))) && isValidReportUpdate(reportId);
-
-      // Delete access: Restricted to the report owner or authorized administrators
+      allow create: if isAuthenticated() && (isAdmin() || isReportOwner(request.resource.data)) && isValidReport(request.resource.data);
+      allow update: if isAuthenticated() && (isAdmin() || (isReportOwner(resource.data) && isReportOwner(request.resource.data))) && isValidReport(request.resource.data) && areImmutableFieldsUnchanged(['id']);
       allow delete: if isAdmin() || isReportOwner(resource.data);
     }
 
-    // 4. Plant Approval Inbox Collection
     match /plant_approvals/{approvalId} {
-      // Read access: Authenticated advisors and administrators can view pending approvals
       allow read: if isAuthenticated();
-
-      // Create access: Authenticated advisors can submit pending proposals
-      allow create: if isAuthenticated() && request.resource.data.status == 'pending' && isValidApprovalCreate(approvalId);
-
-      // Update access: Only administrators can approve or deny proposals
-      allow update: if isAdmin() && isValidApprovalUpdate(approvalId);
-
-      // Delete access: Only administrators can delete approval records
+      allow create: if isAdvisor() && request.resource.data.status == 'pending' && isValidApproval(request.resource.data);
+      allow update: if isAdmin() && isValidApproval(request.resource.data) && areImmutableFieldsUnchanged(['id']);
       allow delete: if isAdmin();
     }
   }
